@@ -10,7 +10,7 @@ const TABS = [
     { name: "차량용 명단", href: "/dashboard/vehicle" },
     { name: "캘린더", href: "/dashboard/monthly" },
     { name: "예약관리", href: "/dashboard/all" },
-    { name: "엑셀등록", href: "/dashboard/bulk-add" },
+    { name: "대시보드", href: "/dashboard/stats" },
 ];
 
 export default function Navbar() {
