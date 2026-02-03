@@ -9,7 +9,7 @@ const TABS = [
     { name: "명단보기", href: "/dashboard/list" },
     { name: "차량용 명단", href: "/dashboard/vehicle" },
     { name: "캘린더", href: "/dashboard/monthly" },
-    { name: "전체현황", href: "/dashboard/all" },
+    { name: "예약관리", href: "/dashboard/all" },
     { name: "엑셀등록", href: "/dashboard/bulk-add" },
 ];
 

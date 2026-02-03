@@ -1060,7 +1060,7 @@ export default function AllReservationsPage() {
 
             <div className="relative z-20 flex shrink-0 flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <h2 className="text-xl md:text-2xl font-bold text-gray-900">전체 예약 현황 {!isMobile && '(엑셀형 편집)'}</h2>
+                    <h2 className="text-xl md:text-2xl font-bold text-gray-900">전체 예약 관리</h2>
                     {!isMobile && (
                         <p className="text-sm text-gray-500">
                             <strong>Shift+Click</strong>으로 범위 선택, <strong>Delete</strong>로 삭제
