@@ -250,7 +250,6 @@ export function DatePicker({ value, onChange, label, required }: DatePickerProps
                                 onChange={(e) => handleYearChange(Number(e.target.value))}
                                 className="px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs sm:text-sm font-semibold border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
                                 onClick={(e) => e.stopPropagation()}
-                                onMouseDown={(e) => e.preventDefault()}
                             >
                                 {yearOptions.map((year) => (
                                     <option key={year} value={year}>
@@ -265,7 +264,6 @@ export function DatePicker({ value, onChange, label, required }: DatePickerProps
                                 onChange={(e) => handleMonthChange(Number(e.target.value))}
                                 className="px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs sm:text-sm font-semibold border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
                                 onClick={(e) => e.stopPropagation()}
-                                onMouseDown={(e) => e.preventDefault()}
                             >
                                 {Array.from({ length: 12 }, (_, i) => (
                                     <option key={i} value={i}>

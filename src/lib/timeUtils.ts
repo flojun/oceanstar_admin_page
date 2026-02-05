@@ -39,3 +39,19 @@ export function formatDateDisplay(dateStr: string | null | undefined): string {
         return dateStr;
     }
 }
+
+/**
+ * Returns the Korean day of the week (e.g., "(월)") from a YYYY-MM-DD string
+ */
+export function getKoreanDay(dateStr: string): string {
+    if (!dateStr) return "";
+    try {
+        const days = ["(일)", "(월)", "(화)", "(수)", "(목)", "(금)", "(토)"];
+        // Create date object (split to avoid timezone offset issues)
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        return days[date.getDay()];
+    } catch (e) {
+        return "";
+    }
+}

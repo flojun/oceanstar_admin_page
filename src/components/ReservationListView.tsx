@@ -109,7 +109,7 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
                 .from("reservations")
                 .select("*")
                 .eq("tour_date", selectedDate)
-                .neq("status", "취소")
+                .neq("status", "취소") // Exclude cancelled reservations from List View
                 .order("option", { ascending: true })
                 .order("pickup_location", { ascending: true });
 

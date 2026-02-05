@@ -3,7 +3,7 @@
 import "react-data-grid/lib/styles.css";
 import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { DataGrid, RenderEditCellProps, FillEvent } from "react-data-grid";
+import { DataGrid, RenderEditCellProps, FillEvent, DataGridHandle } from "react-data-grid";
 import { Save, Settings, Plus, Undo, Redo } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Reservation, ReservationInsert } from "@/types/reservation";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { getHawaiiDateStr, formatDateDisplay } from "@/lib/timeUtils";
 import { useUnsavedChanges } from "@/components/providers/UnsavedChangesProvider";
 import CustomTextEditor from "@/components/editors/CustomTextEditor";
+import StatusEditor from "@/components/editors/StatusEditor";
 
 interface RangeSelection {
     startCol: number;
@@ -60,18 +61,31 @@ const fullHeightGridStyle = `
     outline-offset: -2px;
     z-index: 5;
   }
+  .no-col-bg {
+    background-color: #f9fafb !important;
+  }
 `;
 
 export default function AllReservationsPage() {
     const [rows, setRows] = useState<(Reservation | (Partial<Reservation> & { isNew?: boolean }))[]>([]);
+    const [totalCount, setTotalCount] = useState<number>(0); // Store total count for row numbering
     const [selectedRows, setSelectedRows] = useState<ReadonlySet<string>>(new Set());
     const [changedRowIds, setChangedRowIds] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(true);
+    const gridContainerRef = useRef<HTMLDivElement>(null);
+    const gridRef = useRef<DataGridHandle>(null);
     const [saving, setSaving] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(0);
 
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
+
     // Range Selection State
+    const [actionModal, setActionModal] = useState<{ id: string; idx: number } | null>(null);
+
+    // Track previously selected cell for range selection
+    const [lastSelectedIdx, setLastSelectedIdx] = useState<number>(-1);
     const [selectedCell, setSelectedCell] = useState<{ idx: number; rowIdx: number } | null>(null);
     const [anchorCell, setAnchorCell] = useState<{ idx: number; rowIdx: number } | null>(null);
     const [rangeSelection, setRangeSelection] = useState<RangeSelection | null>(null);
@@ -85,7 +99,6 @@ export default function AllReservationsPage() {
     const [showCopyModal, setShowCopyModal] = useState(false);
     const [copyStartRow, setCopyStartRow] = useState('');
     const [copyEndRow, setCopyEndRow] = useState('');
-    const [lastSelectedIdx, setLastSelectedIdx] = useState<number>(-1);
 
     // Search State
     const [searchCriteria, setSearchCriteria] = useState<'name' | 'source' | 'tour_date' | 'contact'>('name');
@@ -96,7 +109,6 @@ export default function AllReservationsPage() {
     const [tooltip, setTooltip] = useState<{ content: React.ReactNode; rect: DOMRect } | null>(null);
 
     // Dynamic Column Width State
-    const gridContainerRef = useRef<HTMLDivElement>(null);
     const [noteColWidth, setNoteColWidth] = useState(160);
 
     // Undo/Redo State
@@ -250,6 +262,22 @@ export default function AllReservationsPage() {
             const from = pageIndex * PAGE_SIZE;
             const to = from + PAGE_SIZE - 1;
 
+            // Fetch Count separately to avoid potential issues with range/count combination
+            let fetchedCount = null;
+            // Only fetch count on first page or if we don't have it yet
+            if (pageIndex === 0 || totalCount === 0) {
+                const { count, error: countError } = await supabase
+                    .from("reservations")
+                    .select("*", { count: 'exact', head: true });
+
+                if (countError) {
+                    console.error("Error fetching count:", countError);
+                    // Don't throw, just ignore count failure to allow data to load
+                } else {
+                    fetchedCount = count;
+                }
+            }
+
             const { data, error } = await supabase
                 .from("reservations")
                 .select("*")
@@ -260,6 +288,8 @@ export default function AllReservationsPage() {
             if (error) throw error;
 
             if (data) {
+                if (fetchedCount !== null) setTotalCount(fetchedCount); // Update total count
+
                 if (isRefresh) {
                     const sanitized = ensureUniqueIds(data);
                     setRows(sanitized);
@@ -277,7 +307,7 @@ export default function AllReservationsPage() {
                 }
             }
         } catch (error) {
-            console.error("Error fetching all reservations:", error);
+            console.error("Error fetching all reservations:", JSON.stringify(error, null, 2));
         } finally {
             setLoading(false);
         }
@@ -766,13 +796,15 @@ export default function AllReservationsPage() {
             key: "no_col",
             name: "No.",
             width: 50,
-            cellClass: "select-none text-center bg-gray-50",
+            cellClass: "select-none text-center no-col-bg", // Use explicit class with !important
             headerCellClass: "text-center",
             renderCell: ({ row, tabIndex }: any) => {
                 // Find index in current rows
                 const idx = rows.indexOf(row);
-                // Reverse numbering: Top is rows.length, Bottom is 1.
-                const rowNumber = rows.length - idx;
+                // Reverse numbering: Total Count - Index
+                // If totalCount is not yet loaded, fallback to rows.length (though it might change)
+                const baseCount = totalCount > 0 ? totalCount : rows.length;
+                const rowNumber = baseCount - idx;
                 return <div className="flex items-center justify-center h-full text-gray-500 font-mono text-xs">{rowNumber}</div>;
             }
         },
@@ -863,7 +895,7 @@ export default function AllReservationsPage() {
         {
             key: "status",
             name: "상태",
-            renderEditCell: CustomTextEditor,
+            renderEditCell: StatusEditor,
             width: 80,
             cellClass: "select-none p-0 text-center",
             headerCellClass: "text-center",
@@ -1234,6 +1266,7 @@ export default function AllReservationsPage() {
                     <>
                         <style>{fullHeightGridStyle}</style>
                         <DataGrid
+                            ref={gridRef}
                             defaultColumnOptions={{ resizable: true }}
                             columns={columns}
                             rows={filteredRows}
