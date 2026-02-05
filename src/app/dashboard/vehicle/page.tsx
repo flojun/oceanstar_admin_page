@@ -490,7 +490,7 @@ export default function VehiclePage() {
     };
 
     return (
-        <div className="flex flex-col h-full bg-gray-100 p-4 gap-4 overflow-hidden relative">
+        <div className="flex flex-col h-full bg-gray-100 p-4 gap-4 overflow-y-auto relative">
 
             {/* Hidden Export Container for Bulk Processing */}
             <div style={{ position: 'absolute', top: -9999, left: -9999, width: '1200px' }}>
@@ -515,34 +515,73 @@ export default function VehiclePage() {
                 ))}
             </div>
 
+            {/* Sticky Action Bar */}
+            <div className="sticky top-0 z-10 bg-white p-2 rounded-lg shadow-sm flex items-center gap-2 justify-between lg:justify-end shrink-0">
+                {/* Mobile Order: Image, Share | Copy */}
+                {/* Desktop Order: Copy, Image, Share */}
+
+                {/* Copy Button */}
+                <button
+                    onClick={handleCopyToClipboard}
+                    className="flex items-center gap-1 px-3 py-2 lg:px-6 lg:py-3 bg-yellow-400 text-black rounded text-xs lg:text-base font-bold hover:bg-yellow-500 transition order-3 lg:order-1"
+                >
+                    <Copy size={14} className="lg:w-5 lg:h-5" />
+                    <span className="lg:hidden">복사</span>
+                    <span className="hidden lg:inline">텍스트로 복사</span>
+                </button>
+
+                <div className="flex gap-2 order-1 lg:order-2">
+                    <button
+                        onClick={handleDownloadImage}
+                        className="flex items-center gap-1 px-3 py-2 lg:px-6 lg:py-3 bg-green-600 text-white rounded text-xs lg:text-base font-bold hover:bg-green-700 transition"
+                    >
+                        <Download size={14} className="lg:w-5 lg:h-5" />
+                        <span className="lg:hidden">저장</span>
+                        <span className="hidden lg:inline">이미지 저장</span>
+                    </button>
+                    <button
+                        onClick={handleKakaoShare}
+                        className="flex items-center gap-1 px-3 py-2 lg:px-6 lg:py-3 bg-yellow-300 text-black rounded text-xs lg:text-base font-bold hover:bg-yellow-400 transition"
+                    >
+                        <Share2 size={14} className="lg:w-5 lg:h-5" />
+                        <span className="lg:hidden">전체 공유</span>
+                        <span className="hidden lg:inline">전체 명단 공유</span>
+                    </button>
+                </div>
+            </div>
+
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-lg shadow-sm shrink-0">
+            <div className="bg-white p-3 rounded-lg shadow-sm shrink-0">
                 <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-2xl font-bold text-gray-800">
-                            차량 배차 관리 <span className="text-lg font-normal text-gray-500">{getKoreanDay(selectedDate)}</span>
+                    <div className="flex justify-between items-center gap-2">
+                        <h1 className="text-lg lg:text-3xl font-bold text-gray-800 whitespace-nowrap">
+                            차량 배차 <span className="text-sm lg:text-2xl font-normal lg:font-extrabold text-gray-500 lg:text-gray-800">{getKoreanDay(selectedDate)}</span>
                         </h1>
-                        <div className="w-40">
+                        <div className="w-32 lg:w-48">
                             <DatePicker
                                 value={selectedDate}
                                 onChange={handleDateChange}
                             />
                         </div>
                     </div>
-                    <div className="flex gap-2">
-                        {['1부', '2부', '3부', '패러', '제트', '기타'].map(opt => (
-                            <button
-                                key={opt}
-                                onClick={() => handleOptionChange(opt)}
-                                className={`px-3 py-1 rounded-full text-sm font-bold transition-colors ${selectedOption === opt ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                            >
-                                {opt}
-                            </button>
-                        ))}
+
+                    {/* Option Dropdown */}
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm lg:text-lg font-bold text-gray-700">시간/옵션:</label>
+                        <select
+                            value={selectedOption}
+                            onChange={(e) => handleOptionChange(e.target.value)}
+                            className="flex-1 p-2 border border-gray-300 rounded text-sm lg:text-lg font-bold"
+                        >
+                            {['1부', '2부', '3부', '패러', '제트', '기타'].map(opt => (
+                                <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                        </select>
                     </div>
                 </div>
 
-                <div className="w-full md:w-auto">
+
+                <div className="w-full">
                     <DriverManager drivers={drivers} onDriversChange={setDrivers} />
                 </div>
             </div>
@@ -555,18 +594,21 @@ export default function VehiclePage() {
                 onDragEnd={handleDragEnd}
             >
                 {/* Main Content Area */}
+                {/* Let content expand naturally for scrolling */}
                 <div className="flex flex-col lg:flex-row flex-1 min-h-0 gap-4">
 
                     {/* Left: Unassigned List */}
-                    <UnassignedDropZone
-                        items={vehicles.unassigned.items}
-                        id="unassigned"
-                        totalPax={calculateTotalPax(vehicles.unassigned.items)}
-                    />
+                    <div className="shrink-0 lg:w-1/4">
+                        <UnassignedDropZone
+                            items={vehicles.unassigned.items}
+                            id="unassigned"
+                            totalPax={calculateTotalPax(vehicles.unassigned.items)}
+                        />
+                    </div>
 
                     {/* Right: Vehicle Assignment Area */}
-                    <div className="flex-1 flex flex-col gap-4 min-h-0 overflow-auto">
-                        <div id="vehicle-export-area" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 p-2 bg-white rounded-lg min-h-[500px]">
+                    <div className="flex-1 flex flex-col gap-4 min-h-0">
+                        <div id="vehicle-export-area" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 p-2 bg-white rounded-lg min-h-[300px]">
                             {['vehicle-1', 'vehicle-2', 'vehicle-3', 'personal-1'].map(key => (
                                 <VehicleDropZone
                                     key={key}
@@ -581,36 +623,14 @@ export default function VehiclePage() {
                                         }));
                                     }}
                                     optionName={selectedOption}
+                                    dateTitle={`${selectedDate} ${getKoreanDay(selectedDate)}`}
                                 />
                             ))}
                         </div>
                     </div>
                 </div>
 
-                {/* Footer / Export Actions */}
-                <div className="bg-white p-3 rounded-lg shadow-sm flex items-center gap-3 shrink-0">
-                    <button
-                        onClick={handleDownloadImage}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition"
-                    >
-                        <Download size={18} />
-                        이미지로 저장
-                    </button>
-                    <button
-                        onClick={handleCopyToClipboard}
-                        className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-black rounded font-bold hover:bg-yellow-500 transition"
-                    >
-                        <Copy size={18} />
-                        카카오톡 복사용
-                    </button>
-                    <button
-                        onClick={handleKakaoShare}
-                        className="flex items-center gap-2 px-4 py-2 bg-yellow-300 text-black rounded font-bold hover:bg-yellow-400 transition"
-                    >
-                        <Share2 size={18} />
-                        카카오톡 공유 (전체)
-                    </button>
-                </div>
+                {/* Footer / Export Actions - Moved to Top */}
 
                 <DragOverlay dropAnimation={dropAnimation}>
                     {activeId ? (
@@ -644,7 +664,7 @@ function UnassignedDropZone({ items, id, totalPax }: { items: Reservation[], id:
     const pendingItems = items.filter(i => i.status === '대기' || i.status === '예약대기');
 
     return (
-        <div ref={setNodeRef} className="w-full lg:w-1/4 bg-white rounded-lg shadow-sm border flex flex-col min-h-[400px]">
+        <div ref={setNodeRef} className="w-full bg-white rounded-lg shadow-sm border flex flex-col min-h-[250px] lg:min-h-[400px]">
             <div className="p-3 border-b bg-gray-50 rounded-t-lg">
                 <h3 className="font-bold text-gray-700">명단 리스트 ({items.length}팀 / {totalPax}명)</h3>
                 <p className="text-xs text-gray-500">드래그하여 우측 차량에 배정하세요.</p>

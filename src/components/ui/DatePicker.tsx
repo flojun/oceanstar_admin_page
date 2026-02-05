@@ -231,7 +231,7 @@ export function DatePicker({ value, onChange, label, required }: DatePickerProps
             </div>
 
             {isOpen && (
-                <div className="absolute z-[100] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-3 sm:p-4 w-64 sm:w-72">
+                <div className="absolute right-0 origin-top-right z-[100] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-3 sm:p-4 w-64 sm:w-72">
                     {/* Month Navigation - Horizontal Arrows with Year/Month Selectors */}
                     <div className="flex items-center justify-between mb-3 gap-2">
                         <button

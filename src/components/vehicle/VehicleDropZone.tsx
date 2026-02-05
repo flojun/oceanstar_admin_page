@@ -2,19 +2,15 @@ import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Vehicle, Driver } from '@/types/vehicle';
+import { Reservation } from '@/types/reservation';
 import { DraggableBar } from './DraggableBar';
 
 interface VehicleDropZoneProps {
     vehicle: Vehicle;
     drivers: Driver[];
-    driverId: string | null;
-    items: Reservation[];
-}
-
-interface VehicleDropZoneProps {
-    vehicle: Vehicle;
-    drivers: Driver[];
     onDriverChange: (vehicleId: string, driverId: string) => void;
+    items: Reservation[];
+    driverId: string | null;
     optionName?: string;
     dateTitle?: string;
 }
@@ -28,7 +24,7 @@ export function VehicleDropZone({ vehicle, drivers, onDriverChange, optionName, 
     const isOverLimit = vehicle.type === 'company' && totalPax > 15;
 
     return (
-        <div className="flex flex-col h-full bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+        <div className="flex flex-col bg-gray-50 rounded-lg border border-gray-200 overflow-hidden min-h-[600px] lg:min-h-0">
             {/* Export Date Title (Only visible when provided, mainly for export) */}
             {dateTitle && (
                 <div className="bg-gray-800 text-white text-center py-1 text-sm font-bold">
@@ -60,7 +56,7 @@ export function VehicleDropZone({ vehicle, drivers, onDriverChange, optionName, 
             </div>
 
             {/* Drop Area */}
-            <div ref={setNodeRef} className="flex-1 p-2 min-h-[300px] overflow-y-auto vehicle-drop-area">
+            <div ref={setNodeRef} className="flex-1 p-2 overflow-y-auto vehicle-drop-area">
                 <SortableContext
                     items={vehicle.items.map(i => i.id)}
                     strategy={verticalListSortingStrategy}
