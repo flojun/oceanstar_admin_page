@@ -38,6 +38,8 @@ export function ReservationModal({
 }: ReservationModalProps) {
     const [formData, setFormData] = useState<ReservationInsert>(INITIAL_FORM);
     const [loading, setLoading] = useState(false);
+    // Explicit capacity info: { current, limit, group }
+    const [capacityInfo, setCapacityInfo] = useState<{ current: number, limit: number, group: string, incoming: number } | null>(null);
 
     useEffect(() => {
         if (reservation) {
@@ -119,11 +121,91 @@ export function ReservationModal({
         }
     };
 
+    // Helper: Option Grouping (Duplicated from monthly/types for local check)
+    const getOptionGroupKey = (option: string): string => {
+        if (!option) return '기타';
+        const lower = option.trim().toLowerCase();
+
+        // Smart matching for raw inputs (before blur transformation)
+        if (lower === '1' || lower.includes('1부')) return '1부';
+        if (lower === '2' || lower.includes('2부')) return '2부';
+        if (lower === '3' || lower.includes('3부')) return '3부';
+
+        return '기타';
+    };
+
+    // Helper: Parse Pax
+    const parsePax = (str: string): number => {
+        if (!str) return 0;
+        const num = parseInt(str.replace(/[^0-9]/g, ''), 10);
+        return isNaN(num) ? 0 : num;
+    };
+
+    // Real-time Overbooking Check
+    useEffect(() => {
+        const checkOverbooking = async () => {
+            // Reset if missing core data
+            if (!formData.tour_date || !formData.option) {
+                setCapacityInfo(null);
+                return;
+            }
+
+            const group = getOptionGroupKey(formData.option);
+            if (!['1부', '2부', '3부'].includes(group)) {
+                setCapacityInfo(null);
+                return;
+            }
+
+            // Valid group, calculate even if pax is 0 (to show 0/45)
+            const newPax = parsePax(formData.pax);
+
+            const LIMITS: Record<string, number> = { '1부': 45, '2부': 45, '3부': 40 };
+            const limit = LIMITS[group];
+
+            try {
+                const { data, error } = await supabase
+                    .from("reservations")
+                    .select("id, pax, option, status")
+                    .eq("tour_date", formData.tour_date)
+                    .neq("status", "취소");
+
+                if (error) throw error;
+
+                let currentTotal = 0;
+                data.forEach(r => {
+                    if (reservation && r.id === reservation.id) return;
+                    if (getOptionGroupKey(r.option) === group) {
+                        currentTotal += parsePax(r.pax);
+                    }
+                });
+
+                setCapacityInfo({
+                    current: currentTotal,
+                    limit: limit,
+                    group: group,
+                    incoming: newPax
+                });
+
+            } catch (err) {
+                console.error("Overbooking check failed", err);
+            }
+        };
+
+        const timer = setTimeout(() => {
+            checkOverbooking();
+        }, 300); // 300ms faster debounce
+
+        return () => clearTimeout(timer);
+    }, [formData.tour_date, formData.option, formData.pax, reservation]);
+
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/50 p-4 backdrop-blur-sm overflow-y-auto">
-            <div className="w-full max-w-2xl my-8 sm:my-0 rounded-lg bg-white shadow-xl">
+            <div className="w-full max-w-2xl my-8 sm:my-0 rounded-lg bg-white shadow-xl relative">
+
+
+
                 {/* Header */}
                 <div className="flex items-center justify-between border-b px-4 sm:px-6 py-4 bg-white sticky top-0 z-10 rounded-t-lg">
                     <h2 className="text-lg sm:text-xl font-bold text-gray-900">
@@ -216,6 +298,27 @@ export function ReservationModal({
                                     value={formData.option}
                                     onValueChange={(val) => handleChange("option", val)}
                                 />
+                                {/* Capacity Indicator (DEBUG MODE) */}
+                                {(formData.option || '').length > 0 && (
+                                    <div className="mt-1">
+                                        {!capacityInfo ? (
+                                            <div className="text-xs px-2 py-1 rounded-md bg-gray-100 text-gray-500 flex items-center gap-1">
+                                                <span className="animate-spin">⌛</span> 확인 중... [{formData.option}]
+                                            </div>
+                                        ) : (
+                                            <div className={`text-xs px-2 py-1 rounded-md flex items-center gap-1 font-bold ${(capacityInfo.current + capacityInfo.incoming) > capacityInfo.limit
+                                                ? "bg-red-100 text-red-700 animate-pulse"
+                                                : "bg-blue-50 text-blue-700"
+                                                }`}>
+                                                {(capacityInfo.current + capacityInfo.incoming) > capacityInfo.limit ? "⚠️" : "✓"}
+                                                <span>
+                                                    {capacityInfo.group}: {capacityInfo.current} + {capacityInfo.incoming} = {capacityInfo.current + capacityInfo.incoming}/{capacityInfo.limit}명
+                                                    {/* DEBUG: {JSON.stringify(capacityInfo)} */}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Pickup Location */}

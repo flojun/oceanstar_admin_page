@@ -39,19 +39,32 @@ function getOptionGroupKey(option: string): string {
 }
 
 // ---------- Traffic Light Logic ----------
-// Returns color class
-function getBarColor(group: string, count: number): string {
-    // Traffic Light Logic ONLY for 1부, 2부, 3부
-    if (['1부', '2부', '3부'].includes(group)) {
-        if (count >= 46) return 'bg-red-500 text-white'; // 초과 -> Red
-        if (count >= 44) return 'bg-green-600 text-white'; // 마감 -> Green (Darker)
-        if (count >= 40) return 'bg-yellow-400 text-black'; // 주의 -> Yellow
-        if (count <= 10) return 'bg-red-500 text-white'; // 미달 -> Red
-        return 'bg-blue-500 text-white'; // Normal (11-39)
+// Returns color class and width percentage
+function getReservationStatus(group: string, count: number) {
+    let max = 0;
+    // Default for others: Brown Gradient
+    let color = 'from-amber-700 to-amber-900 border-amber-600';
+    let percent = 100;
+
+    if (group === '1부' || group === '2부') {
+        max = 45;
+        if (count >= 46) color = 'from-amber-400 to-amber-600 border-amber-300'; // 초과 (Yellow/Amber)
+        else if (count >= 44) color = 'from-rose-500 to-rose-700 border-rose-400'; // 마감 (Red/Rose)
+        else if (count >= 10) color = 'from-blue-400 to-blue-600 border-blue-300'; // Normal (Blue)
+        else color = 'from-emerald-400 to-emerald-600 border-emerald-300'; // Low (Green/Emerald)
+
+        percent = Math.min(100, (count / max) * 100);
+    } else if (group === '3부') {
+        max = 40;
+        if (count >= 41) color = 'from-amber-400 to-amber-600 border-amber-300';
+        else if (count >= 38) color = 'from-rose-500 to-rose-700 border-rose-400';
+        else if (count >= 10) color = 'from-blue-400 to-blue-600 border-blue-300';
+        else color = 'from-emerald-400 to-emerald-600 border-emerald-300';
+
+        percent = Math.min(100, (count / max) * 100);
     }
 
-    // All other options -> Brown (Other Options)
-    return 'bg-[#8B4513] text-white';
+    return { color, percent };
 }
 
 
@@ -263,26 +276,44 @@ export default function MonthlyPage() {
                                         const count = dayStats.optionStats[group];
                                         if (!count) return null;
 
+                                        const { color, percent } = getReservationStatus(group, count);
+
                                         return (
                                             <div
                                                 key={group}
-                                                className={cn(
-                                                    "text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-sm flex justify-between items-center w-full font-bold leading-tight shadow-sm",
-                                                    getBarColor(group, count)
-                                                )}
+                                                // Outer Container: "Slot"
+                                                className="relative w-full h-9 sm:h-6 rounded-md bg-gray-200 shadow-inner border border-gray-300 overflow-hidden"
                                             >
-                                                {/* Desktop: "1부 : 2명" | Mobile: "1부 : 2명" for 1부/2부/3부 */}
-                                                <span className="hidden sm:inline">{group} : {count}명</span>
-                                                <span className="sm:hidden">
-                                                    {group === '1부' ? `1부 : ${count}명` :
-                                                        group === '2부' ? `2부 : ${count}명` :
-                                                            group === '3부' ? `3부 : ${count}명` :
-                                                                group === '패러 및 제트' ? `패+제 : ${count}명` :
-                                                                    group === '패러' ? `패러 : ${count}명` :
-                                                                        group === '제트' ? `제트 : ${count}명` :
-                                                                            group === '거북이' ? `거북이 : ${count}명` :
-                                                                                `기타 : ${count}명`}
-                                                </span>
+                                                {/* Inner Fill: 3D Bar */}
+                                                <div
+                                                    className={cn(
+                                                        "h-full absolute left-0 top-0 transition-all duration-300 ease-out",
+                                                        "bg-gradient-to-b shadow-md border-t border-b-2 border-r",
+                                                        color
+                                                    )}
+                                                    style={{ width: `${percent}%` }}
+                                                />
+
+                                                {/* Text Overlay (White Text with Premium Shadow) */}
+                                                <div className="relative z-10 w-full h-full flex flex-col sm:flex-row items-center justify-center sm:justify-between px-2 text-[10px] sm:text-xs font-bold leading-tight sm:leading-none text-white select-none">
+                                                    <span className="hidden sm:inline" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,0.5)' }}>
+                                                        {group} : {count}명
+                                                    </span>
+                                                    {/* Mobile View: Stacked */}
+                                                    <div className="sm:hidden flex flex-col items-center justify-center w-full h-full leading-3" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,0.5)' }}>
+                                                        <span className="mb-0.5">
+                                                            {group === '1부' ? '1부:' :
+                                                                group === '2부' ? '2부:' :
+                                                                    group === '3부' ? '3부:' :
+                                                                        group === '패러 및 제트' ? '패+제:' :
+                                                                            group === '패러' ? '패러:' :
+                                                                                group === '제트' ? '제트:' :
+                                                                                    group === '거북이' ? '거북:' :
+                                                                                        '기타:'}
+                                                        </span>
+                                                        <span>{count}명</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         );
                                     })}
@@ -293,12 +324,13 @@ export default function MonthlyPage() {
                 </div>
             </div>
 
-            <div className="shrink-0 flex gap-4 text-sm font-medium text-gray-500 px-2 justify-end">
-                <div className="flex items-center gap-1"><span className="w-3 h-3 bg-red-500 rounded-full"></span>미달/초과(≤10 or ≥46)</div>
-                <div className="flex items-center gap-1"><span className="w-3 h-3 bg-blue-500 rounded-full"></span>정상(11~39)</div>
-                <div className="flex items-center gap-1"><span className="w-3 h-3 bg-yellow-400 rounded-full"></span>주의(≥40)</div>
-                <div className="flex items-center gap-1"><span className="w-3 h-3 bg-green-600 rounded-full"></span>마감 (≥44)</div>
-                <div className="flex items-center gap-1"><span className="w-3 h-3 bg-[#8B4513] rounded-full"></span>기타옵션</div>
+
+            <div className="shrink-0 flex gap-4 text-sm font-medium text-gray-500 px-2 justify-end flex-wrap">
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-emerald-400 to-emerald-600 border border-emerald-300 shadow-sm"></span>1~9명</div>
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-blue-400 to-blue-600 border border-blue-300 shadow-sm"></span>10명~</div>
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-rose-500 to-rose-700 border border-rose-400 shadow-sm"></span>마감</div>
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-amber-400 to-amber-600 border border-amber-300 shadow-sm"></span>초과</div>
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-amber-700 to-amber-900 border border-amber-600 shadow-sm"></span>기타</div>
             </div>
         </div>
     );

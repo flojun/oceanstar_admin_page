@@ -22,7 +22,7 @@ interface RangeSelection {
 }
 
 // Helper to create an empty row with initialized strings
-const createEmptyRow = (): Partial<Reservation> & { isNew?: boolean } => ({
+const createEmptyRow = (): Partial<Reservation> & { isNew?: boolean, _grid_id: string, _capacityStatus?: string, _capacityMsg?: string } => ({
     id: `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
     _grid_id: crypto.randomUUID(),
     status: "",
@@ -64,10 +64,52 @@ const fullHeightGridStyle = `
   .no-col-bg {
     background-color: #f9fafb !important;
   }
+  .overbooking-warning {
+    background-color: #fee2e2 !important;
+    color: #b91c1c !important;
+  }
 `;
 
+// Helper for option grouping
+const getOptionGroupKey = (option: string): string => {
+    if (!option) return '기타';
+    const lower = option.trim().toLowerCase();
+    if (lower === '1' || lower.includes('1부')) return '1부';
+    if (lower === '2' || lower.includes('2부')) return '2부';
+    if (lower === '3' || lower.includes('3부')) return '3부';
+    return '기타';
+};
+
+const parsePax = (str: string): number => {
+    if (!str) return 0;
+    const num = parseInt(str.toString().replace(/[^0-9]/g, ''), 10);
+    return isNaN(num) ? 0 : num;
+};
+
+// Custom Option Render
+function OptionCellRenderer({ row }: any) {
+    const status = row._capacityStatus;
+    const msg = row._capacityMsg;
+
+    let indicator = null;
+    if (status === 'checking') {
+        indicator = <span className="text-gray-500 text-xs ml-1 animate-spin">⌛</span>;
+    } else if (status === 'warning') {
+        indicator = <span className="text-red-600 font-bold ml-1 text-xs">⚠️</span>;
+    } else if (status === 'safe') {
+        indicator = <span className="text-blue-500 font-bold ml-1 text-xs">✓</span>;
+    }
+
+    return (
+        <div className={`w-full h-full flex items-center px-2 ${status === 'warning' ? 'bg-red-50' : ''}`} title={msg || row.option}>
+            <span>{row.option}</span>
+            {indicator}
+        </div>
+    );
+}
+
 export default function AllReservationsPage() {
-    const [rows, setRows] = useState<(Reservation | (Partial<Reservation> & { isNew?: boolean }))[]>([]);
+    const [rows, setRows] = useState<(Reservation | (Partial<Reservation> & { isNew?: boolean, _grid_id?: string, _capacityStatus?: string, _capacityMsg?: string }))[]>([]);
     const [totalCount, setTotalCount] = useState<number>(0); // Store total count for row numbering
     const [selectedRows, setSelectedRows] = useState<ReadonlySet<string>>(new Set());
     const [changedRowIds, setChangedRowIds] = useState<Set<string>>(new Set());
@@ -254,6 +296,58 @@ export default function AllReservationsPage() {
         });
     };
 
+    // Async Overbooking Check
+    const checkOverbooking = async (row: any, index: number) => {
+        const group = getOptionGroupKey(row.option || "");
+        if (!['1부', '2부', '3부'].includes(group)) {
+            setRows(prev => {
+                const updated = [...prev];
+                if (updated[index]) (updated[index] as any)._capacityStatus = null;
+                return updated;
+            });
+            return;
+        }
+
+        const newPax = parsePax(row.pax || "");
+        const LIMITS: Record<string, number> = { '1부': 45, '2부': 45, '3부': 40 };
+        const limit = LIMITS[group];
+
+        try {
+            const { data, error } = await supabase
+                .from("reservations")
+                .select("pax, option")
+                .eq("tour_date", row.tour_date)
+                .neq("status", "취소");
+
+            if (error) throw error;
+
+            let dbTotal = 0;
+            if (data) {
+                data.forEach(r => {
+                    if (getOptionGroupKey(r.option) === group) dbTotal += parsePax(r.pax);
+                });
+            }
+
+            // Note: In strict mode, we might want to subtract the CURRENT row's saved value if it exists?
+            // But for "New/Edit", simple sum is safer warning.
+            const total = dbTotal + newPax;
+            const isOver = total > limit;
+            const msg = `${group}: 확정${dbTotal} + 입력${newPax} = ${total}/${limit}명${isOver ? " (초과!)" : ""}`;
+
+            setRows(prev => {
+                const updated = [...prev];
+                // Safety check: ensure we are updating same row
+                if (updated[index] && (updated[index] as any)._grid_id === row._grid_id) {
+                    (updated[index] as any)._capacityStatus = isOver ? 'warning' : 'safe';
+                    (updated[index] as any)._capacityMsg = msg;
+                }
+                return updated;
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     const fetchReservations = async (pageIndex: number, isRefresh = false) => {
         if (!hasMore && !isRefresh) return;
         if (pageIndex === 0) setLoading(true);
@@ -376,6 +470,19 @@ export default function AllReservationsPage() {
             const oldRow = rows[index];
             let newRow = newRows[index];
             newRow = { ...smartParseRow(newRow), _grid_id: oldRow._grid_id };
+
+            // Overbooking Trigger
+            if (newRow.tour_date !== oldRow.tour_date || newRow.option !== oldRow.option || newRow.pax !== oldRow.pax) {
+                if (newRow.tour_date && newRow.option && newRow.pax) {
+                    (newRow as any)._capacityStatus = 'checking'; // Instant visual feedback
+                    checkOverbooking(newRow, index);
+                }
+            } else {
+                // Preserve status if not changed
+                (newRow as any)._capacityStatus = (oldRow as any)._capacityStatus;
+                (newRow as any)._capacityMsg = (oldRow as any)._capacityMsg;
+            }
+
             newRows[index] = newRow;
 
             const hasChanged = Object.keys(newRow).some((k) => {
@@ -694,7 +801,7 @@ export default function AllReservationsPage() {
                 if (!row.name && !row.tour_date && !row.receipt_date) return;
 
                 if (row.isNew) {
-                    const { id, isNew, created_at, _grid_id, ...rest } = row;
+                    const { id, isNew, created_at, _grid_id, _capacityMsg, _capacityStatus, ...rest } = row;
 
                     let isReconfirmed = false;
                     if (typeof rest.is_reconfirmed === 'boolean') isReconfirmed = rest.is_reconfirmed;
@@ -719,8 +826,8 @@ export default function AllReservationsPage() {
                         source: rest.source || "",
                     });
                 } else {
-                    // 업데이트할 때도 _grid_id 제거
-                    const { _grid_id, ...cleanRow } = row;
+                    // 업데이트할 때도 _grid_id 및 UI 상태 제거
+                    const { _grid_id, _capacityMsg, _capacityStatus, ...cleanRow } = row;
 
                     // 접수일 미입력 시 하와이 날짜 자동 입력
                     if (!cleanRow.receipt_date) {
@@ -942,7 +1049,12 @@ export default function AllReservationsPage() {
             editorOptions: { commitOnOutsideClick: true }
         },
         { key: "pax", name: "인원", renderEditCell: CustomTextEditor, width: 60, cellClass: "select-none p-0 text-center", headerCellClass: "text-center", renderCell: (props: any) => hoverTooltipRenderer(props, true), editorOptions: { commitOnOutsideClick: true } },
-        { key: "option", name: "옵션", renderEditCell: CustomTextEditor, width: 60, cellClass: "select-none p-0 text-center", headerCellClass: "text-center", renderCell: (props: any) => hoverTooltipRenderer(props, true), editorOptions: { commitOnOutsideClick: true } },
+        {
+            key: "option", name: "옵션", renderEditCell: CustomTextEditor, width: 70,
+            cellClass: "select-none p-0 text-center", headerCellClass: "text-center",
+            renderCell: OptionCellRenderer,
+            editorOptions: { commitOnOutsideClick: true }
+        },
         { key: "pickup_location", name: "픽업장소", renderEditCell: CustomTextEditor, width: 96, cellClass: "select-none p-0", headerCellClass: "text-center", renderCell: (props: any) => hoverTooltipRenderer(props, false), editorOptions: { commitOnOutsideClick: true } },
         { key: "contact", name: "연락처", renderEditCell: CustomTextEditor, width: 130, cellClass: "select-none p-0", headerCellClass: "text-center", renderCell: (props: any) => hoverTooltipRenderer(props, false), editorOptions: { commitOnOutsideClick: true } },
         { key: "note", name: "기타사항", renderEditCell: CustomTextEditor, width: noteColWidth, cellClass: "select-none p-0", renderCell: (props: any) => hoverTooltipRenderer(props, false), editorOptions: { commitOnOutsideClick: true } },
