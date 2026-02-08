@@ -11,6 +11,7 @@ export default function StatusEditor<R, SR>({ row, column, onRowChange, onClose 
     const options = [
         { value: "예약확정", label: "예약확정 (Confirmed)", color: "text-green-600" },
         { value: "예약대기", label: "예약대기 (Waiting)", color: "text-yellow-600" },
+        { value: "취소요청", label: "취소요청 (Request Cncl)", color: "text-orange-600" },
         { value: "취소", label: "취소 (Cancel)", color: "text-red-600" },
     ];
 
@@ -66,7 +67,7 @@ export default function StatusEditor<R, SR>({ row, column, onRowChange, onClose 
                             className={`px-3 py-2 cursor-pointer hover:bg-blue-50 flex items-center gap-2 ${opt.value === initialValue ? 'bg-blue-50 font-bold' : ''}`}
                             onClick={() => handleSelect(opt.value)}
                         >
-                            <span className={`w-2 h-2 rounded-full ${opt.value === '예약확정' ? 'bg-green-500' : opt.value === '예약대기' ? 'bg-yellow-500' : 'bg-red-500'}`} />
+                            <span className={`w-2 h-2 rounded-full ${opt.value === '예약확정' ? 'bg-green-500' : opt.value === '예약대기' ? 'bg-yellow-500' : opt.value === '취소요청' ? 'bg-orange-500' : 'bg-red-500'}`} />
                             <span className={opt.color}>{opt.label}</span>
                         </div>
                     ))}

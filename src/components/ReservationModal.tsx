@@ -233,6 +233,7 @@ export function ReservationModal({
                                     onChange={(e) => handleChange("status", e.target.value)}
                                 >
                                     <option value="예약확정">예약확정</option>
+                                    <option value="예약대기">예약대기</option>
                                     <option value="취소">취소</option>
                                     <option value="대기">대기</option>
                                 </select>

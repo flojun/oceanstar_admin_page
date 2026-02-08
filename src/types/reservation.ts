@@ -1,4 +1,4 @@
-export type ReservationStatus = '예약확정' | '취소' | '대기' | string;
+export type ReservationStatus = '예약확정' | '취소' | '대기' | '취소요청' | '예약대기' | string;
 
 export interface Reservation {
   id: string;
@@ -13,7 +13,12 @@ export interface Reservation {
   option: string;
   pickup_location: string;
   contact: string;
-  note: string; // End of Reservation interface
+  note: string;
+  // UI/Transient fields
+  isNew?: boolean;
+  _grid_id?: string;
+  _capacityStatus?: string;
+  _capacityMsg?: string;
 }
 
 export type ReservationInsert = Omit<Reservation, 'id' | 'created_at'>;

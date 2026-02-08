@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useUnsavedChanges } from "@/components/providers/UnsavedChangesProvider";
 
 const TABS = [
+    { name: "홈", href: "/dashboard/home" },
     { name: "명단보기", href: "/dashboard/list" },
     { name: "차량용 명단", href: "/dashboard/vehicle" },
     { name: "캘린더", href: "/dashboard/monthly" },

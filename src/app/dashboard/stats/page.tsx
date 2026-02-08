@@ -13,6 +13,18 @@ export default function DashboardStatsPage() {
     const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
     const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
 
+    // Chart Date Range Filter State
+    // Default: 1 year range ending in current month
+    // Example: Feb 2025 to Feb 2026
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth() + 1;
+
+    const [startYear, setStartYear] = useState<number>(currentYear - 1);
+    const [startMonth, setStartMonth] = useState<number>(currentMonth);
+    const [endYear, setEndYear] = useState<number>(currentYear);
+    const [endMonth, setEndMonth] = useState<number>(currentMonth);
+
     // Trend Filter
     const [trendSource, setTrendSource] = useState<string>('ALL');
 
@@ -24,8 +36,6 @@ export default function DashboardStatsPage() {
         try {
             setLoading(true);
             // Fetch all reservations
-            // Note: In a production app with huge data, we should use server-side aggregation.
-            // For now, client-side aggregation is fine.
             const { data, error } = await supabase
                 .from('reservations')
                 .select('*')
@@ -49,31 +59,77 @@ export default function DashboardStatsPage() {
         return isNaN(num) ? 0 : num;
     };
 
+    // Generate Month List for Range
+    const getMonthRange = () => {
+        const months = [];
+        let curYear = startYear;
+        let curMonth = startMonth;
+
+        const endDateVal = endYear * 12 + endMonth;
+
+        while (curYear * 12 + curMonth <= endDateVal) {
+            months.push({ year: curYear, month: curMonth });
+            curMonth++;
+            if (curMonth > 12) {
+                curMonth = 1;
+                curYear++;
+            }
+        }
+        return months;
+    };
+
+    // Helper format: 02/2026
+    const formatMonthLabel = (year: number, month: number) => {
+        return `${String(month).padStart(2, '0')}/${year}`;
+    };
+
     // 1. Monthly Pax Stats (Overall)
     const monthlyPaxData = useMemo(() => {
         const stats: Record<string, number> = {};
 
+        // Initialize with 0 for all months in range
+        const months = getMonthRange();
+        months.forEach(m => {
+            const key = `${m.year}-${String(m.month).padStart(2, '0')}`; // Data Key
+            stats[key] = 0;
+        });
+
         reservations.forEach(r => {
             if (!r.tour_date) return;
-            // Expected format YYYY-MM-DD
             const date = new Date(r.tour_date);
             if (isNaN(date.getTime())) return;
 
-            const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            const pax = parsePax(r.pax);
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const key = `${year}-${String(month).padStart(2, '0')}`;
 
-            stats[key] = (stats[key] || 0) + pax;
+            // Only add if within our generated range keys
+            if (stats.hasOwnProperty(key)) {
+                const pax = parsePax(r.pax);
+                stats[key] += pax;
+            }
         });
 
-        // Convert to array and sort
-        return Object.entries(stats)
-            .map(([date, pax]) => ({ date, pax }))
-            .sort((a, b) => a.date.localeCompare(b.date));
-    }, [reservations]);
+        // Convert to array with Display Label
+        return months.map(m => {
+            const key = `${m.year}-${String(m.month).padStart(2, '0')}`;
+            return {
+                date: formatMonthLabel(m.year, m.month), // 02/2025
+                pax: stats[key] || 0
+            };
+        });
+    }, [reservations, startYear, startMonth, endYear, endMonth]);
 
     // 2. Trend Data (Dynamic based on source)
     const trendData = useMemo(() => {
         const stats: Record<string, number> = {};
+
+        // Initialize with 0 for all months in range
+        const months = getMonthRange();
+        months.forEach(m => {
+            const key = `${m.year}-${String(m.month).padStart(2, '0')}`; // Data Key
+            stats[key] = 0;
+        });
 
         reservations.forEach(r => {
             if (!r.tour_date) return;
@@ -83,16 +139,25 @@ export default function DashboardStatsPage() {
             const date = new Date(r.tour_date);
             if (isNaN(date.getTime())) return;
 
-            const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            const pax = parsePax(r.pax); // Tracking Pax Traffic
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const key = `${year}-${String(month).padStart(2, '0')}`;
 
-            stats[key] = (stats[key] || 0) + pax;
+            // Only add if within our generated range keys
+            if (stats.hasOwnProperty(key)) {
+                const pax = parsePax(r.pax);
+                stats[key] += pax;
+            }
         });
 
-        return Object.entries(stats)
-            .map(([date, count]) => ({ date, count }))
-            .sort((a, b) => a.date.localeCompare(b.date));
-    }, [reservations, trendSource]);
+        return months.map(m => {
+            const key = `${m.year}-${String(m.month).padStart(2, '0')}`;
+            return {
+                date: formatMonthLabel(m.year, m.month), // 02/2025
+                count: stats[key] || 0
+            };
+        });
+    }, [reservations, trendSource, startYear, startMonth, endYear, endMonth]);
 
     // 3. Invoice / Excel Export Logic
     const handleDownloadInvoice = () => {
@@ -176,6 +241,51 @@ export default function DashboardStatsPage() {
                 </div>
             ) : (
                 <>
+                    {/* Date Range Filter Controls */}
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-2">
+                            <span className="font-bold text-gray-700">조회 기간:</span>
+
+                            {/* Start Date */}
+                            <div className="flex items-center gap-1">
+                                <select
+                                    value={startYear}
+                                    onChange={(e) => setStartYear(Number(e.target.value))}
+                                    className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>{y}년</option>)}
+                                </select>
+                                <select
+                                    value={startMonth}
+                                    onChange={(e) => setStartMonth(Number(e.target.value))}
+                                    className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    {Array.from({ length: 12 }, (_, i) => i + 1).map(m => <option key={m} value={m}>{m}월</option>)}
+                                </select>
+                            </div>
+
+                            <span className="text-gray-400">~</span>
+
+                            {/* End Date */}
+                            <div className="flex items-center gap-1">
+                                <select
+                                    value={endYear}
+                                    onChange={(e) => setEndYear(Number(e.target.value))}
+                                    className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>{y}년</option>)}
+                                </select>
+                                <select
+                                    value={endMonth}
+                                    onChange={(e) => setEndMonth(Number(e.target.value))}
+                                    className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    {Array.from({ length: 12 }, (_, i) => i + 1).map(m => <option key={m} value={m}>{m}월</option>)}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Charts Section */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* 1. Monthly Total Pax */}

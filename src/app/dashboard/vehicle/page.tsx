@@ -29,6 +29,9 @@ import { getHawaiiTomorrowStr, getKoreanDay } from '@/lib/timeUtils';
 import { Vehicle, Driver, VehicleState } from '@/types/vehicle';
 import { VehicleDropZone } from '@/components/vehicle/VehicleDropZone';
 import { DraggableBar } from '@/components/vehicle/DraggableBar';
+import { VehicleManifestTable } from '@/components/vehicle/VehicleManifestTable';
+
+// ... (imports remain)
 import { DriverManager } from '@/components/vehicle/DriverManager';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { toPng } from 'html-to-image';
@@ -369,11 +372,12 @@ export default function VehiclePage() {
 
     // Export Logic
     const handleDownloadImage = async () => {
-        const element = document.getElementById('vehicle-export-area');
+        // Target the NEW hidden table container for current option
+        const element = document.getElementById(`export-container-current`);
         if (!element) return;
 
         try {
-            const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#ffffff' });
+            const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' }); // Black background
             const link = document.createElement('a');
             link.href = dataUrl;
             link.download = `vehicle-list-${selectedOption}.png`;
@@ -438,10 +442,11 @@ export default function VehiclePage() {
                 continue;
             }
 
+            // Target the NEW hidden table container for bulk export
             const element = document.getElementById(`export-container-${opt}`);
             if (element) {
                 try {
-                    const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#ffffff' });
+                    const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' }); // Black background
                     const blob = await (await fetch(dataUrl)).blob();
                     const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
                     files.push(file);
@@ -450,7 +455,6 @@ export default function VehiclePage() {
                 }
             }
         }
-
         if (files.length === 0) {
             alert("배정된 명단이 없어 공유할 파일이 없습니다.");
             return;
@@ -492,27 +496,30 @@ export default function VehiclePage() {
     return (
         <div className="flex flex-col h-full bg-gray-100 p-4 gap-4 overflow-y-auto relative">
 
-            {/* Hidden Export Container for Bulk Processing */}
-            <div style={{ position: 'absolute', top: -9999, left: -9999, width: '1200px' }}>
+            {/* Hidden Export Container for Bulk Processing (Share All) */}
+            <div style={{ position: 'absolute', top: -9999, left: -9999 }}>
                 {Object.entries(bulkData).map(([opt, vState]) => (
-                    <div key={opt} id={`export-container-${opt}`} className="p-4 bg-white mb-4">
-                        <h2 className="text-xl font-bold mb-4">{selectedDate} [{opt}] 배차 명단</h2>
-                        <div className="grid grid-cols-4 gap-4">
-                            {['vehicle-1', 'vehicle-2', 'vehicle-3', 'personal-1'].map(key => (
-                                <VehicleDropZone
-                                    key={key}
-                                    vehicle={vState[key]}
-                                    drivers={drivers}
-                                    driverId={vState[key].driverId}
-                                    items={vState[key].items}
-                                    onDriverChange={() => { }}
-                                    optionName={opt}
-                                    dateTitle={`${selectedDate} ${getKoreanDay(selectedDate)}`}
-                                />
-                            ))}
-                        </div>
+                    <div key={opt} id={`export-container-${opt}`}>
+                        <VehicleManifestTable
+                            vehicles={vState}
+                            drivers={drivers}
+                            optionName={opt}
+                            date={selectedDate}
+                        />
                     </div>
                 ))}
+            </div>
+
+            {/* Hidden Export Container for Single (Download Image) */}
+            <div style={{ position: 'absolute', top: -9999, left: -9999 }}>
+                <div id="export-container-current">
+                    <VehicleManifestTable
+                        vehicles={vehicles}
+                        drivers={drivers}
+                        optionName={selectedOption}
+                        date={selectedDate}
+                    />
+                </div>
             </div>
 
             {/* Sticky Action Bar */}

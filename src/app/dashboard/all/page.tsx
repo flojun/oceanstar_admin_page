@@ -108,7 +108,25 @@ function OptionCellRenderer({ row }: any) {
     );
 }
 
+import CancellationRequestsView from "@/components/CancellationRequestsView";
+import { useSearchParams } from "next/navigation";
+
 export default function AllReservationsPage() {
+    const searchParams = useSearchParams();
+    const initialView = searchParams.get('view') === 'cancellation' ? 'cancellation' : 'input';
+    const [activeTab, setActiveTab] = useState<'input' | 'cancellation'>(initialView);
+
+    // Update activeTab when searchParams change (if navigating within same page)
+    useEffect(() => {
+        const view = searchParams.get('view');
+        if (view === 'cancellation') {
+            setActiveTab('cancellation');
+        } else if (view === 'input') {
+            setActiveTab('input');
+        }
+    }, [searchParams]);
+
+    // ... rest of state ...
     const [rows, setRows] = useState<(Reservation | (Partial<Reservation> & { isNew?: boolean, _grid_id?: string, _capacityStatus?: string, _capacityMsg?: string }))[]>([]);
     const [totalCount, setTotalCount] = useState<number>(0); // Store total count for row numbering
     const [selectedRows, setSelectedRows] = useState<ReadonlySet<string>>(new Set());
@@ -515,7 +533,7 @@ export default function AllReservationsPage() {
         return () => window.removeEventListener("beforeunload", handleBeforeUnload);
     }, [rows, changedRowIds, setIsDirty]);
 
-    const handleSaveRef = useRef<() => Promise<void>>();
+    const handleSaveRef = useRef<() => Promise<void>>(undefined);
     useEffect(() => {
         registerSaveHandler(async () => {
             await handleSaveRef.current?.();
@@ -1012,6 +1030,7 @@ export default function AllReservationsPage() {
                 let className = "text-gray-600";
                 if (status === "예약확정") className = "text-green-600 font-bold";
                 else if (status === "예약대기") className = "text-yellow-600 font-bold";
+                else if (status === "취소요청") className = "text-orange-600 font-bold";
                 else if (status === "취소") className = "text-red-600 font-bold line-through";
 
                 return (
@@ -1367,115 +1386,131 @@ export default function AllReservationsPage() {
             )
             }
 
-            <div ref={gridContainerRef} className="flex-1 w-full rounded-md border border-gray-300 bg-white shadow-sm min-h-0 flex flex-col relative">
-                {rangeOverlayStyle && <div style={rangeOverlayStyle} />}
-
-                {loading && rows.length === 0 ? (
-                    <div className="flex h-full items-center justify-center text-gray-500">
-                        데이터를 불러오는 중입니다...
-                    </div>
-                ) : (
-                    <>
-                        <style>{fullHeightGridStyle}</style>
-                        <DataGrid
-                            ref={gridRef}
-                            defaultColumnOptions={{ resizable: true }}
-                            columns={columns}
-                            rows={filteredRows}
-                            onRowsChange={handleRowsChange}
-                            onFill={handleFill}
-                            className="rdg-light h-full text-sm flex-1 datagrid-overflow-visible"
-                            headerRowHeight={40}
-                            rowHeight={35}
-                            rowClass={rowClass}
-                            rowKeyGetter={(row) => String((row as any)._grid_id || row.id)}
-                            onScroll={handleScroll}
-                            selectedRows={selectedRows}
-                            onSelectedRowsChange={setSelectedRows}
-                            onCellClick={handleCellClick}
-                            onCellDoubleClick={isMobile ? (args, event) => {
-                                // On mobile, double-click (second tap) enters edit mode
-                                // Only if it's the same cell that was already selected
-                                if (selectedCell &&
-                                    selectedCell.idx === args.column.idx &&
-                                    selectedCell.rowIdx === args.rowIdx) {
-                                    // Default double-click behavior will trigger edit mode
-                                    return;
-                                }
-                            } : undefined}
-                            direction="ltr"
-                            style={{ height: "100%", userSelect: "none" }}
-                        />
-                    </>
-                )}
-                {loading && rows.length > 0 && (
-                    <div className="py-2 text-center text-xs text-gray-400 bg-gray-50 border-t">
-                        추가 데이터 로딩 중...
-                    </div>
-                )}
-                {tooltip && createPortal(
-                    <div
-                        className="fixed bg-yellow-100 text-gray-900 px-2 pointer-events-none z-[99999] whitespace-nowrap flex items-center justify-center transform-none"
-                        style={{
-                            top: tooltip.rect.top,
-                            left: tooltip.rect.left,
-                            height: tooltip.rect.height,
-                            minWidth: tooltip.rect.width,
-                        }}
-                    >
-                        {tooltip.content}
-                    </div>,
-                    document.body
-                )}
+            {/* Tab Navigation */}
+            <div className="flex items-center space-x-1 border-b border-gray-200 mb-4 bg-white px-2 pt-2 rounded-t-lg">
+                <button
+                    onClick={() => setActiveTab('input')}
+                    className={`px-4 py-2 font-bold text-sm rounded-t-lg transition-colors ${activeTab === 'input' ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                >
+                    예약 입력 (전체 관리)
+                </button>
+                <button
+                    onClick={() => setActiveTab('cancellation')}
+                    className={`px-4 py-2 font-bold text-sm rounded-t-lg transition-colors flex items-center gap-2 ${activeTab === 'cancellation' ? 'bg-orange-50 text-orange-600 border-b-2 border-orange-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                >
+                    취소 요청
+                    <span className="bg-orange-100 text-orange-700 text-xs px-1.5 py-0.5 rounded-full">New</span>
+                </button>
             </div>
 
-            {
-                activeActionRow && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                        <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden">
-                            <div className="p-6 text-center">
-                                <h3 className="text-lg font-bold text-gray-900 mb-2">상태 변경 및 삭제</h3>
-                                <p className="text-sm text-gray-500 mb-6">원하시는 작업을 선택해주세요.</p>
+            {activeTab === 'cancellation' ? (
+                <CancellationRequestsView />
+            ) : (
+                <div ref={gridContainerRef} className="flex-1 w-full rounded-md border border-gray-300 bg-white shadow-sm min-h-0 flex flex-col relative">
+                    {rangeOverlayStyle && <div style={rangeOverlayStyle} />}
 
-                                <div className="flex flex-col gap-3">
-                                    <button
-                                        onClick={() => handleRowAction('confirmed')}
-                                        className="w-full py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-bold"
-                                    >
-                                        예약확정 (상태변경)
-                                    </button>
-                                    <button
-                                        onClick={() => handleRowAction('waiting')}
-                                        className="w-full py-3 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-lg font-bold"
-                                    >
-                                        예약대기 (상태변경)
-                                    </button>
-                                    <button
-                                        onClick={() => handleRowAction('cancel')}
-                                        className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-bold"
-                                    >
-                                        취소 (상태변경)
-                                    </button>
-                                    <hr className="border-gray-100 my-1" />
-                                    <button
-                                        onClick={() => handleRowAction('delete')}
-                                        className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold shadow-sm"
-                                    >
-                                        삭제 (DB 영구삭제)
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveActionRow(null)}
-                                        className="w-full py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-500 rounded-lg font-semibold mt-2"
-                                    >
-                                        닫기
-                                    </button>
-                                </div>
+                    {loading && rows.length === 0 ? (
+                        <div className="flex h-full items-center justify-center text-gray-500">
+                            데이터를 불러오는 중입니다...
+                        </div>
+                    ) : (
+                        <>
+                            <style>{fullHeightGridStyle}</style>
+                            <DataGrid
+                                ref={gridRef}
+                                defaultColumnOptions={{ resizable: true }}
+                                columns={columns}
+                                rows={filteredRows}
+                                onRowsChange={handleRowsChange}
+                                onFill={handleFill}
+                                className="rdg-light h-full text-sm flex-1 datagrid-overflow-visible"
+                                headerRowHeight={40}
+                                rowHeight={35}
+                                rowClass={rowClass}
+                                rowKeyGetter={(row) => String((row as any)._grid_id || row.id)}
+                                onScroll={handleScroll}
+                                selectedRows={selectedRows}
+                                onSelectedRowsChange={setSelectedRows}
+                                onCellClick={handleCellClick}
+                                onCellDoubleClick={isMobile ? (args, event) => {
+                                    if (selectedCell &&
+                                        selectedCell.idx === args.column.idx &&
+                                        selectedCell.rowIdx === args.rowIdx) {
+                                        return;
+                                    }
+                                } : undefined}
+                                direction="ltr"
+                                style={{ height: "100%", userSelect: "none" }}
+                            />
+                        </>
+                    )}
+                    {loading && rows.length > 0 && (
+                        <div className="py-2 text-center text-xs text-gray-400 bg-gray-50 border-t">
+                            추가 데이터 로딩 중...
+                        </div>
+                    )}
+                    {tooltip && createPortal(
+                        <div
+                            className="fixed bg-yellow-100 text-gray-900 px-2 pointer-events-none z-[99999] whitespace-nowrap flex items-center justify-center transform-none"
+                            style={{
+                                top: tooltip.rect.top,
+                                left: tooltip.rect.left,
+                                height: tooltip.rect.height,
+                                minWidth: tooltip.rect.width,
+                            }}
+                        >
+                            {tooltip.content}
+                        </div>,
+                        document.body
+                    )}
+                </div>
+            )}
+
+            {activeActionRow && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden">
+                        <div className="p-6 text-center">
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">상태 변경 및 삭제</h3>
+                            <p className="text-sm text-gray-500 mb-6">원하시는 작업을 선택해주세요.</p>
+
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={() => handleRowAction('confirmed')}
+                                    className="w-full py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-bold"
+                                >
+                                    예약확정 (상태변경)
+                                </button>
+                                <button
+                                    onClick={() => handleRowAction('waiting')}
+                                    className="w-full py-3 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-lg font-bold"
+                                >
+                                    예약대기 (상태변경)
+                                </button>
+                                <button
+                                    onClick={() => handleRowAction('cancel')}
+                                    className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-bold"
+                                >
+                                    취소 (상태변경)
+                                </button>
+                                <hr className="border-gray-100 my-1" />
+                                <button
+                                    onClick={() => handleRowAction('delete')}
+                                    className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold shadow-sm"
+                                >
+                                    삭제 (DB 영구삭제)
+                                </button>
+                                <button
+                                    onClick={() => setActiveActionRow(null)}
+                                    className="w-full py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-500 rounded-lg font-semibold mt-2"
+                                >
+                                    닫기
+                                </button>
                             </div>
                         </div>
                     </div>
-                )
-            }
-            {/* Copy Range Modal */}
+                </div>
+            )}
+
             {showCopyModal && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 space-y-4">
@@ -1519,6 +1554,7 @@ export default function AllReservationsPage() {
                     </div>
                 </div>
             )}
-        </div >
-    );
+        </div>
+
+    )
 }
