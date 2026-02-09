@@ -152,7 +152,7 @@ export default function AllReservationsPage() {
     const [rangeSelection, setRangeSelection] = useState<RangeSelection | null>(null);
 
     const { setIsDirty, registerSaveHandler } = useUnsavedChanges();
-    const PAGE_SIZE = 500;
+    const PAGE_SIZE = 1000;
     const [activeActionRow, setActiveActionRow] = useState<{ id: string, index: number } | null>(null);
     const [showAddMenu, setShowAddMenu] = useState(false);
 
@@ -523,8 +523,13 @@ export default function AllReservationsPage() {
         }
     };
 
+    const isFetching = useRef(false);
+
     const fetchReservations = async (pageIndex: number, isRefresh = false) => {
         if (!hasMore && !isRefresh) return;
+        if (isFetching.current) return;
+
+        isFetching.current = true;
         if (pageIndex === 0) setLoading(true);
 
         try {
@@ -564,6 +569,11 @@ export default function AllReservationsPage() {
                     setRows(sanitized);
                     setPage(1);
                     setHasMore(data.length === PAGE_SIZE);
+                    // Reset history on refresh
+                    if (sanitized.length > 0) {
+                        setHistory([{ rows: sanitized, changedRowIds: new Set() }]);
+                        setHistoryIndex(0);
+                    }
                 } else {
                     setRows(prev => {
                         const existingIds = new Set(prev.map(r => r.id));
@@ -579,6 +589,7 @@ export default function AllReservationsPage() {
             console.error("Error fetching all reservations:", JSON.stringify(error, null, 2));
         } finally {
             setLoading(false);
+            isFetching.current = false;
         }
     };
 
@@ -1099,8 +1110,8 @@ export default function AllReservationsPage() {
                 // Find index in current rows
                 const idx = rows.indexOf(row);
                 // Reverse numbering: Total Count - Index
-                // If totalCount is not yet loaded, fallback to rows.length (though it might change)
-                const baseCount = totalCount > 0 ? totalCount : rows.length;
+                // Use rows.length as base if we have loaded everything (hasMore is false), otherwise rely on totalCount
+                const baseCount = (!hasMore && rows.length > 0) ? rows.length : (totalCount > 0 ? totalCount : rows.length);
                 const rowNumber = baseCount - idx;
                 return <div className="flex items-center justify-center h-full text-gray-500 font-mono text-xs">{rowNumber}</div>;
             }
