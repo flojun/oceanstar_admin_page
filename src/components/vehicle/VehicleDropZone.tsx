@@ -24,15 +24,15 @@ export function VehicleDropZone({ vehicle, drivers, onDriverChange, optionName, 
     const isOverLimit = vehicle.type === 'company' && totalPax > 15;
 
     return (
-        <div className="flex flex-col bg-gray-50 rounded-lg border border-gray-200 overflow-hidden min-h-[600px] lg:min-h-0">
+        <div className="w-full h-auto bg-white rounded-lg border border-gray-200 flex flex-col shadow-sm">
             {/* Export Date Title (Only visible when provided, mainly for export) */}
             {dateTitle && (
-                <div className="bg-gray-800 text-white text-center py-1 text-sm font-bold">
+                <div className="bg-gray-800 text-white text-center py-1 text-sm font-bold rounded-t-lg">
                     {dateTitle}
                 </div>
             )}
             {/* Header */}
-            <div className={`p-3 border-b ${isOverLimit ? 'bg-red-50' : 'bg-white'}`}>
+            <div className="p-3 border-b bg-white rounded-t-lg">
                 <div className="flex justify-between items-center mb-2">
                     <h3 className="font-bold text-lg text-gray-800">
                         {vehicle.name} {optionName && <span className="text-sm font-normal text-gray-500">({optionName})</span>}
@@ -55,8 +55,8 @@ export function VehicleDropZone({ vehicle, drivers, onDriverChange, optionName, 
                 </select>
             </div>
 
-            {/* Drop Area */}
-            <div ref={setNodeRef} className="flex-1 p-2 overflow-y-auto vehicle-drop-area">
+            {/* Drop Area - Standard Block that grows with content */}
+            <div ref={setNodeRef} className="p-2 min-h-[200px] vehicle-drop-area">
                 <SortableContext
                     items={vehicle.items.map(i => i.id)}
                     strategy={verticalListSortingStrategy}

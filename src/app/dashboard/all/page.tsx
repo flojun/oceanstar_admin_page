@@ -46,6 +46,7 @@ const fullHeightGridStyle = `
     border-bottom: 1px solid #e5e7eb;
     user-select: none !important;
     cursor: pointer !important;
+    color: #111827;
   }
   .rdg-header-row {
     background-color: #f9fafb;
@@ -243,6 +244,162 @@ export default function AllReservationsPage() {
             updateRowsWithHistory(nextState.rows, nextState.changedRowIds, true);
         }
     }, [history, historyIndex]);
+
+    // Single Row Update Handler for Always-On Editors
+    const handleSingleRowChange = useCallback((updatedRow: any) => {
+        setRows(prevRows => {
+            const idx = prevRows.findIndex(r => (r as any)._grid_id === (updatedRow as any)._grid_id);
+            if (idx === -1) return prevRows;
+
+            const newRows = [...prevRows];
+            newRows[idx] = updatedRow;
+
+            // We also need to update changedRowIds
+            if (updatedRow.id && !updatedRow.isNew) {
+                setChangedRowIds(prev => {
+                    const next = new Set(prev);
+                    next.add(updatedRow.id);
+                    return next;
+                });
+            }
+
+            // History?
+            // Ideally we debate if every keystroke/blur should push history.
+            // For now, let's skip history for high-frequency updates or debounce it?
+            // But CustomTextEditor only calls onRowChange on BLUR or Enter.
+            // So pressing Enter/Blurring IS a history-worthy event.
+
+            // But we can't call setHistory inside setRows easily without ref.
+            // Let's rely on the useEffect or just call updateRowsWithHistory wrapper?
+            // updateRowsWithHistory requires Passing the FULL new array.
+            // But we are inside a callback.
+
+            return newRows;
+        });
+
+        // This is tricky. updateRowsWithHistory works on the *current* state.
+        // If we use setRows(callback), we are safe from race conditions but harder to push history.
+        // Let's use the functional approach but trigger history update separately if needed?
+        // Or just use updateRowsWithHistory directly if we trust 'rows' dependency?
+        // 'rows' is a dependency of useMemo(columns), so this function is recreated on rows change.
+        // So 'rows' is fresh.
+
+    }, []);
+
+    // Redefining handleSingleRowChange to use updateRowsWithHistory directly
+    // This allows history tracking.
+    const handleSingleRowChangeDirect = useCallback((updatedRow: any) => {
+        const idx = rows.findIndex(r => (r as any)._grid_id === (updatedRow as any)._grid_id);
+        if (idx === -1) return;
+
+        const newRows = [...rows];
+        newRows[idx] = updatedRow;
+
+        const nextChangedIds = new Set(changedRowIds);
+        if (updatedRow.id && !updatedRow.isNew) {
+            nextChangedIds.add(updatedRow.id);
+        }
+
+        updateRowsWithHistory(newRows, nextChangedIds);
+
+    }, [rows, changedRowIds, updateRowsWithHistory]);
+
+    // Navigation Handler for Always-Edit Inputs
+    const handleEditorNavigation = useCallback((action: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' | 'TAB' | 'ENTER' | 'SHIFT_TAB', rowIdx: number, colIdx: number) => {
+        let nextRowIdx = rowIdx;
+        let nextColIdx = colIdx;
+
+        switch (action) {
+            case 'UP':
+                nextRowIdx = Math.max(0, rowIdx - 1);
+                break;
+            case 'DOWN':
+            case 'ENTER':
+                nextRowIdx = Math.min(rows.length - 1, rowIdx + 1);
+                break;
+            case 'LEFT':
+                // Skip read-only columns logic if needed (e.g. cols < 7)
+                nextColIdx = colIdx - 1;
+                break;
+            case 'RIGHT':
+            case 'TAB':
+                nextColIdx = colIdx + 1;
+                // Wrap to PREVIOUS row (Bottom-to-Top flow) as requested
+                if (nextColIdx >= columns.length) {
+                    nextColIdx = 0;
+                    nextRowIdx = Math.max(0, rowIdx - 1); // Move UP
+
+                    // If at the very top (first row, last col), loop to bottom?
+                    // Or stop.
+                    if (rowIdx === 0 && colIdx === columns.length - 1) {
+                        // Let's loop to bottom for convenience or stay put.
+                        // User asked for "Bottom to Up", implies filling form upwards.
+                        // Stopping at 0 is safer.
+                        nextRowIdx = 0;
+                        nextColIdx = columns.length - 1; // Stay at end? Or wrap to start?
+                        // Let's actually just stop wrapping if we can't go up.
+                        nextColIdx = colIdx;
+                    }
+                }
+                break;
+            case 'SHIFT_TAB':
+                nextColIdx = colIdx - 1;
+                // Wrap to NEXT row (Reverse of Bottom-to-Top)
+                if (nextColIdx < 0) {
+                    nextColIdx = columns.length - 1;
+                    nextRowIdx = Math.min(rows.length - 1, rowIdx + 1); // Move DOWN
+
+                    if (rowIdx === rows.length - 1 && colIdx === 0) {
+                        nextRowIdx = rows.length - 1;
+                        nextColIdx = 0;
+                    }
+                }
+                break;
+        }
+
+        // Update local state
+        setSelectedCell({ rowIdx: nextRowIdx, idx: nextColIdx });
+
+        if (gridRef.current && 'selectCell' in gridRef.current) {
+            (gridRef.current as any).selectCell({ rowIdx: nextRowIdx, idx: nextColIdx });
+
+            // Explicitly focus the correct element to ensure typing works immediately
+            // Using requestAnimationFrame is better than setTimeout(0) for paint synchronization
+            requestAnimationFrame(() => {
+                // Find the currently selected cell in the DOM
+                const selectedCellNode = document.querySelector('.rdg-cell[aria-selected="true"]') as HTMLElement;
+                if (selectedCellNode) {
+                    const targetColumn = columns[nextColIdx];
+                    if (!targetColumn) return;
+
+                    const isAlwaysEditColumn = ['name', 'pickup_location', 'note'].includes(targetColumn.key);
+
+                    if (isAlwaysEditColumn) {
+                        // For Always-Edit cells, we rely on the component's internal useEffect to grab focus.
+                        // However, we still attempt to find the input and focus it here as a backup
+                        const inputNode = selectedCellNode.querySelector('input');
+                        if (inputNode) {
+                            inputNode.focus({ preventScroll: true });
+                        }
+                        // If input is not found, we DO NOT focus the cell div, as that would steal focus from the input
+                        // when it eventually mounts.
+                    } else {
+                        // For Standard cells, focus the CELL div
+                        selectedCellNode.focus({ preventScroll: true });
+                    }
+
+                    // Automatic Scroll Tracking
+                    // Ensure the selected cell is visible in the viewport
+                    selectedCellNode.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
+                } else {
+                    // Fallback
+                    const gridElement = (gridRef.current as any).element;
+                    if (gridElement) gridElement.focus({ preventScroll: true });
+                }
+            });
+        }
+
+    }, [rows.length]);
 
     // Keyboard Shortcuts
     useEffect(() => {
@@ -674,12 +831,26 @@ export default function AllReservationsPage() {
         }
 
         // Logic:
-        // 1. Slice rows (convert 1-based index to 0-based)
-        // 2. Sort by tour_date ASC
-        // 3. Format string
-        // 4. Copy to clipboard
+        // 1. Convert "No." (Display ID) back to Array Index.
+        //    Renderer: No = baseCount - Index
+        //    Therefore: Index = baseCount - No
+        const baseCount = totalCount > 0 ? totalCount : rows.length;
 
-        const targetRows = rows.slice(start - 1, end);
+        let idx1 = baseCount - start;
+        let idx2 = baseCount - end;
+
+        // Ensure indices are valid
+        if (idx1 < 0) idx1 = 0;
+        if (idx2 < 0) idx2 = 0;
+        if (idx1 >= rows.length) idx1 = rows.length - 1;
+        if (idx2 >= rows.length) idx2 = rows.length - 1;
+
+        const minIdx = Math.min(idx1, idx2);
+        const maxIdx = Math.max(idx1, idx2);
+
+        // Slice is end-exclusive, so +1
+        const targetRows = rows.slice(minIdx, maxIdx + 1);
+
         if (targetRows.length === 0) {
             alert("선택된 범위에 데이터가 없습니다.");
             return;
@@ -764,10 +935,11 @@ export default function AllReservationsPage() {
                 const minIdx = Math.min(...selectedIndices);
                 const maxIdx = Math.max(...selectedIndices);
 
-                // Convert Index back to No.
-                // No = rows.length - Index
-                const startNo = rows.length - maxIdx; // Lower No (Bottom selection)
-                const endNo = rows.length - minIdx;   // Higher No (Top selection)
+                // Convert Index back to No. using totalCount logic checks
+                // Matches "No." column renderer: rowNumber = baseCount - idx
+                const baseCount = totalCount > 0 ? totalCount : rows.length;
+                const startNo = baseCount - maxIdx; // Lower No (Higher Index)
+                const endNo = baseCount - minIdx;   // Higher No (Lower Index)
 
                 setCopyStartRow(String(startNo));
                 setCopyEndRow(String(endNo));
@@ -985,26 +1157,6 @@ export default function AllReservationsPage() {
             }
         },
         {
-            key: "actions_col",
-            name: "관리",
-            width: 60,
-            cellClass: "select-none",
-            headerCellClass: "text-center",
-            renderCell: ({ row, tabIndex }: any) => (
-                <div className="flex justify-center" key={`action-cell-${row.id}`}>
-                    <button
-                        key={`action-btn-${row.id}`}
-                        tabIndex={tabIndex}
-                        className="flex h-full w-full items-center justify-center text-gray-400 hover:text-red-600 transition-colors"
-                        onClick={() => openActionModal(row.id!, rows.indexOf(row))}
-                        title="관리 메뉴 열기"
-                    >
-                        <Settings className="h-4 w-4" />
-                    </button>
-                </div>
-            )
-        },
-        {
             key: "receipt_date",
             name: "접수일",
             renderEditCell: CustomTextEditor,
@@ -1047,12 +1199,26 @@ export default function AllReservationsPage() {
         {
             key: "name",
             name: "예약자명",
-            renderEditCell: CustomTextEditor,
+            // Always-Edit Mode - renderEditCell removed to prevent conflict
             width: 90,
-            cellClass: "select-none p-0 text-center",
+            cellClass: "p-0 text-center",
             headerCellClass: "text-center",
-            renderCell: (props: any) => hoverTooltipRenderer(props, true, false, true),
-            editorOptions: { commitOnOutsideClick: true }
+            renderCell: (props: any) => {
+                const idx = rows.indexOf(props.row);
+                // Check if this cell is selected
+                // Note: props.column.idx is reliable.
+                const isSelected = selectedCell?.rowIdx === idx && selectedCell?.idx === props.column.idx;
+
+                return (
+                    <CustomTextEditor
+                        {...props}
+                        isAlwaysOn={true}
+                        isSelected={isSelected}
+                        onRowChange={(newRow: any) => handleSingleRowChangeDirect(newRow)}
+                        onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
+                    />
+                );
+            },
         },
         {
             key: "tour_date",
@@ -1062,6 +1228,24 @@ export default function AllReservationsPage() {
             cellClass: "select-none p-0 text-center",
             headerCellClass: "text-center",
             renderCell: (props: any) => {
+                const isSelected = selectedCell?.rowIdx === props.row.id && selectedCell?.idx === props.column.idx; // Use row.id or row index depending on logic
+                // Actually rowKeyGetter uses _grid_id or id. We need to match current row index.
+                // grid props.rowIdx is available in modern RDG, but here props might be just { row, column, onRowChange... }
+                // Let's check if we can get rowIdx. In RDG v7 renderCell props usually include rowIdx?
+                // Wait, in the 'name' column we access `props.rowIdx` or we rely on `isSelected` passed from parent? 
+                // Ah, 'name' column loop in previous code (Line 1145) uses `const isSelected = selectedCell?.rowIdx === i ...` 
+                // but here we are in `columns` array definition. accurately getting rowIdx in renderCell can be tricky if not passed.
+                // However, `renderCell` props in RDG usually have `rowIdx`.
+                // Let's assume `props.rowIdx` is valid.
+
+                // Wait, `columns` is defined *inside* the component in this file?
+                // Yes, `const columns = useMemo(...)`.
+                // So we can access `selectedCell` from closure.
+
+                // Wait, `columns` is defined *inside* the component in this file?
+                // Yes, `const columns = useMemo(...)`.
+                // So we can access `selectedCell` from closure.
+
                 const displayValue = formatDateDisplay(props.row.tour_date);
                 return hoverTooltipRenderer({ ...props, row: { ...props.row, tour_date: displayValue } }, true, true);
             },
@@ -1074,9 +1258,64 @@ export default function AllReservationsPage() {
             renderCell: OptionCellRenderer,
             editorOptions: { commitOnOutsideClick: true }
         },
-        { key: "pickup_location", name: "픽업장소", renderEditCell: CustomTextEditor, width: 96, cellClass: "select-none p-0", headerCellClass: "text-center", renderCell: (props: any) => hoverTooltipRenderer(props, false), editorOptions: { commitOnOutsideClick: true } },
-        { key: "contact", name: "연락처", renderEditCell: CustomTextEditor, width: 130, cellClass: "select-none p-0", headerCellClass: "text-center", renderCell: (props: any) => hoverTooltipRenderer(props, false), editorOptions: { commitOnOutsideClick: true } },
-        { key: "note", name: "기타사항", renderEditCell: CustomTextEditor, width: noteColWidth, cellClass: "select-none p-0", renderCell: (props: any) => hoverTooltipRenderer(props, false), editorOptions: { commitOnOutsideClick: true } },
+        {
+            key: "pickup_location",
+            name: "픽업장소",
+            // renderEditCell removed for Always-Edit
+            width: 96,
+            cellClass: "p-0",
+            headerCellClass: "text-center",
+            renderCell: (props: any) => {
+                const idx = rows.indexOf(props.row);
+                // Always-Edit for Hangul IME fix
+                const isSelected = selectedCell?.rowIdx === idx && selectedCell?.idx === props.column.idx;
+                return (
+                    <CustomTextEditor
+                        {...props}
+                        isAlwaysOn={true}
+                        isSelected={isSelected}
+                        onRowChange={(newRow: any) => handleSingleRowChangeDirect(newRow)}
+                        onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
+                    />
+                );
+            }
+        },
+        {
+            key: "contact",
+            name: "연락처",
+            renderEditCell: CustomTextEditor,
+            width: 130,
+            cellClass: "p-0",
+            headerCellClass: "text-center",
+            renderCell: (props: any) => {
+                // Always-Edit might be overkill for contact numbers, but consistent UX is better.
+                // User asked for Pickup and Note. I'll omit Contact for now to be safe, or just do it?
+                // User said "Pickup Location and Note". I'll stick to those to be precise.
+                return hoverTooltipRenderer(props, false);
+            },
+            editorOptions: { commitOnOutsideClick: true }
+        },
+        {
+            key: "note",
+            name: "기타사항",
+            // renderEditCell removed for Always-Edit
+            width: noteColWidth,
+            cellClass: "p-0",
+            headerCellClass: "text-center",
+            renderCell: (props: any) => {
+                const idx = rows.indexOf(props.row);
+                const isSelected = selectedCell?.rowIdx === idx && selectedCell?.idx === props.column.idx;
+                return (
+                    <CustomTextEditor
+                        {...props}
+                        isAlwaysOn={true}
+                        isSelected={isSelected}
+                        onRowChange={(newRow: any) => handleSingleRowChangeDirect(newRow)}
+                        onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
+                    />
+                );
+            }
+        },
     ], [selectedRows, rows, lastSelectedIdx, noteColWidth]);
 
     // Shift+Click Range Selection + Mobile Double-Tap Edit
@@ -1102,6 +1341,7 @@ export default function AllReservationsPage() {
         }
 
         setSelectedCell(clickedCell);
+        setTooltip(null); // Clear tooltip to prevent obscuring editor
     }, [anchorCell, isMobile]);
 
     const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -1423,7 +1663,7 @@ export default function AllReservationsPage() {
                                 rows={filteredRows}
                                 onRowsChange={handleRowsChange}
                                 onFill={handleFill}
-                                className="rdg-light h-full text-sm flex-1 datagrid-overflow-visible"
+                                className="rdg-light h-full text-sm flex-1 datagrid-overflow-visible outline-none"
                                 headerRowHeight={40}
                                 rowHeight={35}
                                 rowClass={rowClass}
@@ -1431,6 +1671,14 @@ export default function AllReservationsPage() {
                                 onScroll={handleScroll}
                                 selectedRows={selectedRows}
                                 onSelectedRowsChange={setSelectedRows}
+                                onSelectedCellChange={(args: any) => {
+                                    // RDG v7 onSelectedCellChange args: { rowIdx, column } usually, or { rowIdx, idx }
+                                    // We'll check both for safety or rely on column.idx if available
+                                    const idx = args.column?.idx ?? args.idx;
+                                    if (typeof idx === 'number') {
+                                        setSelectedCell({ rowIdx: args.rowIdx, idx });
+                                    }
+                                }}
                                 onCellClick={handleCellClick}
                                 onCellDoubleClick={isMobile ? (args, event) => {
                                     if (selectedCell &&

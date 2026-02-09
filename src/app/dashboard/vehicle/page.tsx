@@ -615,7 +615,7 @@ export default function VehiclePage() {
 
                     {/* Right: Vehicle Assignment Area */}
                     <div className="flex-1 flex flex-col gap-4 min-h-0">
-                        <div id="vehicle-export-area" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 p-2 bg-white rounded-lg min-h-[300px]">
+                        <div id="vehicle-export-area" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
                             {['vehicle-1', 'vehicle-2', 'vehicle-3', 'personal-1'].map(key => (
                                 <VehicleDropZone
                                     key={key}
