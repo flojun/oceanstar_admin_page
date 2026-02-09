@@ -102,7 +102,7 @@ function OptionCellRenderer({ row }: any) {
     }
 
     return (
-        <div className={`w-full h-full flex items-center px-2 ${status === 'warning' ? 'bg-red-50' : ''}`} title={msg || row.option}>
+        <div className={`w-full h-full flex items-center justify-center px-2 ${status === 'warning' ? 'bg-red-50' : ''}`} title={msg || row.option}>
             <span>{row.option}</span>
             {indicator}
         </div>
@@ -1195,7 +1195,7 @@ export default function AllReservationsPage() {
                 );
             }
         },
-        { key: "source", name: "경로", renderEditCell: CustomTextEditor, width: 60, cellClass: "select-none p-0 text-center", headerCellClass: "text-center", renderCell: (props: any) => hoverTooltipRenderer(props, true, true), editorOptions: { commitOnOutsideClick: true } },
+        { key: "source", name: "경로", renderEditCell: CustomTextEditor, width: 80, cellClass: "select-none p-0 text-center", headerCellClass: "text-center", renderCell: (props: any) => hoverTooltipRenderer(props, true, true), editorOptions: { commitOnOutsideClick: true } },
         {
             key: "name",
             name: "예약자명",
@@ -1253,7 +1253,7 @@ export default function AllReservationsPage() {
         },
         { key: "pax", name: "인원", renderEditCell: CustomTextEditor, width: 60, cellClass: "select-none p-0 text-center", headerCellClass: "text-center", renderCell: (props: any) => hoverTooltipRenderer(props, true), editorOptions: { commitOnOutsideClick: true } },
         {
-            key: "option", name: "옵션", renderEditCell: CustomTextEditor, width: 70,
+            key: "option", name: "옵션", renderEditCell: CustomTextEditor, width: 80,
             cellClass: "select-none p-0 text-center", headerCellClass: "text-center",
             renderCell: OptionCellRenderer,
             editorOptions: { commitOnOutsideClick: true }

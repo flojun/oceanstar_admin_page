@@ -65,11 +65,11 @@ export function ReservationTable({
     const columns = [
         { label: "리컨펌", key: "is_reconfirmed", width: "w-10 md:w-16", align: "center" }, // Reduced for mobile
         { label: "진행상태", key: "status", width: "w-24", align: "center" },
-        { label: "예약경로", key: "source", width: "w-12 md:w-16", align: "center" }, // Reduced for mobile
+        { label: "예약경로", key: "source", width: "w-24 md:w-32", align: "center" }, // Increased for Korean text
         { label: "예약자명", key: "name", width: "w-24", align: "center" },
         { label: "예약일", key: "tour_date", width: "w-28", align: "center" },
         { label: "인원", key: "pax", width: "w-16", align: "center" },
-        { label: "옵션", key: "option", width: "w-16", align: "center" },
+        { label: "옵션", key: "option", width: "w-24 md:w-32", align: "center" }, // Increased for Korean text
         { label: "픽업장소", key: "pickup_location", width: "w-28", align: "left" },
         { label: "연락처", key: "contact", width: "w-36", align: "left" },
         { label: "기타사항", key: "note", width: "w-48", align: "left" },
