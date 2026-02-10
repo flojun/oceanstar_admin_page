@@ -9,9 +9,11 @@ import { supabase } from "@/lib/supabase";
 import { Reservation, ReservationInsert } from "@/types/reservation";
 import { smartParseRow } from "@/lib/smartParser";
 import { cn } from "@/lib/utils";
-import { getHawaiiDateStr, formatDateDisplay, getKoreanDay } from "@/lib/timeUtils";
+import { getHawaiiDateStr, formatDateDisplay, getKoreanDay, getKoreanDayShort } from "@/lib/timeUtils";
 import { useUnsavedChanges } from "@/components/providers/UnsavedChangesProvider";
 import CustomTextEditor from "@/components/editors/CustomTextEditor";
+import SelectEditor from "@/components/editors/SelectEditor";
+import { PICKUP_LOCATIONS } from "@/constants/pickupLocations";
 import StatusEditor from "@/components/editors/StatusEditor";
 
 interface RangeSelection {
@@ -112,7 +114,9 @@ function OptionCellRenderer({ row }: any) {
 import CancellationRequestsView from "@/components/CancellationRequestsView";
 import { useSearchParams } from "next/navigation";
 
-export default function AllReservationsPage() {
+import { Suspense } from "react";
+
+function AllReservationsContent() {
     const searchParams = useSearchParams();
     const initialView = searchParams.get('view') === 'cancellation' ? 'cancellation' : 'input';
     const [activeTab, setActiveTab] = useState<'input' | 'cancellation'>(initialView);
@@ -1277,6 +1281,19 @@ export default function AllReservationsPage() {
             },
             editorOptions: { commitOnOutsideClick: true }
         },
+        {
+            key: "day_of_week", name: "요일", width: 50,
+            cellClass: "select-none p-0 text-center", headerCellClass: "text-center",
+            renderCell: ({ row }: any) => {
+                const day = getKoreanDayShort(row.tour_date || "");
+                return (
+                    // Default style (inherit) for Mon-Sat. Red for Sun.
+                    <div className={`w-full h-full flex items-center justify-center ${day === '일' ? 'text-red-500 font-bold' : ''}`}>
+                        {day}
+                    </div>
+                );
+            }
+        },
         { key: "pax", name: "인원", renderEditCell: CustomTextEditor, width: 60, cellClass: "select-none p-0 text-center", headerCellClass: "text-center", renderCell: (props: any) => hoverTooltipRenderer(props, true), editorOptions: { commitOnOutsideClick: true } },
         {
             key: "option", name: "옵션", renderEditCell: CustomTextEditor, width: 80,
@@ -1287,23 +1304,12 @@ export default function AllReservationsPage() {
         {
             key: "pickup_location",
             name: "픽업장소",
-            // renderEditCell removed for Always-Edit
-            width: 96,
-            cellClass: "p-0",
+            renderEditCell: (props: any) => <SelectEditor {...props} options={PICKUP_LOCATIONS} />,
+            width: 140,
+            cellClass: "p-0 text-center",
             headerCellClass: "text-center",
             renderCell: (props: any) => {
-                const idx = rows.indexOf(props.row);
-                // Always-Edit for Hangul IME fix
-                const isSelected = selectedCell?.rowIdx === idx && selectedCell?.idx === props.column.idx;
-                return (
-                    <CustomTextEditor
-                        {...props}
-                        isAlwaysOn={true}
-                        isSelected={isSelected}
-                        onRowChange={(newRow: any) => handleSingleRowChangeDirect(newRow)}
-                        onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
-                    />
-                );
+                return <div className="w-full h-full flex items-center justify-center px-1">{props.row.pickup_location}</div>;
             }
         },
         {
@@ -1830,5 +1836,13 @@ export default function AllReservationsPage() {
             )}
         </div>
 
-    )
+    );
+}
+
+export default function AllReservationsPage() {
+    return (
+        <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
+            <AllReservationsContent />
+        </Suspense>
+    );
 }

@@ -46,7 +46,7 @@ type GridRow = Partial<ReservationInsert> & {
     _grid_id: string;
     // Overbooking Info
     _capacityMsg?: string;
-    _capacityStatus?: 'checking' | 'safe' | 'warning' | null;
+    _capacityStatus?: 'checking' | 'safe' | 'warning';
 };
 
 // Simple text editor
@@ -99,14 +99,13 @@ const createEmptyRow = (): GridRow => ({
     contact: "",
     note: "",
     is_reconfirmed: false,
-    _capacityStatus: null,
+    _capacityStatus: undefined,
 });
 
 const initialRows = Array.from({ length: 50 }, () => createEmptyRow());
 
 export default function BulkAddPage() {
     const [rows, setRows] = useState<GridRow[]>(initialRows);
-    const [selectedRange, setSelectedRange] = useState<any | null>(null);
     const [saving, setSaving] = useState(false);
 
     // Common Renderer
@@ -185,7 +184,7 @@ export default function BulkAddPage() {
             // Reset status for invalid group
             setRows(prev => {
                 const updated = [...prev];
-                if (updated[index]) updated[index]._capacityStatus = null;
+                if (updated[index]) updated[index]._capacityStatus = undefined;
                 return updated;
             });
             return;
@@ -251,34 +250,10 @@ export default function BulkAddPage() {
             };
         }
         setRows(newRows);
-        return newRows;
+        return newRows as any;
     };
 
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-        if ((event.key === 'Delete' || event.key === 'Backspace') && selectedRange) {
-            // ... Logic identical to original ...
-            const { idx, rowIdx, endIdx, endRowIdx: rangeEndRowIdx } = selectedRange;
-            const startColIdx = Math.min(idx, endIdx);
-            const endColIdx = Math.max(idx, endIdx);
-            const startRowIdx = Math.min(rowIdx, rangeEndRowIdx);
-            const endRowIdx = Math.max(rowIdx, rangeEndRowIdx);
 
-            setRows(prevRows => {
-                const newRows = [...prevRows];
-                for (let r = startRowIdx; r <= endRowIdx; r++) {
-                    if (r >= 0 && r < newRows.length) {
-                        const row = { ...newRows[r] };
-                        for (let i = startColIdx; i <= endColIdx; i++) {
-                            const colKey = columns[i].key as keyof ReservationInsert;
-                            if (row[colKey] !== "") (row as any)[colKey] = "";
-                        }
-                        newRows[r] = row;
-                    }
-                }
-                return newRows;
-            });
-        }
-    };
 
     const handleAddManyRows = () => setRows(prev => [...prev, ...Array.from({ length: 200 }, () => createEmptyRow())]);
 
@@ -296,7 +271,7 @@ export default function BulkAddPage() {
             // ... Logic identical to original ...
             let isReconfirmed = false;
             if (typeof r.is_reconfirmed === 'boolean') isReconfirmed = r.is_reconfirmed;
-            if (r.is_reconfirmed === 'T' || r.is_reconfirmed === 'true') isReconfirmed = true;
+            if (String(r.is_reconfirmed) === 'T' || String(r.is_reconfirmed) === 'true') isReconfirmed = true;
 
             return {
                 status: r.status || "예약확정",
@@ -348,13 +323,10 @@ export default function BulkAddPage() {
 
             <div className="flex-1 w-full rounded-md border border-gray-300 bg-white shadow-sm overflow-hidden min-h-[500px]">
                 <DataGrid
-                    columns={columns}
+                    columns={columns as any}
                     rows={rows}
                     onRowsChange={handleRowsChange}
                     onFill={handleFill}
-                    onKeyDown={handleKeyDown}
-                    selectedRange={selectedRange}
-                    onSelectedRangeChange={setSelectedRange}
                     className="rdg-light h-full text-sm"
                     headerRowHeight={40}
                     rowHeight={35}

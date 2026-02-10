@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { Edit2, Trash2, Settings, Copy } from "lucide-react";
 import { Reservation } from "@/types/reservation";
 import { cn } from "@/lib/utils";
-import { formatDateDisplay } from "@/lib/timeUtils";
+import { formatDateDisplay, getKoreanDayShort } from "@/lib/timeUtils";
 
 interface ReservationTableProps {
     reservations: Reservation[];
@@ -75,6 +75,7 @@ export function ReservationTable({
         { label: "예약경로", key: "source", width: "w-24 md:w-32", align: "center" }, // Increased for Korean text
         { label: "예약자명", key: "name", width: "w-24", align: "center" },
         { label: "예약일", key: "tour_date", width: "w-28", align: "center" },
+        { label: "요일", key: "day_of_week", width: "w-12", align: "center" },
         { label: "인원", key: "pax", width: "w-16", align: "center" },
         { label: "옵션", key: "option", width: "w-24 md:w-32", align: "center" }, // Increased for Korean text
         { label: "픽업장소", key: "pickup_location", width: "w-28", align: "left" },
@@ -310,6 +311,15 @@ export function ReservationTable({
                                     )}
                                     <td className={cn("px-2 text-gray-900 font-bold text-center", isSimpleView ? "py-1" : "py-3")}>{res.name}</td>
                                     {!isSimpleView && <td className="px-2 py-3 text-gray-600 text-center hidden md:table-cell">{formatDateDisplay(res.tour_date)}</td>}
+                                    {!isSimpleView && (
+                                        <td className="px-1 py-3 text-center hidden md:table-cell">
+                                            <span className={cn(
+                                                getKoreanDayShort(res.tour_date || "") === '일' ? "text-red-500 font-bold" : ""
+                                            )}>
+                                                {getKoreanDayShort(res.tour_date || "")}
+                                            </span>
+                                        </td>
+                                    )}
                                     <td className={cn("px-2 text-gray-600 font-bold text-center", isSimpleView ? "py-1" : "py-3")}>{res.pax}</td>
                                     <td className={cn("px-2 text-gray-600 font-mono text-xs text-center", isSimpleView ? "py-1" : "py-3")}>{res.option}</td>
                                     <td className={cn("px-4 text-gray-600 truncate max-w-[200px]", isSimpleView ? "py-1" : "py-3")} title={res.pickup_location}>

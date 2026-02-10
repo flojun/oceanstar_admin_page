@@ -8,6 +8,7 @@ import { Reservation, ReservationInsert, ReservationStatus } from "@/types/reser
 import { supabase } from "@/lib/supabase";
 
 import { getHawaiiDateStr } from "@/lib/timeUtils";
+import { PICKUP_LOCATIONS } from "@/constants/pickupLocations";
 
 interface ReservationModalProps {
     isOpen: boolean;
@@ -325,10 +326,22 @@ export function ReservationModal({
                             {/* Pickup Location */}
                             <div className="md:col-span-2">
                                 <label className="mb-1 block text-sm font-medium text-gray-700">픽업장소</label>
-                                <SmartInput
+                                <select
+                                    className="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none"
                                     value={formData.pickup_location}
-                                    onValueChange={(val) => handleChange("pickup_location", val)}
-                                />
+                                    onChange={(e) => handleChange("pickup_location", e.target.value)}
+                                >
+                                    <option value="">(선택안함)</option>
+                                    {PICKUP_LOCATIONS.map((loc) => (
+                                        <option key={loc} value={loc}>
+                                            {loc}
+                                        </option>
+                                    ))}
+                                    {/* Keep existing value if not in list (for backward compatibility) */}
+                                    {formData.pickup_location && !PICKUP_LOCATIONS.includes(formData.pickup_location as any) && (
+                                        <option value={formData.pickup_location}>{formData.pickup_location}</option>
+                                    )}
+                                </select>
                             </div>
 
                             {/* Contact */}

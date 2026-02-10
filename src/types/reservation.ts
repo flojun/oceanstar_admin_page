@@ -14,6 +14,8 @@ export interface Reservation {
   pickup_location: string;
   contact: string;
   note: string;
+  vehicle_id?: string;
+  vehicle_order?: number;
   // UI/Transient fields
   isNew?: boolean;
   _grid_id?: string;

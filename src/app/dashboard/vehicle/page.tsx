@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     DndContext,
     DragOverlay,
@@ -102,12 +102,7 @@ export default function VehiclePage() {
         "personal-1": { id: "personal-1", name: "개인차량", type: "personal", maxPax: 999, driverId: null, items: [] },
     };
 
-    const [vehicles, setVehicles] = useState<VehicleState>(JSON.parse(JSON.stringify(initialVehiclesState)));
-
-    // Session persistence: Key = `${date}-${option}`
-    const assignmentsRef = useRef<Record<string, VehicleState>>({});
-
-    // Bulk Data State for Sharing
+    const [vehicles, setVehicles] = useState<VehicleState>(initialVehiclesState);
     const [bulkData, setBulkData] = useState<Record<string, VehicleState>>({});
 
     const sensors = useSensors(
@@ -120,56 +115,204 @@ export default function VehiclePage() {
     useEffect(() => {
         fetchData();
         fetchDrivers();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedOption, selectedDate]);
 
-    // Fetch data for all options (1부, 2부, 3부) for bulk export
+    // Fetch Drivers
+    const fetchDrivers = async () => {
+        const { data } = await supabase.from('drivers').select('*').order('created_at');
+        if (data) setDrivers(data);
+    };
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        try {
+            // A. Fetch Reservations for Date/Option
+            const { data: resData, error: resError } = await supabase
+                .from("reservations")
+                .select("*")
+                .eq("tour_date", selectedDate)
+                .eq("option", selectedOption)
+                .neq("status", "취소");
+
+            if (resError) throw resError;
+
+            // B. Fetch Driver Assignments from daily_vehicle_status
+            const { data: statusData, error: statusError } = await supabase
+                .from("daily_vehicle_status")
+                .select("*")
+                .eq("date", selectedDate)
+                .eq("option", selectedOption);
+
+            if (statusError) throw statusError;
+
+            // C. Construct State
+            const state = JSON.parse(JSON.stringify(initialVehiclesState));
+
+            // Apply Driver Assignments
+            if (statusData) {
+                statusData.forEach((status: any) => {
+                    if (state[status.vehicle_id]) {
+                        state[status.vehicle_id].driverId = status.driver_id;
+                    }
+                });
+            }
+
+            // Distribute Reservations
+            const unassignedItems: Reservation[] = [];
+
+            (resData || []).forEach((res: Reservation) => {
+                const vId = res.vehicle_id || 'unassigned';
+                if (state[vId]) {
+                    state[vId].items.push(res);
+                } else {
+                    unassignedItems.push(res);
+                }
+            });
+
+            // Sort items in each vehicle
+            Object.keys(state).forEach(key => {
+                if (key === 'unassigned') {
+                    state[key].items.sort((a: Reservation, b: Reservation) => {
+                        if (a.vehicle_order !== undefined && b.vehicle_order !== undefined && a.vehicle_order !== 999 && b.vehicle_order !== 999) {
+                            return a.vehicle_order - b.vehicle_order;
+                        }
+                        const timeA = getPickupSortKey(a.pickup_location);
+                        const timeB = getPickupSortKey(b.pickup_location);
+                        if (timeA !== timeB) return timeA.localeCompare(timeB);
+                        return (a.pickup_location || "").localeCompare(b.pickup_location || "");
+                    });
+                } else {
+                    state[key].items.sort((a: Reservation, b: Reservation) => (a.vehicle_order || 999) - (b.vehicle_order || 999));
+                }
+            });
+
+            // Add any invalid-vehicle items to unassigned
+            if (unassignedItems.length > 0) {
+                state.unassigned.items.push(...unassignedItems);
+            }
+
+            setVehicles(state);
+
+        } catch (error) {
+            console.error("Error fetching vehicle data:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedDate, selectedOption]);
+
+    useEffect(() => {
+        fetchData();
+        fetchDrivers();
+    }, [fetchData]);
+
+
+    // Save Driver Assignment
+    const handleDriverChange = useCallback(async (vehicleId: string, driverId: string) => {
+        // Optimistic UI Update
+        setVehicles(prev => ({
+            ...prev,
+            [vehicleId]: { ...prev[vehicleId], driverId }
+        }));
+
+        try {
+            // UPSERT to daily_vehicle_status
+            const { error } = await supabase
+                .from("daily_vehicle_status")
+                .upsert({
+                    date: selectedDate,
+                    option: selectedOption,
+                    vehicle_id: vehicleId,
+                    driver_id: driverId || null,
+                }, { onConflict: 'date, option, vehicle_id' });
+
+            if (error) throw error;
+        } catch (error) {
+            console.error("Error saving driver:", error);
+            alert("기사 배정 저장 실패");
+            fetchData(); // Revert on error
+        }
+    }, [selectedDate, selectedOption, fetchData]);
+
+    // ... (Handlers)
+
+    // ...
+
+    // Render part update to use memoized callback
+
+
+    const handleOptionChange = (newOption: string) => {
+        if (newOption === selectedOption) return;
+        setSelectedOption(newOption);
+    };
+
+    const handleDateChange = (newDate: string) => {
+        if (newDate === selectedDate) return;
+        setSelectedDate(newDate);
+    };
+
+    // Actually, fetchAllOptionsData is for export and needs to fetch *all* options.
+    // We can refactor it to fetch all 3 options from DB similarly.
     const fetchAllOptionsData = async () => {
         setLoading(true);
         const targetOptions = ['1부', '2부', '3부'];
         const newBulkData: Record<string, VehicleState> = {};
 
         try {
-            const { data: allReservations, error } = await supabase
+            // 1. Fetch Reservations
+            const { data: allRes, error: resError } = await supabase
                 .from("reservations")
                 .select("*")
                 .eq("tour_date", selectedDate)
-                .in("option", targetOptions);
+                .in("option", targetOptions)
+                .neq("status", "취소");
+            if (resError) throw resError;
 
-            if (error) throw error;
+            // 2. Fetch Drivers Status
+            const { data: allStatus, error: statusError } = await supabase
+                .from("daily_vehicle_status")
+                .select("*")
+                .eq("date", selectedDate); // Fetch for all options of that date
+            if (statusError) throw statusError;
 
-            // Organize data by option
+            // 3. Build Data
             targetOptions.forEach(opt => {
-                // 1. If currently selected, use current state explicitly (so recent edits are included)
-                if (opt === selectedOption) {
-                    newBulkData[opt] = vehicles;
-                    return;
-                }
+                const state = JSON.parse(JSON.stringify(initialVehiclesState));
 
-                // 2. Check if we have saved state in ref first
-                const savedKey = `${selectedDate}-${opt}`;
-                if (assignmentsRef.current[savedKey]) {
-                    newBulkData[opt] = assignmentsRef.current[savedKey];
-                } else {
-                    // Initialize raw state
-                    const state = JSON.parse(JSON.stringify(initialVehiclesState));
+                // Drivers
+                const optStatus = allStatus?.filter(s => s.option === opt) || [];
+                optStatus.forEach((s: any) => {
+                    if (state[s.vehicle_id]) state[s.vehicle_id].driverId = s.driver_id;
+                });
 
-                    // Populate "unassigned" from DB
-                    const optionReservations = allReservations?.filter(r => r.option === opt) || [];
+                // Reservations
+                const optRes = allRes?.filter(r => r.option === opt) || [];
+                optRes.forEach((res: Reservation) => {
+                    const vId = res.vehicle_id || 'unassigned';
+                    if (state[vId]) state[vId].items.push(res);
+                    else state.unassigned.items.push(res);
+                });
 
-                    if (!assignmentsRef.current[savedKey]) {
-                        // Sort logic
-                        const unassignedItems = optionReservations.sort((a, b) => {
+                // Sort
+                Object.keys(state).forEach(key => {
+                    const items = state[key].items;
+                    if (key === 'unassigned') {
+                        items.sort((a: Reservation, b: Reservation) => {
+                            if (a.vehicle_order !== undefined && b.vehicle_order !== undefined && a.vehicle_order !== 999) {
+                                return a.vehicle_order - b.vehicle_order;
+                            }
                             const timeA = getPickupSortKey(a.pickup_location);
                             const timeB = getPickupSortKey(b.pickup_location);
                             if (timeA !== timeB) return timeA.localeCompare(timeB);
                             return (a.pickup_location || "").localeCompare(b.pickup_location || "");
                         });
-                        state.unassigned.items = unassignedItems;
-                        newBulkData[opt] = state;
+                    } else {
+                        items.sort((a: Reservation, b: Reservation) => (a.vehicle_order || 999) - (b.vehicle_order || 999));
                     }
-                }
+                });
+
+                newBulkData[opt] = state;
             });
+
             setBulkData(newBulkData);
             return newBulkData;
 
@@ -181,83 +324,6 @@ export default function VehiclePage() {
         }
     };
 
-    const handleOptionChange = (newOption: string) => {
-        if (newOption === selectedOption) return;
-        switchContext(selectedDate, newOption);
-    };
-
-    const handleDateChange = (newDate: string) => {
-        if (newDate === selectedDate) return;
-        switchContext(newDate, selectedOption);
-    };
-
-    const switchContext = (newDate: string, newOption: string) => {
-        // 1. Save current state
-        const currentKey = `${selectedDate}-${selectedOption}`;
-        assignmentsRef.current[currentKey] = vehicles;
-
-        // 2. Load new state if exists, else reset
-        const newKey = `${newDate}-${newOption}`;
-        const savedState = assignmentsRef.current[newKey];
-
-        if (savedState) {
-            setVehicles(savedState);
-        } else {
-            setVehicles(JSON.parse(JSON.stringify(initialVehiclesState)));
-        }
-
-        setSelectedDate(newDate);
-        setSelectedOption(newOption);
-    };
-
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const { data, error } = await supabase
-                .from("reservations")
-                .select("*")
-                .eq("tour_date", selectedDate)
-                .eq("option", selectedOption);
-
-            if (error) throw error;
-
-            setVehicles(currentVehicles => {
-                const assignedIds = new Set<string>();
-                Object.values(currentVehicles).forEach(v => {
-                    if (v.id !== 'unassigned') {
-                        v.items.forEach(i => assignedIds.add(i.id));
-                    }
-                });
-
-                const unassignedItems = (data || []).filter(r => !assignedIds.has(r.id)).sort((a, b) => {
-                    const timeA = getPickupSortKey(a.pickup_location);
-                    const timeB = getPickupSortKey(b.pickup_location);
-
-                    if (timeA !== timeB) return timeA.localeCompare(timeB);
-                    return (a.pickup_location || "").localeCompare(b.pickup_location || "");
-                });
-
-                return {
-                    ...currentVehicles,
-                    unassigned: {
-                        ...currentVehicles.unassigned,
-                        items: unassignedItems
-                    }
-                };
-            });
-            setReservations(data || []);
-
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchDrivers = async () => {
-        const { data } = await supabase.from("drivers").select("*").order("name");
-        if (data) setDrivers(data);
-    };
 
     // DnD Handlers
     const findContainer = (id: string): string | undefined => {
@@ -278,7 +344,6 @@ export default function VehiclePage() {
         if (!overId || active.id === overId) return;
 
         const activeContainer = findContainer(active.id as string);
-        // overId could be a container key OR an item ID
         const overContainer = (overId in vehicles)
             ? overId
             : findContainer(overId as string);
@@ -287,7 +352,6 @@ export default function VehiclePage() {
             return;
         }
 
-        // Move item to new container's list (optimistic)
         setVehicles((prev) => {
             const activeItems = prev[activeContainer].items;
             const overItems = prev[overContainer].items;
@@ -330,33 +394,79 @@ export default function VehiclePage() {
         });
     };
 
-    const handleDragEnd = (event: DragEndEvent) => {
+    const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event;
         const activeContainer = findContainer(active.id as string);
         const overContainer = over ? ((over.id in vehicles) ? over.id : findContainer(over.id as string)) : null;
 
-        if (
-            activeContainer &&
-            overContainer &&
-            activeContainer === overContainer
-        ) {
-            const activeIndex = vehicles[activeContainer].items.findIndex(
-                (item) => item.id === active.id
-            );
-            const overIndex = vehicles[overContainer].items.findIndex(
-                (item) => item.id === over!.id
-            );
+        if (activeContainer && overContainer && over) {
+            // Calculate final state for DB persistence
+            const activeItems = vehicles[activeContainer].items;
+            const overItems = vehicles[overContainer].items;
+            const activeIndex = activeItems.findIndex((item) => item.id === active.id);
+            const overIndex = (over.id in vehicles)
+                ? overItems.length + 1
+                : overItems.findIndex((item) => item.id === over.id);
 
-            if (activeIndex !== overIndex) {
-                setVehicles((prev) => ({
-                    ...prev,
-                    [activeContainer]: {
-                        ...prev[activeContainer],
-                        items: arrayMove(prev[activeContainer].items, activeIndex, overIndex),
-                    },
-                }));
+            let newVehicles = { ...vehicles };
+
+            if (activeContainer === overContainer) {
+                if (activeIndex !== overIndex) {
+                    newVehicles[activeContainer].items = arrayMove(activeItems, activeIndex, overIndex);
+                }
+            } else {
+                // Cross-container move: 
+                // Note: activeIndex might be -1 if DragOver already optimistically removed it?
+                // But `vehicles` here is the state from the START of the event usually? 
+                // No, closure captures render state. 
+
+                // Robust approach: verify item exists in source before moving.
+                if (activeIndex !== -1) {
+                    const [movedItem] = newVehicles[activeContainer].items.splice(activeIndex, 1);
+
+                    let insertIndex = overIndex;
+                    if (over.id in vehicles) insertIndex = newVehicles[overContainer].items.length;
+                    else if (insertIndex === -1) insertIndex = newVehicles[overContainer].items.length;
+
+                    // Boundary check
+                    if (insertIndex > newVehicles[overContainer].items.length) insertIndex = newVehicles[overContainer].items.length;
+
+                    newVehicles[overContainer].items.splice(insertIndex, 0, movedItem);
+                }
+            }
+
+            setVehicles(newVehicles);
+
+            // Persist to DB
+            const updates: any[] = [];
+            const timestamp = new Date().toISOString();
+
+            // We only really need to update the Source and Dest containers.
+            [activeContainer, overContainer].forEach(containerId => {
+                // Optimization: if same container, just one loop.
+                if (containerId === overContainer && containerId !== activeContainer) return;
+                // (Handled by Set or just careful loop)
+            });
+
+            const containersToUpdate = Array.from(new Set([activeContainer, overContainer]));
+
+            containersToUpdate.forEach(cId => {
+                newVehicles[cId].items.forEach((item, idx) => {
+                    updates.push({
+                        id: item.id,
+                        vehicle_id: cId === 'unassigned' ? null : cId,
+                        vehicle_order: idx
+                    });
+                });
+            });
+
+            if (updates.length > 0) {
+                supabase.from('reservations').upsert(updates, { onConflict: 'id' }).then(({ error }) => {
+                    if (error) console.error("Error saving drag:", error);
+                });
             }
         }
+
         setActiveId(null);
     };
 
@@ -623,12 +733,7 @@ export default function VehiclePage() {
                                     drivers={drivers}
                                     driverId={vehicles[key].driverId}
                                     items={vehicles[key].items}
-                                    onDriverChange={(vid, did) => {
-                                        setVehicles(prev => ({
-                                            ...prev,
-                                            [vid]: { ...prev[vid], driverId: did }
-                                        }));
-                                    }}
+                                    onDriverChange={handleDriverChange}
                                     optionName={selectedOption}
                                     dateTitle={`${selectedDate} ${getKoreanDay(selectedDate)}`}
                                 />
