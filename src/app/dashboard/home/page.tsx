@@ -73,79 +73,81 @@ export default function HomePage() {
     }
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
-            <header className="mb-8">
-                <h1 className="text-3xl font-extrabold text-gray-900">
-                    Oceanstar Admin <span className="text-blue-600">Home</span>
-                </h1>
-                <p className="text-gray-500 mt-2">오늘의 예약 현황과 주요 업무를 확인하세요.</p>
-            </header>
+        <div className="h-full w-full overflow-y-auto">
+            <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+                <header className="mb-8">
+                    <h1 className="text-3xl font-extrabold text-gray-900">
+                        Oceanstar Admin <span className="text-blue-600">Home</span>
+                    </h1>
+                    <p className="text-gray-500 mt-2">오늘의 예약 현황과 주요 업무를 확인하세요.</p>
+                </header>
 
-            {/* Status Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* New Reservations (Waiting) */}
-                <div
-                    onClick={() => setShowNewReservations(true)}
-                    className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group"
-                >
-                    <div>
-                        <h2 className="text-lg font-semibold text-gray-700 mb-1 group-hover:text-blue-700 transition-colors">새로운 예약 (대기)</h2>
-                        <p className="text-sm text-gray-500">처리되지 않은 신규 예약건</p>
-                        <div className="mt-4 flex items-baseline gap-2">
-                            {loading ? (
-                                <div className="h-10 w-20 bg-gray-100 animate-pulse rounded"></div>
-                            ) : (
-                                <span className="text-4xl font-bold text-blue-600">{waitingCount}</span>
-                            )}
-                            <span className="text-gray-400">건</span>
-                        </div>
-                    </div>
-                    <div className="p-4 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
-                        <Clock className="w-8 h-8 text-blue-600" />
-                    </div>
-                </div>
-
-                {/* Cancellation Requests */}
-                <div
-                    onClick={navigateToCancellations}
-                    className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between hover:shadow-md hover:border-orange-300 transition-all cursor-pointer group"
-                >
-                    <div>
-                        <h2 className="text-lg font-semibold text-gray-700 mb-1 group-hover:text-orange-700 transition-colors">취소 요청</h2>
-                        <p className="text-sm text-gray-500">처리가 필요한 취소 요청건</p>
-                        <div className="mt-4 flex items-baseline gap-2">
-                            {loading ? (
-                                <div className="h-10 w-20 bg-gray-100 animate-pulse rounded"></div>
-                            ) : (
-                                <span className="text-4xl font-bold text-orange-600">{cancellationCount}</span>
-                            )}
-                            <span className="text-gray-400">건</span>
-                        </div>
-                    </div>
-                    <div className="p-4 bg-orange-50 rounded-full group-hover:bg-orange-100 transition-colors">
-                        <AlertCircle className="w-8 h-8 text-orange-600" />
-                    </div>
-                </div>
-            </div>
-
-            <hr className="border-gray-100" />
-
-            {/* Shortcuts */}
-            <div>
-                <h2 className="text-xl font-bold text-gray-800 mb-4">바로가기 메뉴</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    {shortcuts.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className="flex flex-col items-center justify-center p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all group"
-                        >
-                            <div className={`p-4 rounded-full mb-3 group-hover:scale-110 transition-transform ${item.color}`}>
-                                <item.icon className="w-8 h-8" />
+                {/* Status Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* New Reservations (Waiting) */}
+                    <div
+                        onClick={() => setShowNewReservations(true)}
+                        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group"
+                    >
+                        <div>
+                            <h2 className="text-lg font-semibold text-gray-700 mb-1 group-hover:text-blue-700 transition-colors">새로운 예약 (대기)</h2>
+                            <p className="text-sm text-gray-500">처리되지 않은 신규 예약건</p>
+                            <div className="mt-4 flex items-baseline gap-2">
+                                {loading ? (
+                                    <div className="h-10 w-20 bg-gray-100 animate-pulse rounded"></div>
+                                ) : (
+                                    <span className="text-4xl font-bold text-blue-600">{waitingCount}</span>
+                                )}
+                                <span className="text-gray-400">건</span>
                             </div>
-                            <span className="font-semibold text-gray-700 group-hover:text-blue-700">{item.name}</span>
-                        </Link>
-                    ))}
+                        </div>
+                        <div className="p-4 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors">
+                            <Clock className="w-8 h-8 text-blue-600" />
+                        </div>
+                    </div>
+
+                    {/* Cancellation Requests */}
+                    <div
+                        onClick={navigateToCancellations}
+                        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between hover:shadow-md hover:border-orange-300 transition-all cursor-pointer group"
+                    >
+                        <div>
+                            <h2 className="text-lg font-semibold text-gray-700 mb-1 group-hover:text-orange-700 transition-colors">취소 요청</h2>
+                            <p className="text-sm text-gray-500">처리가 필요한 취소 요청건</p>
+                            <div className="mt-4 flex items-baseline gap-2">
+                                {loading ? (
+                                    <div className="h-10 w-20 bg-gray-100 animate-pulse rounded"></div>
+                                ) : (
+                                    <span className="text-4xl font-bold text-orange-600">{cancellationCount}</span>
+                                )}
+                                <span className="text-gray-400">건</span>
+                            </div>
+                        </div>
+                        <div className="p-4 bg-orange-50 rounded-full group-hover:bg-orange-100 transition-colors">
+                            <AlertCircle className="w-8 h-8 text-orange-600" />
+                        </div>
+                    </div>
+                </div>
+
+                <hr className="border-gray-100" />
+
+                {/* Shortcuts */}
+                <div>
+                    <h2 className="text-xl font-bold text-gray-800 mb-4">바로가기 메뉴</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        {shortcuts.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className="flex flex-col items-center justify-center p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all group"
+                            >
+                                <div className={`p-4 rounded-full mb-3 group-hover:scale-110 transition-transform ${item.color}`}>
+                                    <item.icon className="w-8 h-8" />
+                                </div>
+                                <span className="font-semibold text-gray-700 group-hover:text-blue-700">{item.name}</span>
+                            </Link>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>

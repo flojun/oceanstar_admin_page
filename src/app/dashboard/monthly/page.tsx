@@ -42,24 +42,24 @@ function getOptionGroupKey(option: string): string {
 // Returns color class and width percentage
 function getReservationStatus(group: string, count: number) {
     let max = 0;
-    // Default for others: Brown Gradient
-    let color = 'from-amber-700 to-amber-900 border-amber-600';
+    // Default for others: Pink (기타)
+    let color = 'from-pink-400 to-pink-600 border-pink-300';
     let percent = 100;
 
     if (group === '1부' || group === '2부') {
         max = 45;
-        if (count >= 46) color = 'from-amber-400 to-amber-600 border-amber-300'; // 초과 (Yellow/Amber)
-        else if (count >= 44) color = 'from-rose-500 to-rose-700 border-rose-400'; // 마감 (Red/Rose)
-        else if (count >= 10) color = 'from-blue-400 to-blue-600 border-blue-300'; // Normal (Blue)
-        else color = 'from-emerald-400 to-emerald-600 border-emerald-300'; // Low (Green/Emerald)
+        if (count >= 46) color = 'from-red-500 to-red-700 border-red-400'; // 초과 (Red)
+        else if (count >= 44) color = 'from-blue-500 to-blue-700 border-blue-400'; // 마감 (Blue)
+        else if (count >= 10) color = 'from-emerald-400 to-emerald-600 border-emerald-300'; // 10+ (Green)
+        else color = 'from-yellow-400 to-yellow-600 border-yellow-300'; // 1~9 (Yellow)
 
         percent = Math.min(100, (count / max) * 100);
     } else if (group === '3부') {
         max = 40;
-        if (count >= 41) color = 'from-amber-400 to-amber-600 border-amber-300';
-        else if (count >= 38) color = 'from-rose-500 to-rose-700 border-rose-400';
-        else if (count >= 10) color = 'from-blue-400 to-blue-600 border-blue-300';
-        else color = 'from-emerald-400 to-emerald-600 border-emerald-300';
+        if (count >= 41) color = 'from-red-500 to-red-700 border-red-400'; // 초과
+        else if (count >= 38) color = 'from-blue-500 to-blue-700 border-blue-400'; // 마감
+        else if (count >= 10) color = 'from-emerald-400 to-emerald-600 border-emerald-300'; // 10+
+        else color = 'from-yellow-400 to-yellow-600 border-yellow-300'; // 1~9
 
         percent = Math.min(100, (count / max) * 100);
     }
@@ -326,11 +326,11 @@ export default function MonthlyPage() {
 
 
             <div className="shrink-0 flex gap-4 text-sm font-medium text-gray-500 px-2 justify-end flex-wrap">
-                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-emerald-400 to-emerald-600 border border-emerald-300 shadow-sm"></span>1~9명</div>
-                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-blue-400 to-blue-600 border border-blue-300 shadow-sm"></span>10명~</div>
-                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-rose-500 to-rose-700 border border-rose-400 shadow-sm"></span>마감</div>
-                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-amber-400 to-amber-600 border border-amber-300 shadow-sm"></span>초과</div>
-                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-amber-700 to-amber-900 border border-amber-600 shadow-sm"></span>기타</div>
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-yellow-400 to-yellow-600 border border-yellow-300 shadow-sm"></span>1~9명</div>
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-emerald-400 to-emerald-600 border border-emerald-300 shadow-sm"></span>10명~</div>
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-blue-500 to-blue-700 border border-blue-400 shadow-sm"></span>마감</div>
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-red-500 to-red-700 border border-red-400 shadow-sm"></span>초과</div>
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-pink-400 to-pink-600 border border-pink-300 shadow-sm"></span>기타</div>
             </div>
         </div>
     );

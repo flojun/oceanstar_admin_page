@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { Reservation, ReservationInsert } from "@/types/reservation";
 import { smartParseRow } from "@/lib/smartParser";
 import { cn } from "@/lib/utils";
-import { getHawaiiDateStr, formatDateDisplay } from "@/lib/timeUtils";
+import { getHawaiiDateStr, formatDateDisplay, getKoreanDay } from "@/lib/timeUtils";
 import { useUnsavedChanges } from "@/components/providers/UnsavedChangesProvider";
 import CustomTextEditor from "@/components/editors/CustomTextEditor";
 import StatusEditor from "@/components/editors/StatusEditor";
@@ -555,8 +555,9 @@ export default function AllReservationsPage() {
             const { data, error } = await supabase
                 .from("reservations")
                 .select("*")
-                .order("receipt_date", { ascending: false })
-                .order("created_at", { ascending: false })
+                .order("receipt_date", { ascending: false }) // Primary: Receipt Date (Newest Top)
+                .order("created_at", { ascending: false })   // Secondary: Time (Stability)
+                .order("id", { ascending: false })           // Tertiary: ID (Absolute Stability)
                 .range(from, to);
 
             if (error) throw error;
@@ -843,8 +844,6 @@ export default function AllReservationsPage() {
 
         // Logic:
         // 1. Convert "No." (Display ID) back to Array Index.
-        //    Renderer: No = baseCount - Index
-        //    Therefore: Index = baseCount - No
         const baseCount = totalCount > 0 ? totalCount : rows.length;
 
         let idx1 = baseCount - start;
@@ -882,7 +881,23 @@ export default function AllReservationsPage() {
             return optionA.localeCompare(optionB);
         });
 
-        // Group by Date
+        // 1. Get Receipt Date (from first row)
+        // Format: M/d (e.g., 2/10)
+        let receiptHeader = "접수일 미정";
+        const firstRow = sortedRows[0] as any;
+        if (firstRow?.receipt_date) {
+            try {
+                // receipt_date is YYYY-MM-DD
+                const [y, m, d] = firstRow.receipt_date.split('-');
+                receiptHeader = `${parseInt(m)}/${parseInt(d)}`;
+            } catch (e) {
+                receiptHeader = firstRow.receipt_date;
+            }
+        }
+
+        let textToCopy = `${receiptHeader} 예약자명단\n\n`;
+
+        // 2. Group by Date
         const grouped: { [key: string]: any[] } = {};
         sortedRows.forEach((row: any) => {
             const dateKey = formatDateDisplay(row.tour_date) || "날짜미정";
@@ -890,16 +905,16 @@ export default function AllReservationsPage() {
             grouped[dateKey].push(row);
         });
 
-        let textToCopy = "";
-
+        // 3. Build String
         Object.entries(grouped).forEach(([dateStr, groupRows]) => {
             // Convert MM-DD-YYYY to *MM/DD/YYYY
             const dateSlash = dateStr.replace(/-/g, '/');
-            textToCopy += `*${dateSlash}\n`;
+            const dayOfWeek = getKoreanDay(dateStr); // e.g. "(Mon)"
+            textToCopy += `${dayOfWeek} ${dateSlash}\n`;
 
             groupRows.forEach((row: any) => {
-                // (경로, 예약자명, 인원, 옵션, 픽업장소, 기타사항) - Date is in header
-                const source = row.source || "-";
+                // [Source] Name / Pax / Option / Pickup
+                const source = row.source ? `[${row.source}]` : "[-]";
                 const name = row.name || "-";
 
                 // Fix "명명" duplication
@@ -911,7 +926,7 @@ export default function AllReservationsPage() {
                 const note = row.note || "";
 
                 // Format: [Source] Name / Pax / Option / Pickup / Note
-                let line = `[${source}] ${name} / ${pax} / ${option} / ${pickup}`;
+                let line = `${source} ${name} / ${pax} / ${option} / ${pickup}`;
                 if (note) line += ` / ${note}`;
 
                 textToCopy += `${line}\n\n`; // Double spacing between rows
@@ -922,7 +937,7 @@ export default function AllReservationsPage() {
 
         try {
             await navigator.clipboard.writeText(textToCopy);
-            alert(`${sortedRows.length}건의 명단이 복사되었습니다.\n(예약일 기준 오름차순 정렬됨)`);
+            alert(`${sortedRows.length}건의 명단이 복사되었습니다.\n(여행일 기준 그룹화)`);
             setShowCopyModal(false);
             setCopyStartRow('');
             setCopyEndRow('');

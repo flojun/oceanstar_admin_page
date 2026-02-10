@@ -14,6 +14,7 @@ interface ReservationTableProps {
     onReconfirmToggle?: (id: string, currentVal: boolean) => void;
     loading: boolean;
     isSimpleView?: boolean;
+    totalCount?: number;
 }
 
 export function ReservationTable({
@@ -23,11 +24,17 @@ export function ReservationTable({
     onReconfirmToggle,
     loading,
     isSimpleView = false,
+    totalCount = 0,
 }: ReservationTableProps) {
     const [selectedRowId, setSelectedRowId] = React.useState<string | null>(null);
     const [openMenuId, setOpenMenuId] = React.useState<string | null>(null);
     const [toast, setToast] = useState<{ message: string; visible: boolean } | null>(null);
     const [lastCheckedIndex, setLastCheckedIndex] = useState<number | null>(null);
+
+    // Calculate base count for numbering (Newest = High No, Oldest = 1)
+    // If totalCount is provided, use it. Otherwise use reservations length.
+    // Ensure we handle the case where local rows are added (reservations.length > totalCount)
+    const effectiveTotalCount = Math.max(totalCount, reservations.length);
 
     // Toast timer
     useEffect(() => {
@@ -183,7 +190,7 @@ export function ReservationTable({
                                 >
                                     {!isSimpleView && (
                                         <td className="px-4 py-3 text-xs text-gray-400 text-center hidden md:table-cell">
-                                            {index + 1}
+                                            {effectiveTotalCount - index}
                                         </td>
                                     )}
 

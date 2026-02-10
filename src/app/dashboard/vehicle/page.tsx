@@ -670,6 +670,9 @@ function UnassignedDropZone({ items, id, totalPax }: { items: Reservation[], id:
     const confirmedItems = items.filter(i => i.status === '예약확정');
     const pendingItems = items.filter(i => i.status === '대기' || i.status === '예약대기');
 
+    // Only pass items that are actually rendered to SortableContext
+    const renderedItems = [...confirmedItems, ...pendingItems];
+
     return (
         <div ref={setNodeRef} className="w-full bg-white rounded-lg shadow-sm border flex flex-col min-h-[250px] lg:min-h-[400px]">
             <div className="p-3 border-b bg-gray-50 rounded-t-lg">
@@ -678,7 +681,7 @@ function UnassignedDropZone({ items, id, totalPax }: { items: Reservation[], id:
             </div>
             <div className="flex-1 overflow-y-auto p-2">
                 <SortableContext
-                    items={items.map(i => i.id)}
+                    items={renderedItems.map(i => i.id)}
                     strategy={verticalListSortingStrategy}
                 >
                     {/* Confirmed List */}

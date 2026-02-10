@@ -6,6 +6,7 @@ export default function StatusEditor<R, SR>({ row, column, onRowChange, onClose 
     const initialValue = (row as any)[column.key] || "예약확정";
     const [rect, setRect] = useState<DOMRect | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const menuRef = useRef<HTMLDivElement>(null);
 
     // Options configuration
     const options = [
@@ -28,24 +29,34 @@ export default function StatusEditor<R, SR>({ row, column, onRowChange, onClose 
         }
     }, []);
 
+    // Focus the menu container after it mounts in the portal
+    useEffect(() => {
+        if (rect && menuRef.current) {
+            menuRef.current.focus();
+        }
+    }, [rect]);
+
     const handleSelect = (newValue: string) => {
         onRowChange({ ...row, [column.key]: newValue }, true);
         onClose(true);
     };
 
-    // Close on outside click
-    useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            // If click is not inside the portal menu... logic is tricky with Portal.
-            // But since creating the portal here effectively "captures" the edit mode.
-            // If user clicks *anywhere else*, RDG handles blur usually? 
-            // BUT, our menu is in a Portal, so clicks there might register as "outside" to RDG.
-            // We need to stop propagation inside the menu.
-        };
-        // Actually, preventing RDG auto-close might be needed if focus moves to portal.
-        // But for a simple list, we can just let it render. 
-        // RDG usually closes if focus leaves the editor container.
-    }, []);
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === 'Tab' || e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            // If just tabbing through, we might want to save current/initial value? 
+            // Or just close? For status, usually we just close if no selection made.
+            // But if they hit Enter, they might expect to select the first item? 
+            // For now, let's just Close(true) to allow navigation flow.
+            // If we want to support arrow keys later, we can add that.
+            onClose(true);
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose(false);
+        }
+    };
 
     if (!rect) return <div ref={containerRef} className="h-full w-full" />;
 
@@ -53,13 +64,16 @@ export default function StatusEditor<R, SR>({ row, column, onRowChange, onClose 
         <div ref={containerRef} className="h-full w-full bg-white relative">
             {createPortal(
                 <div
-                    className="fixed z-[9999] bg-white border border-gray-300 shadow-xl rounded-md overflow-hidden text-sm animate-in fade-in zoom-in-95 duration-100"
+                    ref={menuRef}
+                    tabIndex={0} // Make focusable
+                    className="fixed z-[9999] bg-white border border-gray-300 shadow-xl rounded-md overflow-hidden text-sm animate-in fade-in zoom-in-95 duration-100 outline-none"
                     style={{
                         top: rect.bottom,
                         left: rect.left,
                         minWidth: Math.max(rect.width, 160),
                     }}
                     onMouseDown={(e) => e.stopPropagation()} // Prevent RDG from handling click
+                    onKeyDown={handleKeyDown}
                 >
                     {options.map((opt) => (
                         <div
@@ -71,15 +85,9 @@ export default function StatusEditor<R, SR>({ row, column, onRowChange, onClose 
                             <span className={opt.color}>{opt.label}</span>
                         </div>
                     ))}
-                    {/* Backdrop to handle clicks outside more gracefully ? No, RDG handles it */}
                 </div>,
                 document.body
             )}
-            {/* 
-               We render a transparent overlay or keep the current cell 
-               to maintain "Focus" so RDG doesn't close immediately?
-               A simple div is enough usually.
-            */}
         </div>
     );
 }
