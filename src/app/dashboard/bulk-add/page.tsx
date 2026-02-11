@@ -1,13 +1,14 @@
 "use client";
 
 import "react-data-grid/lib/styles.css";
-import React, { useState } from "react";
-import { DataGrid, RenderEditCellProps, FillEvent, RenderCellProps } from "react-data-grid";
-import { Save, Plus } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { DataGrid, RenderEditCellProps, FillEvent, RenderCellProps, Column } from "react-data-grid";
+import { Save, Plus, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { ReservationInsert } from "@/types/reservation";
 import { smartParseRow } from "@/lib/smartParser";
 import { getHawaiiDateStr } from "@/lib/timeUtils";
+import { useUnsavedChanges } from "@/components/providers/UnsavedChangesProvider";
 
 // Custom styles for Excel-like look
 const excelStyles = `
@@ -108,6 +109,29 @@ export default function BulkAddPage() {
     const [rows, setRows] = useState<GridRow[]>(initialRows);
     const [saving, setSaving] = useState(false);
 
+    const { setIsDirty, handleNavigationAttempt, registerSaveHandler } = useUnsavedChanges();
+
+    // Register Save Handler for Modal
+    const handleSaveRef = useRef<() => Promise<void>>(undefined);
+
+    useEffect(() => {
+        handleSaveRef.current = async () => {
+            // We need to call the internal handleSave logic here
+            // But handleSave is defined inside the component and depends on state.
+            // We can just wrap it.
+            await handleSave();
+        };
+    });
+
+    useEffect(() => {
+        registerSaveHandler(async () => {
+            if (handleSaveRef.current) {
+                await handleSaveRef.current();
+            }
+        });
+    }, [registerSaveHandler]);
+
+
     // Common Renderer
     const commonCellRenderer = (props: RenderEditCellProps<GridRow>) => (
         <div className="w-full h-full flex items-center px-2 select-none pointer-events-none">
@@ -120,7 +144,7 @@ export default function BulkAddPage() {
         { key: "receipt_date", name: "접수일", renderEditCell: TextEditor, width: 100, renderCell: commonCellRenderer },
         {
             key: "is_reconfirmed", name: "리컨펌", renderEditCell: TextEditor, width: 60,
-            renderCell: ({ row }: any) => <div className="w-full h-full flex items-center px-2">{row.is_reconfirmed ? "T" : ""}</div>
+            renderCell: ({ row }: RenderCellProps<GridRow>) => <div className="w-full h-full flex items-center px-2">{row.is_reconfirmed ? "T" : ""}</div>
         },
         { key: "status", name: "상태", renderEditCell: TextEditor, width: 80, renderCell: commonCellRenderer },
         { key: "source", name: "경로", renderEditCell: TextEditor, width: 80, renderCell: commonCellRenderer },
@@ -152,6 +176,9 @@ export default function BulkAddPage() {
     };
 
     const handleRowsChange = (newRows: GridRow[]) => {
+        // Mark as dirty when rows change
+        setIsDirty(true);
+
         // Smart Parsing & Overbooking Check
         const processedRows = newRows.map((row, i) => {
             const parsed = smartParseRow(row);
@@ -250,6 +277,7 @@ export default function BulkAddPage() {
             };
         }
         setRows(newRows);
+        setIsDirty(true); // Fill also marks as dirty
         return newRows as any;
     };
 
@@ -293,12 +321,19 @@ export default function BulkAddPage() {
             if (error) throw error;
             alert(`${insertData.length}건이 저장되었습니다.`);
             setRows(Array.from({ length: 50 }, () => createEmptyRow()));
+            setIsDirty(false); // Reset dirty after save
         } catch (error) {
             console.error(error);
             alert("저장 실패");
         } finally {
             setSaving(false);
         }
+    };
+
+    const handleClose = () => {
+        // Attempt to navigate away. If dirty, UnsavedChangesProvider will intercept.
+        // We navigate to /dashboard/all (Reservation Management) or Home.
+        handleNavigationAttempt('/dashboard/all');
     };
 
     return (
@@ -314,6 +349,10 @@ export default function BulkAddPage() {
                     <p className="text-sm text-gray-500">날짜(1/30), 단축어(m, z), 인원(1) 등 자동 변환 + 오버부킹 실시간 체크</p>
                 </div>
                 <div className="flex gap-2">
+                    <button onClick={handleClose} className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">
+                        <X className="h-4 w-4" />
+                        닫기
+                    </button>
                     <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 rounded-md bg-green-600 px-6 py-2 text-sm font-bold text-white hover:bg-green-700 disabled:bg-green-400">
                         <Save className="h-4 w-4" />
                         {saving ? "저장 중..." : "전체 저장"}
@@ -323,7 +362,7 @@ export default function BulkAddPage() {
 
             <div className="flex-1 w-full rounded-md border border-gray-300 bg-white shadow-sm overflow-hidden min-h-[500px]">
                 <DataGrid
-                    columns={columns as any}
+                    columns={columns as any} // eslint-disable-line @typescript-eslint/no-explicit-any
                     rows={rows}
                     onRowsChange={handleRowsChange}
                     onFill={handleFill}

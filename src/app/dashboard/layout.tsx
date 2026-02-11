@@ -9,13 +9,13 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="h-screen flex flex-col bg-blue-50 overflow-hidden">
+        <div className="h-screen flex flex-col bg-blue-50 overflow-x-hidden overflow-y-hidden">
             <UnsavedChangesProvider>
                 {/* Top Navigation Bar */}
                 <Navbar />
 
                 {/* Main Content - Takes remaining height */}
-                <main className="flex-1 w-full mx-auto max-w-7xl p-4 md:p-8 overflow-hidden flex flex-col">
+                <main className="flex-1 w-full mx-auto max-w-7xl p-4 md:p-8 overflow-y-auto flex flex-col">
                     {children}
                 </main>
             </UnsavedChangesProvider>

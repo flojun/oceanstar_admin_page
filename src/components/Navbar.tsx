@@ -11,6 +11,7 @@ const TABS = [
     { name: "차량용 명단", href: "/dashboard/vehicle" },
     { name: "캘린더", href: "/dashboard/monthly" },
     { name: "예약관리", href: "/dashboard/all" },
+    { name: "크루 스케쥴", href: "/dashboard/crew" },
     { name: "대시보드", href: "/dashboard/stats" },
 ];
 
