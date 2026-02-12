@@ -10,7 +10,8 @@ import {
     LayoutDashboard,
     ListChecks,
     AlertCircle,
-    Clock // Icon for Waiting
+    Clock, // Icon for Waiting
+    Anchor
 } from "lucide-react";
 import NewReservationsView from "@/components/NewReservationsView";
 
@@ -65,6 +66,7 @@ export default function HomePage() {
         { name: "차량용 명단", href: "/dashboard/vehicle", icon: Car, color: "bg-green-100 text-green-600" },
         { name: "캘린더", href: "/dashboard/monthly", icon: CalendarDays, color: "bg-purple-100 text-purple-600" },
         { name: "예약관리", href: "/dashboard/all", icon: ListChecks, color: "bg-orange-100 text-orange-600" },
+        { name: "크루 스케쥴", href: "/dashboard/crew", icon: Anchor, color: "bg-teal-100 text-teal-600" },
         { name: "대시보드", href: "/dashboard/stats", icon: LayoutDashboard, color: "bg-indigo-100 text-indigo-600" },
     ];
 
@@ -134,7 +136,7 @@ export default function HomePage() {
                 {/* Shortcuts */}
                 <div>
                     <h2 className="text-xl font-bold text-gray-800 mb-4">바로가기 메뉴</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                         {shortcuts.map((item) => (
                             <Link
                                 key={item.href}

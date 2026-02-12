@@ -73,6 +73,22 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
         setPendingNavigation(null);
     };
 
+    // Handle browser refresh/close
+    React.useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = ''; // Chrome requires returnValue to be set
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [isDirty]);
+
     return (
         <UnsavedChangesContext.Provider value={{ isDirty, setIsDirty, handleNavigationAttempt, registerSaveHandler }}>
             {children}

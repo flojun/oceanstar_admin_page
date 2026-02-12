@@ -6,6 +6,7 @@ import { ko } from "date-fns/locale";
 import { supabase } from "@/lib/supabase";
 import { ChevronLeft, ChevronRight, Save, Plus, Trash2, GripVertical, Image as ImageIcon, Loader2 } from "lucide-react";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { useUnsavedChanges } from "@/components/providers/UnsavedChangesProvider";
 import { toPng } from 'html-to-image';
 import {
     DndContext,
@@ -140,6 +141,10 @@ export default function CrewPage() {
     const gridRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);
 
+    // Unsaved Changes
+    const { setIsDirty, registerSaveHandler } = useUnsavedChanges();
+    const [initialMemo, setInitialMemo] = useState<string | null>(null);
+
     // Auto-resize memo textarea
     useEffect(() => {
         if (memoRef.current) {
@@ -189,7 +194,11 @@ export default function CrewPage() {
             setCaptains(captainRes.data || []);
             setSchedules(scheduleRes.data || []);
             setShiftCaptains(shiftCaptainRes.data || []);
-            if (memoRes.data) setMemo(memoRes.data.content || "");
+
+            const memoContent = memoRes.data?.content || "";
+            setMemo(memoContent);
+            setInitialMemo(memoContent);
+            setIsDirty(false); // Reset dirty state on fresh load
 
         } catch (error) {
             console.error("Error fetching crew data:", error);
@@ -202,7 +211,37 @@ export default function CrewPage() {
         fetchData();
     }, [currentDate]);
 
+    useEffect(() => {
+        fetchData();
+    }, [currentDate]);
+
+    // Check for changes
+    useEffect(() => {
+        if (initialMemo === null) return; // Loading
+        if (memo !== initialMemo) {
+            setIsDirty(true);
+        } else {
+            setIsDirty(false);
+        }
+    }, [memo, initialMemo, setIsDirty]);
+
     // Handlers
+    const handleSaveMemo = async () => {
+        try {
+            const { error } = await supabase.from("crew_memos").upsert({ id: 1, content: memo });
+            if (error) throw error;
+            alert("메모가 저장되었습니다.");
+            setInitialMemo(memo); // Update initial state
+            setIsDirty(false);
+        } catch (e) { console.error(e); }
+    };
+
+    // Register save handler
+    useEffect(() => {
+        registerSaveHandler(handleSaveMemo);
+    }, [registerSaveHandler, memo]); // Dependencies need to include memo so the closure captures current memo
+
+    // Other Handlers
     const handleAddCrew = async () => {
         if (!newCrewName.trim()) return;
         try {
@@ -442,13 +481,8 @@ export default function CrewPage() {
 
     // --- Repaired Handlers Below ---
 
-    const handleSaveMemo = async () => {
-        try {
-            const { error } = await supabase.from("crew_memos").upsert({ id: 1, content: memo });
-            if (error) throw error;
-            alert("메모가 저장되었습니다.");
-        } catch (e) { console.error(e); }
-    };
+    // Moved handleSaveMemo up to register it
+
 
     const handleAddCaptain = async () => {
         if (!newCaptainName.trim()) return;

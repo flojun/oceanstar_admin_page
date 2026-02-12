@@ -426,6 +426,8 @@ function AllReservationsContent() {
     }, [handleUndo, handleRedo]);
 
     useEffect(() => {
+        let timeoutId: NodeJS.Timeout;
+
         const updateWidth = () => {
             if (gridContainerRef.current) {
                 const containerWidth = gridContainerRef.current.clientWidth;
@@ -445,15 +447,21 @@ function AllReservationsContent() {
         };
 
         const resizeObserver = new ResizeObserver(() => {
-            // Use requestAnimationFrame to avoid ResizeObserver loop limit exceeded error
-            requestAnimationFrame(updateWidth);
+            // Debounce the resize update to prevent layout thrashing during sidebar transition
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                requestAnimationFrame(updateWidth);
+            }, 100); // 100ms delay to wait for transition to settle
         });
 
         if (gridContainerRef.current) {
             resizeObserver.observe(gridContainerRef.current);
         }
 
-        return () => resizeObserver.disconnect();
+        return () => {
+            resizeObserver.disconnect();
+            clearTimeout(timeoutId);
+        };
     }, []);
 
     useEffect(() => {
@@ -1490,8 +1498,13 @@ function AllReservationsContent() {
     }, [rangeSelection, columns]);
 
     return (
-        <div className="flex h-full flex-col space-y-4" onKeyDown={handleKeyDown} tabIndex={0}>
-            <style jsx global>{fullHeightGridStyle}</style>
+        <div className="flex h-full flex-col space-y-4 contain-strict" onKeyDown={handleKeyDown} tabIndex={0}>
+            <style jsx global>{`
+                .contain-strict {
+                    contain: size layout paint style; 
+                }
+                ${fullHeightGridStyle}
+            `}</style>
 
             <div className="relative z-20 flex shrink-0 flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
