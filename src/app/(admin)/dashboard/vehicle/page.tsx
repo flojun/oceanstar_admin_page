@@ -106,16 +106,18 @@ export default function VehiclePage() {
     const [bulkData, setBulkData] = useState<Record<string, VehicleState>>({});
 
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 5,
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
 
-    useEffect(() => {
-        fetchData();
-        fetchDrivers();
-    }, [selectedOption, selectedDate]);
+
+
 
     // Fetch Drivers
     const fetchDrivers = async () => {
@@ -326,11 +328,15 @@ export default function VehiclePage() {
 
 
     // DnD Handlers
-    const findContainer = (id: string): string | undefined => {
-        if (id in vehicles) return id;
-        return Object.keys(vehicles).find((key) =>
-            vehicles[key].items.find((item) => item.id === id)
+    const findContainerInState = (id: string, state: VehicleState): string | undefined => {
+        if (id in state) return id;
+        return Object.keys(state).find((key) =>
+            state[key].items.some((item) => item.id === id)
         );
+    };
+
+    const findContainer = (id: string): string | undefined => {
+        return findContainerInState(id, vehicles);
     };
 
     const handleDragStart = (event: DragStartEvent) => {
@@ -343,27 +349,32 @@ export default function VehiclePage() {
 
         if (!overId || active.id === overId) return;
 
-        const activeContainer = findContainer(active.id as string);
-        const overContainer = (overId in vehicles)
-            ? overId
-            : findContainer(overId as string);
-
-        if (!activeContainer || !overContainer || activeContainer === overContainer) {
-            return;
-        }
-
         setVehicles((prev) => {
+            const activeContainer = findContainerInState(active.id as string, prev);
+            const overContainer = (overId as string in prev)
+                ? (overId as string)
+                : findContainerInState(overId as string, prev);
+
+            if (!activeContainer || !overContainer || activeContainer === overContainer) {
+                return prev;
+            }
+
             const activeItems = prev[activeContainer].items;
             const overItems = prev[overContainer].items;
             const activeIndex = activeItems.findIndex((item) => item.id === active.id);
-            const overIndex = (overId in vehicles)
-                ? overItems.length + 1
-                : overItems.findIndex((item) => item.id === overId);
 
-            let newIndex;
-            if (overId in vehicles) {
-                newIndex = overItems.length + 1;
+            // Guard: item not found (already moved by a previous event)
+            if (activeIndex === -1) return prev;
+
+            const activeItem = activeItems[activeIndex];
+            if (!activeItem) return prev;
+
+            let newIndex: number;
+            if ((overId as string) in prev) {
+                // Dropping onto the container itself → append to end
+                newIndex = overItems.length;
             } else {
+                const overIndex = overItems.findIndex((item) => item.id === overId);
                 const isBelowOverItem =
                     over &&
                     active.rect.current.translated &&
@@ -371,24 +382,28 @@ export default function VehiclePage() {
                     over.rect.top + over.rect.height;
 
                 const modifier = isBelowOverItem ? 1 : 0;
-                newIndex = overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
+                newIndex = overIndex >= 0 ? overIndex + modifier : overItems.length;
             }
+
+            // Clamp index to valid bounds
+            newIndex = Math.max(0, Math.min(newIndex, overItems.length));
+
+            const newActiveItems = activeItems.filter((item) => item.id !== active.id);
+            const newOverItems = [
+                ...overItems.slice(0, newIndex),
+                activeItem,
+                ...overItems.slice(newIndex),
+            ];
 
             return {
                 ...prev,
                 [activeContainer]: {
                     ...prev[activeContainer],
-                    items: [
-                        ...prev[activeContainer].items.filter((item) => item.id !== active.id),
-                    ],
+                    items: newActiveItems,
                 },
                 [overContainer]: {
                     ...prev[overContainer],
-                    items: [
-                        ...prev[overContainer].items.slice(0, newIndex),
-                        activeItems[activeIndex],
-                        ...prev[overContainer].items.slice(newIndex, overItems.length),
-                    ],
+                    items: newOverItems,
                 },
             };
         });
@@ -396,62 +411,76 @@ export default function VehiclePage() {
 
     const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event;
-        const activeContainer = findContainer(active.id as string);
-        const overContainer = over ? ((over.id in vehicles) ? over.id : findContainer(over.id as string)) : null;
 
-        if (activeContainer && overContainer && over) {
-            // Calculate final state for DB persistence
-            const activeItems = vehicles[activeContainer].items;
-            const overItems = vehicles[overContainer].items;
-            const activeIndex = activeItems.findIndex((item) => item.id === active.id);
-            const overIndex = (over.id in vehicles)
-                ? overItems.length + 1
-                : overItems.findIndex((item) => item.id === over.id);
+        setActiveId(null);
 
-            let newVehicles = { ...vehicles };
+        if (!over) return;
 
-            if (activeContainer === overContainer) {
-                if (activeIndex !== overIndex) {
-                    newVehicles[activeContainer].items = arrayMove(activeItems, activeIndex, overIndex);
-                }
-            } else {
-                // Cross-container move: 
-                // Note: activeIndex might be -1 if DragOver already optimistically removed it?
-                // But `vehicles` here is the state from the START of the event usually? 
-                // No, closure captures render state. 
+        // Use functional setState to get fresh state and avoid stale closures
+        let updatesForDB: { id: string; vehicle_id: string | null; vehicle_order: number }[] = [];
 
-                // Robust approach: verify item exists in source before moving.
-                if (activeIndex !== -1) {
-                    const [movedItem] = newVehicles[activeContainer].items.splice(activeIndex, 1);
+        setVehicles((prev) => {
+            const activeContainer = findContainerInState(active.id as string, prev);
+            const overContainer = (over.id as string in prev)
+                ? (over.id as string)
+                : findContainerInState(over.id as string, prev);
 
-                    let insertIndex = overIndex;
-                    if (over.id in vehicles) insertIndex = newVehicles[overContainer].items.length;
-                    else if (insertIndex === -1) insertIndex = newVehicles[overContainer].items.length;
+            if (!activeContainer || !overContainer) return prev;
 
-                    // Boundary check
-                    if (insertIndex > newVehicles[overContainer].items.length) insertIndex = newVehicles[overContainer].items.length;
-
-                    newVehicles[overContainer].items.splice(insertIndex, 0, movedItem);
-                }
+            // Deep clone to avoid mutating state
+            const newState: VehicleState = {};
+            for (const key of Object.keys(prev)) {
+                newState[key] = {
+                    ...prev[key],
+                    items: [...prev[key].items],
+                };
             }
 
-            setVehicles(newVehicles);
+            if (activeContainer === overContainer) {
+                // Same container reorder
+                const items = newState[activeContainer].items;
+                const activeIndex = items.findIndex((item) => item.id === active.id);
+                const overIndex = items.findIndex((item) => item.id === over.id);
 
-            // Persist to DB
-            const updates: any[] = [];
-            const timestamp = new Date().toISOString();
+                if (activeIndex === -1) return prev; // Item not found
+                if (overIndex === -1 && !(over.id as string in prev)) return prev;
 
-            // We only really need to update the Source and Dest containers.
-            [activeContainer, overContainer].forEach(containerId => {
-                // Optimization: if same container, just one loop.
-                if (containerId === overContainer && containerId !== activeContainer) return;
-                // (Handled by Set or just careful loop)
-            });
+                const targetIndex = overIndex >= 0 ? overIndex : items.length - 1;
 
+                if (activeIndex !== targetIndex) {
+                    newState[activeContainer].items = arrayMove(items, activeIndex, targetIndex);
+                }
+            } else {
+                // Cross-container move
+                const sourceItems = newState[activeContainer].items;
+                const activeIndex = sourceItems.findIndex((item) => item.id === active.id);
+
+                if (activeIndex === -1) return prev; // Item already moved by dragOver
+
+                const [movedItem] = sourceItems.splice(activeIndex, 1);
+
+                const destItems = newState[overContainer].items;
+                let insertIndex: number;
+
+                if ((over.id as string) in prev) {
+                    // Dropped on the container itself
+                    insertIndex = destItems.length;
+                } else {
+                    const overIndex = destItems.findIndex((item) => item.id === over.id);
+                    insertIndex = overIndex >= 0 ? overIndex : destItems.length;
+                }
+
+                // Clamp
+                insertIndex = Math.max(0, Math.min(insertIndex, destItems.length));
+                destItems.splice(insertIndex, 0, movedItem);
+            }
+
+            // Build DB updates from the new state
             const containersToUpdate = Array.from(new Set([activeContainer, overContainer]));
+            const updates: { id: string; vehicle_id: string | null; vehicle_order: number }[] = [];
 
             containersToUpdate.forEach(cId => {
-                newVehicles[cId].items.forEach((item, idx) => {
+                newState[cId].items.forEach((item, idx) => {
                     updates.push({
                         id: item.id,
                         vehicle_id: cId === 'unassigned' ? null : cId,
@@ -460,14 +489,26 @@ export default function VehiclePage() {
                 });
             });
 
-            if (updates.length > 0) {
-                supabase.from('reservations').upsert(updates, { onConflict: 'id' }).then(({ error }) => {
-                    if (error) console.error("Error saving drag:", error);
-                });
-            }
-        }
+            updatesForDB = updates;
+            return newState;
+        });
 
-        setActiveId(null);
+        // Persist to DB (after state update)
+        // Use setTimeout to ensure we read the updates captured from the setState callback
+        setTimeout(async () => {
+            if (updatesForDB.length > 0) {
+                try {
+                    const { error } = await supabase
+                        .from('reservations')
+                        .upsert(updatesForDB, { onConflict: 'id' });
+                    if (error) {
+                        console.error("Error saving drag:", error);
+                    }
+                } catch (err) {
+                    console.error("Error persisting drag changes:", err);
+                }
+            }
+        }, 0);
     };
 
 
