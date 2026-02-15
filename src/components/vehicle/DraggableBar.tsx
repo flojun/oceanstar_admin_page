@@ -39,7 +39,7 @@ export function DraggableBar({ reservation, index }: DraggableBarProps) {
                 {reservation.name}
             </div>
             <div className="w-10 text-center bg-blue-100 text-blue-700 rounded px-1 font-bold text-xs py-0.5">
-                {reservation.pax?.replace("명", "")}명
+                {reservation.pax?.replace(/명/g, '')}명
             </div>
             <div className="flex-1 text-right text-gray-500 text-xs truncate">
                 {reservation.contact}

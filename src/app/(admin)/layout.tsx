@@ -18,19 +18,33 @@ import {
     Anchor,
     ChevronLeft,
     ChevronRight,
+    ChevronDown,
     PanelLeftClose,
-    PanelLeftOpen
+    PanelLeftOpen,
+    BarChart3,
+    Receipt
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const SIDEBAR_ITEMS = [
+type SidebarItem =
+    | { name: string; href: string; icon: React.ComponentType<{ className?: string }>; children?: undefined }
+    | { name: string; icon: React.ComponentType<{ className?: string }>; href?: undefined; children: { name: string; href: string }[] };
+
+const SIDEBAR_ITEMS: SidebarItem[] = [
     { name: "홈", href: "/dashboard/home", icon: LayoutDashboard },
     { name: "명단보기", href: "/dashboard/list", icon: ListChecks },
     { name: "차량용 명단", href: "/dashboard/vehicle", icon: Car },
     { name: "캘린더", href: "/dashboard/monthly", icon: Calendar },
     { name: "예약관리", href: "/dashboard/all", icon: ClipboardList },
     { name: "크루 스케쥴", href: "/dashboard/crew", icon: Anchor },
-    { name: "대시보드", href: "/dashboard/stats", icon: Users },
+    {
+        name: "대시보드",
+        icon: BarChart3,
+        children: [
+            { name: "Overview", href: "/dashboard/overview" },
+            { name: "정산 검토", href: "/dashboard/settlement" },
+        ]
+    },
 ];
 
 function AdminSidebar({
@@ -44,6 +58,21 @@ function AdminSidebar({
     const router = useRouter();
     const { handleNavigationAttempt } = useUnsavedChanges();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+
+    // Auto-expand group if a child route is active
+    useEffect(() => {
+        SIDEBAR_ITEMS.forEach(item => {
+            if (item.children) {
+                const anyChildActive = item.children.some(c => pathname === c.href || pathname?.startsWith(c.href + '/'));
+                // Also check legacy /dashboard/stats route
+                const isLegacyStats = pathname === '/dashboard/stats' || pathname?.startsWith('/dashboard/stats/');
+                if (anyChildActive || isLegacyStats) {
+                    setOpenGroups(prev => new Set(prev).add(item.name));
+                }
+            }
+        });
+    }, [pathname]);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -53,7 +82,15 @@ function AdminSidebar({
     const handleLinkClick = (href: string) => {
         setIsMobileOpen(false);
         handleNavigationAttempt(href);
-    }
+    };
+
+    const toggleGroup = (name: string) => {
+        setOpenGroups(prev => {
+            const next = new Set(prev);
+            next.has(name) ? next.delete(name) : next.add(name);
+            return next;
+        });
+    };
 
     return (
         <>
@@ -110,11 +147,74 @@ function AdminSidebar({
                     isCollapsed ? "overflow-visible p-2" : "overflow-y-auto p-4"
                 )}>
                     {SIDEBAR_ITEMS.map((item) => {
+                        // ---- Group item with children ----
+                        if (item.children) {
+                            const isOpen = openGroups.has(item.name);
+                            const anyChildActive = item.children.some(c => pathname === c.href || pathname?.startsWith(c.href + '/'));
+                            const isLegacyActive = pathname === '/dashboard/stats' || pathname?.startsWith('/dashboard/stats/');
+                            const groupActive = anyChildActive || isLegacyActive;
+
+                            return (
+                                <div key={item.name}>
+                                    <button
+                                        onClick={() => isCollapsed ? handleLinkClick(item.children![0].href) : toggleGroup(item.name)}
+                                        className={cn(
+                                            "w-full flex items-center rounded-lg text-sm font-medium transition-colors group relative",
+                                            isCollapsed ? "justify-center px-0 py-3 gap-0" : "justify-start px-3 py-2.5 gap-3",
+                                            groupActive
+                                                ? "bg-blue-50 text-blue-700"
+                                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                        )}
+                                    >
+                                        <item.icon className={cn("w-5 h-5 shrink-0", groupActive ? "text-blue-600" : "text-gray-400")} />
+
+                                        {!isCollapsed && (
+                                            <>
+                                                <span className="whitespace-nowrap flex-1 text-left">{item.name}</span>
+                                                <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform", isOpen && "rotate-180")} />
+                                            </>
+                                        )}
+
+                                        {isCollapsed && (
+                                            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-1.5 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-[9999] shadow-md">
+                                                <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
+                                                {item.name}
+                                            </div>
+                                        )}
+                                    </button>
+
+                                    {/* Sub-items */}
+                                    {!isCollapsed && isOpen && (
+                                        <div className="ml-5 mt-1 space-y-0.5 border-l-2 border-gray-100 pl-3">
+                                            {item.children.map(child => {
+                                                const childActive = pathname === child.href || pathname?.startsWith(child.href + '/');
+                                                return (
+                                                    <button
+                                                        key={child.href}
+                                                        onClick={() => handleLinkClick(child.href)}
+                                                        className={cn(
+                                                            "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
+                                                            childActive
+                                                                ? "bg-blue-50 text-blue-700 font-semibold"
+                                                                : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                                                        )}
+                                                    >
+                                                        {child.name}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        }
+
+                        // ---- Regular item ----
                         const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
                         return (
                             <button
                                 key={item.href}
-                                onClick={() => handleLinkClick(item.href)}
+                                onClick={() => handleLinkClick(item.href!)}
                                 className={cn(
                                     "w-full flex items-center rounded-lg text-sm font-medium transition-colors group relative",
                                     isCollapsed ? "justify-center px-0 py-3 gap-0" : "justify-start px-3 py-2.5 gap-3",

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Vehicle, Driver } from '@/types/vehicle';
@@ -22,6 +22,8 @@ export function VehicleDropZone({ vehicle, drivers, onDriverChange, optionName, 
 
     const totalPax = vehicle.items.reduce((sum, item) => sum + Number(item.pax?.replace(/[^0-9]/g, '') || 0), 0);
     const isOverLimit = vehicle.type === 'company' && totalPax > 15;
+
+    const sortableItems = useMemo(() => vehicle.items.map(i => i.id), [vehicle.items]);
 
     return (
         <div className="w-full h-auto bg-white rounded-lg border border-gray-200 flex flex-col shadow-sm">
@@ -58,7 +60,7 @@ export function VehicleDropZone({ vehicle, drivers, onDriverChange, optionName, 
             {/* Drop Area - Standard Block that grows with content */}
             <div ref={setNodeRef} className="p-2 min-h-[200px] vehicle-drop-area">
                 <SortableContext
-                    items={vehicle.items.map(i => i.id)}
+                    items={sortableItems}
                     strategy={verticalListSortingStrategy}
                 >
                     {vehicle.items.length === 0 ? (

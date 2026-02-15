@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     DndContext,
     DragOverlay,
@@ -85,6 +85,19 @@ const getPickupSortKey = (location: string | null) => {
     return knownKey ? PICKUP_TIMES[knownKey] : "99:99";
 };
 
+// Initial Vehicle State structure - defined outside component to maintain stable reference
+const initialVehiclesState: VehicleState = {
+    "unassigned": { id: "unassigned", name: "미배정 명단", type: "company", maxPax: 999, driverId: null, items: [] },
+    "vehicle-1": { id: "vehicle-1", name: "1호차", type: "company", maxPax: 15, driverId: null, items: [] },
+    "vehicle-2": { id: "vehicle-2", name: "2호차", type: "company", maxPax: 15, driverId: null, items: [] },
+    "vehicle-3": { id: "vehicle-3", name: "3호차", type: "company", maxPax: 15, driverId: null, items: [] },
+    "personal-1": { id: "personal-1", name: "개인차량", type: "personal", maxPax: 999, driverId: null, items: [] },
+};
+
+function createFreshVehicleState(): VehicleState {
+    return JSON.parse(JSON.stringify(initialVehiclesState));
+}
+
 export default function VehiclePage() {
     const [reservations, setReservations] = useState<Reservation[]>([]);
     const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -93,16 +106,7 @@ export default function VehiclePage() {
     const [selectedDate, setSelectedDate] = useState<string>(getHawaiiTomorrowStr());
     const [activeId, setActiveId] = useState<string | null>(null);
 
-    // Initial Vehicle State structure
-    const initialVehiclesState: VehicleState = {
-        "unassigned": { id: "unassigned", name: "미배정 명단", type: "company", maxPax: 999, driverId: null, items: [] },
-        "vehicle-1": { id: "vehicle-1", name: "1호차", type: "company", maxPax: 15, driverId: null, items: [] },
-        "vehicle-2": { id: "vehicle-2", name: "2호차", type: "company", maxPax: 15, driverId: null, items: [] },
-        "vehicle-3": { id: "vehicle-3", name: "3호차", type: "company", maxPax: 15, driverId: null, items: [] },
-        "personal-1": { id: "personal-1", name: "개인차량", type: "personal", maxPax: 999, driverId: null, items: [] },
-    };
-
-    const [vehicles, setVehicles] = useState<VehicleState>(initialVehiclesState);
+    const [vehicles, setVehicles] = useState<VehicleState>(createFreshVehicleState);
     const [bulkData, setBulkData] = useState<Record<string, VehicleState>>({});
 
     const sensors = useSensors(
@@ -148,7 +152,7 @@ export default function VehiclePage() {
             if (statusError) throw statusError;
 
             // C. Construct State
-            const state = JSON.parse(JSON.stringify(initialVehiclesState));
+            const state = createFreshVehicleState();
 
             // Apply Driver Assignments
             if (statusData) {
@@ -278,7 +282,7 @@ export default function VehiclePage() {
 
             // 3. Build Data
             targetOptions.forEach(opt => {
-                const state = JSON.parse(JSON.stringify(initialVehiclesState));
+                const state = createFreshVehicleState();
 
                 // Drivers
                 const optStatus = allStatus?.filter(s => s.option === opt) || [];
@@ -796,7 +800,7 @@ export default function VehiclePage() {
                                     <div className="bg-white p-2 border shadow-lg rounded w-64 flex gap-2 text-sm font-bold">
                                         <span>{item.pickup_location}</span>
                                         <span>{item.name}</span>
-                                        <span>{item.pax}명</span>
+                                        <span>{item.pax?.replace(/명/g, '')}명</span>
                                     </div>
                                 );
                             })()}
@@ -813,11 +817,11 @@ function UnassignedDropZone({ items, id, totalPax }: { items: Reservation[], id:
     const { setNodeRef } = useDroppable({ id });
 
     // Split items by status
-    const confirmedItems = items.filter(i => i.status === '예약확정');
-    const pendingItems = items.filter(i => i.status === '대기' || i.status === '예약대기');
+    const confirmedItems = useMemo(() => items.filter(i => i.status === '예약확정'), [items]);
+    const pendingItems = useMemo(() => items.filter(i => i.status === '대기' || i.status === '예약대기'), [items]);
 
     // Only pass items that are actually rendered to SortableContext
-    const renderedItems = [...confirmedItems, ...pendingItems];
+    const sortableItemIds = useMemo(() => [...confirmedItems, ...pendingItems].map(i => i.id), [confirmedItems, pendingItems]);
 
     return (
         <div ref={setNodeRef} className="w-full bg-white rounded-lg shadow-sm border flex flex-col min-h-[250px] lg:min-h-[400px]">
@@ -827,7 +831,7 @@ function UnassignedDropZone({ items, id, totalPax }: { items: Reservation[], id:
             </div>
             <div className="flex-1 overflow-y-auto p-2">
                 <SortableContext
-                    items={renderedItems.map(i => i.id)}
+                    items={sortableItemIds}
                     strategy={verticalListSortingStrategy}
                 >
                     {/* Confirmed List */}

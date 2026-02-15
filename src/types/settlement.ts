@@ -1,0 +1,100 @@
+// Settlement system type definitions
+
+// ---- Platform Config ----
+
+export type PlatformKey = 'myRealTrip' | 'zoomZoom' | 'triple' | 'waug';
+
+export interface PlatformConfig {
+    key: PlatformKey;
+    label: string;
+    sourceCode: string;   // DB source column value
+    color: string;
+    enabled: boolean;     // parser implemented?
+}
+
+export const PLATFORMS: Record<PlatformKey, PlatformConfig> = {
+    myRealTrip: { key: 'myRealTrip', label: '마이리얼트립', sourceCode: 'm', color: 'blue', enabled: true },
+    zoomZoom: { key: 'zoomZoom', label: '줌줌투어', sourceCode: 'z', color: 'green', enabled: false },
+    triple: { key: 'triple', label: '트리플', sourceCode: 't', color: 'purple', enabled: false },
+    waug: { key: 'waug', label: '와그', sourceCode: 'w', color: 'orange', enabled: false },
+};
+
+export const PLATFORM_KEYS: PlatformKey[] = ['myRealTrip', 'zoomZoom', 'triple', 'waug'];
+
+// ---- Excel Parsed Row ----
+
+export interface SettlementRow {
+    reservationId: string;
+    productName: string;
+    tourDate: string;        // YYYY-MM-DD
+    pax: number;
+    adultCount: number;
+    childCount: number;
+    platformAmount: number;  // Amount from platform Excel (KRW)
+    customerName: string;
+    rawData: Record<string, unknown>;
+}
+
+// ---- DB Virtual Merge ----
+
+export interface MergedReservation {
+    groupKey: string;            // "name|receipt_date"
+    name: string;
+    receiptDate: string;
+    tourDate: string;
+    mergedOption: string;        // "1부 + 패러"
+    originalOptions: string[];   // ["1부", "패러"]
+    totalPax: number;
+    adultCount: number;
+    childCount: number;
+    reservationIds: string[];    // all DB ids in this group
+    source: string;
+    status: string;
+    contact: string;
+    note: string;
+    pickupLocation: string;
+}
+
+// ---- Product Price ----
+
+export interface ProductPrice {
+    id: string;
+    product_name: string;
+    match_keywords: string;   // comma-separated
+    adult_price: number;
+    child_price: number;
+    tier_group: string;       // "Tier 1", "Tier 2", "Tier 3"
+    is_active: boolean;
+    created_at?: string;
+}
+
+// ---- Match Result ----
+
+export type MatchStatus = 'normal' | 'warning' | 'error';
+
+export interface MatchResult {
+    status: MatchStatus;
+    statusLabel: string;          // "정상" / "확인필요" / "오류"
+    classifiedProductName: string; // Classifier가 판별한 상품명
+    excelRow: SettlementRow | null;
+    dbGroup: MergedReservation | null;
+    matchedProduct: ProductPrice | null;
+    expectedAmount: number;
+    actualAmount: number;
+    amountDiff: number;
+    diffPercent: number;
+    notes: string[];
+}
+
+// ---- Summary ----
+
+export interface SettlementSummary {
+    totalExcelRows: number;
+    totalDbGroups: number;
+    normal: number;
+    warning: number;
+    error: number;
+    totalExpected: number;
+    totalActual: number;
+    totalDiff: number;
+}
