@@ -36,6 +36,7 @@ import {
     ChevronUp,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { addDays, parseISO, format } from 'date-fns';
 
 // ---- Color map ----
 const COLOR = {
@@ -105,14 +106,19 @@ export default function SettlementPage() {
 
             if (result.rows.length === 0) { setIsLoading(false); return; }
 
-            // Date range
+            // Date range with +/- 1 day buffer for tolerance
             const dates = result.rows.map(r => r.tourDate).filter(Boolean).sort();
-            const startDate = dates[0];
-            const endDate = dates[dates.length - 1];
+            const minDate = dates[0];
+            const maxDate = dates[dates.length - 1];
+
+            // Widen the fetch range
+            const expandedStartDate = format(addDays(parseISO(minDate), -1), 'yyyy-MM-dd');
+            const expandedEndDate = format(addDays(parseISO(maxDate), 1), 'yyyy-MM-dd');
 
             // Fetch DB data
+            const dateField = currentPlatform === 'myRealTrip' ? 'receipt_date' : 'tour_date';
             const [dbGroups, productPrices] = await Promise.all([
-                fetchAndMergeReservations(platform.sourceCode, startDate, endDate),
+                fetchAndMergeReservations(platform.sourceCode, expandedStartDate, expandedEndDate, dateField),
                 fetchProductPrices(),
             ]);
 
@@ -186,6 +192,8 @@ export default function SettlementPage() {
             case 'normal': return <CheckCircle2 className="w-4 h-4 text-green-500" />;
             case 'warning': return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
             case 'error': return <XCircle className="w-4 h-4 text-red-500" />;
+            case 'partial_refund': return <RefreshCw className="w-4 h-4 text-orange-500" />;
+            case 'cancelled': return <Trash2 className="w-4 h-4 text-gray-500" />;
         }
     };
 
@@ -194,6 +202,8 @@ export default function SettlementPage() {
             case 'normal': return '';
             case 'warning': return 'bg-yellow-50/60';
             case 'error': return 'bg-red-50/60';
+            case 'partial_refund': return 'bg-orange-50/60';
+            case 'cancelled': return 'bg-gray-100 text-gray-400';
         }
     };
 
@@ -282,9 +292,11 @@ export default function SettlementPage() {
 
             {/* Summary Cards */}
             {summary && (
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-5 gap-3">
                     <SummaryCard label="🟢 정상" value={summary.normal} icon={<CheckCircle2 className="w-5 h-5 text-green-500" />} bg="bg-green-50 border-green-200" />
                     <SummaryCard label="🟡 확인필요" value={summary.warning} icon={<AlertTriangle className="w-5 h-5 text-yellow-500" />} bg="bg-yellow-50 border-yellow-200" />
+                    <SummaryCard label="🟠 부분환불" value={summary.partialRefund} icon={<RefreshCw className="w-5 h-5 text-orange-500" />} bg="bg-orange-50 border-orange-200" />
+                    <SummaryCard label="⚪ 취소" value={summary.cancelled} icon={<Trash2 className="w-5 h-5 text-gray-500" />} bg="bg-gray-50 border-gray-200" />
                     <SummaryCard label="🔴 오류" value={summary.error} icon={<XCircle className="w-5 h-5 text-red-500" />} bg="bg-red-50 border-red-200" />
                 </div>
             )}
@@ -365,10 +377,17 @@ export default function SettlementPage() {
                                             </div>
                                         </td>
                                         <td className="px-3 py-3 text-gray-700 whitespace-nowrap">
-                                            {r.excelRow?.tourDate || r.dbGroup?.tourDate || '-'}
+                                            {r.excelGroup?.tourDate || r.dbGroup?.tourDate || '-'}
                                         </td>
                                         <td className="px-3 py-3 text-gray-700">
-                                            {r.excelRow?.customerName || r.dbGroup?.name || '-'}
+                                            <div className="flex items-center gap-1">
+                                                {r.excelGroup?.customerName || r.dbGroup?.name || '-'}
+                                                {r.excelGroup && r.excelGroup.rows.length > 1 && (
+                                                    <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full font-bold">
+                                                        {r.excelGroup.rows.length}건
+                                                    </span>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-3 py-3">
                                             <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full',
@@ -382,10 +401,11 @@ export default function SettlementPage() {
                                             </span>
                                         </td>
                                         <td className="px-3 py-3 text-gray-700 text-xs">
-                                            {r.dbGroup?.mergedOption || r.excelRow?.productName || '-'}
+                                            {r.dbGroup?.mergedOption || r.excelGroup?.rows[0]?.productName || '-'}
                                         </td>
                                         <td className="px-3 py-3 text-center text-gray-700">
-                                            {r.dbGroup ? `${r.dbGroup.adultCount}+${r.dbGroup.childCount}` : r.excelRow?.pax ?? '-'}
+                                            {r.dbGroup ? `${r.dbGroup.adultCount}+${r.dbGroup.childCount}` :
+                                                r.excelGroup ? `${r.excelGroup.adultCount}+${r.excelGroup.childCount}` : '-'}
                                         </td>
                                         <td className="px-3 py-3 text-right tabular-nums">{r.actualAmount > 0 ? r.actualAmount.toLocaleString() : '-'}</td>
                                         <td className="px-3 py-3 text-right tabular-nums">{r.expectedAmount > 0 ? r.expectedAmount.toLocaleString() : '-'}</td>
@@ -394,7 +414,18 @@ export default function SettlementPage() {
                                         )}>
                                             {r.amountDiff !== 0 ? `${r.amountDiff > 0 ? '+' : ''}${r.amountDiff.toLocaleString()}` : '-'}
                                         </td>
-                                        <td className="px-3 py-3 text-xs text-gray-500 max-w-[180px] truncate">{r.notes.join(', ') || '-'}</td>
+                                        <td className="px-3 py-3 text-xs text-gray-500 max-w-[200px] truncate">
+                                            {r.notes.map((note, i) => (
+                                                <span key={i} className={cn(
+                                                    "block",
+                                                    note.includes("⚠️") ? "text-amber-600 font-bold" :
+                                                        note.includes("🟢") ? "text-green-600 font-bold" :
+                                                            note.includes("부분 환불") ? "text-orange-600" : ""
+                                                )}>
+                                                    {note}
+                                                </span>
+                                            ))}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -637,6 +668,8 @@ function DetailPopup({ result, onClose }: { result: MatchResult; onClose: () => 
                         {result.status === 'normal' && <CheckCircle2 className="w-5 h-5 text-green-500" />}
                         {result.status === 'warning' && <AlertTriangle className="w-5 h-5 text-yellow-500" />}
                         {result.status === 'error' && <XCircle className="w-5 h-5 text-red-500" />}
+                        {result.status === 'partial_refund' && <RefreshCw className="w-5 h-5 text-orange-500" />}
+                        {result.status === 'cancelled' && <Trash2 className="w-5 h-5 text-gray-500" />}
                         상세 비교 — {result.statusLabel}
                     </h2>
                     <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
@@ -645,15 +678,39 @@ function DetailPopup({ result, onClose }: { result: MatchResult; onClose: () => 
                 <div className="p-5 overflow-y-auto max-h-[60vh] space-y-6">
                     {/* Excel Side */}
                     <div>
-                        <h3 className="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wider">📄 엑셀 데이터</h3>
-                        {result.excelRow ? (
-                            <div className="grid grid-cols-2 gap-2 text-sm bg-gray-50 p-4 rounded-xl">
-                                <div><span className="text-gray-400">예약번호</span><p className="font-mono">{result.excelRow.reservationId || '-'}</p></div>
-                                <div><span className="text-gray-400">고객명</span><p>{result.excelRow.customerName || '-'}</p></div>
-                                <div><span className="text-gray-400">날짜</span><p>{result.excelRow.tourDate || '-'}</p></div>
-                                <div><span className="text-gray-400">상품명</span><p>{result.excelRow.productName || '-'}</p></div>
-                                <div><span className="text-gray-400">인원</span><p>성인 {result.excelRow.adultCount} / 아동 {result.excelRow.childCount}</p></div>
-                                <div><span className="text-gray-400">금액</span><p className="font-semibold">{result.excelRow.platformAmount.toLocaleString()}원</p></div>
+                        <h3 className="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wider">📄 엑셀 데이터 ({result.excelGroup?.rows.length || 0}건)</h3>
+                        {result.excelGroup ? (
+                            <div className="space-y-2">
+                                <div className="grid grid-cols-2 gap-2 text-sm bg-blue-50/50 p-3 rounded-xl border border-blue-100 mb-2">
+                                    <div className="col-span-2 font-bold text-blue-700 flex justify-between">
+                                        <span>총 합계</span>
+                                        <span>{result.excelGroup.totalAmount.toLocaleString()}원</span>
+                                    </div>
+                                    <div><span className="text-gray-400">고객명</span><p>{result.excelGroup.customerName}</p></div>
+                                    <div><span className="text-gray-400">날짜</span><p>{result.excelGroup.tourDate}</p></div>
+                                    <div><span className="text-gray-400">총 인원</span><p>성인 {result.excelGroup.adultCount} / 아동 {result.excelGroup.childCount}</p></div>
+                                </div>
+
+                                {/* Individual Rows */}
+                                {result.excelGroup.rows.map((row, idx) => (
+                                    <div key={idx} className={cn(
+                                        "text-xs p-2 rounded-lg border border-gray-100",
+                                        row.platformAmount < 0 ? "bg-red-50 border-red-200" : "bg-gray-50"
+                                    )}>
+                                        <div className="flex justify-between font-medium text-gray-700">
+                                            <span className={row.platformAmount < 0 ? "text-red-700 font-bold" : ""}>
+                                                #{idx + 1} {row.productName} {row.platformAmount < 0 ? "(취소/환불)" : ""}
+                                            </span>
+                                            <span className={row.platformAmount < 0 ? "text-red-700 font-bold" : ""}>
+                                                {row.platformAmount.toLocaleString()}원
+                                            </span>
+                                        </div>
+                                        <div className="text-gray-400 flex gap-2 mt-1">
+                                            <span>{row.reservationId}</span>
+                                            <span>성인 {row.adultCount} / 아동 {row.childCount}</span>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         ) : <p className="text-sm text-gray-400 italic">엑셀에 데이터 없음</p>}
                     </div>

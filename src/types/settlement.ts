@@ -13,10 +13,10 @@ export interface PlatformConfig {
 }
 
 export const PLATFORMS: Record<PlatformKey, PlatformConfig> = {
-    myRealTrip: { key: 'myRealTrip', label: '마이리얼트립', sourceCode: 'm', color: 'blue', enabled: true },
-    zoomZoom: { key: 'zoomZoom', label: '줌줌투어', sourceCode: 'z', color: 'green', enabled: false },
-    triple: { key: 'triple', label: '트리플', sourceCode: 't', color: 'purple', enabled: false },
-    waug: { key: 'waug', label: '와그', sourceCode: 'w', color: 'orange', enabled: false },
+    myRealTrip: { key: 'myRealTrip', label: '마이리얼트립', sourceCode: 'M', color: 'blue', enabled: true },
+    zoomZoom: { key: 'zoomZoom', label: '줌줌투어', sourceCode: 'Z', color: 'green', enabled: false },
+    triple: { key: 'triple', label: '트리플', sourceCode: 'T', color: 'purple', enabled: false },
+    waug: { key: 'waug', label: '와그', sourceCode: 'W', color: 'orange', enabled: false },
 };
 
 export const PLATFORM_KEYS: PlatformKey[] = ['myRealTrip', 'zoomZoom', 'triple', 'waug'];
@@ -70,13 +70,27 @@ export interface ProductPrice {
 
 // ---- Match Result ----
 
-export type MatchStatus = 'normal' | 'warning' | 'error';
+export type MatchStatus = 'normal' | 'warning' | 'error' | 'partial_refund' | 'cancelled';
+
+// ---- Excel Grouping ----
+export interface ExcelGroup {
+    groupId: string;
+    customerName: string;
+    tourDate: string;
+    totalAmount: number;
+    totalPax: number;
+    adultCount: number;
+    childCount: number;
+    rows: SettlementRow[];
+    isPartialRefund: boolean;
+    isFullCancellation: boolean;
+}
 
 export interface MatchResult {
     status: MatchStatus;
-    statusLabel: string;          // "정상" / "확인필요" / "오류"
+    statusLabel: string;          // "정상" / "확인필요" / "오류" / "부분환불" / "취소"
     classifiedProductName: string; // Classifier가 판별한 상품명
-    excelRow: SettlementRow | null;
+    excelGroup: ExcelGroup | null;
     dbGroup: MergedReservation | null;
     matchedProduct: ProductPrice | null;
     expectedAmount: number;
@@ -94,6 +108,8 @@ export interface SettlementSummary {
     normal: number;
     warning: number;
     error: number;
+    partialRefund: number;
+    cancelled: number;
     totalExpected: number;
     totalActual: number;
     totalDiff: number;

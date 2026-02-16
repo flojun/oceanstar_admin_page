@@ -9,7 +9,87 @@ import {
     MatchStatus,
     ProductPrice,
     SettlementSummary,
+    ExcelGroup,
 } from '@/types/settlement';
+import { parseISO, differenceInCalendarDays, format } from 'date-fns';
+
+// ===========================
+// 0. Excel Grouping (Double Aggregation)
+// ===========================
+
+// Helper to normalize pickup location (remove parens and content, remove spaces)
+function normalizePickup(pickup: string): string {
+    return pickup.replace(/\(.*\)/g, '').replace(/\s+/g, '').trim();
+}
+
+function groupExcelRows(rows: SettlementRow[]): ExcelGroup[] {
+    // 1. Sort: Name ASC -> Date ASC (Amount sort removed)
+    const sorted = [...rows].sort((a, b) => {
+        const nameA = a.customerName.replace(/\s+/g, '');
+        const nameB = b.customerName.replace(/\s+/g, '');
+        if (nameA !== nameB) return nameA.localeCompare(nameB);
+        return a.tourDate.localeCompare(b.tourDate);
+    });
+
+    const groups: ExcelGroup[] = [];
+
+    // 2. Grouping
+    for (const row of sorted) {
+        const lastGroup = groups[groups.length - 1];
+
+        let shouldMerge = false;
+        if (lastGroup) {
+            const normName = row.customerName.replace(/\s+/g, '').toLowerCase();
+            const lastNormName = lastGroup.customerName.replace(/\s+/g, '').toLowerCase();
+
+            // Criteria: Same Name + Date within 1 day based on Receipt Date
+            const lastRow = lastGroup.rows[lastGroup.rows.length - 1];
+            const diff = Math.abs(differenceInCalendarDays(parseISO(row.tourDate), parseISO(lastRow.tourDate)));
+
+            if (normName === lastNormName &&
+                diff <= 1
+            ) {
+                shouldMerge = true;
+            }
+        }
+
+        if (shouldMerge) {
+            // Merge into last group
+            lastGroup.rows.push(row);
+            lastGroup.totalAmount += row.platformAmount;
+            lastGroup.totalPax += row.pax;
+            lastGroup.adultCount += row.adultCount;
+            lastGroup.childCount += row.childCount;
+        } else {
+            // New Group
+            groups.push({
+                groupId: `${row.customerName}|${row.tourDate}|${Math.random()}`,
+                customerName: row.customerName,
+                tourDate: row.tourDate, // Earliest
+                totalAmount: row.platformAmount,
+                totalPax: row.pax,
+                adultCount: row.adultCount,
+                childCount: row.childCount,
+                rows: [row],
+                isPartialRefund: false,
+                isFullCancellation: false,
+            });
+        }
+    }
+
+    // 3. Refund Detection
+    for (const group of groups) {
+        const hasNegativeRow = group.rows.some(r => r.platformAmount < 0);
+
+        if (group.totalAmount <= 0) {
+            group.isFullCancellation = true;
+        } else if (hasNegativeRow) {
+            group.isPartialRefund = true;
+        }
+    }
+
+    return groups;
+}
 
 // ===========================
 // 1. Fetch product_prices
@@ -35,7 +115,8 @@ export async function fetchProductPrices(): Promise<ProductPrice[]> {
 export async function fetchAndMergeReservations(
     sourceCode: string,
     startDate?: string,
-    endDate?: string
+    endDate?: string,
+    dateField: 'tour_date' | 'receipt_date' = 'tour_date'
 ): Promise<MergedReservation[]> {
     let query = supabase
         .from('reservations')
@@ -43,8 +124,8 @@ export async function fetchAndMergeReservations(
         .ilike('source', sourceCode)
         .neq('status', '취소');
 
-    if (startDate) query = query.gte('tour_date', startDate);
-    if (endDate) query = query.lte('tour_date', endDate);
+    if (startDate) query = query.gte(dateField, startDate);
+    if (endDate) query = query.lte(dateField, endDate);
 
     const { data, error } = await query;
     if (error) {
@@ -52,11 +133,14 @@ export async function fetchAndMergeReservations(
         return [];
     }
 
-    return virtualMerge(data || []);
+    console.log(`[Settlement] Fetched ${(data || []).length} reservations for source="${sourceCode}", date range: ${startDate} ~ ${endDate}`);
+    const merged = virtualMerge(data || []);
+    console.log(`[Settlement] Virtual merged into ${merged.length} groups`);
+    return merged;
 }
 
 /**
- * Virtual Merge: group by name + receipt_date, merge options, extract children
+ * Virtual Merge: group by name + receipt_date + NORMALIZED PICKUP
  */
 function virtualMerge(rows: Record<string, unknown>[]): MergedReservation[] {
     const groups = new Map<string, Record<string, unknown>[]>();
@@ -64,7 +148,11 @@ function virtualMerge(rows: Record<string, unknown>[]): MergedReservation[] {
     rows.forEach(r => {
         const name = String(r.name || '').trim();
         const receiptDate = String(r.receipt_date || '').trim();
-        const key = `${name}|${receiptDate}`;
+        // 1. Pickup Normalization: Distinct groups for different pickup locations
+        const pickup = normalizePickup(String(r.pickup_location || ''));
+
+        // Key includes pickup to separate same-name same-day different-hotel
+        const key = `${name}|${receiptDate}|${pickup}`;
 
         if (!groups.has(key)) groups.set(key, []);
         groups.get(key)!.push(r);
@@ -75,18 +163,13 @@ function virtualMerge(rows: Record<string, unknown>[]): MergedReservation[] {
     groups.forEach((group, key) => {
         const first = group[0];
 
-        // Merge options → tags
         const options = group
             .map(r => String(r.option || '').trim())
             .filter(Boolean);
         const uniqueOptions = [...new Set(options)];
 
-        // Sum pax
-        const totalPax = group.reduce((sum, r) => {
-            return sum + parsePaxString(String(r.pax || ''));
-        }, 0);
+        const totalPax = parsePaxString(String(first.pax || ''));
 
-        // Extract children from note / pickup_location
         const allNotes = group.map(r => `${r.note || ''} ${r.pickup_location || ''}`).join(' ');
         const childCount = extractChildCount(allNotes);
         const adultCount = Math.max(0, totalPax - childCount);
@@ -123,9 +206,6 @@ function parsePaxString(pax: string): number {
     return isNaN(num) ? 0 : num;
 }
 
-/**
- * Extract child count from note/pickup text using 아(\d+) pattern
- */
 function extractChildCount(text: string): number {
     if (!text) return 0;
     const matches = text.match(/아\s*(\d+)/g);
@@ -139,6 +219,14 @@ function extractChildCount(text: string): number {
     return total;
 }
 
+function formatDateShort(dateStr: string): string {
+    try {
+        return format(parseISO(dateStr), 'M/d');
+    } catch {
+        return dateStr;
+    }
+}
+
 // ===========================
 // 4. Tag-Based Precision Classifier
 // ===========================
@@ -150,10 +238,6 @@ interface ClassifierResult {
     notes: string[];
 }
 
-/**
- * Extract option tags from merged options array.
- * Tags are normalized lowercase presence flags.
- */
 function extractTags(options: string[]): {
     has1bu: boolean;
     has2bu: boolean;
@@ -173,30 +257,12 @@ function extractTags(options: string[]): {
     };
 }
 
-/**
- * Find a product_price row by match_keywords.
- * Keywords are comma-separated. A keyword like "1부+패러" must be checked
- * via tag combinations, not substring inclusion.
- */
 function findProductByName(productPrices: ProductPrice[], nameSubstring: string): ProductPrice | null {
     return productPrices.find(p =>
         p.product_name.includes(nameSubstring)
     ) || null;
 }
 
-/**
- * Tag-Based Precision Classifier with priority rules.
- *
- * Priority (highest first):
- * 1. [콤보] 거북이 + 패러: (1부 OR 2부) AND 패러
- * 2. [콤보] 거북이 + 제트: (1부 OR 2부) AND 제트
- * 3. [액티비티] 패러 + 제트: 패러 AND 제트
- * 4. [단품] 거북이(1/2부): (1부 OR 2부) only (no 패러/제트)
- * 5. [단품] 선셋(3부): (3부 OR 선셋)
- * 6. [단품] 패러 or 제트: 패러 only OR 제트 only
- *
- * Anomaly: 1부 + 패러 + 제트 → 3종 결합 (존재하지 않는 상품)
- */
 export function classifyProduct(
     options: string[],
     productPrices: ProductPrice[]
@@ -206,13 +272,11 @@ export function classifyProduct(
     const hasSunset = tags.has3bu || tags.hasSunset;
     const notes: string[] = [];
 
-    // ---- Anomaly Detection: 3종 결합 ----
+    // Same priority rules as before...
     if (hasTurtle && tags.hasParasail && tags.hasJetski) {
         notes.push('🟡 [알 수 없는 조합] 거북이+패러+제트 3종 결합은 존재하지 않는 상품입니다.');
-        // Fallback: use the highest-priced combo available
         const combo1 = findProductByName(productPrices, '거북이 + 패러');
         const combo2 = findProductByName(productPrices, '패러 + 제트');
-        // Pick the more expensive one
         let fallback = combo1;
         if (combo2 && (!fallback || combo2.adult_price > fallback.adult_price)) {
             fallback = combo2;
@@ -225,7 +289,6 @@ export function classifyProduct(
         };
     }
 
-    // ---- Priority 1: [콤보] 거북이 + 패러 ----
     if (hasTurtle && tags.hasParasail) {
         const product = findProductByName(productPrices, '거북이 + 패러');
         return {
@@ -236,7 +299,6 @@ export function classifyProduct(
         };
     }
 
-    // ---- Priority 2: [콤보] 거북이 + 제트 ----
     if (hasTurtle && tags.hasJetski) {
         const product = findProductByName(productPrices, '거북이 + 제트');
         return {
@@ -247,7 +309,6 @@ export function classifyProduct(
         };
     }
 
-    // ---- Priority 3: [액티비티] 패러 + 제트 ----
     if (tags.hasParasail && tags.hasJetski) {
         const product = findProductByName(productPrices, '패러 + 제트');
         return {
@@ -258,7 +319,6 @@ export function classifyProduct(
         };
     }
 
-    // ---- Priority 4: [단품] 거북이 스노클링(1/2부) ----
     if (hasTurtle && !tags.hasParasail && !tags.hasJetski) {
         const product = findProductByName(productPrices, '거북이 스노클링');
         return {
@@ -269,7 +329,6 @@ export function classifyProduct(
         };
     }
 
-    // ---- Priority 5: [단품] 선셋(3부) ----
     if (hasSunset) {
         const product = findProductByName(productPrices, '선셋');
         return {
@@ -280,7 +339,6 @@ export function classifyProduct(
         };
     }
 
-    // ---- Priority 6: [단품] 패러세일링 or 제트스키 ----
     if (tags.hasParasail && !tags.hasJetski) {
         const product = findProductByName(productPrices, '패러세일링');
         return {
@@ -301,7 +359,6 @@ export function classifyProduct(
         };
     }
 
-    // ---- No match ----
     notes.push('매칭되는 기준가 상품이 없습니다.');
     return {
         productName: '(미분류)',
@@ -312,163 +369,162 @@ export function classifyProduct(
 }
 
 // ===========================
-// 5. Main matching: Excel vs DB
+// 5. Match Logic (Group vs Group)
 // ===========================
 
 export function matchSettlementData(
-    excelRows: SettlementRow[],
+    rawExcelRows: SettlementRow[],
     dbGroups: MergedReservation[],
     productPrices: ProductPrice[]
 ): MatchResult[] {
     const results: MatchResult[] = [];
     const matchedDbKeys = new Set<string>();
 
-    for (const excelRow of excelRows) {
-        // Find matching DB group by name + tour date
+    const excelGroups = groupExcelRows(rawExcelRows);
+
+    console.log(`[Settlement Match] Raw Rows: ${rawExcelRows.length} -> Excel Groups: ${excelGroups.length}`);
+
+    for (const exGroup of excelGroups) {
+
+        // 1. Refund Status
+        if (exGroup.isFullCancellation) {
+            results.push({
+                status: 'cancelled',
+                statusLabel: '취소',
+                classifiedProductName: '-',
+                excelGroup: exGroup,
+                dbGroup: null,
+                matchedProduct: null,
+                expectedAmount: 0,
+                actualAmount: exGroup.totalAmount,
+                amountDiff: 0,
+                diffPercent: 0,
+                notes: ['전액 환불(취소)된 예약입니다.'],
+            });
+            continue;
+        }
+
+        // 2. Find Best Match
         let bestMatch: MergedReservation | null = null;
+        let dateMismatchWarning: string | null = null;
 
         for (const dbg of dbGroups) {
             if (matchedDbKeys.has(dbg.groupKey)) continue;
 
-            const dbName = dbg.name.toLowerCase().trim();
-            const excelName = excelRow.customerName.toLowerCase().trim();
+            const dbName = dbg.name.replace(/\s+/g, '').toLowerCase();
+            const exName = exGroup.customerName.replace(/\s+/g, '').toLowerCase();
+            const nameMatch = dbName && exName && (dbName.includes(exName) || exName.includes(dbName));
 
-            const nameMatch = dbName && excelName &&
-                (dbName.includes(excelName) || excelName.includes(dbName));
-            const dateMatch = dbg.tourDate === excelRow.tourDate;
+            // Receipt Date matching for Source 'M' and others
+            let dbDateStr = dbg.tourDate;
+            if (dbg.source === 'M') dbDateStr = dbg.receiptDate;
 
-            if (nameMatch && dateMatch) {
-                bestMatch = dbg;
-                break;
+            const exactDateMatch = dbDateStr === exGroup.tourDate;
+            let toleranceMatch = false;
+
+            if (!exactDateMatch && nameMatch) {
+                const diff = Math.abs(differenceInCalendarDays(parseISO(dbDateStr), parseISO(exGroup.tourDate)));
+                if (diff <= 1) toleranceMatch = true;
             }
-        }
 
-        // Fallback: date + pax match
-        if (!bestMatch) {
-            for (const dbg of dbGroups) {
-                if (matchedDbKeys.has(dbg.groupKey)) continue;
-                if (dbg.tourDate === excelRow.tourDate && dbg.totalPax === excelRow.pax) {
+            if (nameMatch) {
+                if (exactDateMatch) {
                     bestMatch = dbg;
+                    dateMismatchWarning = null;
                     break;
                 }
+                if (toleranceMatch && !bestMatch) {
+                    bestMatch = dbg;
+                    dateMismatchWarning = `⚠️ 접수일 불일치 (엑셀: ${formatDateShort(exGroup.tourDate)} vs DB: ${formatDateShort(dbDateStr)})`;
+                }
             }
         }
 
+        // 3. Process Match
         if (bestMatch) {
             matchedDbKeys.add(bestMatch.groupKey);
-
-            // --- Precision Classifier ---
             const classified = classifyProduct(bestMatch.originalOptions, productPrices);
-            const matchedProduct = classified.matchedProduct;
 
-            // Calculate expected amount
             let expectedAmount = 0;
-            if (matchedProduct) {
+            if (classified.matchedProduct) {
                 expectedAmount =
-                    (bestMatch.adultCount * matchedProduct.adult_price) +
-                    (bestMatch.childCount * matchedProduct.child_price);
+                    (bestMatch.adultCount * classified.matchedProduct.adult_price) +
+                    (bestMatch.childCount * classified.matchedProduct.child_price);
             }
 
-            const actualAmount = excelRow.platformAmount;
-            const amountDiff = expectedAmount - actualAmount;
-            const diffPercent = expectedAmount > 0 ? Math.abs(amountDiff / expectedAmount) * 100 : 0;
+            const diff = exGroup.totalAmount - expectedAmount;
+            const diffAbs = Math.abs(diff);
+            const errorMargin = expectedAmount * 0.1; // 10%
 
-            // Status judgment
-            let status: MatchStatus;
-            let statusLabel: string;
-            const notes: string[] = [...classified.notes];
+            let status: MatchStatus = 'normal';
+            let statusLabel = '정상';
+            const notes = [...classified.notes];
 
-            if (classified.isAnomaly) {
-                status = 'warning';
-                statusLabel = '확인필요';
-            } else if (expectedAmount === 0 || !matchedProduct) {
-                status = 'warning';
-                statusLabel = '확인필요';
-                if (!notes.some(n => n.includes('매칭'))) {
-                    notes.push('매칭되는 기준가 상품이 없습니다.');
-                }
-            } else if (diffPercent <= 10) {
-                status = 'normal';
-                statusLabel = '정상';
-                if (amountDiff !== 0) {
-                    notes.push(`오차 ${diffPercent.toFixed(1)}% (허용 범위 내)`);
-                }
-            } else {
+            if (dateMismatchWarning) {
+                notes.push(dateMismatchWarning);
+            }
+
+            // --- Status Determination ---
+            if (exGroup.isPartialRefund) {
+                status = 'partial_refund';
+                statusLabel = '부분환불';
+                notes.push('부분 환불 내역이 포함되어 있습니다.');
+            } else if (expectedAmount > 0 && diffAbs > errorMargin) {
+                // Initial Warning
                 status = 'warning';
                 statusLabel = '확인필요';
 
-                // --- 금액 부족 감지: 콤보 판별인데 단품 수준 금액 ---
-                if (matchedProduct && matchedProduct.tier_group === 'Tier 3' && amountDiff > 0) {
-                    // Find the cheapest single-product price (Tier 1)
-                    const tier1Products = productPrices.filter(p => p.tier_group === 'Tier 1' && p.is_active);
-                    const lowestSinglePrice = tier1Products.length > 0
-                        ? Math.min(...tier1Products.map(p => p.adult_price))
-                        : 0;
+                // ---- Exception Handling: On-site Payment ----
+                // Check if Amount is less than expected (diff < 0) AND triggers exist
+                const dbNotesFn = (bestMatch.note + ' ' + bestMatch.pickupLocation).toLowerCase();
+                const hasTrigger = dbNotesFn.includes('추가') || dbNotesFn.includes('$');
 
-                    if (lowestSinglePrice > 0 && actualAmount <= lowestSinglePrice * bestMatch.totalPax * 1.15) {
-                        notes.push(`🟡 [금액 부족] 콤보(${classified.productName}) 판별인데 정산금이 단품 수준입니다.`);
-                    } else {
-                        notes.push(`금액 오차 ${diffPercent.toFixed(1)}% (±10% 초과)`);
+                if (diff < 0 && hasTrigger && classified.matchedProduct) {
+                    // Recalculate: Treat ALL Pax as Children (Base price paid on platform)
+                    const altExpected = bestMatch.totalPax * classified.matchedProduct.child_price;
+                    const altDiff = exGroup.totalAmount - altExpected;
+
+                    if (Math.abs(altDiff) <= altExpected * 0.1) {
+                        status = 'normal';
+                        statusLabel = '현장결제';
+                        notes.push('🟢 현장 추가결제 건으로 승인 (플랫폼: 전원 아동가 적용)');
                     }
-                } else {
-                    notes.push(`금액 오차 ${diffPercent.toFixed(1)}% (±10% 초과)`);
                 }
+            } else if (!classified.matchedProduct) {
+                status = 'warning';
+                statusLabel = '상품미확인';
+            } else if (classified.isAnomaly) {
+                status = 'warning';
+                statusLabel = '조합오류';
             }
 
             results.push({
                 status,
                 statusLabel,
                 classifiedProductName: classified.productName,
-                excelRow,
+                excelGroup: exGroup,
                 dbGroup: bestMatch,
-                matchedProduct,
+                matchedProduct: classified.matchedProduct,
                 expectedAmount,
-                actualAmount,
-                amountDiff,
-                diffPercent,
+                actualAmount: exGroup.totalAmount,
+                amountDiff: diff,
+                diffPercent: expectedAmount ? (diff / expectedAmount) * 100 : 0,
                 notes,
             });
+
         } else {
-            // No DB match found
             results.push({
                 status: 'error',
-                statusLabel: '오류',
-                classifiedProductName: '(DB 없음)',
-                excelRow,
+                statusLabel: 'DB없음',
+                classifiedProductName: '-',
+                excelGroup: exGroup,
                 dbGroup: null,
                 matchedProduct: null,
                 expectedAmount: 0,
-                actualAmount: excelRow.platformAmount,
-                amountDiff: -excelRow.platformAmount,
+                actualAmount: exGroup.totalAmount,
+                amountDiff: exGroup.totalAmount,
                 diffPercent: 100,
-                notes: ['DB에 매칭되는 예약을 찾을 수 없습니다.'],
-            });
-        }
-    }
-
-    // DB groups not matched by any Excel row
-    for (const dbg of dbGroups) {
-        if (!matchedDbKeys.has(dbg.groupKey)) {
-            const classified = classifyProduct(dbg.originalOptions, productPrices);
-            let expectedAmount = 0;
-            if (classified.matchedProduct) {
-                expectedAmount =
-                    (dbg.adultCount * classified.matchedProduct.adult_price) +
-                    (dbg.childCount * classified.matchedProduct.child_price);
-            }
-
-            results.push({
-                status: 'error',
-                statusLabel: '오류',
-                classifiedProductName: classified.productName,
-                excelRow: null,
-                dbGroup: dbg,
-                matchedProduct: classified.matchedProduct,
-                expectedAmount,
-                actualAmount: 0,
-                amountDiff: expectedAmount,
-                diffPercent: 100,
-                notes: ['플랫폼 엑셀에 없는 DB 예약입니다.', ...classified.notes],
+                notes: ['DB에서 해당 예약(이름+날짜)을 찾을 수 없습니다.'],
             });
         }
     }
@@ -484,25 +540,26 @@ export function calculateSummary(results: MatchResult[]): SettlementSummary {
     const normal = results.filter(r => r.status === 'normal').length;
     const warning = results.filter(r => r.status === 'warning').length;
     const error = results.filter(r => r.status === 'error').length;
+    const partialRefund = results.filter(r => r.status === 'partial_refund').length;
+    const cancelled = results.filter(r => r.status === 'cancelled').length;
 
     const totalExpected = results.reduce((s, r) => s + r.expectedAmount, 0);
     const totalActual = results.reduce((s, r) => s + r.actualAmount, 0);
+    const totalExcelRows = results.reduce((s, r) => s + (r.excelGroup?.rows.length || 0), 0);
 
     return {
-        totalExcelRows: results.filter(r => r.excelRow !== null).length,
+        totalExcelRows,
         totalDbGroups: results.filter(r => r.dbGroup !== null).length,
         normal,
         warning,
         error,
+        partialRefund,
+        cancelled,
         totalExpected,
         totalActual,
         totalDiff: totalExpected - totalActual,
     };
 }
-
-// ===========================
-// 7. Settlement Confirmation
-// ===========================
 
 export async function confirmSettlement(reservationIds: string[]): Promise<{ success: boolean; error?: string }> {
     if (reservationIds.length === 0) return { success: true };

@@ -10,7 +10,8 @@ export async function parseMyRealTrip(file: File): Promise<ParseResult> {
 
     try {
         const buffer = await file.arrayBuffer();
-        const workbook = XLSX.read(buffer, { type: 'array' });
+        const data = new Uint8Array(buffer);
+        const workbook = XLSX.read(data, { type: 'array' });
 
         const sheetName = workbook.SheetNames[0];
         if (!sheetName) return { rows: [], errors: ['엑셀 파일에 시트가 없습니다.'] };
@@ -22,6 +23,11 @@ export async function parseMyRealTrip(file: File): Promise<ParseResult> {
         // Detect columns from header keys
         const keys = Object.keys(jsonData[0]);
         const col = detectColumns(keys);
+
+        // DEBUG: Check column detection
+        console.log('[MyRealTrip Parser] Detected columns:', JSON.stringify(col, null, 2));
+        console.log('[MyRealTrip Parser] Keys:', JSON.stringify(keys, null, 2));
+        console.log('[MyRealTrip Parser] First Row Sample:', JSON.stringify(jsonData[0], null, 2));
 
         if (!col.reservationId) {
             errors.push(`예약번호 컬럼을 찾을 수 없습니다. 감지된 컬럼: ${keys.join(', ')}`);
@@ -43,7 +49,21 @@ export async function parseMyRealTrip(file: File): Promise<ParseResult> {
             try {
                 const reservationId = String(row[col.reservationId] || '').trim();
                 const productName = String(row[col.productName] || '').trim();
-                const tourDate = parseDateValue(row[col.tourDate]);
+                let tourDate = parseDateValue(row[col.tourDate]);
+
+                // Fallback: Extract Receipt Date from Reservation ID (EXP-20251225-...)
+                if (!tourDate && reservationId.startsWith('EXP-')) {
+                    const match = reservationId.match(/EXP-(\d{8})-/);
+                    if (match) {
+                        const d = match[1];
+                        tourDate = `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`;
+                        // console.log(`[MyRealTrip] Extracted Receipt Date: ${tourDate} from ${reservationId}`);
+                    }
+                }
+
+                if (idx === 0) {
+                    console.log(`[MyRealTrip Parser] Row 0 date check: key="${col.tourDate}", rawValue="${row[col.tourDate]}", parsed="${tourDate}"`);
+                }
                 const adultCount = parseNumeric(row[col.adultCount]);
                 const childCount = parseNumeric(row[col.childCount]);
                 const amount = parseNumeric(row[col.amount]);
@@ -106,11 +126,11 @@ interface ColumnMapping {
 
 const PATTERNS: Record<keyof ColumnMapping, RegExp[]> = {
     reservationId: [/예약번호/i, /예약.?id/i, /reservation/i, /booking.?id/i, /주문번호/i],
-    productName: [/상품명/i, /product/i, /상품/i, /투어명/i],
+    productName: [/^상품명$/i, /product name/i, /투어명/i], // Removed generic /상품/ to avoid ID match
     tourDate: [/여행일/i, /투어일/i, /tour.?date/i, /이용일/i, /날짜/i],
     adultCount: [/성인/i, /adult/i, /대인/i],
     childCount: [/아동/i, /child/i, /소인/i, /어린이/i],
-    amount: [/결제금액/i, /금액/i, /amount/i, /정산금액/i, /총.?금액/i, /판매금액/i],
+    amount: [/판매금액/i, /sales.?amount/i, /총.?판매금액/i, /결제금액/i], // Prioritize Sales Amount. Avoid generic '금액' which matches '정산금액'
     customerName: [/예약자/i, /이름/i, /customer/i, /고객명/i, /성명/i],
 };
 
