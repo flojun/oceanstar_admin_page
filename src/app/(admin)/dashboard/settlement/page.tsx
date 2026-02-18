@@ -17,6 +17,8 @@ import {
     matchSettlementData,
     calculateSummary,
     confirmSettlement,
+    excludeSettlement,
+    fetchUnsettledPastReservations,
 } from '@/lib/settlement/matcher';
 import { supabase } from '@/lib/supabase';
 import {
@@ -66,6 +68,8 @@ export default function SettlementPage() {
     // Modals
     const [showSettings, setShowSettings] = useState(false);
     const [detailResult, setDetailResult] = useState<MatchResult | null>(null);
+    const [unsettledItems, setUnsettledItems] = useState<MergedReservation[]>([]);
+    const [showUnsettledModal, setShowUnsettledModal] = useState(false);
 
     // Confirming
     const [isConfirming, setIsConfirming] = useState(false);
@@ -85,7 +89,10 @@ export default function SettlementPage() {
         setMatchResults([]);
         setSummary(null);
         setUploadedFileName('');
+        setSummary(null);
+        setUploadedFileName('');
         setSelectedIds(new Set());
+        setLastSelectedIdx(null);
     };
 
     // ---- File handling ----
@@ -96,7 +103,10 @@ export default function SettlementPage() {
         setParseErrors([]);
         setMatchResults([]);
         setSummary(null);
+        setMatchResults([]);
+        setSummary(null);
         setSelectedIds(new Set());
+        setLastSelectedIdx(null);
 
         try {
             const parser = getParser(currentPlatform);
@@ -107,20 +117,30 @@ export default function SettlementPage() {
             if (result.rows.length === 0) { setIsLoading(false); return; }
 
             // Date range with +/- 1 day buffer for tolerance
-            const dates = result.rows.map(r => r.tourDate).filter(Boolean).sort();
-            const minDate = dates[0];
-            const maxDate = dates[dates.length - 1];
+            const dates = result.rows.map(r => r.tourDate || r.receiptDate).filter(Boolean).sort();
+
+            if (dates.length === 0) {
+                setParseErrors(prev => [...prev, '유효한 여행일(Tour Date)을 찾을 수 없습니다.']);
+                setIsLoading(false);
+                return;
+            }
+
+            const minDate = dates[0] as string;
+            const maxDate = dates[dates.length - 1] as string;
 
             // Widen the fetch range
-            const expandedStartDate = format(addDays(parseISO(minDate), -1), 'yyyy-MM-dd');
+            const expandedStartDate = format(addDays(parseISO(minDate), -3), 'yyyy-MM-dd');
             const expandedEndDate = format(addDays(parseISO(maxDate), 1), 'yyyy-MM-dd');
 
             // Fetch DB data
-            const dateField = currentPlatform === 'myRealTrip' ? 'receipt_date' : 'tour_date';
-            const [dbGroups, productPrices] = await Promise.all([
+            const dateField = 'tour_date';
+            const [dbGroups, productPrices, pastUnsettled] = await Promise.all([
                 fetchAndMergeReservations(platform.sourceCode, expandedStartDate, expandedEndDate, dateField),
                 fetchProductPrices(),
+                fetchUnsettledPastReservations(platform.sourceCode, minDate),
             ]);
+
+            setUnsettledItems(pastUnsettled);
 
             // Match
             const results = matchSettlementData(result.rows, dbGroups, productPrices);
@@ -144,13 +164,27 @@ export default function SettlementPage() {
     const handleDragLeave = () => setIsDragging(false);
 
     // ---- Selection ----
-    const toggleSelect = (idx: number) => {
+    const [lastSelectedIdx, setLastSelectedIdx] = useState<number | null>(null);
+
+    const toggleSelect = (idx: number, shiftKey: boolean = false) => {
         setSelectedIds(prev => {
             const next = new Set(prev);
             const key = String(idx);
-            next.has(key) ? next.delete(key) : next.add(key);
+
+            if (shiftKey && lastSelectedIdx !== null && lastSelectedIdx !== idx) {
+                const start = Math.min(lastSelectedIdx, idx);
+                const end = Math.max(lastSelectedIdx, idx);
+
+                // Add range to selection
+                for (let i = start; i <= end; i++) {
+                    next.add(String(i));
+                }
+            } else {
+                next.has(key) ? next.delete(key) : next.add(key);
+            }
             return next;
         });
+        setLastSelectedIdx(idx);
     };
 
     const toggleAll = () => {
@@ -186,6 +220,46 @@ export default function SettlementPage() {
         }
     };
 
+    const handleExclude = async () => {
+        const ids: string[] = [];
+        selectedIds.forEach(idx => {
+            const r = matchResults[Number(idx)];
+            if (r?.dbGroup) {
+                ids.push(...r.dbGroup.reservationIds);
+            }
+        });
+        if (ids.length === 0) { alert('제외할 항목을 선택하세요.'); return; }
+
+        if (!confirm(`${ids.length}건의 예약을 '정산 제외'로 변경하시겠습니까?`)) return;
+
+        setIsConfirming(true);
+        const { success, error } = await excludeSettlement(ids);
+        setIsConfirming(false);
+
+        if (success) {
+            alert('정산 제외 처리 완료!');
+            setSelectedIds(new Set());
+            // TODO: Ideally refresh or filter out excluding items
+        } else {
+            alert(`오류: ${error}`);
+        }
+    };
+
+    // Unsettled Items Action
+    const handleUnsettledAction = async (ids: string[], action: 'confirm' | 'exclude') => {
+        if (!confirm(action === 'confirm' ? '선택한 항목을 정산 완료 처리하시겠습니까?' : '선택한 항목을 정산 제외 처리하시겠습니까?')) return;
+
+        const func = action === 'confirm' ? confirmSettlement : excludeSettlement;
+        const { success, error } = await func(ids);
+
+        if (success) {
+            alert('처리되었습니다.');
+            setUnsettledItems(prev => prev.filter(item => !ids.some(id => item.reservationIds.includes(id))));
+        } else {
+            alert(`오류: ${error}`);
+        }
+    };
+
     // ---- Status helpers ----
     const statusIcon = (s: MatchResult['status']) => {
         switch (s) {
@@ -194,6 +268,8 @@ export default function SettlementPage() {
             case 'error': return <XCircle className="w-4 h-4 text-red-500" />;
             case 'partial_refund': return <RefreshCw className="w-4 h-4 text-orange-500" />;
             case 'cancelled': return <Trash2 className="w-4 h-4 text-gray-500" />;
+            case 'completed': return <CheckCircle2 className="w-4 h-4 text-blue-600" />;
+            case 'excluded': return <XCircle className="w-4 h-4 text-gray-400" />;
         }
     };
 
@@ -204,11 +280,34 @@ export default function SettlementPage() {
             case 'error': return 'bg-red-50/60';
             case 'partial_refund': return 'bg-orange-50/60';
             case 'cancelled': return 'bg-gray-100 text-gray-400';
+            case 'completed': return 'bg-blue-50/60';
+            case 'excluded': return 'bg-gray-50/60 text-gray-400 opacity-60';
         }
     };
 
     return (
         <div className="flex flex-col gap-6">
+            {/* Unsettled Items Banner */}
+            {unsettledItems.length > 0 && (
+                <div
+                    onClick={() => setShowUnsettledModal(true)}
+                    className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:bg-orange-100 transition shadow-sm"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="bg-orange-100 p-2 rounded-full">
+                            <AlertTriangle className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-orange-800">확인되지 않은 과거 미정산 내역이 {unsettledItems.length}건 있습니다.</h3>
+                            <p className="text-xs text-orange-600 mt-0.5">이월된 예약이 누락되지 않도록 확인해주세요.</p>
+                        </div>
+                    </div>
+                    <div className="px-4 py-2 bg-white border border-orange-200 rounded-lg text-sm font-bold text-orange-700 hover:bg-orange-50 shadow-sm">
+                        내역 확인하기
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
@@ -332,6 +431,14 @@ export default function SettlementPage() {
                                 <RefreshCw className="w-3.5 h-3.5" /> 초기화
                             </button>
                             <button
+                                onClick={handleExclude}
+                                disabled={selectedIds.size === 0 || isConfirming}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition ml-2"
+                            >
+                                <XCircle className="w-3.5 h-3.5" />
+                                정산 제외
+                            </button>
+                            <button
                                 onClick={handleConfirm}
                                 disabled={selectedIds.size === 0 || isConfirming}
                                 className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
@@ -349,7 +456,7 @@ export default function SettlementPage() {
                                         <input type="checkbox" checked={selectedIds.size === matchResults.length && matchResults.length > 0} onChange={toggleAll} className="rounded" />
                                     </th>
                                     <th className="px-3 py-3 text-left font-semibold">상태</th>
-                                    <th className="px-3 py-3 text-left font-semibold">날짜</th>
+                                    <th className="px-3 py-3 text-left font-semibold">여행일</th>
                                     <th className="px-3 py-3 text-left font-semibold">고객명</th>
                                     <th className="px-3 py-3 text-left font-semibold">판별 상품</th>
                                     <th className="px-3 py-3 text-left font-semibold">병합 옵션</th>
@@ -368,7 +475,13 @@ export default function SettlementPage() {
                                         onClick={() => setDetailResult(r)}
                                     >
                                         <td className="px-3 py-3 text-center" onClick={e => e.stopPropagation()}>
-                                            <input type="checkbox" checked={selectedIds.has(String(idx))} onChange={() => toggleSelect(idx)} className="rounded" />
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedIds.has(String(idx))}
+                                                onClick={(e) => toggleSelect(idx, (e.nativeEvent as MouseEvent).shiftKey)}
+                                                onChange={() => { }}
+                                                className="rounded cursor-pointer"
+                                            />
                                         </td>
                                         <td className="px-3 py-3">
                                             <div className="flex items-center gap-1.5">
@@ -377,12 +490,12 @@ export default function SettlementPage() {
                                             </div>
                                         </td>
                                         <td className="px-3 py-3 text-gray-700 whitespace-nowrap">
-                                            {r.excelGroup?.tourDate || r.dbGroup?.tourDate || '-'}
+                                            {r.dbGroup?.tourDate || r.excelGroup?.tourDate || '-'}
                                         </td>
                                         <td className="px-3 py-3 text-gray-700">
                                             <div className="flex items-center gap-1">
                                                 {r.excelGroup?.customerName || r.dbGroup?.name || '-'}
-                                                {r.excelGroup && r.excelGroup.rows.length > 1 && (
+                                                {r.excelGroup && (
                                                     <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full font-bold">
                                                         {r.excelGroup.rows.length}건
                                                     </span>
@@ -401,7 +514,8 @@ export default function SettlementPage() {
                                             </span>
                                         </td>
                                         <td className="px-3 py-3 text-gray-700 text-xs">
-                                            {r.dbGroup?.mergedOption || r.excelGroup?.rows[0]?.productName || '-'}
+                                            {r.dbGroup?.mergedOption || r.excelGroup?.option ||
+                                                (r.status === 'cancelled' ? '' : r.excelGroup?.rows[0]?.productName) || '-'}
                                         </td>
                                         <td className="px-3 py-3 text-center text-gray-700">
                                             {r.dbGroup ? `${r.dbGroup.adultCount}+${r.dbGroup.childCount}` :
@@ -448,6 +562,121 @@ export default function SettlementPage() {
 
             {/* Detail Comparison Popup */}
             {detailResult && <DetailPopup result={detailResult} onClose={() => setDetailResult(null)} />}
+
+            {/* Unsettled Items Modal */}
+            {showUnsettledModal && (
+                <UnsettledItemsModal
+                    items={unsettledItems}
+                    onClose={() => setShowUnsettledModal(false)}
+                    onAction={handleUnsettledAction}
+                />
+            )}
+        </div>
+    );
+}
+
+// ==================================================
+// Unsettled Items Modal
+// ==================================================
+
+import { MergedReservation } from '@/types/settlement';
+
+function UnsettledItemsModal({ items, onClose, onAction }: { items: MergedReservation[], onClose: () => void, onAction: (ids: string[], action: 'confirm' | 'exclude') => void }) {
+    const [selected, setSelected] = useState<Set<string>>(new Set());
+
+    const toggleSelect = (id: string) => {
+        setSelected(prev => {
+            const next = new Set(prev);
+            const ids = items.find(i => i.groupKey === id)?.reservationIds || [];
+            // If already selecting some, toggle all off. If not, toggle all on.
+            // Simplified: select by Group Key
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+        });
+    };
+
+    const handleAction = (action: 'confirm' | 'exclude') => {
+        const allIds: string[] = [];
+        selected.forEach(key => {
+            const group = items.find(i => i.groupKey === key);
+            if (group) allIds.push(...group.reservationIds);
+        });
+
+        if (allIds.length === 0) return alert('선택된 항목이 없습니다.');
+        onAction(allIds, action);
+        setSelected(new Set());
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[80vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between p-5 border-b bg-orange-50">
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle className="w-5 h-5 text-orange-600" />
+                        <h2 className="text-lg font-bold text-orange-800">미정산 이월 내역 확인 ({items.length}건)</h2>
+                    </div>
+                    <button onClick={onClose} className="p-1 hover:bg-orange-100 rounded-lg text-orange-800"><X className="w-5 h-5" /></button>
+                </div>
+
+                <div className="p-0 overflow-y-auto flex-1">
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-100/50 sticky top-0">
+                            <tr>
+                                <th className="px-4 py-3 text-center w-12">
+                                    <input
+                                        type="checkbox"
+                                        className="rounded"
+                                        checked={selected.size === items.length && items.length > 0}
+                                        onChange={() => setSelected(selected.size === items.length ? new Set() : new Set(items.map(i => i.groupKey)))}
+                                    />
+                                </th>
+                                <th className="px-4 py-3 text-left">이름</th>
+                                <th className="px-4 py-3 text-left">투어일</th>
+                                <th className="px-4 py-3 text-left">옵션</th>
+                                <th className="px-4 py-3 text-center">인원</th>
+                                <th className="px-4 py-3 text-left">플랫폼</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                            {items.map((item) => (
+                                <tr key={item.groupKey} className="hover:bg-gray-50">
+                                    <td className="px-4 py-3 text-center">
+                                        <input
+                                            type="checkbox"
+                                            className="rounded"
+                                            checked={selected.has(item.groupKey)}
+                                            onChange={() => toggleSelect(item.groupKey)}
+                                        />
+                                    </td>
+                                    <td className="px-4 py-3 font-medium">{item.name}</td>
+                                    <td className="px-4 py-3 text-gray-600">{item.tourDate}</td>
+                                    <td className="px-4 py-3 text-gray-500 text-xs">{item.mergedOption}</td>
+                                    <td className="px-4 py-3 text-center">{item.totalPax}</td>
+                                    <td className="px-4 py-3 text-gray-500">{item.source}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="p-4 border-t bg-gray-50 flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-600">{selected.size}개 선택됨</span>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => handleAction('exclude')}
+                            className="px-4 py-2 bg-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-300 text-sm"
+                        >
+                            정산 제외
+                        </button>
+                        <button
+                            onClick={() => handleAction('confirm')}
+                            className="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 text-sm"
+                        >
+                            정산 확정 처리
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

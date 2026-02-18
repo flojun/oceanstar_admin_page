@@ -32,6 +32,9 @@ export interface SettlementRow {
     childCount: number;
     platformAmount: number;  // Amount from platform Excel (KRW)
     customerName: string;
+    option?: string;        // Extracted option (e.g. "09:00 (1부)") - new
+    status: string;           // "예약확정", "취소" etc.
+    receiptDate?: string;     // Extracted from Reservation ID if available (YYYY-MM-DD)
     rawData: Record<string, unknown>;
 }
 
@@ -42,6 +45,7 @@ export interface MergedReservation {
     name: string;
     receiptDate: string;
     tourDate: string;
+    allTourDates?: string[]; // All tour dates in this group (sorted)
     mergedOption: string;        // "1부 + 패러"
     originalOptions: string[];   // ["1부", "패러"]
     totalPax: number;
@@ -53,6 +57,7 @@ export interface MergedReservation {
     contact: string;
     note: string;
     pickupLocation: string;
+    settlementStatus?: 'completed' | 'excluded' | null;
 }
 
 // ---- Product Price ----
@@ -70,13 +75,15 @@ export interface ProductPrice {
 
 // ---- Match Result ----
 
-export type MatchStatus = 'normal' | 'warning' | 'error' | 'partial_refund' | 'cancelled';
+export type MatchStatus = 'normal' | 'warning' | 'error' | 'partial_refund' | 'cancelled' | 'completed' | 'excluded';
 
 // ---- Excel Grouping ----
 export interface ExcelGroup {
     groupId: string;
     customerName: string;
     tourDate: string;
+    receiptDate?: string; // Added receiptDate
+    option?: string;      // Added option (for simple display)
     totalAmount: number;
     totalPax: number;
     adultCount: number;
@@ -110,7 +117,16 @@ export interface SettlementSummary {
     error: number;
     partialRefund: number;
     cancelled: number;
+    completed: number;
+    excluded: number;
     totalExpected: number;
     totalActual: number;
     totalDiff: number;
+}
+// ---- Classifier Result ----
+export interface ClassifierResult {
+    productName: string;
+    matchedProduct: ProductPrice | null;
+    isAnomaly: boolean;
+    notes: string[];
 }

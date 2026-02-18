@@ -14,6 +14,9 @@ export interface Reservation {
   pickup_location: string;
   contact: string;
   note: string;
+  // Settlement fields
+  settlement_status?: 'completed' | 'excluded' | null;
+  settled_at?: string | null;
   vehicle_id?: string;
   vehicle_order?: number;
   // UI/Transient fields

@@ -1,7 +1,7 @@
 // Settlement matcher engine
 // Virtual merge, tag-based precision classifier, ±10% validation
 
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../supabase';
 import {
     SettlementRow,
     MergedReservation,
@@ -10,7 +10,8 @@ import {
     ProductPrice,
     SettlementSummary,
     ExcelGroup,
-} from '@/types/settlement';
+    ClassifierResult,
+} from '../../types/settlement';
 import { parseISO, differenceInCalendarDays, format } from 'date-fns';
 
 // ===========================
@@ -18,54 +19,104 @@ import { parseISO, differenceInCalendarDays, format } from 'date-fns';
 // ===========================
 
 // Helper to normalize pickup location (remove parens and content, remove spaces)
-function normalizePickup(pickup: string): string {
+export function normalizePickup(pickup: string): string {
+    // Remove content inside parentheses (e.g., "(Lobby)") and remove all spaces
     return pickup.replace(/\(.*\)/g, '').replace(/\s+/g, '').trim();
 }
 
+/**
+ * Validates and extracts date override from note.
+ * Pattern: (M/D) or (MM/DD) e.g., "(2/6)" -> "2026-02-06"
+ * Returns null if no valid date found.
+ */
+function extractDateOverride(note: string, originalYear: string): string | null {
+    const match = note.match(/\(\s*(\d{1,2})\s*\/\s*(\d{1,2})\s*\)/);
+    if (match) {
+        const month = match[1].padStart(2, '0');
+        const day = match[2].padStart(2, '0');
+        return `${originalYear}-${month}-${day}`;
+    }
+    return null;
+}
+
+/**
+ * Groups raw Excel rows.
+ * LOGIC:
+ * 1. Sort by Customer Name (asc) -> Receipt Date (asc) -> Tour Date (asc).
+ * 2. Iterate and merge if:
+ *    - Same Name AND
+ *    - (Current Date - Previous Group's LAST Date) <= 1 day.
+ * 3. Representative Date: The MIN date of the group (implicitly the first one due to sorting).
+ */
 function groupExcelRows(rows: SettlementRow[]): ExcelGroup[] {
-    // 1. Sort: Name ASC -> Date ASC (Amount sort removed)
+    // 1. Sort
     const sorted = [...rows].sort((a, b) => {
-        const nameA = a.customerName.replace(/\s+/g, '');
-        const nameB = b.customerName.replace(/\s+/g, '');
-        if (nameA !== nameB) return nameA.localeCompare(nameB);
-        return a.tourDate.localeCompare(b.tourDate);
+        const nameA = a.customerName.replace(/\s+/g, '').toLowerCase();
+        const nameB = b.customerName.replace(/\s+/g, '').toLowerCase();
+        if (nameA < nameB) return -1;
+        if (nameA > nameB) return 1;
+
+        // If names equal, sort by Date Key (Receipt Date -> Tour Date)
+        const dateA = a.receiptDate || a.tourDate;
+        const dateB = b.receiptDate || b.tourDate;
+        if (dateA < dateB) return -1;
+        if (dateA > dateB) return 1;
+        return 0;
     });
 
     const groups: ExcelGroup[] = [];
+    let currentGroup: ExcelGroup | null = null;
+    let lastDateInGroup: Date | null = null;
 
-    // 2. Grouping
     for (const row of sorted) {
-        const lastGroup = groups[groups.length - 1];
+        const normName = row.customerName.replace(/\s+/g, '').toLowerCase();
+        const rowDateStr = row.receiptDate || row.tourDate;
+        const rowDate = parseISO(rowDateStr);
 
-        let shouldMerge = false;
-        if (lastGroup) {
-            const normName = row.customerName.replace(/\s+/g, '').toLowerCase();
-            const lastNormName = lastGroup.customerName.replace(/\s+/g, '').toLowerCase();
-
-            // Criteria: Same Name + Date within 1 day based on Receipt Date
-            const lastRow = lastGroup.rows[lastGroup.rows.length - 1];
-            const diff = Math.abs(differenceInCalendarDays(parseISO(row.tourDate), parseISO(lastRow.tourDate)));
-
-            if (normName === lastNormName &&
-                diff <= 1
-            ) {
-                shouldMerge = true;
+        // Check if we can merge with current group
+        let isMergeable = false;
+        if (currentGroup && lastDateInGroup) {
+            const groupName: string = currentGroup.customerName.replace(/\s+/g, '').toLowerCase();
+            if (groupName === normName) {
+                const diff = differenceInCalendarDays(rowDate, lastDateInGroup);
+                if (Math.abs(diff) <= 1) { // 0 or 1 day diff from LAST row
+                    isMergeable = true;
+                }
             }
         }
 
-        if (shouldMerge) {
-            // Merge into last group
-            lastGroup.rows.push(row);
-            lastGroup.totalAmount += row.platformAmount;
-            lastGroup.totalPax += row.pax;
-            lastGroup.adultCount += row.adultCount;
-            lastGroup.childCount += row.childCount;
+        if (isMergeable && currentGroup) {
+            // MERGE
+            currentGroup.rows.push(row);
+            currentGroup.totalAmount += row.platformAmount;
+            currentGroup.totalPax += row.pax;
+            currentGroup.adultCount += row.adultCount;
+            currentGroup.childCount += row.childCount;
+
+            // Merge Options (Unique)
+            if (row.option) {
+                const currentOptions = (currentGroup.option || '').split(' + ').filter(Boolean);
+                if (!currentOptions.includes(row.option)) {
+                    currentGroup.option = currentGroup.option ? `${currentGroup.option} + ${row.option}` : row.option;
+                }
+            }
+
+            // Should Representative Date update? 
+            // User Request: Use MIN Date. Since sorted, currentGroup.date (first row) is already Min.
+            // We just update lastDateInGroup for the NEXT chaining check.
+            if (rowDate > lastDateInGroup!) {
+                lastDateInGroup = rowDate;
+            }
         } else {
-            // New Group
-            groups.push({
-                groupId: `${row.customerName}|${row.tourDate}|${Math.random()}`,
+            // NEW GROUP
+            // Group Key is somewhat arbitrary now since we merged days.
+            // We use the first row's data as representative.
+            currentGroup = {
+                groupId: `${normName}|${rowDateStr}`, // Key based on First Date
                 customerName: row.customerName,
-                tourDate: row.tourDate, // Earliest
+                tourDate: row.tourDate,
+                receiptDate: row.receiptDate, // Representative Receipt Date (Min)
+                option: row.option, // Representative Option (First)
                 totalAmount: row.platformAmount,
                 totalPax: row.pax,
                 adultCount: row.adultCount,
@@ -73,17 +124,20 @@ function groupExcelRows(rows: SettlementRow[]): ExcelGroup[] {
                 rows: [row],
                 isPartialRefund: false,
                 isFullCancellation: false,
-            });
+            };
+            groups.push(currentGroup);
+            lastDateInGroup = rowDate;
         }
     }
 
-    // 3. Refund Detection
+    // Refund Logic (Post-processing)
     for (const group of groups) {
         const hasNegativeRow = group.rows.some(r => r.platformAmount < 0);
+        const hasCancelText = group.rows.some(r => r.status.includes('취소') || r.productName.includes('취소'));
 
         if (group.totalAmount <= 0) {
             group.isFullCancellation = true;
-        } else if (hasNegativeRow) {
+        } else if (hasNegativeRow || hasCancelText) {
             group.isPartialRefund = true;
         }
     }
@@ -123,6 +177,7 @@ export async function fetchAndMergeReservations(
         .select('*')
         .ilike('source', sourceCode)
         .neq('status', '취소');
+    // .is('settlement_status', null); // Removed to allow matching 'Completed' items
 
     if (startDate) query = query.gte(dateField, startDate);
     if (endDate) query = query.lte(dateField, endDate);
@@ -140,45 +195,75 @@ export async function fetchAndMergeReservations(
 }
 
 /**
- * Virtual Merge: group by name + receipt_date + NORMALIZED PICKUP
+ * Virtual Merge: group by name + RECEIPT_DATE (or matching_date if missing) + PICKUP
  */
 function virtualMerge(rows: Record<string, unknown>[]): MergedReservation[] {
     const groups = new Map<string, Record<string, unknown>[]>();
 
     rows.forEach(r => {
         const name = String(r.name || '').trim();
+        const tourDate = String(r.tour_date || '').trim();
+        const note = String(r.note || '').trim();
         const receiptDate = String(r.receipt_date || '').trim();
-        // 1. Pickup Normalization: Distinct groups for different pickup locations
+
+        // 1. Date Override Logic
+        const originalYear = (tourDate || '').split('-')[0] || '2026';
+        let overrideDate = extractDateOverride(note, originalYear);
+
+        // Fix: Ignore override if it matches receiptDate (likely just a note, not a reschedule)
+        if (overrideDate === receiptDate) {
+            overrideDate = null;
+        }
+
+        const matchingDate = overrideDate || tourDate;
+
+        // 2. Pickup Normalization
         const pickup = normalizePickup(String(r.pickup_location || ''));
 
-        // Key includes pickup to separate same-name same-day different-hotel
-        const key = `${name}|${receiptDate}|${pickup}`;
+        // 3. Grouping Key
+        // User Request: Merge multiple tour dates if from same booking (Same Receipt Date).
+        const dateKey = receiptDate ? `RD:${receiptDate}` : `TD:${matchingDate}`;
+
+        // Key: Name + DateKey + Pickup
+        const key = `${name}|${dateKey}|${pickup}`;
 
         if (!groups.has(key)) groups.set(key, []);
-        groups.get(key)!.push(r);
+        groups.get(key)!.push({
+            ...r,
+            _matchingDate: matchingDate
+        });
     });
 
     const merged: MergedReservation[] = [];
 
     groups.forEach((group, key) => {
         const first = group[0];
+        // Representative Date: based on first row's matching date
+        const matchingDate = (first as any)._matchingDate;
 
         const options = group
             .map(r => String(r.option || '').trim())
             .filter(Boolean);
         const uniqueOptions = [...new Set(options)];
 
+        const allTourDates = [...new Set(group.map(r => (r as any)._matchingDate))].sort();
         const totalPax = parsePaxString(String(first.pax || ''));
 
+        // Pax/Child logic
         const allNotes = group.map(r => `${r.note || ''} ${r.pickup_location || ''}`).join(' ');
-        const childCount = extractChildCount(allNotes);
+        const extractedChild = extractChildCount(allNotes);
+        const dbChild = parseInt(String(first.child_count || '0'), 10);
+
+        // Prioritize extracted count from notes if found, otherwise use DB column
+        const childCount = extractedChild > 0 ? extractedChild : dbChild;
         const adultCount = Math.max(0, totalPax - childCount);
 
         merged.push({
             groupKey: key,
             name: String(first.name || ''),
             receiptDate: String(first.receipt_date || ''),
-            tourDate: String(first.tour_date || ''),
+            tourDate: String(matchingDate),
+            allTourDates,
             mergedOption: uniqueOptions.join(' + '),
             originalOptions: uniqueOptions,
             totalPax,
@@ -190,52 +275,110 @@ function virtualMerge(rows: Record<string, unknown>[]): MergedReservation[] {
             contact: String(first.contact || ''),
             note: String(first.note || ''),
             pickupLocation: String(first.pickup_location || ''),
+            settlementStatus: (first.settlement_status as any) || null,
         });
     });
 
     return merged;
 }
 
-// ===========================
-// 3. Helpers
-// ===========================
+export function classifyProduct(
+    options: string[],
+    productPrices: ProductPrice[]
+): ClassifierResult {
+    const tags = extractTags(options);
+    const hasTurtle = tags.has1bu || tags.has2bu || tags.hasTurtleKeyword;
+    const hasSunset = tags.has3bu || tags.hasSunset;
+    const notes: string[] = [];
 
-function parsePaxString(pax: string): number {
-    if (!pax) return 0;
-    const num = parseInt(pax.replace(/[^0-9]/g, ''), 10);
-    return isNaN(num) ? 0 : num;
-}
+    // --- Complex Combinations ---
 
-function extractChildCount(text: string): number {
-    if (!text) return 0;
-    const matches = text.match(/아\s*(\d+)/g);
-    if (!matches) return 0;
-
-    let total = 0;
-    matches.forEach(m => {
-        const num = parseInt(m.replace(/[^0-9]/g, ''), 10);
-        if (!isNaN(num)) total += num;
-    });
-    return total;
-}
-
-function formatDateShort(dateStr: string): string {
-    try {
-        return format(parseISO(dateStr), 'M/d');
-    } catch {
-        return dateStr;
+    // 1. Turtle + Parasail
+    if (hasTurtle && tags.hasParasail) {
+        const product = findProductByName(productPrices, '거북이 + 패러');
+        return {
+            productName: '거북이+패러',
+            matchedProduct: product,
+            isAnomaly: false,
+            notes,
+        };
     }
-}
 
-// ===========================
-// 4. Tag-Based Precision Classifier
-// ===========================
+    // 2. Turtle + Jetski
+    if (hasTurtle && tags.hasJetski) {
+        const product = findProductByName(productPrices, '거북이 + 제트');
+        return {
+            productName: '거북이+제트',
+            matchedProduct: product,
+            isAnomaly: false,
+            notes,
+        };
+    }
 
-interface ClassifierResult {
-    productName: string;
-    matchedProduct: ProductPrice | null;
-    isAnomaly: boolean;
-    notes: string[];
+    // 3. Parasail + Jetski
+    if (tags.hasParasail && tags.hasJetski) {
+        const product = findProductByName(productPrices, '패러 + 제트');
+        return {
+            productName: '패러+제트',
+            matchedProduct: product,
+            isAnomaly: false,
+            notes,
+        };
+    }
+
+    // --- Single Items ---
+
+    // 4. Turtle Only
+    if (hasTurtle && !tags.hasParasail && !tags.hasJetski) {
+        const product = findProductByName(productPrices, '거북이 스노클링');
+        return {
+            productName: '1/2부',
+            matchedProduct: product,
+            isAnomaly: false,
+            notes,
+        };
+    }
+
+    // 5. Sunset Only
+    if (hasSunset) {
+        const product = findProductByName(productPrices, '선셋');
+        return {
+            productName: '3부',
+            matchedProduct: product,
+            isAnomaly: false,
+            notes,
+        };
+    }
+
+    // 6. Parasail Only
+    if (tags.hasParasail && !tags.hasJetski) {
+        const product = findProductByName(productPrices, '패러세일링');
+        return {
+            productName: '패러',
+            matchedProduct: product,
+            isAnomaly: false,
+            notes,
+        };
+    }
+
+    // 7. Jetski Only
+    if (tags.hasJetski && !tags.hasParasail) {
+        const product = findProductByName(productPrices, '제트스키');
+        return {
+            productName: '제트',
+            matchedProduct: product,
+            isAnomaly: false,
+            notes,
+        };
+    }
+
+    // --- Fallback / Anomaly ---
+    return {
+        productName: '[알 수 없는 조합]',
+        matchedProduct: null,
+        isAnomaly: true,
+        notes: [`식별불가 옵션: ${options.join(', ')}`],
+    };
 }
 
 function extractTags(options: string[]): {
@@ -245,132 +388,23 @@ function extractTags(options: string[]): {
     hasSunset: boolean;
     hasParasail: boolean;
     hasJetski: boolean;
+    hasTurtleKeyword: boolean;
 } {
     const joined = options.map(o => o.toLowerCase()).join(' ');
     return {
-        has1bu: joined.includes('1부'),
-        has2bu: joined.includes('2부'),
+        has1bu: joined.includes('1부') || joined.includes('09:00'),
+        has2bu: joined.includes('2부') || joined.includes('13:00'),
         has3bu: joined.includes('3부'),
         hasSunset: joined.includes('선셋'),
         hasParasail: joined.includes('패러'),
         hasJetski: joined.includes('제트'),
+        hasTurtleKeyword: joined.includes('거북이') || joined.includes('turtle'),
     };
 }
 
-function findProductByName(productPrices: ProductPrice[], nameSubstring: string): ProductPrice | null {
-    return productPrices.find(p =>
-        p.product_name.includes(nameSubstring)
-    ) || null;
+function findProductByName(prices: ProductPrice[], namePart: string): ProductPrice | null {
+    return prices.find(p => p.product_name.includes(namePart)) || null;
 }
-
-export function classifyProduct(
-    options: string[],
-    productPrices: ProductPrice[]
-): ClassifierResult {
-    const tags = extractTags(options);
-    const hasTurtle = tags.has1bu || tags.has2bu;
-    const hasSunset = tags.has3bu || tags.hasSunset;
-    const notes: string[] = [];
-
-    // Same priority rules as before...
-    if (hasTurtle && tags.hasParasail && tags.hasJetski) {
-        notes.push('🟡 [알 수 없는 조합] 거북이+패러+제트 3종 결합은 존재하지 않는 상품입니다.');
-        const combo1 = findProductByName(productPrices, '거북이 + 패러');
-        const combo2 = findProductByName(productPrices, '패러 + 제트');
-        let fallback = combo1;
-        if (combo2 && (!fallback || combo2.adult_price > fallback.adult_price)) {
-            fallback = combo2;
-        }
-        return {
-            productName: fallback?.product_name || '[알 수 없는 조합]',
-            matchedProduct: fallback,
-            isAnomaly: true,
-            notes,
-        };
-    }
-
-    if (hasTurtle && tags.hasParasail) {
-        const product = findProductByName(productPrices, '거북이 + 패러');
-        return {
-            productName: product?.product_name || '[콤보] 거북이 + 패러',
-            matchedProduct: product,
-            isAnomaly: false,
-            notes,
-        };
-    }
-
-    if (hasTurtle && tags.hasJetski) {
-        const product = findProductByName(productPrices, '거북이 + 제트');
-        return {
-            productName: product?.product_name || '[콤보] 거북이 + 제트',
-            matchedProduct: product,
-            isAnomaly: false,
-            notes,
-        };
-    }
-
-    if (tags.hasParasail && tags.hasJetski) {
-        const product = findProductByName(productPrices, '패러 + 제트');
-        return {
-            productName: product?.product_name || '[액티비티] 패러 + 제트',
-            matchedProduct: product,
-            isAnomaly: false,
-            notes,
-        };
-    }
-
-    if (hasTurtle && !tags.hasParasail && !tags.hasJetski) {
-        const product = findProductByName(productPrices, '거북이 스노클링');
-        return {
-            productName: product?.product_name || '거북이 스노클링(1/2부)',
-            matchedProduct: product,
-            isAnomaly: false,
-            notes,
-        };
-    }
-
-    if (hasSunset) {
-        const product = findProductByName(productPrices, '선셋');
-        return {
-            productName: product?.product_name || '선셋 스노클링(3부)',
-            matchedProduct: product,
-            isAnomaly: false,
-            notes,
-        };
-    }
-
-    if (tags.hasParasail && !tags.hasJetski) {
-        const product = findProductByName(productPrices, '패러세일링');
-        return {
-            productName: product?.product_name || '패러세일링(단품)',
-            matchedProduct: product,
-            isAnomaly: false,
-            notes,
-        };
-    }
-
-    if (tags.hasJetski && !tags.hasParasail) {
-        const product = findProductByName(productPrices, '제트스키');
-        return {
-            productName: product?.product_name || '제트스키(단품)',
-            matchedProduct: product,
-            isAnomaly: false,
-            notes,
-        };
-    }
-
-    notes.push('매칭되는 기준가 상품이 없습니다.');
-    return {
-        productName: '(미분류)',
-        matchedProduct: null,
-        isAnomaly: false,
-        notes,
-    };
-}
-
-// ===========================
-// 5. Match Logic (Group vs Group)
-// ===========================
 
 export function matchSettlementData(
     rawExcelRows: SettlementRow[],
@@ -388,10 +422,11 @@ export function matchSettlementData(
 
         // 1. Refund Status
         if (exGroup.isFullCancellation) {
+            const classified = classifyProduct([exGroup.rows[0].productName], productPrices);
             results.push({
                 status: 'cancelled',
                 statusLabel: '취소',
-                classifiedProductName: '-',
+                classifiedProductName: classified.productName,
                 excelGroup: exGroup,
                 dbGroup: null,
                 matchedProduct: null,
@@ -408,34 +443,111 @@ export function matchSettlementData(
         let bestMatch: MergedReservation | null = null;
         let dateMismatchWarning: string | null = null;
 
-        for (const dbg of dbGroups) {
-            if (matchedDbKeys.has(dbg.groupKey)) continue;
+        // Strategy 1: Match by Name + Receipt Date (Exact OR ±1 day)
+        if (exGroup.receiptDate) {
+            bestMatch = dbGroups.find(dbg => {
+                if (matchedDbKeys.has(dbg.groupKey)) return false;
 
-            const dbName = dbg.name.replace(/\s+/g, '').toLowerCase();
-            const exName = exGroup.customerName.replace(/\s+/g, '').toLowerCase();
-            const nameMatch = dbName && exName && (dbName.includes(exName) || exName.includes(dbName));
+                const dbName = dbg.name.replace(/\s+/g, '').toLowerCase();
+                const exName = exGroup.customerName.replace(/\s+/g, '').toLowerCase();
+                const nameMatch = dbName && exName && (dbName === exName || dbName.includes(exName) || exName.includes(dbName));
+                if (!nameMatch) return false;
 
-            // Receipt Date matching for Source 'M' and others
-            let dbDateStr = dbg.tourDate;
-            if (dbg.source === 'M') dbDateStr = dbg.receiptDate;
+                if (!dbg.receiptDate) return false;
 
-            const exactDateMatch = dbDateStr === exGroup.tourDate;
-            let toleranceMatch = false;
+                const dbReceipt = parseISO(dbg.receiptDate);
+                const exReceipt = parseISO(exGroup.receiptDate!);
+                const diff = Math.abs(differenceInCalendarDays(dbReceipt, exReceipt));
 
-            if (!exactDateMatch && nameMatch) {
-                const diff = Math.abs(differenceInCalendarDays(parseISO(dbDateStr), parseISO(exGroup.tourDate)));
-                if (diff <= 1) toleranceMatch = true;
+                return diff <= 1;
+            }) || null;
+
+            if (bestMatch) {
+                const dbReceipt = parseISO(bestMatch.receiptDate);
+                const exReceipt = parseISO(exGroup.receiptDate!);
+                const receiptDiff = Math.abs(differenceInCalendarDays(dbReceipt, exReceipt));
+
+                if (receiptDiff > 0) {
+                    dateMismatchWarning = `⚠️ 접수일 1일 차이 (엑셀: ${formatDateShort(exGroup.receiptDate!)} vs DB: ${formatDateShort(bestMatch.receiptDate)})`;
+                }
+
+                // Check Tour Date difference
+                if (exGroup.tourDate) {
+                    const exDate = parseISO(exGroup.tourDate);
+
+                    // Find closest date in DB group
+                    let minDiff = 999;
+                    let closestDate = '';
+
+                    if (bestMatch.allTourDates && bestMatch.allTourDates.length > 0) {
+                        for (const dStr of bestMatch.allTourDates) {
+                            const d = parseISO(dStr);
+                            const diff = Math.abs(differenceInCalendarDays(d, exDate));
+                            if (diff < minDiff) {
+                                minDiff = diff;
+                                closestDate = dStr;
+                            }
+                        }
+                    } else {
+                        const d = parseISO(bestMatch.tourDate);
+                        minDiff = Math.abs(differenceInCalendarDays(d, exDate));
+                        closestDate = bestMatch.tourDate;
+                    }
+
+                    // Update bestMatch.tourDate to be the closest one for display
+                    bestMatch.tourDate = closestDate;
+
+                    if (minDiff > 1) {
+                        const existing = dateMismatchWarning ? dateMismatchWarning + ', ' : '';
+                        dateMismatchWarning = `${existing}⚠️ 투어일 불일치 (엑셀: ${formatDateShort(exGroup.tourDate)} vs DB: ${formatDateShort(bestMatch.tourDate)})`;
+                    }
+                }
+
+
             }
+        }
 
-            if (nameMatch) {
-                if (exactDateMatch) {
+        // Strategy 2: Match by Name + Tour Date (+/- 1 day)
+        if (!bestMatch) {
+            for (const dbg of dbGroups) {
+                if (matchedDbKeys.has(dbg.groupKey)) continue;
+
+                const dbName = dbg.name.replace(/\s+/g, '').toLowerCase();
+                const exName = exGroup.customerName.replace(/\s+/g, '').toLowerCase();
+                const nameMatch = dbName && exName && (dbName.includes(exName) || exName.includes(dbName));
+
+                if (!nameMatch) continue;
+
+                const exDate = parseISO(exGroup.tourDate);
+                let toleranceMatch = false;
+                let exactMatch = false;
+                let closestDate = dbg.tourDate;
+
+                if (dbg.allTourDates && dbg.allTourDates.length > 0) {
+                    for (const dStr of dbg.allTourDates) {
+                        const d = parseISO(dStr);
+                        const diff = Math.abs(differenceInCalendarDays(d, exDate));
+                        if (diff === 0) exactMatch = true;
+                        if (diff <= 1) toleranceMatch = true;
+                        if (diff === 0) closestDate = dStr;
+                        else if (!exactMatch && diff <= 1) closestDate = dStr;
+                    }
+                } else {
+                    const diff = Math.abs(differenceInCalendarDays(parseISO(dbg.tourDate), exDate));
+                    if (diff === 0) exactMatch = true;
+                    if (diff <= 1) toleranceMatch = true;
+                }
+
+                if (exactMatch) {
                     bestMatch = dbg;
+                    bestMatch.tourDate = closestDate;
                     dateMismatchWarning = null;
                     break;
                 }
                 if (toleranceMatch && !bestMatch) {
                     bestMatch = dbg;
-                    dateMismatchWarning = `⚠️ 접수일 불일치 (엑셀: ${formatDateShort(exGroup.tourDate)} vs DB: ${formatDateShort(dbDateStr)})`;
+                    bestMatch.tourDate = closestDate;
+                    dateMismatchWarning = null;
                 }
             }
         }
@@ -464,23 +576,27 @@ export function matchSettlementData(
                 notes.push(dateMismatchWarning);
             }
 
-            // --- Status Determination ---
-            if (exGroup.isPartialRefund) {
+            // Check Settlement Status first
+            if (bestMatch.settlementStatus === 'completed') {
+                status = 'completed';
+                statusLabel = '정산완료';
+                notes.push('이미 정산 확정된 내역입니다.');
+            } else if (bestMatch.settlementStatus === 'excluded') {
+                status = 'excluded';
+                statusLabel = '정산제외';
+                notes.push('정산 제외 처리된 내역입니다.');
+            } else if (exGroup.isPartialRefund) {
                 status = 'partial_refund';
                 statusLabel = '부분환불';
                 notes.push('부분 환불 내역이 포함되어 있습니다.');
             } else if (expectedAmount > 0 && diffAbs > errorMargin) {
-                // Initial Warning
                 status = 'warning';
                 statusLabel = '확인필요';
 
-                // ---- Exception Handling: On-site Payment ----
-                // Check if Amount is less than expected (diff < 0) AND triggers exist
                 const dbNotesFn = (bestMatch.note + ' ' + bestMatch.pickupLocation).toLowerCase();
-                const hasTrigger = dbNotesFn.includes('추가') || dbNotesFn.includes('$');
+                const hasTrigger = dbNotesFn.includes('추가') || dbNotesFn.includes('$') || dbNotesFn.includes('add');
 
                 if (diff < 0 && hasTrigger && classified.matchedProduct) {
-                    // Recalculate: Treat ALL Pax as Children (Base price paid on platform)
                     const altExpected = bestMatch.totalPax * classified.matchedProduct.child_price;
                     const altDiff = exGroup.totalAmount - altExpected;
 
@@ -513,10 +629,11 @@ export function matchSettlementData(
             });
 
         } else {
+            const classified = classifyProduct([exGroup.rows[0].productName], productPrices);
             results.push({
                 status: 'error',
                 statusLabel: 'DB없음',
-                classifiedProductName: '-',
+                classifiedProductName: classified.productName,
                 excelGroup: exGroup,
                 dbGroup: null,
                 matchedProduct: null,
@@ -529,12 +646,32 @@ export function matchSettlementData(
         }
     }
 
+    // 4. Identify Unmatched DB Groups (Saturday Carry-over)
+    for (const dbg of dbGroups) {
+        if (!matchedDbKeys.has(dbg.groupKey)) {
+            const date = parseISO(dbg.tourDate);
+            const isSaturday = date.getDay() === 6;
+
+            if (isSaturday) {
+                results.push({
+                    status: 'warning',
+                    statusLabel: '이월대기',
+                    classifiedProductName: '-',
+                    excelGroup: null,
+                    dbGroup: dbg,
+                    matchedProduct: null,
+                    expectedAmount: 0,
+                    actualAmount: 0,
+                    amountDiff: 0,
+                    diffPercent: 0,
+                    notes: [`🕒 토요일 투어 (${formatDateShort(dbg.tourDate)}) - 다음 주 정산 확인 필요`],
+                });
+            }
+        }
+    }
+
     return results;
 }
-
-// ===========================
-// 6. Summary
-// ===========================
 
 export function calculateSummary(results: MatchResult[]): SettlementSummary {
     const normal = results.filter(r => r.status === 'normal').length;
@@ -542,6 +679,8 @@ export function calculateSummary(results: MatchResult[]): SettlementSummary {
     const error = results.filter(r => r.status === 'error').length;
     const partialRefund = results.filter(r => r.status === 'partial_refund').length;
     const cancelled = results.filter(r => r.status === 'cancelled').length;
+    const completed = results.filter(r => r.status === 'completed').length;
+    const excluded = results.filter(r => r.status === 'excluded').length;
 
     const totalExpected = results.reduce((s, r) => s + r.expectedAmount, 0);
     const totalActual = results.reduce((s, r) => s + r.actualAmount, 0);
@@ -555,6 +694,8 @@ export function calculateSummary(results: MatchResult[]): SettlementSummary {
         error,
         partialRefund,
         cancelled,
+        completed,
+        excluded,
         totalExpected,
         totalActual,
         totalDiff: totalExpected - totalActual,
@@ -566,7 +707,10 @@ export async function confirmSettlement(reservationIds: string[]): Promise<{ suc
 
     const { error } = await supabase
         .from('reservations')
-        .update({ status: '정산완료' })
+        .update({
+            settlement_status: 'completed',
+            settled_at: new Date().toISOString(),
+        })
         .in('id', reservationIds);
 
     if (error) {
@@ -575,4 +719,83 @@ export async function confirmSettlement(reservationIds: string[]): Promise<{ suc
     }
 
     return { success: true };
+}
+
+export async function excludeSettlement(reservationIds: string[]): Promise<{ success: boolean; error?: string }> {
+    if (reservationIds.length === 0) return { success: true };
+
+    const { error } = await supabase
+        .from('reservations')
+        .update({
+            settlement_status: 'excluded',
+            settled_at: new Date().toISOString(),
+        })
+        .in('id', reservationIds);
+
+    if (error) {
+        console.error('Settlement exclusion error:', error);
+        return { success: false, error: error.message };
+    }
+
+    return { success: true };
+}
+
+/**
+ * Fetches "Unsettled Past Reservations" (Carry-over Check).
+ * Criteria: 
+ * 1. tour_date < currentMinDate
+ * 2. settlement_status IS NULL
+ * 3. status != '취소'
+ */
+export async function fetchUnsettledPastReservations(
+    sourceCode: string,
+    currentMinDate: string
+): Promise<MergedReservation[]> {
+    const { data, error } = await supabase
+        .from('reservations')
+        .select('*')
+        .ilike('source', sourceCode)
+        .lt('tour_date', currentMinDate) // Past dates only
+        .neq('status', '취소')
+        .is('settlement_status', null); // Unsettled only
+
+    if (error) {
+        console.error('fetchUnsettledPastReservations error:', error);
+        return [];
+    }
+
+    if (!data || data.length === 0) return [];
+
+    // Virtual Merge them for display
+    return virtualMerge(data);
+}
+
+// ===========================
+// Helpers
+// ===========================
+
+function parsePaxString(str: string): number {
+    const n = parseInt(str.replace(/[^0-9]/g, ''), 10);
+    return isNaN(n) ? 0 : n;
+}
+
+function extractChildCount(text: string): number {
+    if (!text) return 0;
+    // Regex to match: (아1), (아 1), (아동1), (소아1), (유아1), (Child1), (C1), (baby1)
+    // Case insensitive, optional '동', flexible whitespace
+    const regex = /(?:아|유|소|child|c|baby)(?:동)?\s*(\d+)/i;
+    const match = text.match(regex);
+    if (match) {
+        return parseInt(match[1], 10);
+    }
+    return 0;
+}
+
+function formatDateShort(dateStr: string): string {
+    if (!dateStr) return '';
+    try {
+        return format(parseISO(dateStr), 'M/d');
+    } catch {
+        return dateStr;
+    }
 }
