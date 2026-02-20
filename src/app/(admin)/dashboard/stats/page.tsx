@@ -5,7 +5,8 @@ import { supabase } from '@/lib/supabase';
 import { Reservation, SOURCE_MAPPING } from '@/types/reservation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import * as XLSX from 'xlsx';
-import { Loader2, Download, Filter } from 'lucide-react';
+import { Loader2, Download, Filter, BarChart2, FileSpreadsheet } from 'lucide-react';
+import Link from 'next/link';
 
 export default function DashboardStatsPage() {
     const [loading, setLoading] = useState(true);
@@ -232,153 +233,169 @@ export default function DashboardStatsPage() {
     }, [reservations]);
 
     return (
-        <div className="h-full w-full overflow-y-auto">
-            <div className="p-6 max-w-7xl mx-auto space-y-8 pb-20">
-                <h1 className="text-3xl font-bold text-gray-900">대시보드</h1>
-
-                {loading ? (
-                    <div className="flex h-64 items-center justify-center">
-                        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-                    </div>
-                ) : (
-                    <>
-                        {/* Date Range Filter Controls */}
-                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div className="flex items-center gap-2">
-                                <span className="font-bold text-gray-700">조회 기간:</span>
-
-                                {/* Start Date */}
-                                <div className="flex items-center gap-1">
-                                    <select
-                                        value={startYear}
-                                        onChange={(e) => setStartYear(Number(e.target.value))}
-                                        className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                    >
-                                        {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>{y}년</option>)}
-                                    </select>
-                                    <select
-                                        value={startMonth}
-                                        onChange={(e) => setStartMonth(Number(e.target.value))}
-                                        className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                    >
-                                        {Array.from({ length: 12 }, (_, i) => i + 1).map(m => <option key={m} value={m}>{m}월</option>)}
-                                    </select>
-                                </div>
-
-                                <span className="text-gray-400">~</span>
-
-                                {/* End Date */}
-                                <div className="flex items-center gap-1">
-                                    <select
-                                        value={endYear}
-                                        onChange={(e) => setEndYear(Number(e.target.value))}
-                                        className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                    >
-                                        {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>{y}년</option>)}
-                                    </select>
-                                    <select
-                                        value={endMonth}
-                                        onChange={(e) => setEndMonth(Number(e.target.value))}
-                                        className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                    >
-                                        {Array.from({ length: 12 }, (_, i) => i + 1).map(m => <option key={m} value={m}>{m}월</option>)}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Charts Section */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* 1. Monthly Total Pax */}
-                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                                <h2 className="text-lg font-bold text-gray-800 mb-4">월별 총 탑승 인원</h2>
-                                <div className="h-80">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={monthlyPaxData}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="date" />
-                                            <YAxis />
-                                            <Tooltip />
-                                            <Bar dataKey="pax" fill="#3b82f6" name="인원(명)" radius={[4, 4, 0, 0]} />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </div>
-
-                            {/* 2. Monthly Trends with Filter */}
-                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-lg font-bold text-gray-800">월별 예약 추세 (인원)</h2>
-                                    <div className="flex items-center gap-2">
-                                        <Filter className="h-4 w-4 text-gray-500" />
-                                        <select
-                                            value={trendSource}
-                                            onChange={(e) => setTrendSource(e.target.value)}
-                                            className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                        >
-                                            <option value="ALL">전체 경로</option>
-                                            {availableSources.map(src => (
-                                                <option key={src} value={src}>{src}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className="h-80">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <LineChart data={trendData}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="date" />
-                                            <YAxis />
-                                            <Tooltip />
-                                            <Line type="monotone" dataKey="count" stroke="#f59e0b" strokeWidth={2} name="인원(명)" />
-                                        </LineChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Invoice Download Section */}
-                        <div className="bg-white p-8 rounded-xl shadow-lg border-t-4 border-blue-600">
-                            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                                <div>
-                                    <h2 className="text-xl font-bold text-gray-900 mb-2">인보이스 다운로드</h2>
-                                    <p className="text-gray-500">
-                                        특정 월의 데이터를 경로별로 정리하여 엑셀 파일로 다운로드합니다.
-                                    </p>
-                                </div>
-
-                                <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg">
-                                    <select
-                                        value={selectedYear}
-                                        onChange={(e) => setSelectedYear(Number(e.target.value))}
-                                        className="block rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                                    >
-                                        {[2024, 2025, 2026, 2027].map(year => (
-                                            <option key={year} value={year}>{year}년</option>
-                                        ))}
-                                    </select>
-                                    <select
-                                        value={selectedMonth}
-                                        onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                                        className="block rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                                    >
-                                        {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                                            <option key={month} value={month}>{month}월</option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        onClick={handleDownloadInvoice}
-                                        className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                    >
-                                        <Download className="mr-2 h-4 w-4" />
-                                        인보이스 (Excel)
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </>
-                )}
+        <div className="flex flex-col gap-6">
+            {/* Tab Navigation */}
+            <div className="flex gap-1 bg-gray-100 p-1.5 rounded-xl">
+                <Link
+                    href="/dashboard/stats"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200 bg-indigo-600 text-white shadow-md"
+                >
+                    <BarChart2 className="w-4 h-4" />
+                    Overview
+                </Link>
+                <Link
+                    href="/dashboard/settlement"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700 hover:bg-white/60"
+                >
+                    <FileSpreadsheet className="w-4 h-4" />
+                    정산검토
+                </Link>
             </div>
+
+            <h1 className="text-3xl font-bold text-gray-900">대시보드</h1>
+
+            {loading ? (
+                <div className="flex h-64 items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                </div>
+            ) : (
+                <>
+                    {/* Date Range Filter Controls */}
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-2">
+                            <span className="font-bold text-gray-700">조회 기간:</span>
+
+                            {/* Start Date */}
+                            <div className="flex items-center gap-1">
+                                <select
+                                    value={startYear}
+                                    onChange={(e) => setStartYear(Number(e.target.value))}
+                                    className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>{y}년</option>)}
+                                </select>
+                                <select
+                                    value={startMonth}
+                                    onChange={(e) => setStartMonth(Number(e.target.value))}
+                                    className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    {Array.from({ length: 12 }, (_, i) => i + 1).map(m => <option key={m} value={m}>{m}월</option>)}
+                                </select>
+                            </div>
+
+                            <span className="text-gray-400">~</span>
+
+                            {/* End Date */}
+                            <div className="flex items-center gap-1">
+                                <select
+                                    value={endYear}
+                                    onChange={(e) => setEndYear(Number(e.target.value))}
+                                    className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>{y}년</option>)}
+                                </select>
+                                <select
+                                    value={endMonth}
+                                    onChange={(e) => setEndMonth(Number(e.target.value))}
+                                    className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    {Array.from({ length: 12 }, (_, i) => i + 1).map(m => <option key={m} value={m}>{m}월</option>)}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Charts Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* 1. Monthly Total Pax */}
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <h2 className="text-lg font-bold text-gray-800 mb-4">월별 총 탑승 인원</h2>
+                            <div className="h-80">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={monthlyPaxData}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="date" />
+                                        <YAxis />
+                                        <Tooltip />
+                                        <Bar dataKey="pax" fill="#3b82f6" name="인원(명)" radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        {/* 2. Monthly Trends with Filter */}
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-lg font-bold text-gray-800">월별 예약 추세 (인원)</h2>
+                                <div className="flex items-center gap-2">
+                                    <Filter className="h-4 w-4 text-gray-500" />
+                                    <select
+                                        value={trendSource}
+                                        onChange={(e) => setTrendSource(e.target.value)}
+                                        className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        <option value="ALL">전체 경로</option>
+                                        {availableSources.map(src => (
+                                            <option key={src} value={src}>{src}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="h-80">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={trendData}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="date" />
+                                        <YAxis />
+                                        <Tooltip />
+                                        <Line type="monotone" dataKey="count" stroke="#f59e0b" strokeWidth={2} name="인원(명)" />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Invoice Download Section */}
+                    <div className="bg-white p-8 rounded-xl shadow-lg border-t-4 border-blue-600">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900 mb-2">인보이스 다운로드</h2>
+                                <p className="text-gray-500">
+                                    특정 월의 데이터를 경로별로 정리하여 엑셀 파일로 다운로드합니다.
+                                </p>
+                            </div>
+
+                            <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg">
+                                <select
+                                    value={selectedYear}
+                                    onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                    className="block rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                                >
+                                    {[2024, 2025, 2026, 2027].map(year => (
+                                        <option key={year} value={year}>{year}년</option>
+                                    ))}
+                                </select>
+                                <select
+                                    value={selectedMonth}
+                                    onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                                    className="block rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                                >
+                                    {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                                        <option key={month} value={month}>{month}월</option>
+                                    ))}
+                                </select>
+                                <button
+                                    onClick={handleDownloadInvoice}
+                                    className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                >
+                                    <Download className="mr-2 h-4 w-4" />
+                                    인보이스 (Excel)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

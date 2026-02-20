@@ -22,7 +22,8 @@ import {
     PanelLeftClose,
     PanelLeftOpen,
     BarChart3,
-    Receipt
+    Receipt,
+    ClipboardCheck
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -36,7 +37,14 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
     { name: "차량용 명단", href: "/dashboard/vehicle", icon: Car },
     { name: "캘린더", href: "/dashboard/monthly", icon: Calendar },
     { name: "예약관리", href: "/dashboard/all", icon: ClipboardList },
-    { name: "크루 스케쥴", href: "/dashboard/crew", icon: Anchor },
+    {
+        name: "크루 스케쥴",
+        icon: Anchor,
+        children: [
+            { name: "스케쥴 관리", href: "/dashboard/crew" },
+            { name: "출석 현황", href: "/dashboard/crew/attendance" },
+        ]
+    },
     {
         name: "대시보드",
         icon: BarChart3,
@@ -187,7 +195,9 @@ function AdminSidebar({
                                     {!isCollapsed && isOpen && (
                                         <div className="ml-5 mt-1 space-y-0.5 border-l-2 border-gray-100 pl-3">
                                             {item.children.map(child => {
-                                                const childActive = pathname === child.href || pathname?.startsWith(child.href + '/');
+                                                const childActive = child.href === '/dashboard/crew'
+                                                    ? pathname === child.href
+                                                    : pathname === child.href || pathname?.startsWith(child.href + '/');
                                                 return (
                                                     <button
                                                         key={child.href}

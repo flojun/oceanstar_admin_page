@@ -37,6 +37,11 @@ export async function middleware(request: NextRequest) {
 
     const path = request.nextUrl.pathname
 
+    // 0. Public routes - no auth required
+    if (path.startsWith('/checkin')) {
+        return response
+    }
+
     // 1. If trying to access /login but already logged in -> Redirect to /dashboard/home
     if (path === '/login') {
         if (user) {

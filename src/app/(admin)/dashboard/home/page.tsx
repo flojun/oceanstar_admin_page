@@ -11,7 +11,8 @@ import {
     ListChecks,
     AlertCircle,
     Clock, // Icon for Waiting
-    Anchor
+    Anchor,
+    FileSpreadsheet
 } from "lucide-react";
 import NewReservationsView from "@/components/NewReservationsView";
 
@@ -68,6 +69,7 @@ export default function HomePage() {
         { name: "예약관리", href: "/dashboard/all", icon: ListChecks, color: "bg-orange-100 text-orange-600" },
         { name: "크루 스케쥴", href: "/dashboard/crew", icon: Anchor, color: "bg-teal-100 text-teal-600" },
         { name: "대시보드", href: "/dashboard/stats", icon: LayoutDashboard, color: "bg-indigo-100 text-indigo-600" },
+        { name: "정산검토", href: "/dashboard/settlement", icon: FileSpreadsheet, color: "bg-emerald-100 text-emerald-600" },
     ];
 
     if (showNewReservations) {

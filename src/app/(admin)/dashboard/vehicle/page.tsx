@@ -370,6 +370,9 @@ export default function VehiclePage() {
             // Guard: item not found (already moved by a previous event)
             if (activeIndex === -1) return prev;
 
+            // Guard: item already exists in overContainer (moved by a prior dragOver)
+            if (overItems.some((item) => item.id === active.id)) return prev;
+
             const activeItem = activeItems[activeIndex];
             if (!activeItem) return prev;
 

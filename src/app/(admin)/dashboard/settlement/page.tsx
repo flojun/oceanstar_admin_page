@@ -39,6 +39,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { addDays, parseISO, format } from 'date-fns';
+import Link from 'next/link';
+import { BarChart2 } from 'lucide-react';
 
 // ---- Color map ----
 const COLOR = {
@@ -287,6 +289,24 @@ export default function SettlementPage() {
 
     return (
         <div className="flex flex-col gap-6">
+            {/* Tab Navigation */}
+            <div className="flex gap-1 bg-gray-100 p-1.5 rounded-xl">
+                <Link
+                    href="/dashboard/stats"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700 hover:bg-white/60"
+                >
+                    <BarChart2 className="w-4 h-4" />
+                    Overview
+                </Link>
+                <Link
+                    href="/dashboard/settlement"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200 bg-emerald-600 text-white shadow-md"
+                >
+                    <FileSpreadsheet className="w-4 h-4" />
+                    정산검토
+                </Link>
+            </div>
+
             {/* Unsettled Items Banner */}
             {unsettledItems.length > 0 && (
                 <div
@@ -528,7 +548,7 @@ export default function SettlementPage() {
                                         )}>
                                             {r.amountDiff !== 0 ? `${r.amountDiff > 0 ? '+' : ''}${r.amountDiff.toLocaleString()}` : '-'}
                                         </td>
-                                        <td className="px-3 py-3 text-xs text-gray-500 max-w-[200px] truncate">
+                                        <td className="px-3 py-3 text-xs text-gray-500 min-w-[200px]">
                                             {r.notes.map((note, i) => (
                                                 <span key={i} className={cn(
                                                     "block",

@@ -5,7 +5,8 @@ import { supabase } from '@/lib/supabase';
 import { Reservation, SOURCE_MAPPING } from '@/types/reservation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import * as XLSX from 'xlsx';
-import { Loader2, Download, Filter } from 'lucide-react';
+import { Loader2, Download, Filter, BarChart2, FileSpreadsheet } from 'lucide-react';
+import Link from 'next/link';
 
 export default function DashboardStatsPage() {
     const [loading, setLoading] = useState(true);
@@ -234,6 +235,24 @@ export default function DashboardStatsPage() {
     return (
         <div className="h-full w-full overflow-y-auto">
             <div className="p-6 max-w-7xl mx-auto space-y-8 pb-20">
+                {/* Tab Navigation */}
+                <div className="flex gap-1 bg-gray-100 p-1.5 rounded-xl">
+                    <Link
+                        href="/dashboard/stats"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200 bg-indigo-600 text-white shadow-md"
+                    >
+                        <BarChart2 className="w-4 h-4" />
+                        Overview
+                    </Link>
+                    <Link
+                        href="/dashboard/settlement"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700 hover:bg-white/60"
+                    >
+                        <FileSpreadsheet className="w-4 h-4" />
+                        정산검토
+                    </Link>
+                </div>
+
                 <h1 className="text-3xl font-bold text-gray-900">대시보드</h1>
 
                 {loading ? (
