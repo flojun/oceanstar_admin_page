@@ -6,7 +6,7 @@ import { format, startOfWeek, addDays, subWeeks, addWeeks } from "date-fns";
 import { supabase } from "@/lib/supabase";
 import {
     CalendarDays, ClipboardCheck, ChevronLeft, ChevronRight,
-    QrCode, X, Loader2, AlertCircle, Download
+    QrCode, X, Loader2, AlertCircle, Download, Calendar
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -119,17 +119,19 @@ function AttendanceTable({
 // ---- Summary Cards ----
 function SummaryCards({
     members,
-    weeklyCount,
+    periodCount,
     getMismatch,
+    periodLabel,
 }: {
     members: { id: string; name: string }[];
-    weeklyCount: (id: string) => number;
+    periodCount: (id: string) => number;
     getMismatch: (id: string) => number;
+    periodLabel: string;
 }) {
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 p-4">
             {members.map(m => {
-                const count = weeklyCount(m.id);
+                const count = periodCount(m.id);
                 const mismatch = getMismatch(m.id);
                 return (
                     <div
@@ -140,8 +142,8 @@ function SummaryCards({
                             <span className="absolute top-1.5 right-1.5 text-[10px] font-bold text-red-600 bg-red-100 px-1 rounded">⚠ {mismatch}</span>
                         )}
                         <p className="font-bold text-gray-800 text-sm">{m.name}</p>
-                        <p className="text-3xl font-extrabold mt-1 text-green-600">{count}</p>
-                        <p className="text-xs text-gray-400">회 출석</p>
+                        <p className="text-3xl font-extrabold mt-1 text-blue-600">{count}</p>
+                        <p className="text-xs text-gray-400 mt-1">{periodLabel} 출석</p>
                     </div>
                 );
             })}
@@ -169,19 +171,39 @@ export default function CrewAttendancePage() {
     const endStr = format(weekDates[6], "yyyy-MM-dd");
     const checkinUrl = `${baseUrl}/checkin`;
 
+    // Bi-weekly Pay Period Calculation
+    const currentDay = currentDate.getDate();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    const periodStart = currentDay <= 15 ? new Date(currentYear, currentMonth, 1) : new Date(currentYear, currentMonth, 16);
+    const periodEnd = currentDay <= 15 ? new Date(currentYear, currentMonth, 15) : new Date(currentYear, currentMonth + 1, 0); // last day of month
+    const periodStartStr = format(periodStart, "yyyy-MM-dd");
+    const periodEndStr = format(periodEnd, "yyyy-MM-dd");
+    const periodLabel = currentDay <= 15 ? "전반기 (1일~15일)" : "후반기 (16일~말일)";
+
     useEffect(() => { setBaseUrl(window.location.origin); }, []);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const [crewRes, captainRes, crewSchedRes, shiftCapRes, crewAttRes, capAttRes] = await Promise.all([
+            // Fetch schedules for the current WEEK table view
+            const [crewRes, captainRes, crewSchedRes, shiftCapRes] = await Promise.all([
                 supabase.from("crew_members").select("*").order("sort_order"),
                 supabase.from("captains").select("*").order("created_at"),
                 supabase.from("crew_schedules").select("crew_id, date, option").gte("date", startStr).lte("date", endStr),
                 supabase.from("shift_captains").select("captain_id, date, option").gte("date", startStr).lte("date", endStr),
-                supabase.from("crew_attendance").select("crew_id, date, option").gte("date", startStr).lte("date", endStr),
-                supabase.from("captain_attendance").select("captain_id, date, option").gte("date", startStr).lte("date", endStr),
             ]);
+
+            // Expand range to include BOTH the current week AND the current pay period
+            // to ensure we have all data needed for the weekly table AND the bi-weekly summary.
+            const minDateStr = startStr < periodStartStr ? startStr : periodStartStr;
+            const maxDateStr = endStr > periodEndStr ? endStr : periodEndStr;
+
+            const [crewAttRes, capAttRes] = await Promise.all([
+                supabase.from("crew_attendance").select("crew_id, date, option").gte("date", minDateStr).lte("date", maxDateStr),
+                supabase.from("captain_attendance").select("captain_id, date, option").gte("date", minDateStr).lte("date", maxDateStr),
+            ]);
+
             setCrew((crewRes.data || []) as CrewMember[]);
             setCaptains((captainRes.data || []) as Captain[]);
             setCrewSchedules(crewSchedRes.data || []);
@@ -191,14 +213,15 @@ export default function CrewAttendancePage() {
         } finally {
             setLoading(false);
         }
-    }, [startStr, endStr]);
+    }, [startStr, endStr, periodStartStr, periodEndStr]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
     // ---- Crew Helpers ----
     const crewHasSched = (id: string, d: string, opt: string) => crewSchedules.some(s => s.crew_id === id && s.date === d && s.option === opt);
     const crewHasAtt = (id: string, d: string, opt: string) => crewAtt.some(a => a.crew_id === id && a.date === d && a.option === opt);
-    const crewCount = (id: string) => crewAtt.filter(a => a.crew_id === id).length;
+    const crewCountWeekly = (id: string) => crewAtt.filter(a => a.crew_id === id && a.date >= startStr && a.date <= endStr).length;
+    const crewCountPeriod = (id: string) => crewAtt.filter(a => a.crew_id === id && a.date >= periodStartStr && a.date <= periodEndStr).length;
     const crewMismatch = (id: string) => {
         let n = 0;
         weekDates.forEach(d => {
@@ -214,7 +237,8 @@ export default function CrewAttendancePage() {
     // ---- Captain Helpers ----
     const capHasSched = (id: string, d: string, opt: string) => shiftCaptains.some(s => s.captain_id === id && s.date === d && s.option === opt);
     const capHasAtt = (id: string, d: string, opt: string) => captainAtt.some(a => a.captain_id === id && a.date === d && a.option === opt);
-    const capCount = (id: string) => captainAtt.filter(a => a.captain_id === id).length;
+    const capCountWeekly = (id: string) => captainAtt.filter(a => a.captain_id === id && a.date >= startStr && a.date <= endStr).length;
+    const capCountPeriod = (id: string) => captainAtt.filter(a => a.captain_id === id && a.date >= periodStartStr && a.date <= periodEndStr).length;
     const capMismatch = (id: string) => {
         let n = 0;
         weekDates.forEach(d => {
@@ -290,6 +314,24 @@ export default function CrewAttendancePage() {
                     <button onClick={() => setCurrentDate(subWeeks(currentDate, 1))} className="p-1 hover:bg-gray-100 rounded"><ChevronLeft className="w-5 h-5" /></button>
                     <span className="font-bold text-base whitespace-nowrap">{format(weekDates[0], "yyyy.MM.dd")} ~ {format(weekDates[6], "MM.dd")}</span>
                     <button onClick={() => setCurrentDate(addWeeks(currentDate, 1))} className="p-1 hover:bg-gray-100 rounded"><ChevronRight className="w-5 h-5" /></button>
+
+                    <div className="relative ml-2">
+                        <label className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 cursor-pointer transition">
+                            <Calendar className="w-4 h-4" />
+                            <span>날짜 선택</span>
+                            <input
+                                type="date"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                value={format(currentDate, 'yyyy-MM-dd')}
+                                onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                                onChange={(e) => {
+                                    if (e.target.value) {
+                                        setCurrentDate(new Date(e.target.value));
+                                    }
+                                }}
+                            />
+                        </label>
+                    </div>
                 </div>
                 {totalMismatches > 0 && (
                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-sm font-semibold text-red-700">
@@ -304,11 +346,14 @@ export default function CrewAttendancePage() {
                 <>
                     {/* ===== CAPTAIN 섹션 ===== */}
                     <div className="bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden">
-                        <div className="p-4 border-b bg-amber-50 flex items-center gap-2">
-                            <span className="text-lg">⚓</span>
-                            <h2 className="font-bold text-amber-800">캡틴 주간 근무 횟수</h2>
+                        <div className="p-4 border-b bg-amber-50 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                                <span className="text-lg">⚓</span>
+                                <h2 className="font-bold text-amber-800">캡틴 급여 기간 출석 횟수</h2>
+                            </div>
+                            <span className="text-sm font-semibold text-amber-700 bg-amber-100 px-3 py-1 rounded-full">{periodLabel}</span>
                         </div>
-                        <SummaryCards members={captains} weeklyCount={capCount} getMismatch={capMismatch} />
+                        <SummaryCards members={captains} periodCount={capCountPeriod} getMismatch={capMismatch} periodLabel={periodLabel} />
                     </div>
 
                     <AttendanceTable
@@ -316,18 +361,21 @@ export default function CrewAttendancePage() {
                         weekDates={weekDates}
                         hasSchedule={capHasSched}
                         hasAttendance={capHasAtt}
-                        weeklyCount={capCount}
+                        weeklyCount={capCountWeekly}
                         getMismatch={capMismatch}
-                        label="⚓ 캡틴 스케쥴 vs 출석 비교"
+                        label={`⚓ 캡틴 주간 스케쥴 vs 출석 비교 (${format(weekDates[0], "MM/dd")}~${format(weekDates[6], "MM/dd")})`}
                     />
 
                     {/* ===== CREW 섹션 ===== */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="p-4 border-b bg-gray-50 flex items-center gap-2">
-                            <span className="text-lg">🧑‍✈️</span>
-                            <h2 className="font-bold text-gray-700">크루 주간 근무 횟수</h2>
+                        <div className="p-4 border-b bg-gray-50 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                                <span className="text-lg">🧑‍✈️</span>
+                                <h2 className="font-bold text-gray-700">크루 급여 기간 출석 횟수</h2>
+                            </div>
+                            <span className="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1 rounded-full">{periodLabel}</span>
                         </div>
-                        <SummaryCards members={crew} weeklyCount={crewCount} getMismatch={crewMismatch} />
+                        <SummaryCards members={crew} periodCount={crewCountPeriod} getMismatch={crewMismatch} periodLabel={periodLabel} />
                     </div>
 
                     <AttendanceTable
@@ -335,9 +383,9 @@ export default function CrewAttendancePage() {
                         weekDates={weekDates}
                         hasSchedule={crewHasSched}
                         hasAttendance={crewHasAtt}
-                        weeklyCount={crewCount}
+                        weeklyCount={crewCountWeekly}
                         getMismatch={crewMismatch}
-                        label="🧑‍✈️ 크루 스케쥴 vs 출석 비교"
+                        label={`🧑‍✈️ 크루 주간 스케쥴 vs 출석 비교 (${format(weekDates[0], "MM/dd")}~${format(weekDates[6], "MM/dd")})`}
                     />
 
                     {/* PIN 관리 */}
