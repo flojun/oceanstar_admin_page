@@ -349,7 +349,9 @@ export default function CrewAttendancePage() {
                         <div className="p-4 border-b bg-amber-50 flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2">
                                 <span className="text-lg">⚓</span>
-                                <h2 className="font-bold text-amber-800">캡틴 급여 기간 출석 횟수</h2>
+                                <h2 className="font-bold text-amber-800">
+                                    캡틴 출석 횟수 ({format(periodStart, "MM/dd")} ~ {format(periodEnd, "MM/dd")})
+                                </h2>
                             </div>
                             <span className="text-sm font-semibold text-amber-700 bg-amber-100 px-3 py-1 rounded-full">{periodLabel}</span>
                         </div>
@@ -371,7 +373,9 @@ export default function CrewAttendancePage() {
                         <div className="p-4 border-b bg-gray-50 flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2">
                                 <span className="text-lg">🧑‍✈️</span>
-                                <h2 className="font-bold text-gray-700">크루 급여 기간 출석 횟수</h2>
+                                <h2 className="font-bold text-gray-700">
+                                    크루 출석 횟수 ({format(periodStart, "MM/dd")} ~ {format(periodEnd, "MM/dd")})
+                                </h2>
                             </div>
                             <span className="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1 rounded-full">{periodLabel}</span>
                         </div>
