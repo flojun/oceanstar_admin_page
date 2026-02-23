@@ -121,12 +121,10 @@ function SummaryCards({
     members,
     periodCount,
     getMismatch,
-    periodLabel,
 }: {
     members: { id: string; name: string }[];
     periodCount: (id: string) => number;
     getMismatch: (id: string) => number;
-    periodLabel: string;
 }) {
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 p-4">
@@ -143,7 +141,6 @@ function SummaryCards({
                         )}
                         <p className="font-bold text-gray-800 text-sm">{m.name}</p>
                         <p className="text-3xl font-extrabold mt-1 text-blue-600">{count}</p>
-                        <p className="text-xs text-gray-400 mt-1">{periodLabel} 출석</p>
                     </div>
                 );
             })}
@@ -355,7 +352,7 @@ export default function CrewAttendancePage() {
                             </div>
                             <span className="text-sm font-semibold text-amber-700 bg-amber-100 px-3 py-1 rounded-full">{periodLabel}</span>
                         </div>
-                        <SummaryCards members={captains} periodCount={capCountPeriod} getMismatch={capMismatch} periodLabel={periodLabel} />
+                        <SummaryCards members={captains} periodCount={capCountPeriod} getMismatch={capMismatch} />
                     </div>
 
                     <AttendanceTable
@@ -379,7 +376,7 @@ export default function CrewAttendancePage() {
                             </div>
                             <span className="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1 rounded-full">{periodLabel}</span>
                         </div>
-                        <SummaryCards members={crew} periodCount={crewCountPeriod} getMismatch={crewMismatch} periodLabel={periodLabel} />
+                        <SummaryCards members={crew} periodCount={crewCountPeriod} getMismatch={crewMismatch} />
                     </div>
 
                     <AttendanceTable
