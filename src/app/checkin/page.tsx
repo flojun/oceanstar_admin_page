@@ -61,6 +61,7 @@ function CheckinContent() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [successOpt, setSuccessOpt] = useState("");
+    const [confirmingOption, setConfirmingOption] = useState<string | null>(null);
 
     const hstNow = getHSTNow();
     const todayStr = getHSTDateStr(hstNow);
@@ -145,6 +146,7 @@ function CheckinContent() {
             }
             setAttended(prev => [...prev, { option }]);
             setSuccessOpt(option);
+            setConfirmingOption(null);
             setStep("done");
         } finally {
             setLoading(false);
@@ -208,7 +210,32 @@ function CheckinContent() {
                                 <p className="text-xs text-gray-400 mt-1">Today · {todayStr} (HST)</p>
                             </div>
 
-                            {availableOptions.length === 0 ? (
+                            {confirmingOption ? (
+                                <div className="space-y-4 py-4">
+                                    <div className="text-center p-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                                        <p className="text-sm text-gray-500">You selected</p>
+                                        <p className="text-xl font-bold text-gray-900">{SESSION_LABEL[confirmingOption]}</p>
+                                        <p className="text-sm text-gray-400 mt-1">{SESSION_TIME[confirmingOption]}</p>
+                                    </div>
+                                    <p className="text-center font-semibold text-gray-800">Would you like to check in?</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => setConfirmingOption(null)}
+                                            className="py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition"
+                                            disabled={loading}
+                                        >
+                                            No, Back
+                                        </button>
+                                        <button
+                                            onClick={() => handleCheckin(confirmingOption)}
+                                            className={`py-3 ${SESSION_STYLE[confirmingOption]} text-white font-bold rounded-xl transition flex items-center justify-center gap-2`}
+                                            disabled={loading}
+                                        >
+                                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Yes, Confirm"}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : availableOptions.length === 0 ? (
                                 <div className="text-center py-6 text-gray-400">
                                     <p className="text-sm font-semibold">No check-in available right now.</p>
                                     <div className="mt-3 text-xs space-y-1">
@@ -227,13 +254,13 @@ function CheckinContent() {
                                         return (
                                             <button
                                                 key={opt}
-                                                onClick={() => handleCheckin(opt)}
+                                                onClick={() => setConfirmingOption(opt)}
                                                 disabled={!avail || alreadyDone || loading}
                                                 className={`w-full py-4 rounded-xl font-bold text-base transition flex items-center justify-between px-5 ${alreadyDone
-                                                        ? "bg-green-100 text-green-700 border-2 border-green-400 cursor-default"
-                                                        : avail
-                                                            ? `${SESSION_STYLE[opt]} text-white`
-                                                            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                                    ? "bg-green-100 text-green-700 border-2 border-green-400 cursor-default"
+                                                    : avail
+                                                        ? `${SESSION_STYLE[opt]} text-white`
+                                                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
                                                     }`}
                                             >
                                                 <span>{SESSION_LABEL[opt]}</span>
