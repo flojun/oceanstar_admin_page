@@ -63,13 +63,33 @@ export async function middleware(request: NextRequest) {
         }
     }
 
+    // 3. Agency routes
+    if (path.startsWith('/agency-')) {
+        const agencyCookie = request.cookies.get('agency_session');
+
+        if (path === '/agency-login') {
+            if (agencyCookie) {
+                return NextResponse.redirect(new URL('/agency-dashboard', request.url))
+            }
+            return response
+        }
+
+        if (path.startsWith('/agency-dashboard')) {
+            if (!agencyCookie) {
+                return NextResponse.redirect(new URL('/agency-login', request.url))
+            }
+        }
+    }
+
     return response
 }
 
 export const config = {
     matcher: [
         '/login',
+        '/agency-login',
         '/dashboard/:path*',
+        '/agency-dashboard/:path*',
         '/((?!_next/static|_next/image|favicon.ico).*)',
     ],
 }

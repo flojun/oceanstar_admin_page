@@ -19,6 +19,9 @@ export interface Reservation {
   settled_at?: string | null;
   vehicle_id?: string;
   vehicle_order?: number;
+  // Admin fields
+  agency_id?: string | null;
+
   // UI/Transient fields
   isNew?: boolean;
   _grid_id?: string;

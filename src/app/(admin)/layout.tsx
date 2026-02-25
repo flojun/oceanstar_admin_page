@@ -23,9 +23,12 @@ import {
     PanelLeftOpen,
     BarChart3,
     Receipt,
-    ClipboardCheck
+    ClipboardCheck,
+    Building2,
+    Bell
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import NotificationBell from "@/components/NotificationBell";
 
 type SidebarItem =
     | { name: string; href: string; icon: React.ComponentType<{ className?: string }>; children?: undefined }
@@ -53,6 +56,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
             { name: "정산 검토", href: "/dashboard/settlement" },
         ]
     },
+    { name: "여행사 관리", href: "/dashboard/agencies", icon: Building2 },
 ];
 
 function AdminSidebar({
@@ -128,13 +132,16 @@ function AdminSidebar({
             )}>
                 {/* Logo & Toggle */}
                 <div className={cn(
-                    "h-16 flex items-center border-b border-gray-100",
+                    "h-16 flex flex-row items-center border-b border-gray-100",
                     isCollapsed ? "justify-center px-0" : "justify-between px-4"
                 )}>
                     {!isCollapsed && (
-                        <h1 className="text-xl font-extrabold text-blue-600 tracking-tight truncate">
-                            OCEANSTAR
-                        </h1>
+                        <div className="flex items-center gap-2 flex-1">
+                            <h1 className="text-xl font-extrabold text-blue-600 tracking-tight truncate pt-1">
+                                OCEANSTAR
+                            </h1>
+                            <NotificationBell />
+                        </div>
                     )}
 
                     <button
