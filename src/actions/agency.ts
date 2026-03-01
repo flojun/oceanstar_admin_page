@@ -3,12 +3,17 @@
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { ReservationInsert, ReservationUpdate } from "@/types/reservation";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "oceanstar-agency-super-secret-key-change-in-prod";
 
 // Server action client
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! // Use anon key since service key is missing
-);
+// We MUST use the service role key to query the backend since we locked down the `agencies` table RLS.
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function loginAgency(login_id: string, password_input: string) {
     try {
@@ -22,13 +27,22 @@ export async function loginAgency(login_id: string, password_input: string) {
             return { success: false, error: "존재하지 않는 아이디입니다." };
         }
 
-        // In a real prod environment, use bcrypt instead of plain text password.
-        if (agency.password !== password_input) {
+        // Use bcrypt for secure password comparison
+        const isMatch = await bcrypt.compare(password_input, agency.password);
+        if (!isMatch) {
             return { success: false, error: "비밀번호가 일치하지 않습니다." };
         }
 
         const c = await cookies();
-        c.set("agency_session", agency.id, {
+
+        // Create JWT payload
+        const token = jwt.sign(
+            { id: agency.id, name: agency.name },
+            JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        c.set("agency_session", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             maxAge: 60 * 60 * 24 * 7, // 1 week
@@ -57,9 +71,17 @@ export async function logoutAgency() {
 
 export async function getAgencySession() {
     const c = await cookies();
-    const id = c.get("agency_session")?.value;
-    const name = c.get("agency_name")?.value;
-    return { id, name };
+    const token = c.get("agency_session")?.value;
+
+    if (!token) return { id: undefined, name: undefined };
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET) as { id: string; name: string };
+        return { id: decoded.id, name: decoded.name };
+    } catch (err) {
+        // Token is invalid or expired
+        return { id: undefined, name: undefined };
+    }
 }
 
 export async function createAgencyReservation(reservation: ReservationInsert) {

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { Agency } from "@/types/agency";
 import { Loader2, Plus, Trash2, Edit2, Copy, ExternalLink } from "lucide-react";
+import { getAgencies, createAgency, updateAgency, deleteAgency } from "@/actions/adminAgency";
 
 export default function AgencyManagementPage() {
     const [agencies, setAgencies] = useState<Agency[]>([]);
@@ -20,16 +20,13 @@ export default function AgencyManagementPage() {
 
     const fetchAgencies = async () => {
         setLoading(true);
-        const { data, error } = await supabase
-            .from("agencies")
-            .select("id, name, login_id, created_at")
-            .order("created_at", { ascending: false });
+        const res = await getAgencies();
 
-        if (error) {
-            console.error(error);
+        if (!res.success) {
+            console.error(res.error);
             alert("여행사 목록을 불러오지 못했습니다.");
         } else {
-            setAgencies(data as Agency[]);
+            setAgencies(res.data as Agency[]);
         }
         setLoading(false);
     };
@@ -62,14 +59,14 @@ export default function AgencyManagementPage() {
 
         setFormLoading(true);
         if (modalMode === 'add') {
-            const { error } = await supabase.from("agencies").insert({
+            const res = await createAgency({
                 name: formData.name,
                 login_id: formData.login_id,
                 password: formData.password
             });
-            if (error) {
-                if (error.code === '23505') alert("이미 존재하는 아이디입니다.");
-                else alert("추가 실패: " + error.message);
+            if (!res.success) {
+                if (res.code === '23505') alert("이미 존재하는 아이디입니다.");
+                else alert("추가 실패: " + res.error);
             } else {
                 fetchAgencies();
                 handleCloseModal();
@@ -78,10 +75,10 @@ export default function AgencyManagementPage() {
             const updates: any = { name: formData.name, login_id: formData.login_id };
             if (formData.password) updates.password = formData.password; // Only update if provided
 
-            const { error } = await supabase.from("agencies").update(updates).eq('id', selectedAgency.id);
-            if (error) {
-                if (error.code === '23505') alert("이미 존재하는 아이디입니다.");
-                else alert("수정 실패: " + error.message);
+            const res = await updateAgency(selectedAgency.id, updates);
+            if (!res.success) {
+                if (res.code === '23505') alert("이미 존재하는 아이디입니다.");
+                else alert("수정 실패: " + res.error);
             } else {
                 fetchAgencies();
                 handleCloseModal();
@@ -93,9 +90,9 @@ export default function AgencyManagementPage() {
     const handleDelete = async (id: string, name: string) => {
         if (!confirm(`정말로 '${name}' 여행사를 삭제하시겠습니까? 관련 예약의 agency_id는 null로 처리됩니다.`)) return;
 
-        const { error } = await supabase.from("agencies").delete().eq('id', id);
-        if (error) {
-            alert("삭제 실패: " + error.message);
+        const res = await deleteAgency(id);
+        if (!res.success) {
+            alert("삭제 실패: " + res.error);
         } else {
             fetchAgencies();
         }
