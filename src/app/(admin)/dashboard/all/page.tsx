@@ -502,7 +502,7 @@ function AllReservationsContent() {
         try {
             const { data, error } = await supabase
                 .from("reservations")
-                .select("pax, option")
+                .select("id, pax, option")
                 .eq("tour_date", row.tour_date)
                 .neq("status", "취소");
 
@@ -511,6 +511,8 @@ function AllReservationsContent() {
             let dbTotal = 0;
             if (data) {
                 data.forEach(r => {
+                    // Exclude the current row to prevent double-counting when editing existing row
+                    if (row.id && !row.isNew && r.id === row.id) return;
                     if (getOptionGroupKey(r.option) === group) dbTotal += parsePax(r.pax);
                 });
             }

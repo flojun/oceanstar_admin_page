@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Reservation, ReservationStatus } from "@/types/reservation";
-import { createAgencyReservation, updateAgencyReservation, cancelAgencyReservation } from "@/actions/agency";
-import { Loader2, PlusCircle, Calendar as CalIcon, Edit, Trash2, ChevronDown, Search } from "lucide-react";
+import { createAgencyReservation, updateAgencyReservation, cancelAgencyReservation, getAgencyAvailabilityWeekly } from "@/actions/agency";
+import { Loader2, PlusCircle, Calendar as CalIcon, Edit, Trash2, ChevronDown, Search, Info } from "lucide-react";
 
 export default function AgencyDashboardPage() {
     const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -13,7 +13,11 @@ export default function AgencyDashboardPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterDate, setFilterDate] = useState("");
 
-    const [activeTab, setActiveTab] = useState<'registration' | 'date_view'>('registration');
+    const [activeTab, setActiveTab] = useState<'availability' | 'registration' | 'date_view'>('registration');
+
+    const [availability, setAvailability] = useState<{ date: string; availability: { option: string; status: string }[] }[]>([]);
+    const [availabilityLoading, setAvailabilityLoading] = useState(false);
+    const [availabilityDate, setAvailabilityDate] = useState("");
 
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
@@ -65,7 +69,63 @@ export default function AgencyDashboardPage() {
             if (session.name) setAgencyName(session.name);
         };
         getAgencyContext();
+
+        // Default availability date to today (or tomorrow if late)
+        // Just use today's local date as default
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        setAvailabilityDate(`${yyyy}-${mm}-${dd}`);
     }, []);
+
+    // Utility to get Monday and Sunday of a given week (returns Mon-Sun range)
+    const getWeekRange = (dateString: string) => {
+        // Parse as local time by treating date as local noon (avoids UTC midnight -> wrong day in negative UTC offsets)
+        const d = new Date(dateString + 'T12:00:00');
+        const day = d.getDay();
+        // If Sunday (0), shift to the coming Monday
+        const diffToMonday = day === 0 ? 1 : 1 - day;
+
+        const monday = new Date(d);
+        monday.setDate(d.getDate() + diffToMonday);
+
+        // Include Sunday at end of week (Mon + 6 days)
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+
+        // Format as YYYY-MM-DD using local calendar (not UTC)
+        const fmt = (dt: Date) => {
+            const y = dt.getFullYear();
+            const m = String(dt.getMonth() + 1).padStart(2, '0');
+            const dd = String(dt.getDate()).padStart(2, '0');
+            return `${y}-${m}-${dd}`;
+        };
+
+        return {
+            start: fmt(monday),
+            end: fmt(sunday)
+        };
+    };
+
+    useEffect(() => {
+        if (!availabilityDate || activeTab !== 'availability') return;
+
+        const fetchAvailability = async () => {
+            setAvailabilityLoading(true);
+            const { start, end } = getWeekRange(availabilityDate);
+
+            const result = await getAgencyAvailabilityWeekly(start, end);
+            if (result.success && result.data) {
+                setAvailability(result.data);
+            } else {
+                setAvailability([]);
+            }
+            setAvailabilityLoading(false);
+        };
+
+        fetchAvailability();
+    }, [availabilityDate, activeTab]);
 
     const openForm = (mode: 'add' | 'edit', res?: Reservation) => {
         setFormMode(mode);
@@ -178,23 +238,149 @@ export default function AgencyDashboardPage() {
         <div className="space-y-6 sm:space-y-8 pb-32">
 
             {/* 상단 탭 네비게이션 */}
-            <div className="flex bg-white rounded-2xl sm:rounded-3xl p-2 shadow-sm border-2 border-gray-100 mb-4 sm:mb-8">
+            <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-8">
+                {/* 예약 가능 현황 탭 - 초록 */}
+                <button
+                    onClick={() => { setActiveTab('availability'); setIsFormOpen(false); }}
+                    className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 px-3 py-4 sm:py-5 rounded-2xl font-bold text-sm sm:text-base md:text-lg transition-all shadow-sm border-2 ${activeTab === 'availability'
+                        ? 'bg-emerald-500 border-emerald-500 text-white shadow-emerald-200 shadow-lg scale-[1.02]'
+                        : 'bg-white border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300'
+                        }`}
+                >
+                    <CalIcon className={`w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ${activeTab === 'availability' ? 'text-white' : 'text-emerald-500'}`} />
+                    <span className="text-center leading-tight">예약 가능<br className="sm:hidden" /> 현황</span>
+                </button>
+
+                {/* 예약 등록 및 목록 탭 - 파랑 */}
                 <button
                     onClick={() => { setActiveTab('registration'); setIsFormOpen(false); }}
-                    className={`flex-1 py-3 sm:py-4 text-center text-lg sm:text-2xl font-bold rounded-xl sm:rounded-2xl transition-all ${activeTab === 'registration' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'}`}
+                    className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 px-3 py-4 sm:py-5 rounded-2xl font-bold text-sm sm:text-base md:text-lg transition-all shadow-sm border-2 ${activeTab === 'registration'
+                        ? 'bg-blue-600 border-blue-600 text-white shadow-blue-200 shadow-lg scale-[1.02]'
+                        : 'bg-white border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300'
+                        }`}
                 >
-                    예약 등록 및 현황
+                    <PlusCircle className={`w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ${activeTab === 'registration' ? 'text-white' : 'text-blue-500'}`} />
+                    <span className="text-center leading-tight">예약 등록<br className="sm:hidden" /> 및 목록</span>
                 </button>
+
+                {/* 날짜별 보기 탭 - 보라 */}
                 <button
                     onClick={() => { setActiveTab('date_view'); setIsFormOpen(false); }}
-                    className={`flex-1 py-3 sm:py-4 text-center text-lg sm:text-2xl font-bold rounded-xl sm:rounded-2xl transition-all ${activeTab === 'date_view' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'}`}
+                    className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 px-3 py-4 sm:py-5 rounded-2xl font-bold text-sm sm:text-base md:text-lg transition-all shadow-sm border-2 ${activeTab === 'date_view'
+                        ? 'bg-violet-600 border-violet-600 text-white shadow-violet-200 shadow-lg scale-[1.02]'
+                        : 'bg-white border-violet-200 text-violet-600 hover:bg-violet-50 hover:border-violet-300'
+                        }`}
                 >
-                    날짜별 보기
+                    <Search className={`w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ${activeTab === 'date_view' ? 'text-white' : 'text-violet-500'}`} />
+                    <span className="text-center leading-tight">날짜별<br className="sm:hidden" /> 보기</span>
                 </button>
             </div>
 
+            {/* 예약 가능 현황 탭 */}
+            {activeTab === 'availability' && (
+                <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-gray-200 shadow-sm flex flex-col items-center justify-center">
+                        <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <CalIcon className="w-6 h-6 text-blue-500" /> 조회하실 날짜를 선택해주세요
+                        </h3>
+                        <p className="text-gray-500 mb-4">해당 날짜가 포함된 주(월~토)의 예약 현황을 보여줍니다.</p>
+                        <div className="w-full max-w-md relative">
+                            <input
+                                type="date"
+                                value={availabilityDate}
+                                onChange={(e) => setAvailabilityDate(e.target.value)}
+                                className="w-full px-6 py-4 sm:py-5 bg-blue-50 border-2 border-blue-200 rounded-xl text-xl sm:text-2xl font-bold text-blue-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition text-center"
+                            />
+                        </div>
+                    </div>
+
+                    {availabilityLoading ? (
+                        <div className="py-20 flex justify-center items-center">
+                            <Loader2 className="w-16 h-16 text-blue-600 animate-spin" />
+                            <span className="ml-4 text-2xl font-bold text-blue-800">현황을 불러오는 중입니다...</span>
+                        </div>
+                    ) : availabilityDate === "" ? (
+                        <div className="bg-white rounded-3xl p-16 text-center border-2 border-blue-100 border-dashed">
+                            <CalIcon className="w-20 h-20 text-blue-300 mx-auto mb-6" />
+                            <h3 className="text-3xl font-bold text-blue-800">날짜를 선택해 주세요</h3>
+                            <p className="text-xl text-blue-600 mt-4">원하시는 날짜를 선택하시면 해당 주간의 예약 가능 현황이 보입니다.</p>
+                        </div>
+                    ) : availability.length === 0 ? (
+                        <div className="bg-white rounded-3xl p-16 text-center border-2 border-gray-200 border-dashed">
+                            <Info className="w-20 h-20 text-gray-300 mx-auto mb-6" />
+                            <h3 className="text-2xl font-bold text-gray-500">해당 날짜 범위에 조회된 정보가 없습니다.</h3>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+                            {availability.map((dayData) => {
+                                // Parse as local noon to get correct day-of-week label
+                                const d = new Date(dayData.date + 'T12:00:00');
+                                const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
+                                const formattedDate = `${d.getMonth() + 1}월 ${d.getDate()}일 (${dayNames[d.getDay()]})`;
+                                const todayLocal = (() => {
+                                    const t = new Date();
+                                    const y = t.getFullYear();
+                                    const mo = String(t.getMonth() + 1).padStart(2, '0');
+                                    const dy = String(t.getDate()).padStart(2, '0');
+                                    return `${y}-${mo}-${dy}`;
+                                })();
+                                const isToday = dayData.date === todayLocal;
+
+                                return (
+                                    <div key={dayData.date} className={`p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 ${isToday ? 'border-blue-400 bg-blue-50/30 shadow-md' : 'border-gray-200 bg-white shadow-sm'} flex flex-col`}>
+                                        <div className="border-b-2 border-gray-100 pb-4 mb-4 flex justify-between items-center">
+                                            <h4 className={`text-xl sm:text-2xl font-black ${isToday ? 'text-blue-800' : 'text-gray-900'}`}>{formattedDate}</h4>
+                                            {isToday && <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">오늘</span>}
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            {dayData.availability.length === 0 ? (
+                                                <div className="text-center py-6 text-gray-400 font-bold">운영 안함</div>
+                                            ) : (
+                                                dayData.availability.map((item) => {
+                                                    let statusColor = "text-gray-800";
+                                                    let bgColor = "bg-gray-100";
+                                                    let borderColor = "border-gray-200";
+
+                                                    if (item.status === "출발 미정") {
+                                                        statusColor = "text-yellow-700";
+                                                        bgColor = "bg-yellow-50";
+                                                        borderColor = "border-yellow-200";
+                                                    } else if (item.status === "예약 가능") {
+                                                        statusColor = "text-green-700";
+                                                        bgColor = "bg-green-50";
+                                                        borderColor = "border-green-200";
+                                                    } else if (item.status === "마감 임박") {
+                                                        statusColor = "text-orange-700";
+                                                        bgColor = "bg-orange-50";
+                                                        borderColor = "border-orange-200";
+                                                    } else if (item.status === "마감") {
+                                                        statusColor = "text-red-700";
+                                                        bgColor = "bg-red-50";
+                                                        borderColor = "border-red-200";
+                                                    }
+
+                                                    return (
+                                                        <div key={item.option} className={`flex justify-between items-center p-3 rounded-xl border ${borderColor} ${bgColor}`}>
+                                                            <span className="text-lg font-black text-gray-800">{item.option}</span>
+                                                            <span className={`text-lg font-bold px-3 py-1 rounded-full bg-white shadow-sm ${statusColor}`}>
+                                                                {item.status}
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            )}
+
             {activeTab === 'registration' && !isFormOpen && (
-                <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-blue-50 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-blue-100 shadow-sm">
+                <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-blue-50 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-blue-100 shadow-sm animate-in fade-in duration-300">
                     <div>
                         <h2 className="text-2xl sm:text-3xl font-bold text-blue-900">예약 현황</h2>
                         <p className="text-lg sm:text-xl text-blue-700 mt-1 sm:mt-2 font-medium">등록하신 예약 목록을 확인하세요.</p>
