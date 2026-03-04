@@ -554,6 +554,13 @@ export default function AgencyDashboardPage() {
                                     </button>
                                 )}
                             </div>
+                            {/* 전체보기 버튼 */}
+                            <button
+                                onClick={() => { setSearchTerm(""); setFilterDate(""); }}
+                                className="whitespace-nowrap px-6 py-3 sm:py-4 bg-gray-100 text-gray-700 text-lg sm:text-xl font-bold rounded-xl border-2 border-gray-200 shadow-sm hover:bg-gray-200 active:bg-gray-300 transition-colors"
+                            >
+                                전체보기
+                            </button>
                         </div>
                     )}
 
