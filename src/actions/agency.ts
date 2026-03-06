@@ -8,15 +8,16 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "oceanstar-agency-super-secret-key-change-in-prod";
 
-// Server action client
-// We MUST use the service role key to query the backend since we locked down the `agencies` table RLS.
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Helper to get supabase client on demand instead of at build time
+const getSupabase = () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+    const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim();
+    return createClient(supabaseUrl, supabaseKey);
+};
 
 export async function loginAgency(login_id: string, password_input: string) {
     try {
+        const supabase = getSupabase();
         const { data: agency, error } = await supabase
             .from("agencies")
             .select("id, password, name")
@@ -88,6 +89,7 @@ export async function getAgencySession() {
 async function checkCapacity(tourDate: string, option: string, additionalPax: number, excludeId?: string): Promise<string | null> {
     if (!tourDate || !option) return null;
 
+    const supabase = getSupabase();
     let query = supabase
         .from("reservations")
         .select("pax")
@@ -136,6 +138,7 @@ export async function createAgencyReservation(reservation: ReservationInsert) {
         const capError = await checkCapacity(reservation.tour_date, reservation.option, newPaxNum);
         if (capError) return { success: false, error: capError };
 
+        const supabase = getSupabase();
         // 1. Insert reservation
         const { data, error } = await supabase
             .from("reservations")
@@ -168,6 +171,7 @@ export async function updateAgencyReservation(id: string, updates: ReservationUp
     if (!session.id) return { success: false, error: "Unauthorized" };
 
     try {
+        const supabase = getSupabase();
         // Validation: Check capacity if date, option, or pax changed
         if (updates.tour_date || updates.option || updates.pax) {
             // Need to know existing details first
@@ -226,6 +230,7 @@ export async function cancelAgencyReservation(id: string, reserverName: string) 
     if (!session.id) return { success: false, error: "Unauthorized" };
 
     try {
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from("reservations")
             .update({ status: "취소요청" })
@@ -255,6 +260,7 @@ export async function getAgencyAvailabilityWeekly(startDate: string, endDate: st
     if (!session.id) return { success: false, error: "Unauthorized" };
 
     try {
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from("reservations")
             .select("option, pax, status, tour_date")
@@ -295,7 +301,7 @@ export async function getAgencyAvailabilityWeekly(startDate: string, endDate: st
             }
 
             // Filter reservations for this specific date
-            const daysData = data?.filter(r => r.tour_date === dateStr) || [];
+            const daysData = data?.filter((r: any) => r.tour_date === dateStr) || [];
 
             // Tally pax
             if (daysData.length > 0) {

@@ -2,11 +2,6 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getAgencySession } from '@/actions/agency';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
 // Maps agency login_id -> legacy source field values used in the reservations table.
 // Add entries here whenever a new agency has existing reservations entered under a different source name.
 const SOURCE_MAP: Record<string, string[]> = {
@@ -19,6 +14,11 @@ const SOURCE_MAP: Record<string, string[]> = {
 
 export async function GET() {
     try {
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+
         const session = await getAgencySession();
 
         if (!session.id || !session.name) {

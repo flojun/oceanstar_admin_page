@@ -5,13 +5,16 @@ import { Agency } from "@/types/agency";
 import bcrypt from "bcryptjs";
 
 // Ensure this uses the service role key to bypass the new restrictive RLS
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim();
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Helper to get supabase client on demand instead of at build time
+const getSupabase = () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+    const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim();
+    return createClient(supabaseUrl, supabaseKey);
+};
 
 export async function getAgencies() {
     try {
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from("agencies")
             .select("id, name, login_id, created_at")
@@ -34,6 +37,7 @@ export async function createAgency(agencyData: { name: string; login_id: string;
             finalPassword = await bcrypt.hash(finalPassword, 10);
         }
 
+        const supabase = getSupabase();
         const { data, error } = await supabase.from("agencies").insert({
             name: agencyData.name,
             login_id: agencyData.login_id,
@@ -61,6 +65,7 @@ export async function updateAgency(id: string, updates: { name?: string; login_i
             payload.password = await bcrypt.hash(payload.password, 10);
         }
 
+        const supabase = getSupabase();
         const { data, error } = await supabase.from("agencies").update(payload).eq('id', id).select().single();
 
         if (error) {
@@ -77,6 +82,7 @@ export async function updateAgency(id: string, updates: { name?: string; login_i
 
 export async function deleteAgency(id: string) {
     try {
+        const supabase = getSupabase();
         const { error } = await supabase.from("agencies").delete().eq('id', id);
 
         if (error) throw error;

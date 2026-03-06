@@ -31,8 +31,7 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            // Append dummy domain to create email
-            const email = `${username}@oceanstar.com`;
+            const email = username;
 
             const { error } = await supabase.auth.signInWithPassword({
                 email,
