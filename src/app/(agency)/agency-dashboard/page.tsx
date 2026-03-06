@@ -592,7 +592,7 @@ export default function AgencyDashboardPage() {
                                                 <CalIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" /> {res.tour_date}
                                             </span>
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs sm:text-sm font-bold ml-2 ${['취소', '취소요청'].includes(res.status) ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                                                {res.status}
+                                                {res.status === '예약확정' ? 'Confirmed' : res.status === '취소' ? 'Cancelled' : res.status === '취소요청' ? 'Cancel Request' : res.status === '예약대기' ? 'Pending' : res.status}
                                             </span>
                                         </div>
                                         {/* 텍스트 영역 (이름, 인원수, 옵션, 픽업) */}
@@ -602,15 +602,15 @@ export default function AgencyDashboardPage() {
                                             </span>
                                             <span className="text-gray-300 text-lg sm:text-xl leading-none mt-0.5">|</span>
                                             <span className="text-lg sm:text-xl text-blue-600 font-bold shrink-0 leading-none mt-0.5">
-                                                {res.pax}
+                                                Pax: {res.pax}
                                             </span>
                                             <span className="text-gray-300 text-lg sm:text-xl leading-none mt-0.5">|</span>
                                             <span className="inline-flex items-center justify-center px-2 py-1 text-lg sm:text-xl font-bold text-gray-700 border border-gray-200 rounded-md shrink-0 bg-gray-50 leading-none mt-0.5">
-                                                {res.option}
+                                                Option: {res.option}
                                             </span>
                                             <span className="text-gray-300 text-lg sm:text-xl leading-none mt-0.5">|</span>
                                             <div className="text-lg sm:text-xl text-gray-800 flex-1 flex items-center min-w-0">
-                                                <span className="inline-flex items-center justify-center bg-gray-100 text-gray-500 px-2 py-1 rounded-md text-sm sm:text-base mr-2 font-bold shrink-0 leading-none mt-0.5">픽업</span>
+                                                <span className="inline-flex items-center justify-center bg-gray-100 text-gray-500 px-2 py-1 rounded-md text-sm sm:text-base mr-2 font-bold shrink-0 leading-none mt-0.5">Pickup</span>
                                                 <span className="truncate leading-none mt-0.5 font-bold">{res.pickup_location}</span>
                                             </div>
                                         </div>
@@ -622,12 +622,12 @@ export default function AgencyDashboardPage() {
                                             <button
                                                 onClick={() => openForm('edit', res)}
                                                 className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 p-2 text-sm font-bold text-gray-600 bg-gray-50 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-gray-100">
-                                                <Edit className="w-4 h-4" /> 수정
+                                                <Edit className="w-4 h-4" /> Edit
                                             </button>
                                             <button
                                                 onClick={() => handleCancel(res.id, res.name)}
                                                 className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 p-2 text-sm font-bold text-red-500 bg-red-50 hover:text-red-700 hover:bg-red-100 rounded-lg transition-colors border border-red-100">
-                                                <Trash2 className="w-4 h-4" /> 삭제
+                                                <Trash2 className="w-4 h-4" /> Delete
                                             </button>
                                         </div>
                                     )}
@@ -681,7 +681,7 @@ export default function AgencyDashboardPage() {
                                                 <CalIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" /> {res.tour_date}
                                             </span>
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs sm:text-sm font-bold ml-2 ${['취소', '취소요청'].includes(res.status) ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                                                {res.status}
+                                                {res.status === '예약확정' ? 'Confirmed' : res.status === '취소' ? 'Cancelled' : res.status === '취소요청' ? 'Cancel Request' : res.status === '예약대기' ? 'Pending' : res.status}
                                             </span>
                                         </div>
                                         {/* 텍스트 영역 (이름, 인원수, 옵션, 픽업) */}
@@ -691,15 +691,15 @@ export default function AgencyDashboardPage() {
                                             </span>
                                             <span className="text-gray-300 text-lg sm:text-xl leading-none mt-0.5">|</span>
                                             <span className="text-lg sm:text-xl text-blue-600 font-bold shrink-0 leading-none mt-0.5">
-                                                {res.pax}
+                                                Pax: {res.pax}
                                             </span>
                                             <span className="text-gray-300 text-lg sm:text-xl leading-none mt-0.5">|</span>
                                             <span className="inline-flex items-center justify-center px-2 py-1 text-lg sm:text-xl font-bold text-gray-700 border border-gray-200 rounded-md shrink-0 bg-gray-50 leading-none mt-0.5">
-                                                {res.option}
+                                                Option: {res.option}
                                             </span>
                                             <span className="text-gray-300 text-lg sm:text-xl leading-none mt-0.5">|</span>
                                             <div className="text-lg sm:text-xl text-gray-800 flex-1 flex items-center min-w-0">
-                                                <span className="inline-flex items-center justify-center bg-gray-100 text-gray-500 px-2 py-1 rounded-md text-sm sm:text-base mr-2 font-bold shrink-0 leading-none mt-0.5">픽업</span>
+                                                <span className="inline-flex items-center justify-center bg-gray-100 text-gray-500 px-2 py-1 rounded-md text-sm sm:text-base mr-2 font-bold shrink-0 leading-none mt-0.5">Pickup</span>
                                                 <span className="truncate leading-none mt-0.5 font-bold">{res.pickup_location}</span>
                                             </div>
                                         </div>
@@ -711,12 +711,12 @@ export default function AgencyDashboardPage() {
                                             <button
                                                 onClick={() => openForm('edit', res)}
                                                 className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 p-2 text-sm font-bold text-gray-600 bg-gray-50 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-gray-100">
-                                                <Edit className="w-4 h-4" /> 수정
+                                                <Edit className="w-4 h-4" /> Edit
                                             </button>
                                             <button
                                                 onClick={() => handleCancel(res.id, res.name)}
                                                 className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 p-2 text-sm font-bold text-red-500 bg-red-50 hover:text-red-700 hover:bg-red-100 rounded-lg transition-colors border border-red-100">
-                                                <Trash2 className="w-4 h-4" /> 삭제
+                                                <Trash2 className="w-4 h-4" /> Delete
                                             </button>
                                         </div>
                                     )}
