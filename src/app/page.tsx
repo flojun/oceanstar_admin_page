@@ -43,6 +43,10 @@ export default function ReservationPage() {
   const [maxCapacity, setMaxCapacity] = useState(45);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
 
+  // Dynamic Settings Server State
+  const [tourSettings, setTourSettings] = useState<any[]>([]);
+  const [blockedDates, setBlockedDates] = useState<{ date: string; tour_id: string; reason: string | null }[]>([]);
+
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -56,6 +60,16 @@ export default function ReservationPage() {
         if (Array.isArray(data)) setPickupLocations(data);
       })
       .catch(err => console.error("Failed to fetch pickup locations", err));
+
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setTourSettings(data.tourSettings);
+          setBlockedDates(data.blockedDates);
+        }
+      })
+      .catch(err => console.error("Failed to fetch tour settings", err));
   }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -134,7 +148,16 @@ export default function ReservationPage() {
     }
   };
 
-  const totalPrice = (form.watch("adultCount") * 100) + (form.watch("childCount") * 80);
+  const getPriceForTour = (tourId: string, type: 'adult' | 'child' = 'adult') => {
+    const setting = tourSettings.find(s => s.tour_id === tourId);
+    if (!setting) return 0;
+    return type === 'adult' ? setting.adult_price_krw : setting.child_price_krw;
+  };
+
+  const currentAdultPrice = selectedTour ? getPriceForTour(selectedTour, 'adult') : (tourSettings[0]?.adult_price_krw || 135000);
+  const currentChildPrice = selectedTour ? getPriceForTour(selectedTour, 'child') : (tourSettings[0]?.child_price_krw || 108000);
+
+  const totalPrice = (form.watch("adultCount") * currentAdultPrice) + (form.watch("childCount") * currentChildPrice);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!selectedTour) {
@@ -255,7 +278,7 @@ export default function ReservationPage() {
             <div className="max-w-7xl w-full flex justify-between items-center px-4">
               <div>
                 <p className="text-sm text-slate-500 font-medium">하와이 최고의 스노클링</p>
-                <p className="text-xl font-extrabold text-blue-600">$100 <span className="text-sm text-slate-500 font-normal">/ 1인</span></p>
+                <p className="text-xl font-extrabold text-blue-600">₩{currentAdultPrice.toLocaleString()} <span className="text-sm text-slate-500 font-normal">/ 1인</span></p>
               </div>
               <button
                 onClick={() => setIsBookingOpen(true)}
@@ -290,17 +313,14 @@ export default function ReservationPage() {
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[
-                          { id: "morning1", title: "1부 거북이 스노클링", time: "08:00 - 11:00", price: "$100" },
-                          { id: "morning2", title: "2부 거북이 스노클링", time: "11:00 - 14:00", price: "$100" },
-                          { id: "sunset", title: "선셋 거북이 스노클링", time: "15:00 - 18:00 (시즌 변동)", price: "$100" },
+                          { id: "morning1", title: "1부 거북이 스노클링", time: "08:00 - 11:00" },
+                          { id: "morning2", title: "2부 거북이 스노클링", time: "11:00 - 14:00" },
+                          { id: "sunset", title: "선셋 거북이 스노클링", time: "15:00 - 18:00 (시즌 변동)" },
                         ].map((tour) => (
                           <div
                             key={tour.id}
                             onClick={() => {
                               setSelectedTour(tour.id);
-                              // Optional: Reset date when tour changes
-                              // setSelectedDate(undefined);
-                              // form.setValue("tourDate", undefined);
                             }}
                             className={`relative p-5 rounded-xl border-2 cursor-pointer transition-all ${selectedTour === tour.id
                               ? "border-blue-500 bg-blue-50"
@@ -314,7 +334,7 @@ export default function ReservationPage() {
                             )}
                             <h3 className="font-bold text-lg mb-1">{tour.title}</h3>
                             <p className="text-sm text-slate-500 mb-2">{tour.time}</p>
-                            <p className="font-semibold text-blue-600">{tour.price}</p>
+                            <p className="font-semibold text-blue-600">₩{getPriceForTour(tour.id, 'adult').toLocaleString()}</p>
                           </div>
                         ))}
                       </div>
@@ -390,7 +410,19 @@ export default function ReservationPage() {
                               // Cannot book past dates
                               if (date < new Date(new Date().setHours(0, 0, 0, 0))) return true;
 
+                              // 1. Check Day-of-Week Blocks
+                              const currentSetting = tourSettings.find(s => s.tour_id === selectedTour);
+                              const blockedDays = currentSetting?.blocked_days || [];
+                              if (blockedDays.includes(date.getDay())) return true;
+
                               const dateStr = format(date, 'yyyy-MM-dd');
+
+                              // 2. Check globally & specifically blocked dates
+                              const isBlocked = blockedDates.some(bd =>
+                                bd.date === dateStr && (bd.tour_id === 'all' || bd.tour_id === selectedTour)
+                              );
+                              if (isBlocked) return true;
+
                               const dayData = availabilities[dateStr];
 
                               // If no bookings yet on that day, capacity is full max
@@ -406,7 +438,19 @@ export default function ReservationPage() {
                             }}
                             modifiers={{
                               booked: (date) => {
+                                // 1. Check Day-of-Week Blocks
+                                const currentSetting = tourSettings.find(s => s.tour_id === selectedTour);
+                                const blockedDays = currentSetting?.blocked_days || [];
+                                if (blockedDays.includes(date.getDay())) return true;
+
                                 const dateStr = format(date, 'yyyy-MM-dd');
+
+                                // 2. Check specific blocked dates
+                                const isBlocked = blockedDates.some(bd =>
+                                  bd.date === dateStr && (bd.tour_id === 'all' || bd.tour_id === selectedTour)
+                                );
+                                if (isBlocked) return true;
+
                                 const dayData = availabilities[dateStr];
                                 const remaining = dayData ? dayData.remaining : maxCapacity;
                                 return remaining < totalSelectedPax;
@@ -522,9 +566,9 @@ export default function ReservationPage() {
 
                       <div className="border-t border-slate-100 pt-4 mb-6">
                         <div className="flex justify-between items-end">
-                          <span className="text-slate-500 font-medium">총 결제 금액</span>
+                          <span className="text-slate-500 font-medium">총 결제 금액 (KRW)</span>
                           <div className="text-right">
-                            <span className="text-3xl font-extrabold text-blue-600">${totalPrice}</span>
+                            <span className="text-3xl font-extrabold text-blue-600">₩{totalPrice.toLocaleString()}</span>
                           </div>
                         </div>
                       </div>

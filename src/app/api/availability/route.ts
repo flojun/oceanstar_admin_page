@@ -12,11 +12,23 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: 'Missing required parameters (month, option)' }, { status: 400 });
         }
 
-        // Determine max capacity based on tour option
-        let maxCapacity = 45; // Default for 1부, 2부
-        if (option === '3부') {
-            maxCapacity = 38; // 3부(선셋) is 38
+        // Map option label to tour_id
+        let tourId = 'morning1';
+        if (option === '2부') tourId = 'morning2';
+        if (option === '3부') tourId = 'sunset';
+
+        // Fetch max capacity from DB
+        const { data: tourSetting, error: settingError } = await supabase
+            .from('tour_settings')
+            .select('max_capacity')
+            .eq('tour_id', tourId)
+            .single();
+
+        if (settingError) {
+            console.error('Failed to fetch tour settings:', settingError);
         }
+
+        const maxCapacity = tourSetting?.max_capacity || 45;
 
         // Parse start and end of month for better querying on DATE columns
         const [year, m] = month.split('-');

@@ -25,7 +25,8 @@ import {
     Receipt,
     ClipboardCheck,
     Building2,
-    Bell
+    Bell,
+    Settings
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import NotificationBell from "@/components/NotificationBell";
@@ -56,6 +57,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
             { name: "정산 검토", href: "/dashboard/settlement" },
         ]
     },
+    { name: "예약홈페이지 관리", href: "/dashboard/website-settings", icon: Settings },
     { name: "여행사 관리", href: "/dashboard/agencies", icon: Building2 },
 ];
 
