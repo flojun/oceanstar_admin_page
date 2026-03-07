@@ -1,37 +1,16 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { Reservation } from "@/types/reservation";
-
-export function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
-
-// "2명" -> 2
-export function parsePax(paxStr: string | undefined): number {
-    if (!paxStr) return 0;
-    const num = parseInt(paxStr.toString().replace(/[^0-9]/g, ''), 10);
-    return isNaN(num) ? 0 : num;
-}
-
-export function calculateTotalPax(items: Reservation[]): number {
-    return items.reduce((sum, item) => {
-        if (item.status === "취소") return sum;
-        return sum + parsePax(item.pax);
-    }, 0);
-}
 // Haversine formula to calculate the distance between two coordinates in kilometers or meters
 export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371e3; // Earth radius in meters
     const toRad = (value: number) => (value * Math.PI) / 180;
 
-    const lat1Rad = toRad(lat1);
-    const lat2Rad = toRad(lat2);
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
+    const φ1 = toRad(lat1);
+    const φ2 = toRad(lat2);
+    const Δφ = toRad(lat2 - lat1);
+    const Δλ = toRad(lon2 - lon1);
 
     const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+        Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     const distanceInMeters = R * c;
@@ -75,4 +54,3 @@ export function findClosestPickup(
 export function getWalkingMinutes(meters: number): number {
     return Math.ceil(meters / 83);
 }
-

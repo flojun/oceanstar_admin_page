@@ -1,0 +1,554 @@
+"use client";
+
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Check, MapPin, Calendar, Users, CreditCard, Loader2 } from "lucide-react";
+import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
+import { calculateDistance, findClosestPickup, PickupLocation, getWalkingMinutes } from '@/lib/utils';
+
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
+import { format } from "date-fns";
+import { X, ChevronRight, Info } from "lucide-react";
+
+const formSchema = z.object({
+  tourDate: z.date(),
+  adultCount: z.number().min(1, "성인 1명 이상 선택해주세요"),
+  childCount: z.number().min(0),
+  hotelName: z.string().min(1, "숙소를 입력해주세요"),
+  bookerName: z.string().min(1, "예약자 성함을 입력해주세요"),
+  bookerEmail: z.string().email("정확한 이메일을 입력해주세요"),
+  bookerPhone: z.string().min(10, "연락처를 입력해주세요"),
+});
+
+const libraries: "places"[] = ["places"];
+
+export default function ReservationPage() {
+  const [selectedTour, setSelectedTour] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [pickupLocations, setPickupLocations] = useState<PickupLocation[]>([]);
+  const [closestPickup, setClosestPickup] = useState<{ location: PickupLocation, minutes: number } | null>(null);
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const infoSectionRef = useRef<HTMLElement>(null);
+
+  // Modal state
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+
+  // Capacity Tracking State
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [availabilities, setAvailabilities] = useState<Record<string, { booked: number, remaining: number, isAvailable: boolean }>>({});
+  const [maxCapacity, setMaxCapacity] = useState(45);
+  const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
+
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+    libraries: libraries,
+  });
+
+  useEffect(() => {
+    fetch('/api/pickup')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setPickupLocations(data);
+      })
+      .catch(err => console.error("Failed to fetch pickup locations", err));
+  }, []);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      adultCount: 1,
+      childCount: 0,
+      hotelName: "",
+      bookerName: "",
+      bookerEmail: "",
+      bookerPhone: "",
+    },
+  });
+
+  // Watch pax counts for capacity checks
+  const adultCount = form.watch("adultCount");
+  const childCount = form.watch("childCount");
+  const totalSelectedPax = (adultCount || 0) + (childCount || 0);
+
+  // Fetch Available Capacity
+  const fetchAvailability = useCallback(async (tourId: string, targetDate: Date) => {
+    setIsLoadingAvailability(true);
+    try {
+      let optionLabel = tourId === 'morning1' ? '1부' : tourId === 'morning2' ? '2부' : '3부';
+      const monthStr = format(targetDate, 'yyyy-MM');
+
+      const res = await fetch(`/api/availability?month=${monthStr}&option=${optionLabel}`);
+      const data = await res.json();
+
+      if (data.success) {
+        setAvailabilities(data.availability);
+        setMaxCapacity(data.maxCapacity);
+      }
+    } catch (e) {
+      console.error("Failed to fetch availability", e);
+    } finally {
+      setIsLoadingAvailability(true); // Artificial delay to ensure user sees transition, we'll reset it shortly
+      setTimeout(() => setIsLoadingAvailability(false), 300);
+    }
+  }, []);
+
+  // Re-fetch when tour changes or month navigates
+  useEffect(() => {
+    if (selectedTour) {
+      fetchAvailability(selectedTour, currentMonth);
+      // Reset selected date if they change the tour option
+      setSelectedDate(undefined);
+      form.setValue("tourDate", undefined as unknown as Date);
+    }
+  }, [selectedTour, currentMonth, fetchAvailability, form]);
+
+  const onLoad = (autocomplete: google.maps.places.Autocomplete) => {
+    autocompleteRef.current = autocomplete;
+  };
+
+  const onPlaceChanged = () => {
+    if (autocompleteRef.current !== null) {
+      const place = autocompleteRef.current.getPlace();
+      const lat = place.geometry?.location?.lat();
+      const lng = place.geometry?.location?.lng();
+
+      if (lat && lng) {
+        form.setValue("hotelName", place.name || "");
+
+        // Find closest pickup
+        const result = findClosestPickup(lat, lng, pickupLocations);
+        if (result) {
+          setClosestPickup({
+            location: result.closestLocation,
+            minutes: getWalkingMinutes(result.distanceMeters)
+          });
+        }
+      }
+    } else {
+      console.log('Autocomplete is not loaded yet!');
+    }
+  };
+
+  const totalPrice = (form.watch("adultCount") * 100) + (form.watch("childCount") * 80);
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!selectedTour) {
+      alert("투어 옵션을 먼저 선택해주세요.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Convert date to YYYY-MM-DD string format for DB & Eximbay checkout compatibility
+      const formattedDate = format(values.tourDate, "yyyy-MM-dd");
+
+      const response = await fetch('/api/eximbay/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          selectedTour,
+          pickupLocationId: closestPickup?.location?.id,
+          totalPrice,
+          ...values,
+          tourDate: formattedDate,
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        alert("결제 준비 중 오류가 발생했습니다: " + (data.error || "Unknown error"));
+      }
+    } catch (e) {
+      console.error(e);
+      alert("서버 통신 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+      <header className="bg-white px-6 py-4 shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-blue-600 tracking-tight">Ocean Star</h1>
+          <p className="text-sm font-medium text-slate-500 hidden sm:block">하와이 거북이 스노클링 예약</p>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 pb-32">
+        {/* === 메인 상품 설명 영역 (기존 홈페이지 내용 통합) === */}
+        <div className="w-full lg:w-2/3 xl:w-3/4 mx-auto space-y-12 mb-16">
+          <div className="aspect-[21/9] bg-blue-100 rounded-3xl overflow-hidden relative shadow-lg">
+            {/* TODO: Add proper hero image here later */}
+            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent flex items-end p-8">
+              <h2 className="text-white text-3xl font-bold">오션스타 거북이 스노클링</h2>
+            </div>
+          </div>
+
+          <section className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 prose prose-slate max-w-none">
+            <h3 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2"><Info className="text-blue-500" /> 상세소개 (Detail)</h3>
+            <p className="text-lg text-slate-700 leading-relaxed mb-6">
+              ✨ <strong>하와이에서 가장 사랑받는 No.1 액티비티!</strong> ✨<br />
+              하와이의 중심, 와이키키 터틀 캐니언에서 거북이 스노클링과 다양한 해양 액티비티 5종을 한번에 즐겨보세요.<br />
+              가족, 연인, 친구와 함께 잊지 못할 특별한 추억을 만들어보세요!
+            </p>
+
+            <div className="bg-blue-50/50 p-6 rounded-2xl mb-8">
+              <h4 className="font-bold text-blue-900 mb-4">포함사항 (Included)</h4>
+              <ul className="space-y-2 text-slate-700 list-disc list-inside">
+                <li>거북이 스노클링, 카약, 스탠드업 패들보드, 보트 다이빙, 씨드 스쿠터, 씨체어 튜브</li>
+                <li>친절하고 전문적인 가이드와 함께하는 투어로 수영 걱정 X</li>
+                <li>와이키키내 무료 차량 서비스</li>
+                <li>구명조끼 및 스노클링 장비 제공</li>
+                <li>간단한 스낵과 라면 (추가 음료 및 음식은 자유롭게 지참 가능)</li>
+              </ul>
+            </div>
+
+            <div className="bg-slate-50 p-6 rounded-2xl mb-8">
+              <h4 className="font-bold text-slate-900 mb-4">불포함내역 (Non-Included)</h4>
+              <ul className="space-y-2 text-slate-600 list-disc list-inside">
+                <li>안전요원 가이드 팁</li>
+                <li>고프로 대여 비용 / 개별 점심식사</li>
+              </ul>
+            </div>
+
+            <h4 className="font-bold text-xl text-slate-900 mt-10 mb-4">투어 스케줄 (Tour Schedule)</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="border border-slate-100 p-5 rounded-2xl bg-white shadow-sm">
+                <h5 className="font-bold text-blue-600 mb-3 border-b pb-2">모닝 투어 (08:30 ~ 11:00)</h5>
+                <ul className="text-sm space-y-2 text-slate-600">
+                  <li><span className="font-semibold text-slate-800">07:40 - 07:50 AM</span> Kewalo Harbor 체크인</li>
+                  <li><span className="font-semibold text-slate-800">08:00 AM</span> 보트 출발</li>
+                  <li><span className="font-semibold text-slate-800">11:00 AM</span> 하버 도착</li>
+                </ul>
+              </div>
+              <div className="border border-slate-100 p-5 rounded-2xl bg-white shadow-sm">
+                <h5 className="font-bold text-blue-600 mb-3 border-b pb-2">오후 투어 (11:30 ~ 14:00)</h5>
+                <ul className="text-sm space-y-2 text-slate-600">
+                  <li><span className="font-semibold text-slate-800">10:40 - 10:50 AM</span> Kewalo Harbor 체크인</li>
+                  <li><span className="font-semibold text-slate-800">11:00 AM</span> 보트 출발</li>
+                  <li><span className="font-semibold text-slate-800">14:00 PM</span> 하버 도착</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-8 text-sm text-slate-500 bg-red-50 text-red-700 p-4 rounded-xl">
+              <strong>취소규정 (Cancelation Policy)</strong><br />
+              출항 48시간 이내 취소 시에는 환불이 불가합니다. 이메일을 통한 취소는 불가능하므로 반드시 전화로 연락해 주시기 바랍니다. 지정된 픽업 및 항구에 늦으실 경우 환불 불가.
+            </div>
+          </section>
+        </div>
+
+        {/* 플로팅 예약 버튼 (모달 열기) */}
+        {!isBookingOpen && (
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-40 flex justify-center">
+            <div className="max-w-7xl w-full flex justify-between items-center px-4">
+              <div>
+                <p className="text-sm text-slate-500 font-medium">하와이 최고의 스노클링</p>
+                <p className="text-xl font-extrabold text-blue-600">$100 <span className="text-sm text-slate-500 font-normal">/ 1인</span></p>
+              </div>
+              <button
+                onClick={() => setIsBookingOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-blue-500/30 transition-transform active:scale-95 flex items-center gap-2"
+              >
+                예약하기 <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* === 예약 플로팅 모달 (Booking Drawer/Modal) === */}
+        {isBookingOpen && (
+          <div className="fixed inset-0 z-50 flex justify-end">
+            <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onClick={() => setIsBookingOpen(false)}></div>
+            <div className="relative w-full max-w-[550px] h-full bg-white shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-300">
+              <div className="sticky top-0 bg-white/90 backdrop-blur-md px-6 py-4 border-b border-slate-100 flex justify-between items-center z-10">
+                <h2 className="text-xl font-bold text-slate-900">투어 예약하기</h2>
+                <button onClick={() => setIsBookingOpen(false)} className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
+                  <div className="space-y-8">
+                    {/* 1. Tour Selection */}
+                    <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-slate-900">
+                        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-sm font-bold">1</span>
+                        투어 옵션 선택
+                      </h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                          { id: "morning1", title: "1부 거북이 스노클링", time: "08:00 - 11:00", price: "$100" },
+                          { id: "morning2", title: "2부 거북이 스노클링", time: "11:00 - 14:00", price: "$100" },
+                          { id: "sunset", title: "선셋 거북이 스노클링", time: "15:00 - 18:00 (시즌 변동)", price: "$100" },
+                        ].map((tour) => (
+                          <div
+                            key={tour.id}
+                            onClick={() => {
+                              setSelectedTour(tour.id);
+                              // Optional: Reset date when tour changes
+                              // setSelectedDate(undefined);
+                              // form.setValue("tourDate", undefined);
+                            }}
+                            className={`relative p-5 rounded-xl border-2 cursor-pointer transition-all ${selectedTour === tour.id
+                              ? "border-blue-500 bg-blue-50"
+                              : "border-slate-200 hover:border-blue-200 hover:bg-slate-50"
+                              }`}
+                          >
+                            {selectedTour === tour.id && (
+                              <div className="absolute top-3 right-3 text-blue-500">
+                                <Check size={20} />
+                              </div>
+                            )}
+                            <h3 className="font-bold text-lg mb-1">{tour.title}</h3>
+                            <p className="text-sm text-slate-500 mb-2">{tour.time}</p>
+                            <p className="font-semibold text-blue-600">{tour.price}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+
+                    {/* 2. Pax Selection (Moved UP before Date Selection) */}
+                    {selectedTour && (
+                      <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-slate-900">
+                          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-sm font-bold">2</span>
+                          상세 인원 선택
+                        </h2>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+                              <Users size={16} className="text-blue-500" /> 성인
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              {...form.register("adultCount", { valueAsNumber: true })}
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                              아동 (만3-11세)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              {...form.register("childCount", { valueAsNumber: true })}
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                            />
+                          </div>
+                        </div>
+                      </section>
+                    )}
+
+                    {/* 3. Date Selection (Now happens after Pax) */}
+                    {selectedTour && (
+                      <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-xl font-semibold flex items-center gap-2 text-slate-900">
+                            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-sm font-bold">3</span>
+                            예약 날짜 선택
+                          </h2>
+                          <div className="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                            최대 정원: {maxCapacity}명
+                          </div>
+                        </div>
+
+                        <div className="flex justify-center border border-slate-100 rounded-xl p-4 bg-slate-50/50 relative">
+                          {isLoadingAvailability && (
+                            <div className="absolute inset-0 z-10 bg-white/50 backdrop-blur-sm flex items-center justify-center rounded-xl">
+                              <Loader2 className="animate-spin text-blue-500 w-8 h-8" />
+                            </div>
+                          )}
+                          <DayPicker
+                            mode="single"
+                            selected={selectedDate}
+                            onMonthChange={setCurrentMonth}
+                            onSelect={(date) => {
+                              setSelectedDate(date);
+                              if (date) {
+                                form.setValue("tourDate", date, { shouldValidate: true });
+                                setTimeout(() => {
+                                  infoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }, 150);
+                              }
+                            }}
+                            disabled={(date) => {
+                              // Cannot book past dates
+                              if (date < new Date(new Date().setHours(0, 0, 0, 0))) return true;
+
+                              const dateStr = format(date, 'yyyy-MM-dd');
+                              const dayData = availabilities[dateStr];
+
+                              // If no bookings yet on that day, capacity is full max
+                              const remaining = dayData ? dayData.remaining : maxCapacity;
+
+                              // Disable if remaining spots are less than the user's requested total pax
+                              return remaining < totalSelectedPax;
+                            }}
+                            className="bg-white p-4 rounded-xl shadow-xs"
+                            classNames={{
+                              today: "font-bold text-blue-600",
+                              selected: "bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700",
+                            }}
+                            modifiers={{
+                              booked: (date) => {
+                                const dateStr = format(date, 'yyyy-MM-dd');
+                                const dayData = availabilities[dateStr];
+                                const remaining = dayData ? dayData.remaining : maxCapacity;
+                                return remaining < totalSelectedPax;
+                              }
+                            }}
+                            modifiersStyles={{
+                              booked: { textDecoration: 'line-through', color: 'red' }
+                            }}
+                          />
+                        </div>
+                        {form.formState.errors.tourDate && <p className="text-red-500 text-xs mt-3 text-center">{form.formState.errors.tourDate.message}</p>}
+
+                        <p className="text-center text-xs text-slate-500 mt-4">
+                          선택하신 인원수({totalSelectedPax}명)에 맞춰 예약 가능한 날짜만 활성화됩니다.
+                        </p>
+                      </section>
+                    )}
+
+
+
+                    {/* 4. Hotel Pick-up & Info */}
+                    {selectedTour && selectedDate && (
+                      <section ref={infoSectionRef} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
+                        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-slate-900">
+                          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-sm font-bold">4</span>
+                          숙소 및 예약자 정보
+                        </h2>
+
+                        <div className="space-y-6">
+                          <div>
+                            <label className="text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+                              <MapPin size={16} className="text-blue-500" /> 숙소 입력 (픽업 장소 참고용)
+                            </label>
+
+                            <input
+                              type="text"
+                              {...form.register("hotelName")}
+                              placeholder="머무시는 숙소/호텔 이름을 입력해주세요"
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                            />
+                            {form.formState.errors.hotelName && <p className="text-red-500 text-xs mt-1">{form.formState.errors.hotelName.message}</p>}
+
+                            <p className="text-xs text-blue-600 font-medium mt-2 bg-blue-50 p-2 rounded-lg inline-block">※ 원활한 픽업 배정을 위해 정확히 입력해주세요.</p>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-slate-700 mb-2">예약자 영문 성함</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. HONG GILDONG"
+                                {...form.register("bookerName")}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                              />
+                              {form.formState.errors.bookerName && <p className="text-red-500 text-xs mt-1">{form.formState.errors.bookerName.message}</p>}
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-slate-700 mb-2">이메일</label>
+                              <input
+                                type="email"
+                                placeholder="바우처 수신용"
+                                {...form.register("bookerEmail")}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                              />
+                              {form.formState.errors.bookerEmail && <p className="text-red-500 text-xs mt-1">{form.formState.errors.bookerEmail.message}</p>}
+                            </div>
+                            <div className="md:col-span-2">
+                              <label className="block text-sm font-medium text-slate-700 mb-2">연락처 (카카오톡 ID 또는 전화번호)</label>
+                              <input
+                                type="text"
+                                placeholder="+82 10-1234-5678"
+                                {...form.register("bookerPhone")}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                              />
+                              {form.formState.errors.bookerPhone && <p className="text-red-500 text-xs mt-1">{form.formState.errors.bookerPhone.message}</p>}
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    )}
+                  </div>
+
+                  <div className="w-full mt-8">
+                    <div className="bg-white p-6 rounded-2xl shadow-xl shadow-blue-900/5 border border-slate-100 mb-8">
+                      <h3 className="text-lg font-bold mb-4 border-b border-slate-100 pb-4 text-slate-900">결제 요약</h3>
+
+                      <div className="space-y-4 mb-6">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-500">선택 투어</span>
+                          <span className="font-medium text-slate-900">
+                            {selectedTour === 'morning1' ? '1부 (08:00)' :
+                              selectedTour === 'morning2' ? '2부 (11:00)' :
+                                selectedTour === 'sunset' ? '선셋 스노클링' : '미선택'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-500">예약 날짜</span>
+                          <span className="font-medium text-slate-900 ">{selectedDate ? format(selectedDate, "PPP") : '-'}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-slate-500">인원</span>
+                          <span className="font-medium text-slate-900">성인 {form.watch("adultCount") || 0}명, 아동 {form.watch("childCount") || 0}명</span>
+                        </div>
+                        {closestPickup && (
+                          <div className="flex justify-between text-sm border-t border-slate-50 pt-3">
+                            <span className="text-slate-500">픽업 장소</span>
+                            <span className="font-medium text-blue-700 text-right max-w-[200px]" title={closestPickup.location.name}>
+                              📍 {closestPickup.location.name}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="border-t border-slate-100 pt-4 mb-6">
+                        <div className="flex justify-between items-end">
+                          <span className="text-slate-500 font-medium">총 결제 금액</span>
+                          <div className="text-right">
+                            <span className="text-3xl font-extrabold text-blue-600">${totalPrice}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-colors flex justify-center items-center gap-2 shadow-lg shadow-blue-600/30"
+                      >
+                        {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <CreditCard size={20} />}
+                        {isSubmitting ? "응답 대기 중..." : "결제하기"}
+                      </button>
+                      <p className="text-center text-xs text-slate-400 mt-4">
+                        엑심베이(Eximbay) 안전 결제로 이동합니다.
+                      </p>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </main>
+    </div>
+  );
+}
