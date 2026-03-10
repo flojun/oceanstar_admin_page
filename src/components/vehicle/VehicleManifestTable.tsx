@@ -12,6 +12,17 @@ interface VehicleManifestTableProps {
 export function VehicleManifestTable({ vehicles, drivers, optionName, date }: VehicleManifestTableProps) {
     const vehicleKeys = ['vehicle-1', 'vehicle-2', 'vehicle-3', 'personal-1'];
 
+    const getColorForOption = (name: string) => {
+        if (name.includes('1부')) return 'bg-gray-600';
+        if (name.includes('2부')) return 'bg-[#990000]';
+        if (name.includes('3부') || name.includes('선셋')) return 'bg-blue-700';
+
+        // Dynamic color for new options
+        const colors = ['bg-emerald-700', 'bg-purple-700', 'bg-amber-700', 'bg-rose-700', 'bg-cyan-700'];
+        const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        return colors[hash % colors.length];
+    };
+
     return (
         <div className="bg-black p-4 w-fit min-w-[800px] text-white font-sans inline-block">
             <h2 className="text-2xl font-bold mb-4 text-center">{date} [{optionName}] 배치 명단</h2>
@@ -27,12 +38,9 @@ export function VehicleManifestTable({ vehicles, drivers, optionName, date }: Ve
 
                     return (
                         <div key={key} className="border border-gray-700 mb-4">
-                            {/* Header: Option Name (Red) + Vehicle Name */}
+                            {/* Header: Option Name (Colored) + Vehicle Name */}
                             <div className="flex text-lg font-bold border-b border-gray-700">
-                                <div className={`px-3 py-1 w-20 flex items-center justify-center shrink-0 text-white
-                                    ${optionName === '1부' ? 'bg-gray-600' :
-                                        optionName === '2부' ? 'bg-[#990000]' :
-                                            optionName === '3부' ? 'bg-blue-700' : 'bg-gray-700'}`}>
+                                <div className={`px-3 py-1 w-20 flex items-center justify-center shrink-0 text-white ${getColorForOption(optionName)}`}>
                                     {optionName}
                                 </div>
                                 <div className="bg-black text-white px-3 py-1 flex-1 flex items-center justify-between">

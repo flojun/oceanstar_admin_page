@@ -8,26 +8,12 @@ export async function POST(req: Request) {
         // 1. Generate Order ID
         const order_id = `ORDER_${new Date().getTime()}`;
 
-        // Helper: Map 'morning1' to '1부' for existing DB schema
-        let optionLabel = body.selectedTour;
-        if (body.selectedTour === 'morning1') optionLabel = '1부';
-        if (body.selectedTour === 'morning2') optionLabel = '2부';
-        if (body.selectedTour === 'sunset') optionLabel = '3부';
-
-        // 2. 예약 인원 및 비고(Note) 포맷팅
-        // pax: 수기 예약폼과 호환되게 오직 "총인원 명" 이라는 문자열로만 저장
-        const totalCount = body.adultCount + body.childCount;
-        const paxLabel = `${totalCount}명`;
-
-        // note: 새로 전용 웹사이트에서 들어온 것은 성인/아동 구분자 추가 
-        let noteText = `(성${body.adultCount}/아${body.childCount})`;
-
         // ============================================
         // [중요 보안] 프론트엔드 가격 검증 및 서버 사이드 가격 재계산
         // ============================================
         const { data: tourSetting, error: settingError } = await supabase
             .from('tour_settings')
-            .select('adult_price_krw, child_price_krw')
+            .select('*')
             .eq('tour_id', body.selectedTour)
             .single();
 
@@ -35,8 +21,33 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Failed to fetch pricing from DB' }, { status: 500 });
         }
 
-        const calculatedTotalPrice = (body.adultCount * tourSetting.adult_price_krw) +
-            (body.childCount * tourSetting.child_price_krw);
+        // 판매 중지된 상품 결제 차단
+        if (tourSetting.is_active === false) {
+            return NextResponse.json({ error: '현재 판매가 중지된 옵션입니다.' }, { status: 400 });
+        }
+
+        // DB 기준 옵션명
+        let optionLabel = tourSetting.name;
+
+        // 2. 예약 인원 및 포맷팅
+        const totalCount = body.adultCount + body.childCount;
+        const paxLabel = `${totalCount}명`;
+        const noteText = `(성${body.adultCount}/아${body.childCount})`;
+
+        // 프라이빗 차터 픽업 예외 처리
+        let pickupLabel = body.hotelName;
+        if (tourSetting.is_flat_rate) {
+            pickupLabel += ' (개별안내)';
+        }
+
+        // 가격 계산 (고정 요금제 처리)
+        let calculatedTotalPrice = 0;
+        if (tourSetting.is_flat_rate) {
+            calculatedTotalPrice = tourSetting.adult_price_krw;
+        } else {
+            calculatedTotalPrice = (body.adultCount * tourSetting.adult_price_krw) +
+                (body.childCount * tourSetting.child_price_krw);
+        }
 
         // 3. Insert into Supabase reservations with '결제대기' status
         const { data, error } = await supabase
@@ -49,13 +60,11 @@ export async function POST(req: Request) {
                     contact: body.bookerPhone,
                     tour_date: body.tourDate,
                     option: optionLabel,
-                    pax: paxLabel,                // 오직 'N명'
-                    note: noteText,               // 기존 기타란에 (성N/아N) 삽입
-                    pickup_location: body.hotelName,
+                    pax: paxLabel,
+                    note: noteText,
+                    pickup_location: pickupLabel,
                     status: '결제대기',
-
-                    // 새로 추가할 결제 관리용 컬럼들 (기존 로직과 충돌하지 않고 관리자단 통계용으로만 사용됨)
-                    total_price: calculatedTotalPrice, // Use server calculated price!
+                    total_price: calculatedTotalPrice,
                     booker_email: body.bookerEmail,
                     adult_count: body.adultCount,
                     child_count: body.childCount,

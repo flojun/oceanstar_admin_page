@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { Plus, ChevronDown, Calendar as CalendarIcon, CheckSquare, List as ListIcon, Eye, X, ArrowUpDown } from "lucide-react";
+import { Plus, ChevronDown, Calendar as CalendarIcon, CheckSquare, List as ListIcon, Eye, X, ArrowUpDown, Ship } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Reservation } from "@/types/reservation";
 import { ReservationTable } from "@/components/ReservationTable";
@@ -12,6 +12,8 @@ import { getHawaiiDateStr, getHawaiiTomorrowStr, formatDateDisplay } from "@/lib
 import { DatePicker } from "@/components/ui/DatePicker";
 import { format, parseISO } from "date-fns";
 import { ko } from "date-fns/locale";
+import type { TourSetting } from "@/lib/tourUtils";
+import { getFilterTabs } from "@/lib/tourUtils";
 
 type ViewMode = 'today' | 'reconfirm' | 'custom';
 
@@ -44,12 +46,15 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
     const [isListSelectOpen, setIsListSelectOpen] = useState(false);
     const [isSimpleView, setIsSimpleView] = useState(false);
 
+    // Tour Settings State (Dynamic)
+    const [tourSettings, setTourSettings] = useState<TourSetting[]>([]);
+
     // Search State
     const [searchCriteria, setSearchCriteria] = useState<'name' | 'source' | 'tour_date' | 'contact'>('name');
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Filter Hook
-    const { activeTab, setActiveTab, filteredData: tabFilteredData, groupedSections, sortOption, setSortOption } = useReservationFilter(reservations);
+    // Filter Hook (now with tourSettings for dynamic tabs)
+    const { activeTab, setActiveTab, filteredData: tabFilteredData, groupedSections, sortOption, setSortOption, vesselFilter, setVesselFilter, availableVessels, getVessel } = useReservationFilter(reservations, tourSettings);
 
     // Apply search filter on top of tab filter
     const filteredData = useMemo(() => {
@@ -122,6 +127,13 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
         }
     };
 
+    // Fetch tour settings once
+    useEffect(() => {
+        supabase.from('tour_settings').select('*').order('display_order').then(({ data }) => {
+            if (data) setTourSettings(data);
+        });
+    }, []);
+
     useEffect(() => {
         fetchReservations();
     }, [selectedDate]);
@@ -179,7 +191,7 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
     };
 
     const renderTabs = () => {
-        const tabs: FilterTab[] = ['전체', '1부', '2부', '3부', '패러 및 제트', '패러', '제트', '기타'];
+        const tabs: FilterTab[] = getFilterTabs(tourSettings);
 
         return (
             <div className="md:pb-0">
@@ -445,7 +457,7 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
                         </div>
                         <div className="flex-1 overflow-auto p-2 bg-gray-50">
                             {/* Wrap table in a container for larger screens if needed, or keeping full width */}
-                            <div className="max-w-7xl mx-auto">
+                            <div className="max-w-[1600px] 2xl:max-w-[2200px] mx-auto">
                                 {activeTab === '전체' && groupedSections ? (
                                     <div className="divide-y divide-gray-100 space-y-4">
                                         {Object.entries(groupedSections).map(([groupName, items]) => {

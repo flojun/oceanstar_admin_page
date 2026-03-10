@@ -10,8 +10,24 @@ import { calculateDistance, findClosestPickup, PickupLocation, getWalkingMinutes
 
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { X, ChevronRight, Info } from "lucide-react";
+
+// Helper to format HH:mm:ss string to "hh:mm a"
+const formatTimeAMPM = (timeString: string | null | undefined) => {
+  if (!timeString) return '';
+  try {
+    const parsed = parse(timeString, 'HH:mm:ss', new Date());
+    if (isNaN(parsed.getTime())) {
+      // Fallback for HH:mm if seconds are missing
+      const parsedShort = parse(timeString, 'HH:mm', new Date());
+      return format(parsedShort, 'hh:mm a');
+    }
+    return format(parsed, 'hh:mm a');
+  } catch (e) {
+    return timeString; // Return as-is if parsing fails
+  }
+};
 
 const formSchema = z.object({
   tourDate: z.date(),
@@ -93,10 +109,14 @@ export default function ReservationPage() {
   const fetchAvailability = useCallback(async (tourId: string, targetDate: Date) => {
     setIsLoadingAvailability(true);
     try {
-      let optionLabel = tourId === 'morning1' ? '1부' : tourId === 'morning2' ? '2부' : '3부';
+      let optionLabel = tourId; // Backend now uses tour_id directly or we'll map it to name
+      // Safely find the name locally
+      const currentTour = tourSettings?.find((t: any) => t.tour_id === tourId);
+      if (currentTour) optionLabel = currentTour.name;
+
       const monthStr = format(targetDate, 'yyyy-MM');
 
-      const res = await fetch(`/api/availability?month=${monthStr}&option=${optionLabel}`);
+      const res = await fetch(`/api/availability?month=${monthStr}&option=${encodeURIComponent(optionLabel)}`);
       const data = await res.json();
 
       if (data.success) {
@@ -148,8 +168,12 @@ export default function ReservationPage() {
     }
   };
 
+  const getSelectedTourSetting = () => tourSettings.find((s: any) => s.tour_id === selectedTour);
+  const selectedTourSetting = getSelectedTourSetting();
+  const isFlatRate = selectedTourSetting?.is_flat_rate || false;
+
   const getPriceForTour = (tourId: string, type: 'adult' | 'child' = 'adult') => {
-    const setting = tourSettings.find(s => s.tour_id === tourId);
+    const setting = tourSettings.find((s: any) => s.tour_id === tourId);
     if (!setting) return 0;
     return type === 'adult' ? setting.adult_price_krw : setting.child_price_krw;
   };
@@ -157,7 +181,7 @@ export default function ReservationPage() {
   const currentAdultPrice = selectedTour ? getPriceForTour(selectedTour, 'adult') : (tourSettings[0]?.adult_price_krw || 135000);
   const currentChildPrice = selectedTour ? getPriceForTour(selectedTour, 'child') : (tourSettings[0]?.child_price_krw || 108000);
 
-  const totalPrice = (form.watch("adultCount") * currentAdultPrice) + (form.watch("childCount") * currentChildPrice);
+  const totalPrice = isFlatRate ? currentAdultPrice : (form.watch("adultCount") * currentAdultPrice) + (form.watch("childCount") * currentChildPrice);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!selectedTour) {
@@ -202,13 +226,13 @@ export default function ReservationPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
       <header className="bg-white px-6 py-4 shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="max-w-[1600px] 2xl:max-w-[2200px] mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold text-blue-600 tracking-tight">Ocean Star</h1>
           <p className="text-sm font-medium text-slate-500 hidden sm:block">하와이 거북이 스노클링 예약</p>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 pb-32">
+      <main className="max-w-[1600px] 2xl:max-w-[2200px] mx-auto px-4 py-8 sm:px-6 lg:px-8 pb-32">
         {/* === 메인 상품 설명 영역 (기존 홈페이지 내용 통합) === */}
         <div className="w-full lg:w-2/3 xl:w-3/4 mx-auto space-y-12 mb-16">
           <div className="aspect-[21/9] bg-blue-100 rounded-3xl overflow-hidden relative shadow-lg">
@@ -275,7 +299,7 @@ export default function ReservationPage() {
         {/* 플로팅 예약 버튼 (모달 열기) */}
         {!isBookingOpen && (
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-40 flex justify-center">
-            <div className="max-w-7xl w-full flex justify-between items-center px-4">
+            <div className="max-w-[1600px] 2xl:max-w-[2200px] w-full flex justify-between items-center px-4">
               <div>
                 <p className="text-sm text-slate-500 font-medium">하와이 최고의 스노클링</p>
                 <p className="text-xl font-extrabold text-blue-600">₩{currentAdultPrice.toLocaleString()} <span className="text-sm text-slate-500 font-normal">/ 1인</span></p>
@@ -312,29 +336,32 @@ export default function ReservationPage() {
                         투어 옵션 선택
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[
-                          { id: "morning1", title: "1부 거북이 스노클링", time: "08:00 - 11:00" },
-                          { id: "morning2", title: "2부 거북이 스노클링", time: "11:00 - 14:00" },
-                          { id: "sunset", title: "선셋 거북이 스노클링", time: "15:00 - 18:00 (시즌 변동)" },
-                        ].map((tour) => (
+                        {tourSettings.filter((t: any) => t.is_active !== false).sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)).map((tour: any) => (
                           <div
-                            key={tour.id}
+                            key={tour.tour_id}
                             onClick={() => {
-                              setSelectedTour(tour.id);
+                              setSelectedTour(tour.tour_id);
+                              if (tour.is_flat_rate) {
+                                form.setValue("childCount", 0);
+                              }
                             }}
-                            className={`relative p-5 rounded-xl border-2 cursor-pointer transition-all ${selectedTour === tour.id
+                            className={`relative p-5 rounded-xl border-2 cursor-pointer transition-all ${selectedTour === tour.tour_id
                               ? "border-blue-500 bg-blue-50"
                               : "border-slate-200 hover:border-blue-200 hover:bg-slate-50"
                               }`}
                           >
-                            {selectedTour === tour.id && (
+                            {selectedTour === tour.tour_id && (
                               <div className="absolute top-3 right-3 text-blue-500">
                                 <Check size={20} />
                               </div>
                             )}
-                            <h3 className="font-bold text-lg mb-1">{tour.title}</h3>
-                            <p className="text-sm text-slate-500 mb-2">{tour.time}</p>
-                            <p className="font-semibold text-blue-600">₩{getPriceForTour(tour.id, 'adult').toLocaleString()}</p>
+                            <h3 className="font-bold text-lg mb-1">{tour.name}</h3>
+                            <p className="text-sm text-slate-500 mb-2">
+                              {tour.is_flat_rate ? `최대 ${tour.max_capacity}인 단독 대관` : `${tour.start_time} - ${tour.end_time || '(종료 미정)'}`}
+                            </p>
+                            <p className="font-semibold text-blue-600">
+                              ₩{tour.adult_price_krw?.toLocaleString()} {tour.is_flat_rate ? '/ 팀' : '/ 성인'}
+                            </p>
                           </div>
                         ))}
                       </div>
@@ -347,29 +374,35 @@ export default function ReservationPage() {
                           <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-sm font-bold">2</span>
                           상세 인원 선택
                         </h2>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className={`grid ${isFlatRate ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
                           <div>
                             <label className="text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
-                              <Users size={16} className="text-blue-500" /> 성인
+                              {isFlatRate ? <><Users size={16} className="text-blue-500" /> 총 탑승 인원</> : <><Users size={16} className="text-blue-500" /> 성인</>}
                             </label>
                             <input
                               type="number"
                               min="1"
+                              max={isFlatRate ? selectedTourSetting?.max_capacity : undefined}
                               {...form.register("adultCount", { valueAsNumber: true })}
                               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                             />
+                            {isFlatRate && (
+                              <p className="text-xs text-slate-500 mt-1">※ {selectedTourSetting?.name} 예약은 최대 {selectedTourSetting?.max_capacity}명까지 탑승 가능합니다.</p>
+                            )}
                           </div>
-                          <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                              아동 (만3-11세)
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              {...form.register("childCount", { valueAsNumber: true })}
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                            />
-                          </div>
+                          {!isFlatRate && (
+                            <div>
+                              <label className="block text-sm font-medium text-slate-700 mb-2">
+                                아동 (만3-11세)
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                {...form.register("childCount", { valueAsNumber: true })}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                              />
+                            </div>
+                          )}
                         </div>
                       </section>
                     )}
@@ -425,10 +458,11 @@ export default function ReservationPage() {
 
                               const dayData = availabilities[dateStr];
 
-                              // If no bookings yet on that day, capacity is full max
-                              const remaining = dayData ? dayData.remaining : maxCapacity;
+                              if (dayData && dayData.isAvailable === false) return true;
+                              if (isFlatRate) return false; // Flat rate availability is just true/false, checked above
 
-                              // Disable if remaining spots are less than the user's requested total pax
+                              // Regular bookings compare pax to remaining spots
+                              const remaining = dayData ? dayData.remaining : maxCapacity;
                               return remaining < totalSelectedPax;
                             }}
                             className="bg-white p-4 rounded-xl shadow-xs"
@@ -452,6 +486,9 @@ export default function ReservationPage() {
                                 if (isBlocked) return true;
 
                                 const dayData = availabilities[dateStr];
+                                if (dayData && dayData.isAvailable === false) return true;
+                                if (isFlatRate) return false;
+
                                 const remaining = dayData ? dayData.remaining : maxCapacity;
                                 return remaining < totalSelectedPax;
                               }
@@ -485,15 +522,68 @@ export default function ReservationPage() {
                               <MapPin size={16} className="text-blue-500" /> 숙소 입력 (픽업 장소 참고용)
                             </label>
 
-                            <input
-                              type="text"
-                              {...form.register("hotelName")}
-                              placeholder="머무시는 숙소/호텔 이름을 입력해주세요"
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
-                            />
+                            {/* Autocomplete for hotel input */}
+                            {isLoaded ? (
+                              <Autocomplete
+                                onLoad={onLoad}
+                                onPlaceChanged={onPlaceChanged}
+                              >
+                                <input
+                                  type="text"
+                                  {...form.register("hotelName")}
+                                  placeholder="머무시는 숙소/호텔 이름을 영문으로 입력해주세요"
+                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                                />
+                              </Autocomplete>
+                            ) : (
+                              <input
+                                type="text"
+                                {...form.register("hotelName")}
+                                placeholder="머무시는 숙소/호텔 이름을 입력해주세요"
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                              />
+                            )}
                             {form.formState.errors.hotelName && <p className="text-red-500 text-xs mt-1">{form.formState.errors.hotelName.message}</p>}
 
-                            <p className="text-xs text-blue-600 font-medium mt-2 bg-blue-50 p-2 rounded-lg inline-block">※ 원활한 픽업 배정을 위해 정확히 입력해주세요.</p>
+                            <p className="text-xs text-blue-600 font-medium mt-2 bg-blue-50 p-2 rounded-lg inline-block">※ 원활한 픽업 배정을 위해 구글 자동완성 목록에서 정확히 선택해주세요.</p>
+                          </div>
+
+                          {/* Manual pickup selection dropdown */}
+                          <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">픽업 장소 선택</label>
+                            <select
+                              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white cursor-pointer"
+                              value={closestPickup?.location?.id || ""}
+                              onChange={(e) => {
+                                const selectedLoc = pickupLocations.find(loc => loc.id === e.target.value);
+                                if (selectedLoc) {
+                                  setClosestPickup({
+                                    location: selectedLoc,
+                                    minutes: 0
+                                  });
+                                }
+                              }}
+                            >
+                              <option value="" disabled>가까운 장소가 추천되거나 직접 골라주세요</option>
+                              {pickupLocations.map(loc => (
+                                <option key={loc.id} value={loc.id}>
+                                  {loc.name}
+                                  {!isFlatRate && selectedTour === 'morning1' && loc.time_1 ? ` (${formatTimeAMPM(loc.time_1)})` : ''}
+                                  {!isFlatRate && selectedTour === 'morning2' && loc.time_2 ? ` (${formatTimeAMPM(loc.time_2)})` : ''}
+                                  {!isFlatRate && selectedTour === 'sunset' && loc.time_3 ? ` (${formatTimeAMPM(loc.time_3)})` : ''}
+                                </option>
+                              ))}
+                            </select>
+                            {isFlatRate && (
+                              <p className="text-sm text-blue-600 mt-2 font-medium bg-blue-50 p-2 rounded w-fit">
+                                ℹ️ 단독 대관 픽업 시간은 예약 확정 후 개별 안내드립니다.
+                              </p>
+                            )}
+                            {closestPickup && closestPickup.minutes > 0 && (
+                              <p className="text-sm text-green-600 mt-2 font-medium">
+                                자동 배정됨: 걸어서 약 {closestPickup.minutes}분 거리입니다. (수동 변경 가능)
+                              </p>
+                            )}
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -541,9 +631,7 @@ export default function ReservationPage() {
                         <div className="flex justify-between text-sm">
                           <span className="text-slate-500">선택 투어</span>
                           <span className="font-medium text-slate-900">
-                            {selectedTour === 'morning1' ? '1부 (08:00)' :
-                              selectedTour === 'morning2' ? '2부 (11:00)' :
-                                selectedTour === 'sunset' ? '선셋 스노클링' : '미선택'}
+                            {selectedTourSetting?.name || '미선택'}
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">
@@ -552,7 +640,9 @@ export default function ReservationPage() {
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-slate-500">인원</span>
-                          <span className="font-medium text-slate-900">성인 {form.watch("adultCount") || 0}명, 아동 {form.watch("childCount") || 0}명</span>
+                          <span className="font-medium text-slate-900">
+                            {isFlatRate ? `총 탑승 인원 ${form.watch("adultCount") || 0}명` : `성인 ${form.watch("adultCount") || 0}명, 아동 ${form.watch("childCount") || 0}명`}
+                          </span>
                         </div>
                         {closestPickup && (
                           <div className="flex justify-between text-sm border-t border-slate-50 pt-3">

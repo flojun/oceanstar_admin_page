@@ -30,6 +30,8 @@ import { Vehicle, Driver, VehicleState } from '@/types/vehicle';
 import { VehicleDropZone } from '@/components/vehicle/VehicleDropZone';
 import { DraggableBar } from '@/components/vehicle/DraggableBar';
 import { VehicleManifestTable } from '@/components/vehicle/VehicleManifestTable';
+import type { TourSetting } from '@/lib/tourUtils';
+import { getDisplayOrder } from '@/lib/tourUtils';
 
 // ... (imports remain)
 import { DriverManager } from '@/components/vehicle/DriverManager';
@@ -108,6 +110,25 @@ export default function VehiclePage() {
 
     const [vehicles, setVehicles] = useState<VehicleState>(createFreshVehicleState);
     const [bulkData, setBulkData] = useState<Record<string, VehicleState>>({});
+
+    const [tourSettings, setTourSettings] = useState<TourSetting[]>([]);
+    useEffect(() => {
+        supabase.from('tour_settings').select('*').order('display_order').then(({ data }) => {
+            if (data) {
+                setTourSettings(data);
+                // Auto-select first active option if current isn't in DB yet
+                const active = getDisplayOrder(data);
+                if (active.length > 0 && !active.includes(selectedOption)) {
+                    setSelectedOption(active[0]);
+                }
+            }
+        });
+    }, [selectedOption]);
+
+    const dynamicOptions = useMemo(() => {
+        const list = getDisplayOrder(tourSettings);
+        return list.length > 0 ? list : ['1부', '2부', '3부'];
+    }, [tourSettings]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -260,7 +281,7 @@ export default function VehiclePage() {
     // We can refactor it to fetch all 3 options from DB similarly.
     const fetchAllOptionsData = async () => {
         setLoading(true);
-        const targetOptions = ['1부', '2부', '3부'];
+        const targetOptions = dynamicOptions;
         const newBulkData: Record<string, VehicleState> = {};
 
         try {
@@ -584,7 +605,7 @@ export default function VehiclePage() {
         await new Promise(resolve => setTimeout(resolve, 500));
 
         const files: File[] = [];
-        const options = ['1부', '2부', '3부'];
+        const options = dynamicOptions;
 
         for (const opt of options) {
             // Check if this option has any assigned vehicles
@@ -738,7 +759,7 @@ export default function VehiclePage() {
                             onChange={(e) => handleOptionChange(e.target.value)}
                             className="flex-1 p-2 border border-gray-300 rounded text-sm lg:text-lg font-bold"
                         >
-                            {['1부', '2부', '3부', '패러', '제트', '기타'].map(opt => (
+                            {dynamicOptions.map(opt => (
                                 <option key={opt} value={opt}>{opt}</option>
                             ))}
                         </select>

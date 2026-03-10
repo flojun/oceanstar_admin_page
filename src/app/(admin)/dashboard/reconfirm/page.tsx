@@ -10,6 +10,8 @@ import { cn, calculateTotalPax } from "@/lib/utils";
 
 import { getHawaiiTomorrowStr } from "@/lib/timeUtils";
 import { ArrowUpDown } from "lucide-react";
+import type { TourSetting } from "@/lib/tourUtils";
+import { getFilterTabs } from "@/lib/tourUtils";
 
 export default function ReconfirmPage() {
     const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -19,8 +21,9 @@ export default function ReconfirmPage() {
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+    const [tourSettings, setTourSettings] = useState<TourSetting[]>([]);
 
-    const { activeTab, setActiveTab, filteredData, groupedSections, sortOption, setSortOption } = useReservationFilter(reservations);
+    const { activeTab, setActiveTab, filteredData, groupedSections, sortOption, setSortOption } = useReservationFilter(reservations, tourSettings);
 
     const fetchTomorrowReservations = async () => {
         setLoading(true);
@@ -46,6 +49,9 @@ export default function ReconfirmPage() {
 
     useEffect(() => {
         fetchTomorrowReservations();
+        supabase.from('tour_settings').select('*').order('display_order').then(({ data }) => {
+            if (data) setTourSettings(data);
+        });
     }, []);
 
     const handleReconfirmToggle = async (id: string, currentVal: boolean) => {
@@ -80,7 +86,7 @@ export default function ReconfirmPage() {
     };
 
     const renderTabs = () => {
-        const tabs: FilterTab[] = ['전체', '1부', '2부', '3부', '패러 및 제트', '패러', '제트', '기타'];
+        const tabs: FilterTab[] = getFilterTabs(tourSettings);
         return (
             <div className="flex flex-wrap gap-2 pb-2">
                 {tabs.map(tab => (

@@ -9,6 +9,8 @@ import { supabase } from "@/lib/supabase";
 
 import { getHawaiiDateStr } from "@/lib/timeUtils";
 import { PICKUP_LOCATIONS } from "@/constants/pickupLocations";
+import type { TourSetting } from "@/lib/tourUtils";
+import { resolveOptionToTourSetting } from "@/lib/tourUtils";
 
 interface ReservationModalProps {
     isOpen: boolean;
@@ -38,6 +40,7 @@ export function ReservationModal({
     reservation,
 }: ReservationModalProps) {
     const [formData, setFormData] = useState<ReservationInsert>(INITIAL_FORM);
+    const [tourSettings, setTourSettings] = useState<TourSetting[]>([]);
     const [loading, setLoading] = useState(false);
     // Explicit capacity info: { current, limit, group }
     const [capacityInfo, setCapacityInfo] = useState<{ current: number, limit: number, group: string, incoming: number } | null>(null);
@@ -122,19 +125,6 @@ export function ReservationModal({
         }
     };
 
-    // Helper: Option Grouping (Duplicated from monthly/types for local check)
-    const getOptionGroupKey = (option: string): string => {
-        if (!option) return '기타';
-        const lower = option.trim().toLowerCase();
-
-        // Smart matching for raw inputs (before blur transformation)
-        if (lower === '1' || lower.includes('1부')) return '1부';
-        if (lower === '2' || lower.includes('2부')) return '2부';
-        if (lower === '3' || lower.includes('3부')) return '3부';
-
-        return '기타';
-    };
-
     // Helper: Parse Pax
     const parsePax = (str: string): number => {
         if (!str) return 0;
@@ -142,26 +132,30 @@ export function ReservationModal({
         return isNaN(num) ? 0 : num;
     };
 
-    // Real-time Overbooking Check
+    // Fetch tour settings for dynamic capacity
+    useEffect(() => {
+        supabase.from('tour_settings').select('*').order('display_order').then(({ data }) => {
+            if (data) setTourSettings(data);
+        });
+    }, []);
+
+    // Real-time Overbooking Check (Dynamic)
     useEffect(() => {
         const checkOverbooking = async () => {
-            // Reset if missing core data
             if (!formData.tour_date || !formData.option) {
                 setCapacityInfo(null);
                 return;
             }
 
-            const group = getOptionGroupKey(formData.option);
-            if (!['1부', '2부', '3부'].includes(group)) {
+            const resolved = resolveOptionToTourSetting(formData.option, tourSettings);
+            if (!resolved.tourSetting) {
                 setCapacityInfo(null);
                 return;
             }
 
-            // Valid group, calculate even if pax is 0 (to show 0/45)
+            const group = resolved.group;
+            const limit = resolved.capacity;
             const newPax = parsePax(formData.pax);
-
-            const LIMITS: Record<string, number> = { '1부': 45, '2부': 45, '3부': 40 };
-            const limit = LIMITS[group];
 
             try {
                 const { data, error } = await supabase
@@ -175,7 +169,9 @@ export function ReservationModal({
                 let currentTotal = 0;
                 data.forEach(r => {
                     if (reservation && r.id === reservation.id) return;
-                    if (getOptionGroupKey(r.option) === group) {
+                    const rResolved = resolveOptionToTourSetting(r.option, tourSettings);
+                    // Multi-vessel: group by vessel + start_time + group
+                    if (rResolved.group === group && rResolved.vessel === resolved.vessel) {
                         currentTotal += parsePax(r.pax);
                     }
                 });
@@ -194,10 +190,10 @@ export function ReservationModal({
 
         const timer = setTimeout(() => {
             checkOverbooking();
-        }, 300); // 300ms faster debounce
+        }, 300);
 
         return () => clearTimeout(timer);
-    }, [formData.tour_date, formData.option, formData.pax, reservation]);
+    }, [formData.tour_date, formData.option, formData.pax, reservation, tourSettings]);
 
     if (!isOpen) return null;
 

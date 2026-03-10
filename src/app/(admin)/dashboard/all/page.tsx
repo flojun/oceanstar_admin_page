@@ -15,7 +15,8 @@ import CustomTextEditor from "@/components/editors/CustomTextEditor";
 import SelectEditor from "@/components/editors/SelectEditor";
 import { PICKUP_LOCATIONS } from "@/constants/pickupLocations";
 import StatusEditor from "@/components/editors/StatusEditor";
-
+import type { TourSetting } from "@/lib/tourUtils";
+import { resolveOptionToTourSetting, getVesselBadgeColor, getShortLabel } from "@/lib/tourUtils";
 interface RangeSelection {
     startCol: number;
     startRow: number;
@@ -73,43 +74,11 @@ const fullHeightGridStyle = `
   }
 `;
 
-// Helper for option grouping
-const getOptionGroupKey = (option: string): string => {
-    if (!option) return '기타';
-    const lower = option.trim().toLowerCase();
-    if (lower === '1' || lower.includes('1부')) return '1부';
-    if (lower === '2' || lower.includes('2부')) return '2부';
-    if (lower === '3' || lower.includes('3부')) return '3부';
-    return '기타';
-};
-
 const parsePax = (str: string): number => {
     if (!str) return 0;
     const num = parseInt(str.toString().replace(/[^0-9]/g, ''), 10);
     return isNaN(num) ? 0 : num;
 };
-
-// Custom Option Render
-function OptionCellRenderer({ row }: any) {
-    const status = row._capacityStatus;
-    const msg = row._capacityMsg;
-
-    let indicator = null;
-    if (status === 'checking') {
-        indicator = <span className="text-gray-500 text-xs ml-1 animate-spin">⌛</span>;
-    } else if (status === 'warning') {
-        indicator = <span className="text-red-600 font-bold ml-1 text-xs">⚠️</span>;
-    } else if (status === 'safe') {
-        indicator = <span className="text-blue-500 font-bold ml-1 text-xs">✓</span>;
-    }
-
-    return (
-        <div className={`w-full h-full flex items-center justify-center px-2 ${status === 'warning' ? 'bg-red-50' : ''}`} title={msg || row.option}>
-            <span>{row.option}</span>
-            {indicator}
-        </div>
-    );
-}
 
 import CancellationRequestsView from "@/components/CancellationRequestsView";
 import { useSearchParams } from "next/navigation";
@@ -142,6 +111,13 @@ function AllReservationsContent() {
     const [saving, setSaving] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(0);
+
+    const [tourSettings, setTourSettings] = useState<TourSetting[]>([]);
+    useEffect(() => {
+        supabase.from('tour_settings').select('*').order('display_order').then(({ data }) => {
+            if (data) setTourSettings(data);
+        });
+    }, []);
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
@@ -483,10 +459,10 @@ function AllReservationsContent() {
         });
     };
 
-    // Async Overbooking Check
+    // Async Overbooking Check (Dynamic)
     const checkOverbooking = async (row: any, index: number) => {
-        const group = getOptionGroupKey(row.option || "");
-        if (!['1부', '2부', '3부'].includes(group)) {
+        const resolved = resolveOptionToTourSetting(row.option || "", tourSettings);
+        if (!resolved.tourSetting) {
             setRows(prev => {
                 const updated = [...prev];
                 if (updated[index]) (updated[index] as any)._capacityStatus = null;
@@ -495,9 +471,9 @@ function AllReservationsContent() {
             return;
         }
 
+        const group = resolved.group;
+        const limit = resolved.capacity;
         const newPax = parsePax(row.pax || "");
-        const LIMITS: Record<string, number> = { '1부': 45, '2부': 45, '3부': 40 };
-        const limit = LIMITS[group];
 
         try {
             const { data, error } = await supabase
@@ -511,21 +487,22 @@ function AllReservationsContent() {
             let dbTotal = 0;
             if (data) {
                 data.forEach(r => {
-                    // Exclude the current row to prevent double-counting when editing existing row
+                    // Exclude current row to prevent double-counting when editing existing row
                     if (row.id && !row.isNew && r.id === row.id) return;
-                    if (getOptionGroupKey(r.option) === group) dbTotal += parsePax(r.pax);
+                    const rResolved = resolveOptionToTourSetting(r.option || "", tourSettings);
+                    // Match group AND vessel for multi-vessel accuracy
+                    if (rResolved.group === group && rResolved.vessel === resolved.vessel) {
+                        dbTotal += parsePax(r.pax);
+                    }
                 });
             }
 
-            // Note: In strict mode, we might want to subtract the CURRENT row's saved value if it exists?
-            // But for "New/Edit", simple sum is safer warning.
             const total = dbTotal + newPax;
             const isOver = total > limit;
             const msg = `${group}: 확정${dbTotal} + 입력${newPax} = ${total}/${limit}명${isOver ? " (초과!)" : ""}`;
 
             setRows(prev => {
                 const updated = [...prev];
-                // Safety check: ensure we are updating same row
                 if (updated[index] && (updated[index] as any)._grid_id === row._grid_id) {
                     (updated[index] as any)._capacityStatus = isOver ? 'warning' : 'safe';
                     (updated[index] as any)._capacityMsg = msg;
@@ -1306,9 +1283,38 @@ function AllReservationsContent() {
         },
         { key: "pax", name: "인원", renderEditCell: CustomTextEditor, width: 60, cellClass: "select-none p-0 text-center", headerCellClass: "text-center", renderCell: (props: any) => hoverTooltipRenderer(props, true), editorOptions: { commitOnOutsideClick: true } },
         {
-            key: "option", name: "옵션", renderEditCell: CustomTextEditor, width: 80,
+            key: "option", name: "옵션", renderEditCell: CustomTextEditor, width: 90, // Widened slightly for badges
             cellClass: "select-none p-0 text-center", headerCellClass: "text-center",
-            renderCell: OptionCellRenderer,
+            renderCell: ({ row }: any) => {
+                const status = row._capacityStatus;
+                const msg = row._capacityMsg;
+                const resolved = resolveOptionToTourSetting(row.option || "", tourSettings);
+                const showBadge = resolved.tourSetting && resolved.vessel !== '오션스타';
+                const badgeColorClass = getVesselBadgeColor(resolved.vessel);
+
+                let indicator = null;
+                if (status === 'checking') {
+                    indicator = <span className="text-gray-500 text-xs ml-1 animate-spin">⌛</span>;
+                } else if (status === 'warning') {
+                    indicator = <span className="text-red-600 font-bold ml-1 text-xs">⚠️</span>;
+                } else if (status === 'safe') {
+                    indicator = <span className="text-blue-500 font-bold ml-1 text-xs">✓</span>;
+                }
+
+                return (
+                    <div className={`w-full h-full flex flex-col items-center justify-center p-0.5 leading-tight ${status === 'warning' ? 'bg-red-50' : ''}`} title={msg || row.option}>
+                        <div className="flex items-center">
+                            <span>{row.option}</span>
+                            {indicator}
+                        </div>
+                        {showBadge && (
+                            <span className={`text-[9px] px-1 py-[1px] mt-0.5 rounded shadow-sm flex items-center gap-0.5 ${badgeColorClass}`}>
+                                {getShortLabel(resolved.vessel)}
+                            </span>
+                        )}
+                    </div>
+                );
+            },
             editorOptions: { commitOnOutsideClick: true }
         },
         {
@@ -1358,7 +1364,7 @@ function AllReservationsContent() {
                 );
             }
         },
-    ], [selectedRows, rows, lastSelectedIdx, noteColWidth]);
+    ], [selectedRows, rows, lastSelectedIdx, noteColWidth, tourSettings]);
 
     // Shift+Click Range Selection + Mobile Double-Tap Edit
     const handleCellClick = useCallback((args: any, event: any) => {

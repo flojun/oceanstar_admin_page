@@ -9,6 +9,8 @@ import { ReservationInsert } from "@/types/reservation";
 import { smartParseRow } from "@/lib/smartParser";
 import { getHawaiiDateStr } from "@/lib/timeUtils";
 import { useUnsavedChanges } from "@/components/providers/UnsavedChangesProvider";
+import type { TourSetting } from "@/lib/tourUtils";
+import { resolveOptionToTourSetting, getVesselBadgeColor, getShortLabel } from "@/lib/tourUtils";
 
 // Custom styles for Excel-like look
 const excelStyles = `
@@ -63,29 +65,6 @@ function TextEditor({ row, column, onRowChange, onClose }: RenderEditCellProps<G
     );
 }
 
-// Option Cell Renderer with Indicator
-function OptionCellRenderer({ row }: RenderCellProps<GridRow>) {
-    const status = row._capacityStatus;
-    const msg = row._capacityMsg;
-
-    let indicator = <span className="text-gray-300 ml-1 text-[10px]">•</span>; // Default dot
-
-    if (status === 'checking') {
-        indicator = <span className="text-gray-500 text-xs ml-1 animate-spin">⌛</span>;
-    } else if (status === 'warning') {
-        indicator = <span className="text-red-600 font-bold ml-1 text-xs">⚠️</span>;
-    } else if (status === 'safe') {
-        indicator = <span className="text-blue-500 font-bold ml-1 text-xs">✓</span>;
-    }
-
-    return (
-        <div className={`w-full h-full flex items-center px-2 ${status === 'warning' ? 'bg-red-50' : ''}`} title={msg || row.option}>
-            <span>{row.option}</span>
-            {indicator}
-        </div>
-    );
-}
-
 const createEmptyRow = (): GridRow => ({
     id: `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`,
     _grid_id: crypto.randomUUID(),
@@ -108,6 +87,13 @@ const initialRows = Array.from({ length: 50 }, () => createEmptyRow());
 export default function BulkAddPage() {
     const [rows, setRows] = useState<GridRow[]>(initialRows);
     const [saving, setSaving] = useState(false);
+    const [tourSettings, setTourSettings] = useState<TourSetting[]>([]);
+
+    useEffect(() => {
+        supabase.from('tour_settings').select('*').order('display_order').then(({ data }) => {
+            if (data) setTourSettings(data);
+        });
+    }, []);
 
     const { setIsDirty, handleNavigationAttempt, registerSaveHandler } = useUnsavedChanges();
 
@@ -152,22 +138,39 @@ export default function BulkAddPage() {
         { key: "tour_date", name: "예약일", renderEditCell: TextEditor, width: 100, renderCell: commonCellRenderer },
         { key: "pax", name: "인원", renderEditCell: TextEditor, width: 60, renderCell: commonCellRenderer },
         {
-            key: "option", name: "옵션(자동체크)", renderEditCell: TextEditor, width: 100,
-            renderCell: OptionCellRenderer
+            key: "option", name: "옵션(자동체크)", renderEditCell: TextEditor, width: 130, // Widened for badge
+            renderCell: ({ row }: RenderCellProps<GridRow>) => {
+                const status = row._capacityStatus;
+                const msg = row._capacityMsg;
+                const resolved = resolveOptionToTourSetting(row.option || "", tourSettings);
+                const showBadge = resolved.tourSetting && resolved.vessel !== '오션스타';
+                const badgeColorClass = getVesselBadgeColor(resolved.vessel);
+
+                let indicator = <span className="text-gray-300 ml-1 text-[10px]">•</span>;
+                if (status === 'checking') indicator = <span className="text-gray-500 text-xs ml-1 animate-spin">⌛</span>;
+                else if (status === 'warning') indicator = <span className="text-red-600 font-bold ml-1 text-xs">⚠️</span>;
+                else if (status === 'safe') indicator = <span className="text-blue-500 font-bold ml-1 text-xs">✓</span>;
+
+                return (
+                    <div className={`w-full h-full flex items-center px-1 leading-tight ${status === 'warning' ? 'bg-red-50' : ''}`} title={msg || row.option}>
+                        <div className="flex items-center">
+                            <span>{row.option}</span>
+                            {indicator}
+                        </div>
+                        {showBadge && (
+                            <span className={`ml-1 text-[9px] px-1 py-[1px] rounded shadow-sm flex items-center ${badgeColorClass}`}>
+                                {getShortLabel(resolved.vessel)}
+                            </span>
+                        )}
+                    </div>
+                );
+            }
         },
         { key: "pickup_location", name: "픽업장소", renderEditCell: TextEditor, width: 140, renderCell: commonCellRenderer },
         { key: "contact", name: "연락처", renderEditCell: TextEditor, width: 120, renderCell: commonCellRenderer },
         { key: "note", name: "기타사항", renderEditCell: TextEditor, width: 140, renderCell: commonCellRenderer },
     ];
 
-    const getOptionGroupKey = (option: string): string => {
-        if (!option) return '기타';
-        const lower = option.trim().toLowerCase();
-        if (lower === '1' || lower.includes('1부')) return '1부';
-        if (lower === '2' || lower.includes('2부')) return '2부';
-        if (lower === '3' || lower.includes('3부')) return '3부';
-        return '기타';
-    };
 
     const parsePax = (str: string): number => {
         if (!str) return 0;
@@ -206,9 +209,8 @@ export default function BulkAddPage() {
     };
 
     const checkOverbookingForGrid = async (row: GridRow, index: number) => {
-        const group = getOptionGroupKey(row.option || "");
-        if (!['1부', '2부', '3부'].includes(group)) {
-            // Reset status for invalid group
+        const resolved = resolveOptionToTourSetting(row.option || "", tourSettings);
+        if (!resolved.tourSetting) {
             setRows(prev => {
                 const updated = [...prev];
                 if (updated[index]) updated[index]._capacityStatus = undefined;
@@ -217,9 +219,9 @@ export default function BulkAddPage() {
             return;
         }
 
+        const group = resolved.group;
+        const limit = resolved.capacity;
         const newPax = parsePax(row.pax || "");
-        const LIMITS: Record<string, number> = { '1부': 45, '2부': 45, '3부': 40 };
-        const limit = LIMITS[group];
 
         try {
             const { data, error } = await supabase
@@ -233,7 +235,10 @@ export default function BulkAddPage() {
             let dbTotal = 0;
             if (data) {
                 data.forEach(r => {
-                    if (getOptionGroupKey(r.option) === group) dbTotal += parsePax(r.pax);
+                    const rResolved = resolveOptionToTourSetting(r.option || "", tourSettings);
+                    if (rResolved.group === group && rResolved.vessel === resolved.vessel) {
+                        dbTotal += parsePax(r.pax);
+                    }
                 });
             }
 
@@ -242,11 +247,8 @@ export default function BulkAddPage() {
 
             const msg = `${group}: 확정${dbTotal} + 입력${newPax} = ${total}/${limit}명${isOver ? " (초과!)" : ""}`;
 
-            // Update STATE with result
             setRows(prev => {
                 const updated = [...prev];
-                // Verify ID matches to ensure row hasn't moved (approximated by index/grid_id)
-                // Using index is safe enough for inline edits without sort
                 if (updated[index] && updated[index]._grid_id === row._grid_id) {
                     updated[index]._capacityStatus = isOver ? 'warning' : 'safe';
                     updated[index]._capacityMsg = msg;

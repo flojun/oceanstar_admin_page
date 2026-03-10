@@ -21,7 +21,7 @@ export default function Navbar() {
 
     return (
         <header className="sticky top-0 z-50 border-b border-blue-100 bg-white/80 backdrop-blur-md shadow-sm shrink-0">
-            <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+            <div className="mx-auto flex max-w-[1600px] 2xl:max-w-[2200px] items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-8">
                     <h1 className="text-xl font-extrabold text-blue-600 tracking-tight">O C E A N S T A R</h1>
                     <nav className="hidden space-x-2 md:flex">

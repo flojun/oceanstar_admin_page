@@ -225,15 +225,63 @@ export default function ReservationPage() {
                     <MapPin size={16} className="text-blue-500" /> 숙소 입력 (픽업 장소 참고용)
                   </label>
 
-                  <input
-                    type="text"
-                    {...form.register("hotelName")}
-                    placeholder="머무시는 숙소/호텔 이름을 입력해주세요"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
-                  />
+                  {/* Autocomplete for hotel input */}
+                  {isLoaded ? (
+                    <Autocomplete
+                      onLoad={onLoad}
+                      onPlaceChanged={onPlaceChanged}
+                    >
+                      <input
+                        type="text"
+                        {...form.register("hotelName")}
+                        placeholder="머무시는 숙소/호텔 이름을 영문으로 입력해주세요"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                      />
+                    </Autocomplete>
+                  ) : (
+                    <input
+                      type="text"
+                      {...form.register("hotelName")}
+                      placeholder="머무시는 숙소/호텔 이름을 입력해주세요"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                    />
+                  )}
                   {form.formState.errors.hotelName && <p className="text-red-500 text-xs mt-1">{form.formState.errors.hotelName.message}</p>}
 
-                  <p className="text-xs text-blue-600 font-medium mt-2 bg-blue-50 p-2 rounded-lg inline-block">※ 원활한 픽업 배정을 위해 정확히 입력해주세요.</p>
+                  <p className="text-xs text-blue-600 font-medium mt-2 bg-blue-50 p-2 rounded-lg inline-block">※ 원활한 픽업 배정을 위해 구글 자동완성 목록에서 정확히 선택해주세요.</p>
+                </div>
+
+                {/* Manual pickup selection dropdown */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">픽업 장소 선택</label>
+                  <select
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white cursor-pointer"
+                    value={closestPickup?.location?.id || ""}
+                    onChange={(e) => {
+                      const selectedLoc = pickupLocations.find(loc => loc.id === e.target.value);
+                      if (selectedLoc) {
+                        setClosestPickup({
+                          location: selectedLoc,
+                          minutes: 0
+                        });
+                      }
+                    }}
+                  >
+                    <option value="" disabled>가까운 장소가 추천되거나 직접 골라주세요</option>
+                    {pickupLocations.map(loc => (
+                      <option key={loc.id} value={loc.id}>
+                        {loc.name}
+                        {selectedTour === 'morning1' && loc.time_1 ? ` (${loc.time_1})` : ''}
+                        {selectedTour === 'morning2' && loc.time_2 ? ` (${loc.time_2})` : ''}
+                        {selectedTour === 'sunset' && loc.time_3 ? ` (${loc.time_3})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  {closestPickup && closestPickup.minutes > 0 && (
+                    <p className="text-sm text-green-600 mt-2 font-medium">
+                      자동 배정됨: 걸어서 약 {closestPickup.minutes}분 거리입니다. (수동 변경 가능)
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -57,7 +57,14 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
             { name: "정산 검토", href: "/dashboard/settlement" },
         ]
     },
-    { name: "예약홈페이지 관리", href: "/dashboard/website-settings", icon: Settings },
+    {
+        name: "예약홈페이지 관리",
+        icon: Settings,
+        children: [
+            { name: "가격 및 날짜 관리", href: "/dashboard/website-settings/dates" },
+            { name: "픽업시간 관리", href: "/dashboard/website-settings/pickup" }
+        ]
+    },
     { name: "여행사 관리", href: "/dashboard/agencies", icon: Building2 },
 ];
 
@@ -336,7 +343,7 @@ export default function AdminLayout({
             <UnsavedChangesProvider>
                 <AdminSidebar isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
                 <main className="flex-1 overflow-auto flex flex-col min-w-0">
-                    <div className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
+                    <div className="flex-1 p-4 md:p-8 max-w-[1600px] 2xl:max-w-[2200px] mx-auto w-full">
                         {children}
                     </div>
                 </main>

@@ -6,87 +6,49 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Reservation } from "@/types/reservation";
 import { cn } from "@/lib/utils";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameMonth, isToday, parseISO } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isToday } from "date-fns";
 import { ko } from "date-fns/locale";
+import type { TourSetting } from "@/lib/tourUtils";
+import { resolveOptionToTourSetting, getDisplayOrder, getTrafficLightStatus, getShortLabel } from "@/lib/tourUtils";
 
 // ---------- Types ----------
 interface DailyStats {
     totalPax: number;
-    optionStats: Record<string, number>; // "1부": 40, "2부": 12...
+    optionStats: Record<string, number>;
 }
 
 // ---------- Helper: Parse Pax ----------
-// Example: "2명" -> 2
 function parsePax(paxStr: string): number {
     if (!paxStr) return 0;
     const num = parseInt(paxStr.replace(/[^0-9]/g, ''), 10);
     return isNaN(num) ? 0 : num;
 }
 
-// ---------- Helper: Option Grouping ----------
-function getOptionGroupKey(option: string): string {
-    if (!option) return '기타';
-    const lower = option.toLowerCase();
-    if (lower.includes('1부')) return '1부';
-    if (lower.includes('2부')) return '2부';
-    if (lower.includes('3부')) return '3부';
-    // Treat Turtle, Para, Jet as their own or "기타" depending on rendering requirement.
-    // Spec says Traffic Light Logic applies to 1,2,3. Others are gray/blue.
-    if (lower.includes('거북이')) return '거북이';
-    if (lower.includes('패러')) return '패러';
-    if (lower.includes('제트')) return '제트';
-    return '기타';
-}
-
-// ---------- Traffic Light Logic ----------
-// Returns color class and width percentage
-function getReservationStatus(group: string, count: number) {
-    let max = 0;
-    // Default for others: Pink (기타)
-    let color = 'from-pink-400 to-pink-600 border-pink-300';
-    let percent = 100;
-
-    if (group === '1부' || group === '2부') {
-        max = 45;
-        if (count >= 46) color = 'from-red-500 to-red-700 border-red-400'; // 초과 (Red)
-        else if (count >= 44) color = 'from-blue-500 to-blue-700 border-blue-400'; // 마감 (Blue)
-        else if (count >= 10) color = 'from-emerald-400 to-emerald-600 border-emerald-300'; // 10+ (Green)
-        else color = 'from-yellow-400 to-yellow-600 border-yellow-300'; // 1~9 (Yellow)
-
-        percent = Math.min(100, (count / max) * 100);
-    } else if (group === '3부') {
-        max = 40;
-        if (count >= 41) color = 'from-red-500 to-red-700 border-red-400'; // 초과
-        else if (count >= 38) color = 'from-blue-500 to-blue-700 border-blue-400'; // 마감
-        else if (count >= 10) color = 'from-emerald-400 to-emerald-600 border-emerald-300'; // 10+
-        else color = 'from-yellow-400 to-yellow-600 border-yellow-300'; // 1~9
-
-        percent = Math.min(100, (count / max) * 100);
-    }
-
-    return { color, percent };
-}
-
-
-
-// Order to render bars
-const DISPLAY_ORDER = ['1부', '2부', '3부', '패러 및 제트', '패러', '제트', '기타'];
-
 export default function MonthlyPage() {
     const router = useRouter();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [reservations, setReservations] = useState<Reservation[]>([]);
     const [loading, setLoading] = useState(true);
+    const [tourSettings, setTourSettings] = useState<TourSetting[]>([]);
 
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [selectedDate, setSelectedDate] = useState<string | null>(null); // For mobile double-tap
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-    // Calculate Month Range
+    // Dynamic display order from DB
+    const displayOrder = useMemo(() => getDisplayOrder(tourSettings), [tourSettings]);
+
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-    // Fetch Data
+    // Fetch tour settings once
+    useEffect(() => {
+        supabase.from('tour_settings').select('*').order('display_order').then(({ data }) => {
+            if (data) setTourSettings(data);
+        });
+    }, []);
+
+    // Fetch reservations for the month
     useEffect(() => {
         const fetchMonthData = async () => {
             setLoading(true);
@@ -108,31 +70,29 @@ export default function MonthlyPage() {
                 setLoading(false);
             }
         };
-
         fetchMonthData();
     }, [currentDate]);
 
-    // Aggregate Data by Date
+    // Aggregate Data by Date using dynamic grouping
     const statsByDate = useMemo(() => {
         const stats: Record<string, DailyStats> = {};
 
         reservations.forEach(r => {
-            const dateKey = r.tour_date; // YYYY-MM-DD
+            const dateKey = r.tour_date;
             if (!stats[dateKey]) {
                 stats[dateKey] = { totalPax: 0, optionStats: {} };
             }
 
             const pax = parsePax(r.pax);
-            const group = getOptionGroupKey(r.option);
+            const resolved = resolveOptionToTourSetting(r.option, tourSettings);
+            const group = resolved.group;
 
-            // Add to Group
             stats[dateKey].optionStats[group] = (stats[dateKey].optionStats[group] || 0) + pax;
-            // Add to Total
             stats[dateKey].totalPax += pax;
         });
 
         return stats;
-    }, [reservations]);
+    }, [reservations, tourSettings]);
 
     const handlePrevMonth = () => setCurrentDate(subMonths(currentDate, 1));
     const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
@@ -144,24 +104,19 @@ export default function MonthlyPage() {
         setCurrentDate(newDate);
     };
 
-    // Navigate to Today view with date param (with double-tap on mobile)
     const handleDateClick = (dateStr: string) => {
-        // Check if same date is already selected (second tap)
         if (selectedDate === dateStr) {
             router.push(`/dashboard/today?date=${dateStr}`);
-            setSelectedDate(null); // Reset selection after navigation
+            setSelectedDate(null);
         } else {
-            // First tap: just select the date
             setSelectedDate(dateStr);
         }
     };
 
-    // Calculate grid blanks
-    const startDayOfWeek = monthStart.getDay(); // 0 (Sun) - 6 (Sat)
+    const startDayOfWeek = monthStart.getDay();
     const blanks = Array.from({ length: startDayOfWeek });
 
-    // Range for Picker
-    const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i); // Current -2 to +2
+    const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
     const months = Array.from({ length: 12 }, (_, i) => i);
 
     return (
@@ -176,7 +131,6 @@ export default function MonthlyPage() {
                         <ChevronLeft className="h-6 w-6" />
                     </button>
 
-                    {/* Date Picker Trigger */}
                     <div className="relative">
                         <button
                             onClick={() => setShowDatePicker(!showDatePicker)}
@@ -186,27 +140,18 @@ export default function MonthlyPage() {
                             <span className="text-xs">▼</span>
                         </button>
 
-                        {/* Dropdown Popup */}
                         {showDatePicker && (
                             <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 p-3 z-50 grid grid-cols-2 gap-2 animate-in fade-in zoom-in-95 duration-200">
-                                <select
-                                    className="p-1 border rounded text-sm focus:ring-2 focus:ring-blue-500"
-                                    value={currentDate.getFullYear()}
-                                    onChange={(e) => handleYearMonthChange(e, 'year')}
-                                >
+                                <select className="p-1 border rounded text-sm focus:ring-2 focus:ring-blue-500"
+                                    value={currentDate.getFullYear()} onChange={(e) => handleYearMonthChange(e, 'year')}>
                                     {years.map(y => <option key={y} value={y}>{y}년</option>)}
                                 </select>
-                                <select
-                                    className="p-1 border rounded text-sm focus:ring-2 focus:ring-blue-500"
-                                    value={currentDate.getMonth()}
-                                    onChange={(e) => handleYearMonthChange(e, 'month')}
-                                >
+                                <select className="p-1 border rounded text-sm focus:ring-2 focus:ring-blue-500"
+                                    value={currentDate.getMonth()} onChange={(e) => handleYearMonthChange(e, 'month')}>
                                     {months.map(m => <option key={m} value={m}>{m + 1}월</option>)}
                                 </select>
-                                <button
-                                    onClick={() => { setCurrentDate(new Date()); setShowDatePicker(false); }}
-                                    className="col-span-2 mt-1 py-1.5 text-xs font-semibold bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
-                                >
+                                <button onClick={() => { setCurrentDate(new Date()); setShowDatePicker(false); }}
+                                    className="col-span-2 mt-1 py-1.5 text-xs font-semibold bg-blue-50 text-blue-600 rounded hover:bg-blue-100">
                                     오늘 날짜로 이동
                                 </button>
                             </div>
@@ -217,7 +162,6 @@ export default function MonthlyPage() {
                         <ChevronRight className="h-6 w-6" />
                     </button>
 
-                    {/* Overlay to close picker */}
                     {showDatePicker && (
                         <div className="fixed inset-0 z-40" onClick={() => setShowDatePicker(false)} />
                     )}
@@ -226,7 +170,6 @@ export default function MonthlyPage() {
 
             {/* Calendar Grid */}
             <div className="w-full border border-gray-200 rounded-lg bg-white shadow-sm flex flex-col overflow-hidden max-h-[calc(100vh-200px)] sm:max-h-none sm:flex-1">
-                {/* Weekday Headers */}
                 <div className="grid grid-cols-7 border-b border-blue-100 bg-blue-50/50">
                     {['일', '월', '화', '수', '목', '금', '토'].map((day, i) => (
                         <div key={day} className={cn(
@@ -238,14 +181,11 @@ export default function MonthlyPage() {
                     ))}
                 </div>
 
-                {/* Days */}
                 <div className="overflow-y-auto sm:flex-1 grid grid-cols-7 auto-rows-auto sm:auto-rows-fr">
-                    {/* Blanks for previous month */}
                     {blanks.map((_, i) => (
                         <div key={`blank-${i}`} className="border-b border-r border-gray-100 bg-gray-50/30" />
                     ))}
 
-                    {/* Actual Days */}
                     {daysInMonth.map((day) => {
                         const dateStr = format(day, 'yyyy-MM-dd');
                         const isTodayDate = isToday(day);
@@ -262,29 +202,24 @@ export default function MonthlyPage() {
                                     isSelected && "bg-blue-100 ring-2 ring-inset ring-blue-500"
                                 )}
                             >
-                                {/* Date Number */}
                                 <span className={cn(
-                                    "text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full ml-auto mb-1", // mb-1 plus gap in container provides spacing
+                                    "text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full ml-auto mb-1",
                                     isTodayDate ? "bg-blue-600 text-white shadow-sm" : "text-gray-700"
                                 )}>
                                     {format(day, 'd')}
                                 </span>
 
-                                {/* Bars Container - Pushed to top but below date due to normal flow + spacing */}
                                 <div className="flex flex-col gap-0.5 w-full mt-1">
-                                    {dayStats && DISPLAY_ORDER.map(group => {
+                                    {dayStats && displayOrder.map(group => {
                                         const count = dayStats.optionStats[group];
                                         if (!count) return null;
 
-                                        const { color, percent } = getReservationStatus(group, count);
+                                        const { color, percent } = getTrafficLightStatus(group, count, tourSettings);
 
                                         return (
-                                            <div
-                                                key={group}
-                                                // Outer Container: "Slot"
+                                            <div key={group}
                                                 className="relative w-full h-9 sm:h-6 rounded-md bg-gray-200 shadow-inner border border-gray-300 overflow-hidden"
                                             >
-                                                {/* Inner Fill: 3D Bar */}
                                                 <div
                                                     className={cn(
                                                         "h-full absolute left-0 top-0 transition-all duration-300 ease-out",
@@ -293,24 +228,12 @@ export default function MonthlyPage() {
                                                     )}
                                                     style={{ width: `${percent}%` }}
                                                 />
-
-                                                {/* Text Overlay (White Text with Premium Shadow) */}
                                                 <div className="relative z-10 w-full h-full flex flex-col sm:flex-row items-center justify-center sm:justify-between px-2 text-[10px] sm:text-xs font-bold leading-tight sm:leading-none text-white select-none">
                                                     <span className="hidden sm:inline" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,0.5)' }}>
                                                         {group} : {count}명
                                                     </span>
-                                                    {/* Mobile View: Stacked */}
                                                     <div className="sm:hidden flex flex-col items-center justify-center w-full h-full leading-3" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,0.5)' }}>
-                                                        <span className="mb-0.5">
-                                                            {group === '1부' ? '1부:' :
-                                                                group === '2부' ? '2부:' :
-                                                                    group === '3부' ? '3부:' :
-                                                                        group === '패러 및 제트' ? '패+제:' :
-                                                                            group === '패러' ? '패러:' :
-                                                                                group === '제트' ? '제트:' :
-                                                                                    group === '거북이' ? '거북:' :
-                                                                                        '기타:'}
-                                                        </span>
+                                                        <span className="mb-0.5">{getShortLabel(group)}</span>
                                                         <span>{count}명</span>
                                                     </div>
                                                 </div>
@@ -323,7 +246,6 @@ export default function MonthlyPage() {
                     })}
                 </div>
             </div>
-
 
             <div className="shrink-0 flex gap-4 text-sm font-medium text-gray-500 px-2 justify-end flex-wrap">
                 <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-yellow-400 to-yellow-600 border border-yellow-300 shadow-sm"></span>1~9명</div>

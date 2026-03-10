@@ -78,7 +78,7 @@ export default function HomePage() {
 
     return (
         <div className="h-full w-full overflow-y-auto">
-            <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+            <div className="p-6 max-w-[1600px] 2xl:max-w-[2200px] mx-auto space-y-8 animate-in fade-in duration-500">
                 <header className="mb-8">
                     <h1 className="text-3xl font-extrabold text-gray-900">
                         Oceanstar Admin <span className="text-blue-600">Home</span>
