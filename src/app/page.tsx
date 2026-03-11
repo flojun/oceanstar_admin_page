@@ -12,6 +12,7 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { format, parse } from "date-fns";
 import { X, ChevronRight, Info } from "lucide-react";
+import Image from "next/image";
 
 // Helper to format HH:mm:ss string to "hh:mm a"
 const formatTimeAMPM = (timeString: string | null | undefined) => {
@@ -225,6 +226,26 @@ export default function ReservationPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "TouristAttraction",
+            "name": "하와이 오션스타 거북이 스노클링 투어",
+            "description": "와이키키 출발 하와이 최고의 바다거북 스노클링 및 해양 액티비티",
+            "provider": {
+              "@type": "Organization",
+              "name": "Ocean Star Hawaii"
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": "115",
+              "priceCurrency": "USD"
+            }
+          })
+        }}
+      />
       <header className="bg-white px-6 py-4 shadow-sm sticky top-0 z-50">
         <div className="max-w-[1600px] 2xl:max-w-[2200px] mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold text-blue-600 tracking-tight">Ocean Star</h1>
@@ -237,13 +258,17 @@ export default function ReservationPage() {
         <div className="w-full lg:w-2/3 xl:w-3/4 mx-auto space-y-12 mb-16">
           <div className="aspect-[21/9] bg-blue-100 rounded-3xl overflow-hidden relative shadow-lg">
             {/* TODO: Add proper hero image here later */}
-            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent flex items-end p-8">
-              <h2 className="text-white text-3xl font-bold">오션스타 거북이 스노클링</h2>
+            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent flex items-end p-8 z-10">
+              <h1 className="text-white text-3xl font-bold">오션스타 하와이 거북이 스노클링 & 해양 액티비티</h1>
+            </div>
+            {/* Fallback pattern for now, should be replaced with actual image src when available */}
+            <div className="absolute inset-0 bg-blue-200">
+               {/* <Image src="/hero-image.jpg" alt="하와이 와이키키 거북이 스노클링 오션스타 투어" fill className="object-cover" priority /> */}
             </div>
           </div>
 
           <section className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 prose prose-slate max-w-none">
-            <h3 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2"><Info className="text-blue-500" /> 상세소개 (Detail)</h3>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2"><Info className="text-blue-500" /> 상세소개 (Detail)</h2>
             <p className="text-lg text-slate-700 leading-relaxed mb-6">
               ✨ <strong>하와이에서 가장 사랑받는 No.1 액티비티!</strong> ✨<br />
               하와이의 중심, 와이키키 터틀 캐니언에서 거북이 스노클링과 다양한 해양 액티비티 5종을 한번에 즐겨보세요.<br />
@@ -269,10 +294,10 @@ export default function ReservationPage() {
               </ul>
             </div>
 
-            <h4 className="font-bold text-xl text-slate-900 mt-10 mb-4">투어 스케줄 (Tour Schedule)</h4>
+            <h3 className="font-bold text-xl text-slate-900 mt-10 mb-4">투어 스케줄 (Tour Schedule)</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="border border-slate-100 p-5 rounded-2xl bg-white shadow-sm">
-                <h5 className="font-bold text-blue-600 mb-3 border-b pb-2">모닝 투어 (08:30 ~ 11:00)</h5>
+                <h4 className="font-bold text-blue-600 mb-3 border-b pb-2">모닝 투어 (08:30 ~ 11:00)</h4>
                 <ul className="text-sm space-y-2 text-slate-600">
                   <li><span className="font-semibold text-slate-800">07:40 - 07:50 AM</span> Kewalo Harbor 체크인</li>
                   <li><span className="font-semibold text-slate-800">08:00 AM</span> 보트 출발</li>
@@ -280,7 +305,7 @@ export default function ReservationPage() {
                 </ul>
               </div>
               <div className="border border-slate-100 p-5 rounded-2xl bg-white shadow-sm">
-                <h5 className="font-bold text-blue-600 mb-3 border-b pb-2">오후 투어 (11:30 ~ 14:00)</h5>
+                <h4 className="font-bold text-blue-600 mb-3 border-b pb-2">오후 투어 (11:30 ~ 14:00)</h4>
                 <ul className="text-sm space-y-2 text-slate-600">
                   <li><span className="font-semibold text-slate-800">10:40 - 10:50 AM</span> Kewalo Harbor 체크인</li>
                   <li><span className="font-semibold text-slate-800">11:00 AM</span> 보트 출발</li>
