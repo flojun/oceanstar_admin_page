@@ -5,8 +5,16 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
 
-        // 1. Generate Order ID
-        const order_id = `ORDER_${new Date().getTime()}`;
+        // 1. Generate Order ID (6자리 대문자 알파벳 + 숫자 조합)
+        const generateOrderId = () => {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        };
+        const order_id = generateOrderId();
 
         // ============================================
         // [중요 보안] 프론트엔드 가격 검증 및 서버 사이드 가격 재계산
@@ -26,25 +34,42 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: '현재 판매가 중지된 옵션입니다.' }, { status: 400 });
         }
 
-        // DB 기준 옵션명
+        // DB 기준 옵션명 심플하게 변경 (1부, 2부, 3부, 프라이빗)
         let optionLabel = tourSetting.name;
+        if (tourSetting.tour_id === 'morning1') optionLabel = '1부';
+        else if (tourSetting.tour_id === 'morning2') optionLabel = '2부';
+        else if (tourSetting.tour_id === 'sunset') optionLabel = '3부';
+        else if (tourSetting.tour_id === 'private') optionLabel = '프라이빗';
 
         // 2. 예약 인원 및 포맷팅
         const totalCount = body.adultCount + body.childCount;
         const paxLabel = `${totalCount}명`;
-        const noteText = `(성${body.adultCount}/아${body.childCount})`;
+        const noteText = `(성${body.adultCount}/아${body.childCount}) (예약번호 ${order_id})`;
 
         // 프라이빗 차터 픽업 예외 처리
-        let pickupLabel = body.hotelName;
+        let pickupLabel = body.pickupLocationName || body.hotelName;
         if (tourSetting.is_flat_rate) {
-            pickupLabel += ' (개별안내)';
+            pickupLabel = body.hotelName + ' (개별안내)';
         }
 
         // 가격 계산 (고정 요금제 처리)
         let calculatedTotalPrice = 0;
-        if (tourSetting.is_flat_rate) {
+        if (tourSetting.is_flat_rate && tourSetting.tour_id === 'private') {
+            // 프라이빗 차터 계단식 요금 (동적 환율 적용)
+            const exchangeRate = tourSetting.adult_price_usd ? (tourSetting.adult_price_krw / tourSetting.adult_price_usd) : 1350;
+            let usdPrice = 0;
+            if (totalCount <= 4) usdPrice = 1800;
+            else if (totalCount <= 10) usdPrice = 2200;
+            else if (totalCount <= 20) usdPrice = 2800;
+            else if (totalCount <= 30) usdPrice = 3500;
+            else usdPrice = 4500;
+
+            calculatedTotalPrice = Math.floor(usdPrice * exchangeRate);
+        } else if (tourSetting.is_flat_rate) {
+            // 다른 고정 요금 상품 대비
             calculatedTotalPrice = tourSetting.adult_price_krw;
         } else {
+            // 일반 상품 (성인/아동 인원수별 합산)
             calculatedTotalPrice = (body.adultCount * tourSetting.adult_price_krw) +
                 (body.childCount * tourSetting.child_price_krw);
         }

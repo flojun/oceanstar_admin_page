@@ -125,11 +125,10 @@ export default function WebsiteSettingsPage() {
     // 환율 일괄 적용
     const applyGlobalExchangeRate = () => {
         const newSettings = settings.map(setting => {
-            if (setting.is_flat_rate) return setting; // 고정 요금은 환율 적용 제외
             return {
                 ...setting,
-                adult_price_krw: Math.round((setting.adult_price_usd! * exchangeRate) / 100) * 100,
-                child_price_krw: Math.round((setting.child_price_usd! * exchangeRate) / 100) * 100,
+                adult_price_krw: Math.round(((setting.adult_price_usd || 0) * exchangeRate) / 100) * 100,
+                child_price_krw: Math.round(((setting.child_price_usd || 0) * exchangeRate) / 100) * 100,
             };
         });
         setSettings(newSettings);

@@ -34,11 +34,17 @@ function SuccessContent() {
 
                     {/* Receipt Body */}
                     <div className="p-8">
-                        <div className="flex justify-between items-center pb-6 mb-6 border-b border-dashed border-slate-200">
-                            <span className="text-slate-500 font-medium">예약 번호</span>
-                            <span className="font-mono font-bold text-slate-800 bg-slate-100 px-3 py-1 rounded-lg">
-                                {orderId}
-                            </span>
+                        <div className="flex flex-col gap-2 pb-6 mb-6 border-b border-dashed border-slate-200">
+                            <div className="flex justify-between items-center">
+                                <span className="text-slate-500 font-medium">예약 번호</span>
+                                <span className="font-mono font-bold text-slate-800 bg-slate-100 px-3 py-1 rounded-lg text-lg tracking-widest">
+                                    {orderId}
+                                </span>
+                            </div>
+                            <div className="bg-blue-50 text-blue-800 p-3 rounded-xl text-sm font-medium flex items-start gap-2 border border-blue-100 shadow-inner">
+                                <CheckCircle size={16} className="shrink-0 mt-0.5" />
+                                <p>위 <strong>예약 번호(6자리)</strong>로 오션스타 메인 홈페이지에서 생생한 후기를 남기실 수 있습니다!</p>
+                            </div>
                         </div>
 
                         <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
