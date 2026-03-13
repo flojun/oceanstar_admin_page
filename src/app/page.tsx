@@ -28,6 +28,14 @@ const formatTimeAMPM = (timeString: string | null | undefined) => {
   }
 };
 
+// Helper to mask middle characters of a name
+const maskName = (name: string | null | undefined) => {
+  if (!name) return '';
+  if (name.length <= 1) return name;
+  if (name.length === 2) return name.charAt(0) + '*';
+  return name.charAt(0) + '*'.repeat(name.length - 2) + name.charAt(name.length - 1);
+};
+
 const formSchema = z.object({
   tourDate: z.date(),
   adultCount: z.number().min(1, "최소 1명 이상 선택해주세요"),
@@ -553,7 +561,7 @@ export default function ReservationPage() {
                                     <User size={16} />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold text-slate-900">{review.author_name}</p>
+                                    <p className="text-sm font-bold text-slate-900">{maskName(review.author_name)}</p>
                                     <p className="text-xs text-slate-400">{new Date(review.created_at).toLocaleDateString()}</p>
                                 </div>
                             </div>
