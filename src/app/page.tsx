@@ -442,9 +442,9 @@ export default function ReservationPage() {
                      </p>
                      <div className="bg-slate-50 p-4 rounded-2xl mb-6">
                         <ul className="space-y-2 text-sm text-slate-700 font-medium">
-                           <li className="flex items-start gap-2"><Check className="text-emerald-500 w-4 h-4 mt-0.5 shrink-0" /> Turtle Canyon 스노클링</li>
-                           <li className="flex items-start gap-2"><Check className="text-emerald-500 w-4 h-4 mt-0.5 shrink-0" /> 해양 5종 액티비티 포함</li>
+                           <li className="flex items-start gap-2"><Check className="text-emerald-500 w-4 h-4 mt-0.5 shrink-0" /> 거북이 스노클링 + 해양 5종</li>
                            <li className="flex items-start gap-2"><Check className="text-emerald-500 w-4 h-4 mt-0.5 shrink-0" /> 스노클 장비/구명조끼, 음료/간식</li>
+                           <li className="flex items-start gap-2"><Check className="text-emerald-500 w-4 h-4 mt-0.5 shrink-0" /> 1부(7:30 - 11:30) / 2부(10:30 - 2:30)</li>
                         </ul>
                      </div>
                      <div className="flex items-end justify-between border-t border-slate-100 pt-6">
