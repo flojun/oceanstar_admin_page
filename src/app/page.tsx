@@ -368,6 +368,7 @@ export default function ReservationPage() {
              </span>
              <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6 drop-shadow-lg animate-fade-in-up animation-delay-100 break-keep">
                 하와이 최초! 
+                <br className="md:hidden" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200"> 거북이 스노클링 원조,</span>
                 <br /> 오션스타!
              </h1>
