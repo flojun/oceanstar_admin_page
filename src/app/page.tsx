@@ -433,7 +433,7 @@ export default function ReservationPage() {
                 // Dynamic styles based on index or properties
                   const themes: { bg: string, gradient: string, text: string, badge: string, btn: string, specialLabel?: string, isDark?: boolean }[] = [
                     { bg: 'bg-cyan-100', gradient: 'from-cyan-500 to-blue-400', text: 'text-blue-900', badge: '🌊 가장 인기있는 액티비티', btn: 'bg-slate-900 hover:bg-slate-800', isDark: false },
-                    { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '🌅 여유로운 출발 시간', btn: 'bg-orange-500 hover:bg-orange-600', isDark: false },
+                    { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '🌅 로맨틱 선셋 뷰', btn: 'bg-orange-500 hover:bg-orange-600', specialLabel: '커플/신혼 여행객 추천!', isDark: false },
                     { bg: 'bg-indigo-100', gradient: 'from-indigo-500 to-purple-500', text: 'text-indigo-900', badge: '✨ 프리미엄 투어', btn: 'bg-indigo-600 hover:bg-indigo-700', isDark: false }
                   ];
                   
