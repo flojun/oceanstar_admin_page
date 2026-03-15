@@ -443,19 +443,19 @@ export default function ReservationPage() {
                   else if (isSunset) theme = themes[1];
 
                   return (
-                    <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900 text-white' : 'bg-white'} ${isPrivate ? 'md:col-span-2 lg:col-span-3 max-w-[420px] w-full mx-auto' : ''} rounded-3xl shadow-lg border ${theme.isDark ? 'border-slate-800' : 'border-slate-100'} overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 flex flex-col group relative`}>
+                    <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900 text-white' : 'bg-white'} ${isPrivate ? 'md:col-span-2 lg:col-span-3 max-w-5xl w-full mx-auto flex-col lg:flex-row' : 'flex-col'} rounded-3xl shadow-lg border ${theme.isDark ? 'border-slate-800' : 'border-slate-100'} overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 flex group relative`}>
                       {theme.specialLabel && (
                         <div className="absolute top-0 right-10 bg-gradient-to-r from-orange-400 to-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-b-xl z-10 shadow-md">
                           {theme.specialLabel}
                         </div>
                       )}
-                      <div className={`h-48 ${theme.bg} relative overflow-hidden`}>
+                      <div className={`${isPrivate ? 'h-56 lg:h-auto lg:w-5/12' : 'h-48'} ${theme.bg} relative overflow-hidden shrink-0`}>
                         <div className={`absolute inset-0 bg-gradient-to-tr ${theme.gradient} group-hover:scale-105 transition-transform duration-500`} />
-                        <div className={`absolute bottom-4 left-4 ${theme.isDark ? 'bg-white/10 text-white border border-white/20' : 'bg-white/90 text-' + theme.text} backdrop-blur text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1`}>
+                        <div className={`absolute ${isPrivate ? 'top-4 left-4 bottom-auto' : 'bottom-4 left-4'} ${theme.isDark ? 'bg-white/10 text-white border border-white/20' : 'bg-white/90 text-' + theme.text} backdrop-blur text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 w-max z-10`}>
                           {theme.badge}
                         </div>
                       </div>
-                      <div className="p-8 flex-1 flex flex-col">
+                      <div className={`p-6 sm:p-8 flex-1 flex flex-col ${isPrivate ? 'justify-center' : ''}`}>
                         <h3 className={`text-2xl font-bold ${theme.isDark ? 'text-white' : 'text-slate-800'} mb-3`}>{tour.name}</h3>
                         <p className={`${theme.isDark ? 'text-slate-300' : 'text-slate-600'} mb-6 text-sm leading-relaxed flex-1`}>
                           {tour.description || "와이키키 최고의 투어를 오션스타와 함께하세요. 전문가의 안내로 안전하고 즐거운 시간을 보장합니다."}
@@ -476,12 +476,12 @@ export default function ReservationPage() {
                               </li>
                            </ul>
                         </div>
-                        <div className={`flex items-end justify-between border-t ${theme.isDark ? 'border-slate-700' : 'border-slate-100'} pt-6`}>
-                          <div>
+                        <div className={`flex flex-wrap items-end justify-between border-t ${theme.isDark ? 'border-slate-700' : 'border-slate-100'} pt-6 gap-2`}>
+                          <div className="flex-1 min-w-[60%]">
                             <p className="text-xs text-slate-400 font-medium">
                               {tour.is_flat_rate ? (tour.tour_id === 'private' ? '1~4인 기준 (인원별 상이)' : `최대 ${tour.max_capacity}인 기준`) : '성인가 기준 (24개월 미만 무료)'}
                             </p>
-                            <p className={`text-2xl font-black ${theme.isDark ? 'text-indigo-400' : (isSunset ? 'text-orange-600' : 'text-blue-600')}`}>
+                            <p className={`text-xl sm:text-2xl font-black truncate pr-2 ${theme.isDark ? 'text-indigo-400' : (isSunset ? 'text-orange-600' : 'text-blue-600')}`}>
                               {tour.is_flat_rate && tour.tour_id === 'private' ? (
                                 <>단독 대관 ₩{Math.floor(calculateTieredPrivatePrice(1, (tour.adult_price_krw / (tour.adult_price_usd || 1)))).toLocaleString()} ~</>
                               ) : (
@@ -489,7 +489,7 @@ export default function ReservationPage() {
                               )}
                             </p>
                           </div>
-                          <button onClick={() => setIsBookingOpen(true)} className={`${theme.btn} text-white px-5 py-2.5 rounded-xl font-bold transition-colors`}>예약하기</button>
+                          <button onClick={() => setIsBookingOpen(true)} className={`${theme.btn} text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-colors whitespace-nowrap shrink-0 ml-auto`}>예약하기</button>
                         </div>
                       </div>
                     </div>
