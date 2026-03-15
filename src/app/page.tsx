@@ -443,7 +443,7 @@ export default function ReservationPage() {
                   else if (isSunset) theme = themes[1];
 
                   return (
-                    <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900 text-white' : 'bg-white'} rounded-3xl shadow-lg border ${theme.isDark ? 'border-slate-800' : 'border-slate-100'} overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 flex flex-col group relative`}>
+                    <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900 text-white' : 'bg-white'} ${isPrivate ? 'md:col-span-2 lg:col-span-3 max-w-[420px] w-full mx-auto' : ''} rounded-3xl shadow-lg border ${theme.isDark ? 'border-slate-800' : 'border-slate-100'} overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 flex flex-col group relative`}>
                       {theme.specialLabel && (
                         <div className="absolute top-0 right-10 bg-gradient-to-r from-orange-400 to-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-b-xl z-10 shadow-md">
                           {theme.specialLabel}
