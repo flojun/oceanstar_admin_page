@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { order_id, booker_name } = body;
+        const { order_id, booker_name, reason } = body;
 
         if (!order_id || !booker_name) {
             return NextResponse.json({ error: '예약 번호(6자리)와 예약자명을 모두 입력해주세요.' }, { status: 400 });
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
         // 1. 예약 조회 (주문번호와 예약자명 동시 일치 검증)
         const { data: reservation, error: fetchError } = await supabase
             .from('reservations')
-            .select('id, status, name')
+            .select('id, status, name, note')
             .eq('order_id', normalizedOrderId)
             .ilike('name', normalizedBookerName)
             .single();
@@ -38,9 +38,12 @@ export async function POST(req: Request) {
         }
 
         // 3. 상태 업데이트 ('취소요청')
+        const reasonText = reason ? `\n\n[고객 취소 사유]\n${reason}` : '';
+        const newNote = (reservation.note || '') + reasonText;
+
         const { error: updateError } = await supabase
             .from('reservations')
-            .update({ status: '취소요청' })
+            .update({ status: '취소요청', note: newNote.trim() })
             .eq('id', reservation.id);
 
         if (updateError) {

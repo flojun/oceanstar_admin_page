@@ -88,7 +88,7 @@ export default function ReservationPage() {
 
   // ==== 취소 요청 상태 ====
   const [isCancelOpen, setIsCancelOpen] = useState(false);
-  const [cancelForm, setCancelForm] = useState({ order_id: '', booker_name: '' });
+  const [cancelForm, setCancelForm] = useState({ order_id: '', booker_name: '', reason: '' });
   const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
 
   const { isLoaded, loadError } = useJsApiLoader({
@@ -173,7 +173,7 @@ export default function ReservationPage() {
       const data = await res.json();
       if (data.success) {
         alert(data.message || "취소 요청이 접수되었습니다. 관리자 확인 후 처리됩니다.");
-        setCancelForm({ order_id: '', booker_name: '' });
+        setCancelForm({ order_id: '', booker_name: '', reason: '' });
         setIsCancelOpen(false);
       } else {
         alert(data.error || "취소 요청 중 오류가 발생했습니다.");
@@ -433,14 +433,14 @@ export default function ReservationPage() {
                 // Dynamic styles based on index or properties
                   const themes: { bg: string, gradient: string, text: string, badge: string, btn: string, specialLabel?: string, isDark?: boolean }[] = [
                     { bg: 'bg-cyan-100', gradient: 'from-cyan-500 to-blue-400', text: 'text-blue-900', badge: '🌊 가장 인기있는 액티비티', btn: 'bg-slate-900 hover:bg-slate-800', isDark: false },
-                    { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '🌅 로맨틱 선셋 뷰', btn: 'bg-orange-500 hover:bg-orange-600', specialLabel: '커플/신혼 여행객 추천!', isDark: false },
+                    { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '🌅 여유로운 출발시간', btn: 'bg-orange-500 hover:bg-orange-600', isDark: false },
                     { bg: 'bg-indigo-100', gradient: 'from-indigo-500 to-purple-500', text: 'text-indigo-900', badge: '✨ 프리미엄 투어', btn: 'bg-indigo-600 hover:bg-indigo-700', isDark: false }
                   ];
                   
                   // Use theme based on index or special cases
                   let theme = themes[idx % themes.length];
                   if (isPrivate) theme = { bg: 'bg-slate-800', gradient: 'from-slate-800 to-indigo-900', text: 'text-white', badge: '🛥️ VVIP 단독 보트 대관', btn: 'bg-indigo-500 hover:bg-indigo-400', isDark: true };
-                  else if (isSunset) theme = themes[1];
+                  else if (isSunset) theme = { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '🌅 로맨틱 선셋 뷰', btn: 'bg-orange-500 hover:bg-orange-600', specialLabel: '커플/신혼 여행객 추천!', isDark: false };
 
                   return (
                     <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900 text-white' : 'bg-white'} ${isPrivate ? 'md:col-span-2 lg:col-span-3 w-full flex-col lg:flex-row' : 'flex-col'} rounded-3xl shadow-lg border ${theme.isDark ? 'border-slate-800' : 'border-slate-100'} overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 flex group relative`}>
@@ -472,7 +472,7 @@ export default function ReservationPage() {
                               </li>
                               <li className="flex items-start gap-2">
                                 <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
-                                {tour.is_flat_rate ? '인원수 연동 맞춤형 요금 적용' : `${tour.start_time?.slice(0,5) || '07:30'} - ${tour.end_time?.slice(0,5) || '14:30'}`}
+                                {tour.is_flat_rate ? '인원수 연동 맞춤형 요금 적용' : (isSunset ? '시즌별 시간 변동' : `${tour.start_time?.slice(0,5) || '07:30'} - ${tour.end_time?.slice(0,5) || '14:30'}`)}
                               </li>
                            </ul>
                         </div>
@@ -489,7 +489,7 @@ export default function ReservationPage() {
                               )}
                             </p>
                           </div>
-                          <button onClick={() => setIsBookingOpen(true)} className={`${theme.btn} text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-colors whitespace-nowrap shrink-0 ml-auto`}>예약하기</button>
+                          <button onClick={() => { setSelectedTour(tour.tour_id); if(tour.is_flat_rate) form.setValue("childCount", 0); setIsBookingOpen(true); }} className={`${theme.btn} text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-colors whitespace-nowrap shrink-0 ml-auto`}>예약하기</button>
                         </div>
                       </div>
                     </div>
@@ -545,6 +545,36 @@ export default function ReservationPage() {
                     ))}
                 </div>
             )}
+            
+            {/* Google Reviews Banner */}
+            <div className="mt-12 bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0">
+                        {/* Using a simple G text as placeholder for Google logo if SVG is unavailable */}
+                        <span className="text-3xl font-black text-blue-600">G</span>
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="text-2xl font-black text-slate-900">4.9</span>
+                            <div className="flex gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                    <Star key={i} size={20} className="text-yellow-400 fill-yellow-400" />
+                                ))}
+                            </div>
+                        </div>
+                        <p className="text-slate-600 font-medium">구글 맵 기준 <strong className="text-slate-900">5,000+</strong>개의 실제 고객 리뷰</p>
+                    </div>
+                </div>
+                
+                <a 
+                    href="https://www.google.com/maps/search/?api=1&query=Ocean+Star+Hawaii" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full md:w-auto bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800 font-bold px-8 py-4 rounded-xl transition-all flex items-center justify-center gap-3 shrink-0"
+                >
+                    구글에서 전체 리뷰 보기 <ChevronRight size={18} />
+                </a>
+            </div>
         </section>
 
         {/* === FAQ Section === */}
@@ -699,7 +729,7 @@ export default function ReservationPage() {
                             )}
                             <h3 className="font-bold text-base mb-1 text-slate-800">{tour.name}</h3>
                             <p className="text-xs text-slate-500 mb-3">
-                              {tour.is_flat_rate ? `최대 ${tour.max_capacity}인 단독 대관` : `${tour.start_time || '오전'} - ${tour.end_time || '(종료 미정)'}`}
+                              {tour.is_flat_rate ? `최대 ${tour.max_capacity}인 단독 대관` : (tour.tour_id?.toLowerCase().includes('sunset') ? '시즌별 시간 변동' : `${tour.start_time || '오전'} - ${tour.end_time || '(종료 미정)'}`)}
                             </p>
                             <p className="font-extrabold text-blue-700 text-sm">
                               {tour.is_flat_rate && tour.tour_id === 'private' ? '단독 차터 (계단식 요금)' : tour.is_flat_rate ? `₩${tour.adult_price_krw?.toLocaleString()} / 팀` : `₩${tour.adult_price_krw?.toLocaleString()} / 성인`}
@@ -1125,6 +1155,17 @@ export default function ReservationPage() {
                             onChange={(e) => setCancelForm({ ...cancelForm, booker_name: e.target.value })}
                             className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all font-medium"
                         />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">취소 사유</label>
+                        <textarea
+                            required
+                            rows={3}
+                            placeholder="취소 사유를 간략히 적어주세요 (예: 개인 일정 변경, 기상 악화 등)"
+                            value={cancelForm.reason}
+                            onChange={(e) => setCancelForm({ ...cancelForm, reason: e.target.value })}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all font-medium resize-none"
+                        ></textarea>
                     </div>
 
                     <div className="pt-4">
