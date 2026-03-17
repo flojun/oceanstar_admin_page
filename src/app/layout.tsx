@@ -36,6 +36,9 @@ export const metadata: Metadata = {
       "naver-site-verification": [""], // 네이버 소유권 확인 토큰
     },
   },
+  other: {
+    "theme-color": "#ffffff",
+  },
 };
 
 export default function RootLayout({

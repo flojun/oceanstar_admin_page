@@ -343,7 +343,7 @@ export default function ReservationPage() {
       />
       <header className="bg-white/80 backdrop-blur-md px-6 py-4 fixed top-0 w-full z-40 shadow-sm border-b border-white/20">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-black text-blue-600 tracking-tighter uppercase drop-shadow-sm">Ocean Star</h1>
+          <h1 className="text-2xl font-black text-blue-600 tracking-tighter uppercase drop-shadow-sm">OceanStar</h1>
           <button 
              onClick={() => setIsBookingOpen(true)}
              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-bold text-sm shadow-md transition-all sm:block hidden">
@@ -365,17 +365,17 @@ export default function ReservationPage() {
           
           {/* Top Text Content */}
           <div className="absolute top-0 left-0 right-0 z-20 text-center px-4 pt-16 sm:pt-20 lg:pt-[5vh] xl:pt-[4vh] 2xl:pt-[3vh] max-w-5xl mx-auto flex flex-col items-center">
-             <span className="inline-block py-1 px-3 sm:py-1.5 sm:px-4 rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-widest mb-2 sm:mb-4 animate-fade-in-up">
+             <span className="inline-block py-1 px-3 sm:py-1.5 sm:px-4 rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 text-xs sm:text-sm md:text-sm font-bold uppercase tracking-widest mb-2 sm:mb-4 animate-fade-in-up">
                Original Hawaii Tour
              </span>
-             <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-snug sm:leading-tight drop-shadow-2xl animate-fade-in-up animation-delay-100 break-keep">
-                하와이 최초! <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">거북이 스노클링 원조,</span><br/>오션스타!
+             <h1 className="text-[2.8rem] sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight sm:leading-tight drop-shadow-2xl animate-fade-in-up animation-delay-100 break-keep">
+                하와이 최초!<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">거북이 스노클링 원조,</span><br className="sm:hidden" /><span className="hidden sm:inline"> </span>오션스타!
              </h1>
           </div>
 
           {/* Bottom Text Content & Button */}
           <div className="absolute bottom-0 left-0 right-0 z-20 text-center px-4 pb-24 sm:pb-28 lg:pb-32 max-w-4xl mx-auto flex flex-col items-center">
-             <p className="text-xs sm:text-sm md:text-lg text-white font-medium mb-4 sm:mb-8 drop-shadow-lg leading-relaxed animate-fade-in-up animation-delay-200 max-w-[90%] sm:max-w-none">
+             <p className="text-sm sm:text-base md:text-xl text-white font-medium mb-4 sm:mb-8 drop-shadow-lg leading-relaxed animate-fade-in-up animation-delay-200 max-w-[90%] sm:max-w-none">
                 연 2만명 이상의 고객들과 13,000개의 누적 후기가 입증하는 하와이 단연 1위 거북이 스노클링 전문 업체! 가장 재밌고 특별한 경험을 함께 하세요!
              </p>
              <button 
@@ -673,17 +673,17 @@ export default function ReservationPage() {
 
         {/* 플로팅 예약 버튼 (모달 열기) */}
         {!isBookingOpen && !isReviewOpen && (
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-40 flex justify-center">
-            <div className="max-w-[1600px] w-full flex justify-between items-center px-4">
-              <div>
-                <p className="text-sm text-slate-500 font-medium">하와이 단연 1위</p>
-                <p className="text-xl font-extrabold text-blue-600">최고의 스노클링 투어 예약</p>
+          <div className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-40 flex justify-center">
+            <div className="max-w-[1600px] w-full flex justify-between items-center gap-3 px-2 sm:px-4">
+              <div className="min-w-0 shrink-0">
+                <p className="text-xs sm:text-sm text-slate-500 font-medium">하와이 단연 1위</p>
+                <p className="text-base sm:text-xl font-extrabold text-blue-600 whitespace-nowrap">최고의 스노클링 투어 예약</p>
               </div>
               <button
                 onClick={() => setIsBookingOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-blue-500/30 transition-transform active:scale-95 flex items-center gap-2"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 sm:py-3 sm:px-8 rounded-full shadow-lg shadow-blue-500/30 transition-transform active:scale-95 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0"
               >
-                예약 진행하기 <ChevronRight size={18} />
+                예약하기 <ChevronRight size={18} />
               </button>
             </div>
           </div>
