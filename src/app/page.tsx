@@ -98,13 +98,16 @@ export default function ReservationPage() {
   });
 
   const [isScrolled, setIsScrolled] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    const mainEl = mainRef.current;
+    if (!mainEl) return;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(mainEl.scrollTop > 20);
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    mainEl.addEventListener("scroll", handleScroll);
+    return () => mainEl.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -330,7 +333,7 @@ export default function ReservationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-blue-200 selection:text-blue-900">
+    <div className="fixed inset-0 flex flex-col bg-slate-50 text-slate-800 font-sans selection:bg-blue-200 selection:text-blue-900">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -351,7 +354,7 @@ export default function ReservationPage() {
           })
         }}
       />
-      <header className={`fixed top-0 w-full z-40 transition-all duration-300 bg-white/80 backdrop-blur-md ${isScrolled ? 'shadow-sm border-b border-slate-200' : 'border-b border-transparent'}`}>
+      <header className={`w-full z-40 transition-all duration-300 bg-white/80 backdrop-blur-md shrink-0 ${isScrolled ? 'shadow-sm border-b border-slate-200' : 'border-b border-transparent'}`}>
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-black text-blue-600 tracking-tighter uppercase drop-shadow-sm">OceanStar</h1>
           <button 
@@ -362,7 +365,7 @@ export default function ReservationPage() {
         </div>
       </header>
 
-      <main className="w-full pb-32 pt-16">
+      <main ref={mainRef} className="w-full flex-1 overflow-y-auto pb-0">
         {/* === 1. Hero Section === */}
         <section className="relative w-full h-[100svh] sm:h-[85vh] min-h-[500px] sm:min-h-[600px] overflow-hidden">
           {/* Background Overlay - Top and Bottom gradient for text readability */}
@@ -681,26 +684,28 @@ export default function ReservationPage() {
           </div>
         </section>
 
-        {/* 플로팅 예약 버튼 (모달 열기) */}
-        {!isBookingOpen && !isReviewOpen && (
-          <div className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-40 flex justify-center">
-            <div className="max-w-[1600px] w-full flex justify-between items-center gap-3 px-2 sm:px-4">
-              <div className="min-w-0 shrink-0">
-                <p className="text-xs sm:text-sm text-slate-500 font-medium">하와이 단연 1위</p>
-                <p className="text-base sm:text-xl font-extrabold text-blue-600 whitespace-nowrap">최고의 스노클링 투어 예약</p>
-              </div>
-              <button
-                onClick={() => setIsBookingOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 sm:py-3 sm:px-8 rounded-full shadow-lg shadow-blue-500/30 transition-transform active:scale-95 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0"
-              >
-                예약하기 <ChevronRight size={18} />
-              </button>
-            </div>
-          </div>
-        )}
+      </main>
 
-        {/* === 예약 플로팅 모달 (Booking Drawer/Modal) === */}
-        {isBookingOpen && (
+      {/* 플로팅 예약 버튼 - main 바깥에 위치하여 iOS 스크롤 점프 방지 */}
+      {!isBookingOpen && !isReviewOpen && (
+        <div className="w-full shrink-0 p-3 sm:p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex justify-center">
+          <div className="max-w-[1600px] w-full flex justify-between items-center gap-3 px-2 sm:px-4">
+            <div className="min-w-0 shrink-0">
+              <p className="text-xs sm:text-sm text-slate-500 font-medium">하와이 단연 1위</p>
+              <p className="text-base sm:text-xl font-extrabold text-blue-600 whitespace-nowrap">최고의 스노클링 투어 예약</p>
+            </div>
+            <button
+              onClick={() => setIsBookingOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 sm:py-3 sm:px-8 rounded-full shadow-lg shadow-blue-500/30 transition-transform active:scale-95 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0"
+            >
+              예약하기 <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* === 예약 플로팅 모달 (Booking Drawer/Modal) === */}
+      {isBookingOpen && (
           <div className="fixed inset-0 z-50 flex justify-end">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setIsBookingOpen(false)}></div>
             <div className="relative w-full max-w-[550px] h-full bg-slate-50 shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-300">
@@ -1197,7 +1202,6 @@ export default function ReservationPage() {
           </div>
         )}
 
-      </main>
     </div>
   );
 }
