@@ -354,39 +354,42 @@ export default function ReservationPage() {
 
       <main className="w-full pb-32 pt-16">
         {/* === 1. Hero Section === */}
-        <section className="relative w-full h-[85vh] min-h-[600px] flex items-center justify-center overflow-hidden">
-          {/* Background Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/60 via-blue-900/40 to-slate-900/80 z-10"></div>
-          {/* Background Image (Placholder for gorgeous turtle/ocean pic) */}
+        <section className="relative w-full h-[100svh] sm:h-[85vh] min-h-[500px] sm:min-h-[600px] overflow-hidden">
+          {/* Background Overlay - Top and Bottom gradient for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/70 via-transparent to-blue-900/70 z-10"></div>
+          
+          {/* Background Image */}
           <div className="absolute inset-0 bg-blue-500">
-             {/* <Image src="/hawaii-turtle-hero.jpg" alt="하와이 거북이 스노클링 오션스타" fill className="object-cover" priority /> */}
+             <Image src="/turtle-hero.jpg" alt="하와이 거북이 스노클링 오션스타" fill className="object-cover object-center sm:object-bottom" priority />
           </div>
           
-          <div className="relative z-20 text-center px-4 max-w-4xl mx-auto flex flex-col items-center">
-             <span className="inline-block py-1 px-3 rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 text-sm font-bold uppercase tracking-widest mb-6 animate-fade-in-up">
+          {/* Top Text Content */}
+          <div className="absolute top-0 left-0 right-0 z-20 text-center px-4 pt-16 sm:pt-20 lg:pt-[5vh] xl:pt-[4vh] 2xl:pt-[3vh] max-w-5xl mx-auto flex flex-col items-center">
+             <span className="inline-block py-1 px-3 sm:py-1.5 sm:px-4 rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-widest mb-2 sm:mb-4 animate-fade-in-up">
                Original Hawaii Tour
              </span>
-             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6 drop-shadow-lg animate-fade-in-up animation-delay-100 break-keep">
-                하와이 최초! 
-                <br className="md:hidden" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200"> 거북이 스노클링 원조,</span>
-                <br /> 오션스타!
+             <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-snug sm:leading-tight drop-shadow-2xl animate-fade-in-up animation-delay-100 break-keep">
+                하와이 최초! <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">거북이 스노클링 원조,</span><br/>오션스타!
              </h1>
-             <p className="text-lg md:text-xl text-blue-50 font-medium mb-10 max-w-2xl mx-auto drop-shadow-md leading-relaxed animate-fade-in-up animation-delay-200">
+          </div>
+
+          {/* Bottom Text Content & Button */}
+          <div className="absolute bottom-0 left-0 right-0 z-20 text-center px-4 pb-24 sm:pb-28 lg:pb-32 max-w-4xl mx-auto flex flex-col items-center">
+             <p className="text-xs sm:text-sm md:text-lg text-white font-medium mb-4 sm:mb-8 drop-shadow-lg leading-relaxed animate-fade-in-up animation-delay-200 max-w-[90%] sm:max-w-none">
                 연 2만명 이상의 고객들과 13,000개의 누적 후기가 입증하는 하와이 단연 1위 거북이 스노클링 전문 업체! 가장 재밌고 특별한 경험을 함께 하세요!
              </p>
              <button 
                 onClick={() => setIsBookingOpen(true)}
-                className="bg-white text-blue-800 hover:bg-blue-50 hover:scale-105 transition-all px-8 py-4 rounded-full font-extrabold text-lg shadow-[0_0_40px_rgba(255,255,255,0.3)] animate-fade-in-up animation-delay-300">
+                className="bg-white text-blue-800 hover:bg-blue-50 hover:scale-105 transition-all px-5 py-2.5 sm:px-8 sm:py-4 rounded-full font-extrabold text-sm sm:text-lg shadow-[0_0_40px_rgba(255,255,255,0.3)] animate-fade-in-up animation-delay-300">
                 지금 예약하고 최저가 보장받기
              </button>
           </div>
         </section>
 
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-30">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 -mt-10 sm:-mt-20 relative z-30">
         
           {/* === 2. Bento Box Introduction === */}
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-20">
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-12 sm:mb-20">
             <div className="md:col-span-2 bg-white rounded-3xl p-8 shadow-xl border border-slate-100 flex flex-col justify-center transform hover:-translate-y-1 transition duration-500">
               <Award className="w-10 h-10 text-amber-500 mb-4" />
               <h3 className="text-2xl font-bold text-slate-800 mb-2">Since 2019, 오리지널</h3>
@@ -433,7 +436,7 @@ export default function ReservationPage() {
                 // Dynamic styles based on index or properties
                   const themes: { bg: string, gradient: string, text: string, badge: string, btn: string, specialLabel?: string, isDark?: boolean }[] = [
                     { bg: 'bg-cyan-100', gradient: 'from-cyan-500 to-blue-400', text: 'text-blue-900', badge: '🌊 가장 인기있는 액티비티', btn: 'bg-slate-900 hover:bg-slate-800', isDark: false },
-                    { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '🌅 여유로운 출발시간', btn: 'bg-orange-500 hover:bg-orange-600', isDark: false },
+                     { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '⏰ 여유로운 출발시간', btn: 'bg-orange-500 hover:bg-orange-600', isDark: false },
                     { bg: 'bg-indigo-100', gradient: 'from-indigo-500 to-purple-500', text: 'text-indigo-900', badge: '✨ 프리미엄 투어', btn: 'bg-indigo-600 hover:bg-indigo-700', isDark: false }
                   ];
                   
