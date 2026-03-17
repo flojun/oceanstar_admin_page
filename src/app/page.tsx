@@ -351,12 +351,12 @@ export default function ReservationPage() {
           })
         }}
       />
-      <header className={`fixed top-0 w-full z-40 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md shadow-sm border-b border-white/20' : 'bg-gradient-to-b from-blue-900/50 to-transparent border-b border-transparent'}`}>
+      <header className={`fixed top-0 w-full z-40 transition-all duration-300 bg-white/80 backdrop-blur-md ${isScrolled ? 'shadow-sm border-b border-slate-200' : 'border-b border-transparent'}`}>
         <div className="max-w-[1600px] mx-auto px-6 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex items-center justify-between">
-          <h1 className={`text-2xl font-black tracking-tighter uppercase drop-shadow-sm transition-colors duration-300 ${isScrolled ? 'text-blue-600' : 'text-white'}`}>OceanStar</h1>
+          <h1 className="text-2xl font-black text-blue-600 tracking-tighter uppercase drop-shadow-sm">OceanStar</h1>
           <button 
              onClick={() => setIsBookingOpen(true)}
-             className={`px-5 py-2 rounded-full font-bold text-sm shadow-md transition-all sm:block hidden ${isScrolled ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-white/20 hover:bg-white text-white hover:text-blue-900 border border-white/50 backdrop-blur-sm'}`}>
+             className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-bold text-sm shadow-md transition-all sm:block hidden">
              투어 예약하기
           </button>
         </div>
@@ -683,7 +683,7 @@ export default function ReservationPage() {
 
         {/* 플로팅 예약 버튼 (모달 열기) */}
         {!isBookingOpen && !isReviewOpen && (
-          <div className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-40 flex justify-center">
+          <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-40 flex justify-center" style={{ padding: 'calc(0.75rem) calc(0.75rem) calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}>
             <div className="max-w-[1600px] w-full flex justify-between items-center gap-3 px-2 sm:px-4">
               <div className="min-w-0 shrink-0">
                 <p className="text-xs sm:text-sm text-slate-500 font-medium">하와이 단연 1위</p>
