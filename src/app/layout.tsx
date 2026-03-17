@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -36,7 +36,14 @@ export const metadata: Metadata = {
       "naver-site-verification": [""], // 네이버 소유권 확인 토큰
     },
   },
-  themeColor: "#ffffff",
+};
+
+export const viewport: Viewport = {
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "transparent" },
+    { media: "(prefers-color-scheme: dark)", color: "transparent" },
+  ],
 };
 
 export default function RootLayout({
