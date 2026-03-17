@@ -352,7 +352,7 @@ export default function ReservationPage() {
         }}
       />
       <header className={`fixed top-0 w-full z-40 transition-all duration-300 bg-white/80 backdrop-blur-md ${isScrolled ? 'shadow-sm border-b border-slate-200' : 'border-b border-transparent'}`}>
-        <div className="max-w-[1600px] mx-auto px-6 pb-4 pt-[max(1rem,env(safe-area-inset-top))] flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-black text-blue-600 tracking-tighter uppercase drop-shadow-sm">OceanStar</h1>
           <button 
              onClick={() => setIsBookingOpen(true)}
@@ -683,7 +683,7 @@ export default function ReservationPage() {
 
         {/* 플로팅 예약 버튼 (모달 열기) */}
         {!isBookingOpen && !isReviewOpen && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-40 flex justify-center" style={{ padding: 'calc(0.75rem) calc(0.75rem) calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}>
+          <div className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-40 flex justify-center">
             <div className="max-w-[1600px] w-full flex justify-between items-center gap-3 px-2 sm:px-4">
               <div className="min-w-0 shrink-0">
                 <p className="text-xs sm:text-sm text-slate-500 font-medium">하와이 단연 1위</p>
