@@ -382,14 +382,15 @@ export default function ReservationPage() {
                Original Hawaii Tour
              </span>
              <h1 className="text-[2.8rem] sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight sm:leading-tight drop-shadow-2xl animate-fade-in-up animation-delay-100 break-keep">
-                하와이 최초★<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">거북이 스노클링 투어,</span><br className="sm:hidden" /><span className="hidden sm:inline"> </span>오션스타!
+                하와이 최초!<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">거북이 스노클링 투어,</span><br className="sm:hidden" /><span className="hidden sm:inline"> </span>오션스타★
              </h1>
           </div>
 
           {/* Bottom Text Content & Button */}
           <div className="absolute bottom-0 left-0 right-0 z-20 text-center px-4 pb-24 sm:pb-28 lg:pb-32 max-w-4xl mx-auto flex flex-col items-center">
              <p className="text-sm sm:text-base md:text-xl text-white font-medium mb-4 sm:mb-8 drop-shadow-lg leading-relaxed animate-fade-in-up animation-delay-200 max-w-[90%] sm:max-w-none">
-                연 2만명 이상의 고객들과 13,000개의 후기가 입증하는 하와이 단연 1위 거북이 스노클링 배입니다! 와이키키에서 가장 재미있고 특별한 경험을 오션스타와 함께 하세요!
+                연 2만명 이상의 고객들과 13,000개의 후기가 입증하는 하와이 단연 1위 거북이 스노클링 투어입니다!<br />
+                와이키키에서 가장 재미있고 특별한 경험을 오션스타와 함께 하세요!
              </p>
              <button 
                 onClick={() => setIsBookingOpen(true)}
@@ -406,19 +407,18 @@ export default function ReservationPage() {
             <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <Award className="w-10 h-10 text-amber-500 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">Since 2019,</h3>
-              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">한국인에게 가장 사랑받는 하와이 거북이 스노클링 배</p>
+              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">한국인에게 가장 사랑받는 하와이 와이키키 거북이 스노클링 투어</p>
             </div>
             <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-6 lg:p-7 shadow-xl text-white flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <Star className="w-10 h-10 text-yellow-300 mb-4 fill-yellow-300 shrink-0" />
-              <h3 className="text-3xl font-extrabold mb-1">13,000+</h3>
-              <p className="text-blue-100 font-bold mb-2 text-sm break-keep">누적 리뷰 ★업계 최다★</p>
-              <p className="text-xs text-blue-200 break-keep">압도적인 신뢰와 만족도</p>
+              <h3 className="text-lg lg:text-xl font-bold text-white mb-2 break-keep">13,000+ 누적 리뷰 ★업계 최다★</h3>
+              <p className="text-blue-100 font-medium text-sm leading-relaxed break-keep">압도적인 신뢰와 만족도</p>
             </div>
             
             <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <ShieldCheck className="w-10 h-10 text-emerald-500 mb-4 shrink-0" />
-              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">거북이 100% 보장제</h3>
-              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">자연산 바다 거북이를 만나지 못하면 100% 환불 또는 재탑승을 보장합니다.</p>
+              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">거북이 100% 만남 보장</h3>
+              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">오션스타와 함께라면 와이키키 자연산 바다 거북이를 반드시 만나실 수 있습니다.</p>
             </div>
             
             <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
@@ -429,8 +429,8 @@ export default function ReservationPage() {
             
             <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <UsersRound className="w-10 h-10 text-purple-500 mb-4 shrink-0" />
-              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">전문 자격 한인 크루</h3>
-              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">수영을 전혀 못해도, 영어를 전혀 못해도 괜찮습니다! 전원 자격증 소지 한국인 크루 상주.</p>
+              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">해양 전문 한국인 크루</h3>
+              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">수영을 전혀 못해도, 영어를 전혀 못해도 괜찮습니다! 한국인 크루 상주!</p>
             </div>
           </section>
 
