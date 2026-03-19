@@ -382,14 +382,14 @@ export default function ReservationPage() {
                Original Hawaii Tour
              </span>
              <h1 className="text-[2.8rem] sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight sm:leading-tight drop-shadow-2xl animate-fade-in-up animation-delay-100 break-keep">
-                하와이 최초!<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">거북이 스노클링 원조,</span><br className="sm:hidden" /><span className="hidden sm:inline"> </span>오션스타!
+                하와이 최초★<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">거북이 스노클링 투어,</span><br className="sm:hidden" /><span className="hidden sm:inline"> </span>오션스타!
              </h1>
           </div>
 
           {/* Bottom Text Content & Button */}
           <div className="absolute bottom-0 left-0 right-0 z-20 text-center px-4 pb-24 sm:pb-28 lg:pb-32 max-w-4xl mx-auto flex flex-col items-center">
              <p className="text-sm sm:text-base md:text-xl text-white font-medium mb-4 sm:mb-8 drop-shadow-lg leading-relaxed animate-fade-in-up animation-delay-200 max-w-[90%] sm:max-w-none">
-                연 2만명 이상의 고객들과 13,000개의 누적 후기가 입증하는 하와이 단연 1위 거북이 스노클링 전문 업체! 가장 재밌고 특별한 경험을 함께 하세요!
+                연 2만명 이상의 고객들과 13,000개의 후기가 입증하는 하와이 단연 1위 거북이 스노클링 배입니다! 와이키키에서 가장 재미있고 특별한 경험을 오션스타와 함께 하세요!
              </p>
              <button 
                 onClick={() => setIsBookingOpen(true)}
@@ -402,35 +402,35 @@ export default function ReservationPage() {
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 -mt-10 sm:-mt-20 relative z-30">
         
           {/* === 2. Bento Box Introduction === */}
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-12 sm:mb-20">
-            <div className="md:col-span-2 bg-white rounded-3xl p-8 shadow-xl border border-slate-100 flex flex-col justify-center transform hover:-translate-y-1 transition duration-500">
-              <Award className="w-10 h-10 text-amber-500 mb-4" />
-              <h3 className="text-2xl font-bold text-slate-800 mb-2">Since 2019, 오리지널</h3>
-              <p className="text-slate-600 text-lg">한국인 대상 거북이 스노클링 하와이 최초 · 업계 유일무이 찐 원조.</p>
+          <section className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-12 sm:mb-20">
+            <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+              <Award className="w-10 h-10 text-amber-500 mb-4 shrink-0" />
+              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">Since 2019,</h3>
+              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">한국인에게 가장 사랑받는 하와이 거북이 스노클링 배</p>
             </div>
-            <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-8 shadow-xl text-white flex flex-col justify-center items-start transform hover:-translate-y-1 transition duration-500">
-              <Star className="w-10 h-10 text-yellow-300 mb-4 fill-yellow-300" />
-              <h3 className="text-4xl font-extrabold mb-1">13,000+</h3>
-              <p className="text-blue-100 font-medium text-lg mb-2">누적 리뷰 (업계 최다)</p>
-              <p className="text-sm text-blue-200">압도적인 신뢰와 만족도</p>
-            </div>
-            
-            <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-100 transform hover:-translate-y-1 transition duration-500">
-              <ShieldCheck className="w-10 h-10 text-emerald-500 mb-4" />
-              <h3 className="text-xl font-bold text-slate-800 mb-2">거북이 100% 보장제</h3>
-              <p className="text-slate-600 font-medium">자연산 바다 거북이를 만나지 못하면 100% 환불 또는 재탑승을 보장합니다.</p>
+            <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-6 lg:p-7 shadow-xl text-white flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+              <Star className="w-10 h-10 text-yellow-300 mb-4 fill-yellow-300 shrink-0" />
+              <h3 className="text-3xl font-extrabold mb-1">13,000+</h3>
+              <p className="text-blue-100 font-bold mb-2 text-sm break-keep">누적 리뷰 ★업계 최다★</p>
+              <p className="text-xs text-blue-200 break-keep">압도적인 신뢰와 만족도</p>
             </div>
             
-            <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-100 transform hover:-translate-y-1 transition duration-500">
-              <Anchor className="w-10 h-10 text-blue-500 mb-4" />
-              <h3 className="text-xl font-bold text-slate-800 mb-2">51인승 루프탑 보트</h3>
-              <p className="text-slate-600 font-medium">와이키키 유일! 자외선·비 100% 차단, 흔들림을 최소화하여 멀미 없는 쾌적함.</p>
+            <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+              <ShieldCheck className="w-10 h-10 text-emerald-500 mb-4 shrink-0" />
+              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">거북이 100% 보장제</h3>
+              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">자연산 바다 거북이를 만나지 못하면 100% 환불 또는 재탑승을 보장합니다.</p>
             </div>
             
-            <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-100 transform hover:-translate-y-1 transition duration-500">
-              <UsersRound className="w-10 h-10 text-purple-500 mb-4" />
-              <h3 className="text-xl font-bold text-slate-800 mb-2">전문 자격 한인 크루</h3>
-              <p className="text-slate-600 font-medium">수영을 전혀 못해도, 영어를 전혀 못해도 괜찮습니다! 전원 자격증 소지 한국인 크루 상주.</p>
+            <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+              <Anchor className="w-10 h-10 text-blue-500 mb-4 shrink-0" />
+              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">51인승 루프탑 보트</h3>
+              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">와이키키 유일! 자외선·비 100% 차단, 흔들림을 최소화하여 멀미 없는 쾌적함.</p>
+            </div>
+            
+            <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+              <UsersRound className="w-10 h-10 text-purple-500 mb-4 shrink-0" />
+              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">전문 자격 한인 크루</h3>
+              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">수영을 전혀 못해도, 영어를 전혀 못해도 괜찮습니다! 전원 자격증 소지 한국인 크루 상주.</p>
             </div>
           </section>
 
@@ -442,75 +442,108 @@ export default function ReservationPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-               {tourSettings.filter((t: any) => t.is_active !== false).sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)).map((tour: any, idx: number) => {
-                  const isPrivate = tour.is_flat_rate && tour.tour_id === 'private';
-                  const isSunset = tour.tour_id?.toLowerCase().includes('sunset');
+               {(() => {
+                  const activeTours = tourSettings.filter((t: any) => t.is_active !== false).sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0));
+                  const m1 = activeTours.find((t: any) => t.tour_id === 'morning1');
+                  const m2 = activeTours.find((t: any) => t.tour_id === 'morning2');
+                  const others = activeTours.filter((t: any) => t.tour_id !== 'morning1' && t.tour_id !== 'morning2');
                   
-                // Dynamic styles based on index or properties
-                  const themes: { bg: string, gradient: string, text: string, badge: string, btn: string, specialLabel?: string, isDark?: boolean }[] = [
-                    { bg: 'bg-cyan-100', gradient: 'from-cyan-500 to-blue-400', text: 'text-blue-900', badge: '🌊 가장 인기있는 액티비티', btn: 'bg-slate-900 hover:bg-slate-800', isDark: false },
-                     { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '⏰ 여유로운 출발시간', btn: 'bg-orange-500 hover:bg-orange-600', isDark: false },
-                    { bg: 'bg-indigo-100', gradient: 'from-indigo-500 to-purple-500', text: 'text-indigo-900', badge: '✨ 프리미엄 투어', btn: 'bg-indigo-600 hover:bg-indigo-700', isDark: false }
-                  ];
-                  
-                  // Use theme based on index or special cases
-                  let theme = themes[idx % themes.length];
-                  if (isPrivate) theme = { bg: 'bg-slate-800', gradient: 'from-slate-800 to-indigo-900', text: 'text-white', badge: '🛥️ VVIP 단독 보트 대관', btn: 'bg-indigo-500 hover:bg-indigo-400', isDark: true };
-                  else if (isSunset) theme = { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '🌅 로맨틱 선셋 뷰', btn: 'bg-orange-500 hover:bg-orange-600', specialLabel: '커플/신혼 여행객 추천!', isDark: false };
+                  let displayCards = activeTours;
+                  if (m1 && m2) {
+                     const combined = {
+                        ...m1,
+                        tour_id: 'combined_morning', // virtual id to avoid preselecting 1부 or 2부 in modal
+                        name: '와이키키 거북이 스노클링',
+                        is_combined: true,
+                     };
+                     displayCards = [combined, ...others].sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0));
+                  }
 
-                  return (
-                    <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900 text-white' : 'bg-white'} ${isPrivate ? 'md:col-span-2 lg:col-span-3 w-full flex-col lg:flex-row' : 'flex-col'} rounded-3xl shadow-lg border ${theme.isDark ? 'border-slate-800' : 'border-slate-100'} overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 flex group relative`}>
-                      {theme.specialLabel && (
-                        <div className="absolute top-0 right-10 bg-gradient-to-r from-orange-400 to-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-b-xl z-10 shadow-md">
-                          {theme.specialLabel}
-                        </div>
-                      )}
-                      <div className={`${isPrivate ? 'h-56 lg:h-auto lg:w-5/12' : 'h-48'} ${theme.bg} relative overflow-hidden shrink-0`}>
-                        <div className={`absolute inset-0 bg-gradient-to-tr ${theme.gradient} group-hover:scale-105 transition-transform duration-500`} />
-                        <div className={`absolute ${isPrivate ? 'top-4 left-4 bottom-auto' : 'bottom-4 left-4'} ${theme.isDark ? 'bg-white/10 text-white border border-white/20' : 'bg-white/90 text-' + theme.text} backdrop-blur text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 w-max z-10`}>
-                          {theme.badge}
-                        </div>
-                      </div>
-                      <div className={`p-6 sm:p-8 flex-1 flex flex-col ${isPrivate ? 'justify-center' : ''}`}>
-                        <h3 className={`text-2xl font-bold ${theme.isDark ? 'text-white' : 'text-slate-800'} mb-3`}>{tour.name}</h3>
-                        <p className={`${theme.isDark ? 'text-slate-300' : 'text-slate-600'} mb-6 text-sm leading-relaxed flex-1`}>
-                          {tour.description || "와이키키 최고의 투어를 오션스타와 함께하세요. 전문가의 안내로 안전하고 즐거운 시간을 보장합니다."}
-                        </p>
-                        <div className={`${theme.isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-100'} p-4 rounded-2xl mb-6 border`}>
-                           <ul className={`space-y-2 text-sm ${theme.isDark ? 'text-slate-300' : 'text-slate-700'} font-medium`}>
-                              <li className="flex items-start gap-2">
-                                <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
-                                {tour.is_flat_rate ? `우리 일행 단독 탑승 (최대 ${tour.max_capacity}인)` : '거북이 스노클링 + 해양 5종'}
-                              </li>
-                              <li className="flex items-start gap-2">
-                                <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
-                                {tour.is_flat_rate ? '원하는 옵션 커스터마이징 가능' : '스노클 장비/구명조끼, 음료/간식'}
-                              </li>
-                              <li className="flex items-start gap-2">
-                                <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
-                                {tour.is_flat_rate ? '인원수 연동 맞춤형 요금 적용' : (isSunset ? '시즌별 시간 변동' : `${tour.start_time?.slice(0,5) || '07:30'} - ${tour.end_time?.slice(0,5) || '14:30'}`)}
-                              </li>
-                           </ul>
-                        </div>
-                        <div className={`flex flex-wrap items-end justify-between border-t ${theme.isDark ? 'border-slate-700' : 'border-slate-100'} pt-6 gap-2`}>
-                          <div className="flex-1 min-w-[60%]">
-                            <p className="text-xs text-slate-400 font-medium">
-                              {tour.is_flat_rate ? (tour.tour_id === 'private' ? '1~4인 기준 (인원별 상이)' : `최대 ${tour.max_capacity}인 기준`) : '성인가 기준 (24개월 미만 무료)'}
-                            </p>
-                            <p className={`text-xl sm:text-2xl font-black truncate pr-2 ${theme.isDark ? 'text-indigo-400' : (isSunset ? 'text-orange-600' : 'text-blue-600')}`}>
-                              {tour.is_flat_rate && tour.tour_id === 'private' ? (
-                                <>단독 대관 ₩{Math.floor(calculateTieredPrivatePrice(1, (tour.adult_price_krw / (tour.adult_price_usd || 1)))).toLocaleString()} ~</>
-                              ) : (
-                                <>₩{Math.floor(tour.adult_price_krw || 0).toLocaleString()}{tour.is_flat_rate ? ' / 팀' : ''}</>
-                              )}
-                            </p>
+                  displayCards = displayCards.map((t: any) => {
+                    if (t.tour_id?.toLowerCase().includes('sunset')) return { ...t, name: '선셋·와인 & 와이키키 거북이 스노클링' };
+                    if (t.tour_id === 'private') return { ...t, name: <span className="block text-center leading-snug">[단독] 프라이빗<br/>와이키키 거북이 스노클링</span> };
+                    return t;
+                  });
+
+                  return displayCards.map((tour: any, idx: number) => {
+                    const isPrivate = tour.is_flat_rate && tour.tour_id === 'private';
+                    const isSunset = tour.tour_id?.toLowerCase().includes('sunset');
+                    
+                    const themes: { bg: string, gradient: string, text: string, badge: string, btn: string, specialLabel?: string, isDark?: boolean }[] = [
+                      { bg: 'bg-cyan-100', gradient: 'from-cyan-500 to-blue-400', text: 'text-blue-900', badge: '🌊 가장 인기있는 액티비티', btn: 'bg-slate-900 hover:bg-slate-800', isDark: false },
+                      { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '⏰ 여유로운 출발시간', btn: 'bg-orange-500 hover:bg-orange-600', isDark: false },
+                      { bg: 'bg-indigo-100', gradient: 'from-indigo-500 to-purple-500', text: 'text-indigo-900', badge: '✨ 프리미엄 투어', btn: 'bg-indigo-600 hover:bg-indigo-700', isDark: false }
+                    ];
+                    
+                    let theme = themes[idx % themes.length];
+                    if (isPrivate) theme = { bg: 'bg-slate-800', gradient: 'from-slate-800 to-indigo-900', text: 'text-white', badge: '🛥️ VVIP 단독 보트 대관', btn: 'bg-indigo-500 hover:bg-indigo-400', isDark: true };
+                    else if (isSunset) theme = { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '🌅 로맨틱 선셋 뷰', btn: 'bg-orange-500 hover:bg-orange-600', specialLabel: '커플/신혼 여행객 추천!', isDark: false };
+
+                    return (
+                      <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900 text-white' : 'bg-white'} flex-col rounded-3xl shadow-lg border ${theme.isDark ? 'border-slate-800' : 'border-slate-100'} overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 flex group relative`}>
+                        {theme.specialLabel && (
+                          <div className="absolute top-0 right-10 bg-gradient-to-r from-orange-400 to-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-b-xl z-10 shadow-md">
+                            {theme.specialLabel}
                           </div>
-                          <button onClick={() => { setSelectedTour(tour.tour_id); if(tour.is_flat_rate) form.setValue("childCount", 0); setIsBookingOpen(true); }} className={`${theme.btn} text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-colors whitespace-nowrap shrink-0 ml-auto`}>예약하기</button>
+                        )}
+                        <div className={`h-48 ${theme.bg} relative overflow-hidden shrink-0`}>
+                          <div className={`absolute inset-0 bg-gradient-to-tr ${theme.gradient} group-hover:scale-105 transition-transform duration-500`} />
+                          <div className={`absolute bottom-4 left-4 ${theme.isDark ? 'bg-white/10 text-white border border-white/20' : 'bg-white/90 text-' + theme.text} backdrop-blur text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 w-max z-10`}>
+                            {theme.badge}
+                          </div>
+                        </div>
+                        <div className={`p-6 sm:p-8 flex-1 flex flex-col`}>
+                          <h3 className={`text-2xl font-bold text-center ${theme.isDark ? 'text-white' : 'text-slate-800'} mb-3`}>{tour.name}</h3>
+                          <p className={`${theme.isDark ? 'text-slate-300' : 'text-slate-600'} mb-6 text-sm leading-relaxed flex-1`}>
+                            {tour.description || "와이키키 최고의 투어를 오션스타와 함께하세요. 전문가의 안내로 안전하고 즐거운 시간을 보장합니다."}
+                          </p>
+                          <div className={`${theme.isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-100'} p-4 rounded-2xl mb-6 border`}>
+                            <ul className={`space-y-2 text-sm ${theme.isDark ? 'text-slate-300' : 'text-slate-700'} font-medium`}>
+                                <li className="flex items-start gap-2">
+                                  <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
+                                  {tour.is_flat_rate ? `우리 일행 단독 탑승 (최대 ${tour.max_capacity}인)` : '거북이 스노클링 + 해양 5종'}
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
+                                  {tour.is_flat_rate ? '원하는 옵션 커스터마이징 가능' : '스노클 장비/구명조끼, 음료/간식'}
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
+                                  <div className="flex flex-col gap-1">
+                                    {tour.is_flat_rate ? (
+                                      <span>인원수 연동 맞춤형 요금 적용</span>
+                                    ) : tour.is_combined ? (
+                                      <>
+                                        <span>1부 08:00 - 11:00</span>
+                                        <span>2부 11:00 - 14:00</span>
+                                      </>
+                                    ) : (
+                                      <span>{isSunset ? '시즌별 시간 변동' : `${tour.start_time?.slice(0,5) || '07:30'} - ${tour.end_time?.slice(0,5) || '14:30'}`}</span>
+                                    )}
+                                  </div>
+                                </li>
+                            </ul>
+                          </div>
+                          <div className={`flex flex-wrap items-end justify-between border-t ${theme.isDark ? 'border-slate-700' : 'border-slate-100'} pt-6 gap-2`}>
+                            <div className="flex-1 min-w-[60%]">
+                              <p className="text-xs text-slate-400 font-medium">
+                                {tour.is_flat_rate ? (tour.tour_id === 'private' ? '1~4인 기준 (인원별 상이)' : `최대 ${tour.max_capacity}인 기준`) : '성인가 기준 (24개월 미만 무료)'}
+                              </p>
+                              <p className={`text-xl sm:text-2xl font-black truncate pr-2 ${theme.isDark ? 'text-indigo-400' : (isSunset ? 'text-orange-600' : 'text-blue-600')}`}>
+                                {tour.is_flat_rate && tour.tour_id === 'private' ? (
+                                  <>₩{Math.floor(calculateTieredPrivatePrice(1, (tour.adult_price_krw / (tour.adult_price_usd || 1)))).toLocaleString()} ~</>
+                                ) : (
+                                  <>₩{Math.floor(tour.adult_price_krw || 0).toLocaleString()}{tour.is_flat_rate ? ' / 팀' : ''}</>
+                                )}
+                              </p>
+                            </div>
+                            <button onClick={() => { if(tour.tour_id !== 'combined_morning' && tour.tour_id) { setSelectedTour(tour.tour_id); } else { setSelectedTour(null); } if(tour.is_flat_rate) form.setValue("childCount", 0); setIsBookingOpen(true); }} className={`${theme.btn} text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-colors whitespace-nowrap shrink-0 ml-auto`}>예약하기</button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-               })}
+                    );
+                  });
+               })()}
             </div>
           </section>
         </div>
