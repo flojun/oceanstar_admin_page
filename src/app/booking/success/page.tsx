@@ -3,12 +3,38 @@
 import { CheckCircle, MapPin, Calendar, Clock, Download, ArrowRight, Loader2 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 function SuccessContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const orderId = searchParams.get('order_id');
+
+    const [reservation, setReservation] = useState<any>(null);
+    const [pickupData, setPickupData] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!orderId) return;
+            try {
+                const { data } = await supabase.from('reservations').select('*').eq('order_id', orderId).single();
+                if (data) {
+                    setReservation(data);
+                    if (data.pickup_location && data.pickup_location !== 'DIRECT') {
+                        const { data: pData } = await supabase.from('pickup_locations').select('*').eq('name', data.pickup_location).single();
+                        if (pData) setPickupData(pData);
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching reservation:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
+    }, [orderId]);
 
     if (!orderId) {
         return (
@@ -17,6 +43,23 @@ function SuccessContent() {
                 <button onClick={() => router.push('/')} className="mt-4 text-blue-600 underline">홈으로 돌아가기</button>
             </div>
         );
+    }
+
+    // Compute exact pickup time based on reservation option (1부, 2부, 등) and the DB schedule
+    let finalTime = reservation?.pickup_time || "개별 체크";
+    if (pickupData && reservation?.option) {
+        if (reservation.option.includes('1부') && pickupData.time_1) finalTime = pickupData.time_1;
+        else if (reservation.option.includes('2부') && pickupData.time_2) finalTime = pickupData.time_2;
+        else if (reservation.option.includes('3부') && pickupData.time_3) finalTime = pickupData.time_3;
+    }
+    
+    // Format "07:40:00" to "07:40 AM"
+    if (finalTime && finalTime.match(/^\d{2}:\d{2}/)) {
+        const parts = finalTime.split(':');
+        const hour = parseInt(parts[0], 10);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const h12 = hour % 12 || 12;
+        finalTime = `${h12.toString().padStart(2, '0')}:${parts[1]} ${ampm}`;
     }
 
     return (
@@ -41,9 +84,19 @@ function SuccessContent() {
                                     {orderId}
                                 </span>
                             </div>
-                            <div className="bg-blue-50 text-blue-800 p-3 rounded-xl text-sm font-medium flex items-start gap-2 border border-blue-100 shadow-inner">
-                                <CheckCircle size={16} className="shrink-0 mt-0.5" />
-                                <p>위 <strong>예약 번호(6자리)</strong>로 오션스타 메인 홈페이지에서 생생한 후기를 남기실 수 있습니다!</p>
+                            <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm font-medium flex flex-col gap-2 border border-blue-100 shadow-inner">
+                                <p className="flex items-start gap-2">
+                                    <CheckCircle size={16} className="shrink-0 mt-0.5" />
+                                    위 <strong>예약 번호(6자리)</strong>로 오션스타 메인 홈페이지에서 생생한 후기를 남기실 수 있습니다!
+                                </p>
+                                <p className="flex items-start gap-2">
+                                    <CheckCircle size={16} className="shrink-0 mt-0.5" />
+                                    6자리 예약번호로 예약일 변경 및 취소가 가능합니다!
+                                </p>
+                                <p className="flex items-start gap-2">
+                                    <CheckCircle size={16} className="shrink-0 mt-0.5" />
+                                    아래에 바우처를 캡쳐 및 저장해주세요!
+                                </p>
                             </div>
                         </div>
 
@@ -54,20 +107,34 @@ function SuccessContent() {
                         <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 mb-8 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full blur-3xl -mr-16 -mt-16 opacity-50"></div>
 
-                            {/* In a real app, you would fetch these details from DB using orderId */}
-                            <div className="relative z-10">
-                                <p className="text-sm font-semibold text-blue-800 mb-1">지정 픽업 장소</p>
-                                <p className="text-xl font-extrabold text-blue-900 mb-4">Ilikai Hotel Flagpole</p>
+                            {isLoading ? (
+                                <div className="flex items-center justify-center py-6">
+                                    <Loader2 className="animate-spin text-blue-500" size={24} />
+                                </div>
+                            ) : reservation ? (
+                                <div className="relative z-10">
+                                    <p className="text-sm font-semibold text-blue-800 mb-1">지정 픽업 장소</p>
+                                    <p className="text-xl font-extrabold text-blue-900 mb-4">{reservation.pickup_location === 'DIRECT' ? '개별 이동 (직접 도착)' : reservation.pickup_location}</p>
 
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg text-sm font-bold text-slate-700 shadow-sm">
-                                        <Calendar size={16} className="text-blue-500" /> 2026-04-10
-                                    </div>
-                                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg text-sm font-bold text-slate-700 shadow-sm">
-                                        <Clock size={16} className="text-blue-500" /> 07:30 AM
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg text-sm font-bold text-slate-700 shadow-sm whitespace-nowrap">
+                                                <Calendar size={16} className="text-blue-500 shrink-0" /> 
+                                                {reservation.tour_date ? `${reservation.tour_date} (${['일', '월', '화', '수', '목', '금', '토'][new Date(reservation.tour_date).getDay()]})` : ''}
+                                            </div>
+                                            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg text-sm font-bold text-slate-700 shadow-sm whitespace-nowrap">
+                                                <Clock size={16} className="text-blue-500 shrink-0" /> 
+                                                {reservation.pickup_location === 'DIRECT' ? '오전 07:45까지 집결' : finalTime}
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-blue-700/80 font-medium pl-1">* 위 표시된 일정은 모두 하와이 현지 시각 기준입니다.</p>
                                     </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <div className="relative z-10 text-center text-slate-500 py-4">
+                                    예약 정보를 불러오지 못했습니다.
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-4 text-sm mb-8">
@@ -89,10 +156,10 @@ function SuccessContent() {
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-100">
-                            <button className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+                            <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30">
                                 <Download size={18} /> 바우처 저장
                             </button>
-                            <Link href="/" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+                            <Link href="/" className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
                                 홈으로 이동 <ArrowRight size={18} />
                             </Link>
                         </div>

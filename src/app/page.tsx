@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +13,8 @@ import "react-day-picker/dist/style.css";
 import { format, parse } from "date-fns";
 import Image from "next/image";
 import FAQSection from "@/components/FAQSection";
+import PickupGuide from "@/components/PickupGuide";
+import { getPickupDisplayName } from '@/constants/pickupLocations';
 
 // Helper to format HH:mm:ss string to "hh:mm a"
 const formatTimeAMPM = (timeString: string | null | undefined) => {
@@ -85,11 +88,6 @@ export default function ReservationPage() {
   const [reviewForm, setReviewForm] = useState({ order_id: '', author_name: '', rating: 5, content: '' });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
-
-  // ==== 취소 요청 상태 ====
-  const [isCancelOpen, setIsCancelOpen] = useState(false);
-  const [cancelForm, setCancelForm] = useState({ order_id: '', booker_name: '', reason: '' });
-  const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
@@ -168,33 +166,6 @@ export default function ReservationPage() {
       alert("서버와 통신 중 오류가 발생했습니다.");
     } finally {
       setIsSubmittingReview(false);
-    }
-  };
-
-  const onCancelSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!confirm('정말로 예약 취소를 환불 규정에 따라 요청하시겠습니까?')) {
-        return;
-    }
-    setIsSubmittingCancel(true);
-    try {
-      const res = await fetch('/api/cancel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cancelForm)
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(data.message || "취소 요청이 접수되었습니다. 관리자 확인 후 처리됩니다.");
-        setCancelForm({ order_id: '', booker_name: '', reason: '' });
-        setIsCancelOpen(false);
-      } else {
-        alert(data.error || "취소 요청 중 오류가 발생했습니다.");
-      }
-    } catch (e) {
-      alert("서버와 통신 중 오류가 발생했습니다.");
-    } finally {
-      setIsSubmittingCancel(false);
     }
   };
 
@@ -357,11 +328,18 @@ export default function ReservationPage() {
       <header className={`w-full z-40 transition-all duration-300 bg-white/80 backdrop-blur-md shrink-0 ${isScrolled ? 'shadow-sm border-b border-slate-200' : 'border-b border-transparent'}`}>
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-black text-blue-600 tracking-tighter uppercase drop-shadow-sm">OceanStar</h1>
-          <button 
-             onClick={() => setIsBookingOpen(true)}
-             className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-bold text-sm shadow-md transition-all sm:block hidden">
-             투어 예약하기
-          </button>
+          <div className="flex items-center gap-3">
+             <Link 
+                href="/manage-booking"
+                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-5 py-2 rounded-full font-bold text-sm shadow-sm transition-all sm:block hidden">
+                내 예약 관리
+             </Link>
+             <button 
+                onClick={() => setIsBookingOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-bold text-sm shadow-md transition-all sm:block hidden">
+                투어 예약하기
+             </button>
+          </div>
         </div>
       </header>
 
@@ -626,6 +604,11 @@ export default function ReservationPage() {
             </div>
         </section>
 
+        {/* === Pickup Guide Section === */}
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-20 relative z-30">
+            <PickupGuide />
+        </div>
+
         {/* === FAQ Section === */}
         <FAQSection />
 
@@ -634,26 +617,33 @@ export default function ReservationPage() {
           <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
              <div className="text-center mb-10">
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">취소 및 환불 규정</h2>
-                <p className="text-slate-400">대박하와이 (Waikiki Turtle Snorkel) | 하와이 현지 시간 기준 · 모든 상품 공통 적용</p>
+                <p className="text-slate-400">대박하와이 (Waikiki Turtle Snorkel) | 하와이 현지 시간 기준 · 특약 적용 상품</p>
              </div>
              
              <div className="space-y-8 text-sm md:text-base">
                 <div>
-                   <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><ClipboardList size={20} className="text-blue-400" /> 기본 환불 규정</h3>
-                   <ul className="space-y-3 bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
-                      <li className="flex items-start gap-3">
-                         <span className="text-emerald-400 font-bold shrink-0 mt-0.5">✅ [전액 환불]</span>
-                         <span>투어 시작 <strong>7일 전</strong>까지 취소 통보 시</span>
-                      </li>
-                      <li className="flex items-start gap-3">
-                         <span className="text-yellow-400 font-bold shrink-0 mt-0.5">⚠️ [50% 공제 후 환불]</span>
-                         <span>투어 시작 <strong>6~3일 전</strong> 취소 통보 시</span>
-                      </li>
-                      <li className="flex items-start gap-3">
-                         <span className="text-rose-400 font-bold shrink-0 mt-0.5">❌ [환불 불가]</span>
-                         <span>투어 시작 <strong>2일 전 ~ 당일</strong> 취소 통보 또는 노쇼(No-Show) 시 (100% 취소 수수료 적용)</span>
-                      </li>
-                   </ul>
+                   <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><ClipboardList size={20} className="text-blue-400" /> 기본 환불 특약 규정</h3>
+                   <div className="bg-slate-800/30 p-6 rounded-2xl border border-slate-700/50">
+                      <p className="text-sm text-slate-300 font-medium mb-5 bg-slate-800 p-4 rounded-xl border border-slate-700/50 leading-relaxed">
+                          본 상품은 국외여행 표준약관 제6조(특약)에 따라 일반 소비자분쟁해결기준과 다른 취소수수료가 적용됩니다.<br/>
+                          예약 전 취소 규정을 반드시 확인해 주세요.
+                      </p>
+                      <ul className="space-y-4 text-slate-400 text-sm">
+                         <li className="flex items-start gap-3">
+                            <span className="text-slate-300 font-bold shrink-0 mt-0.5">[전액 환불]</span>
+                            <span>여행시작 <strong>7일 전</strong>까지 (~7일) : 여행 요금 전액 환불</span>
+                         </li>
+                         <li className="flex items-start gap-3">
+                            <span className="text-slate-300 font-bold shrink-0 mt-0.5">[50% 공제]</span>
+                            <span>여행시작 <strong>3일 전</strong>까지 (6~3일) : 상품 요금의 50% 공제</span>
+                         </li>
+                         <li className="flex items-start gap-3">
+                            <span className="text-slate-300 font-bold shrink-0 mt-0.5">[환불 불가]</span>
+                            <span>여행시작 <strong>당일까지</strong> (2일~당일) : 취소/환불 불가</span>
+                         </li>
+                      </ul>
+                      <p className="mt-5 text-xs font-medium text-slate-500">※ 여행일은 현지 시각 기준입니다.</p>
+                   </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-8">
@@ -679,34 +669,15 @@ export default function ReservationPage() {
                     
                     <div className="space-y-6">
                         <div>
-                           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><Mail size={20} className="text-blue-400" /> 취소 요청 방법</h3>
+                           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><Mail size={20} className="text-blue-400" /> 하와이 현지 영업시간 안내</h3>
                            <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50">
-                               <ul className="list-disc ml-5 space-y-2 text-slate-400 text-sm">
-                                   <li>예약 플랫폼 내 취소 버튼 또는 이메일·채팅으로 요청</li>
-                                   <li>영업시간 내 접수된 건에 한해 처리됩니다.</li>
-                                   <li className="text-slate-300 font-medium list-none -ml-5 mt-2 flex items-center gap-2">
-                                       <span className="bg-slate-700 px-2 py-1 rounded text-xs">영업시간</span>
-                                       하와이 현지 기준 월~금 09:00~17:00
-                                   </li>
-                               </ul>
-                           </div>
-                        </div>
-
-                        <div>
-                           <div className="bg-blue-900/20 p-5 rounded-2xl border border-blue-900/50">
-                               <h4 className="font-bold text-blue-300 mb-2 flex items-center gap-2 text-sm"><Info size={16} /> 법적 고지</h4>
-                               <p className="text-xs text-blue-100/70 leading-relaxed">
-                                   본 규정은 국외여행 표준약관 제6조(특약)에 따르며, 일반 소비자분쟁해결기준과 다를 수 있습니다. 예약 전 반드시 확인하세요.
-                               </p>
+                               <div className="text-slate-300 font-medium flex items-center gap-3">
+                                   <span className="bg-slate-700 px-2 py-1.5 rounded text-xs">영업시간</span>
+                                   <span className="text-sm">하와이 현지 기준 월~금 09:00~17:00</span>
+                               </div>
                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div className="mt-8 flex justify-center">
-                   <button onClick={() => setIsCancelOpen(true)} className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-colors border border-slate-700 hover:border-slate-500 shadow-lg flex items-center gap-2">
-                       <AlertTriangle size={18} className="text-rose-400" /> 직접 예약 취소 요청하기
-                   </button>
                 </div>
              </div>
 
@@ -992,7 +963,7 @@ export default function ReservationPage() {
                                     <option value="" disabled>가까운 장소가 추천되거나 직접 골라주세요</option>
                                     {pickupLocations.map(loc => (
                                         <option key={loc.id} value={loc.id}>
-                                        {loc.name}
+                                        {getPickupDisplayName(loc.name)}
                                         {(!isFlatRate || selectedTour !== 'private') && selectedTour === 'morning1' && loc.time_1 ? ` (${formatTimeAMPM(loc.time_1)})` : ''}
                                         {(!isFlatRate || selectedTour !== 'private') && selectedTour === 'morning2' && loc.time_2 ? ` (${formatTimeAMPM(loc.time_2)})` : ''}
                                         {(!isFlatRate || selectedTour !== 'private') && selectedTour === 'sunset' && loc.time_3 ? ` (${formatTimeAMPM(loc.time_3)})` : ''}
@@ -1153,80 +1124,6 @@ export default function ReservationPage() {
                         >
                             {isSubmittingReview ? <Loader2 className="animate-spin" size={20} /> : <Check size={20} />}
                             {isSubmittingReview ? "등록 중..." : "리뷰 등록하기"}
-                        </button>
-                    </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* === 취소 요청 플로팅 모달 (Cancel Request Modal) === */}
-        {isCancelOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setIsCancelOpen(false)}></div>
-            <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-              <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                    <AlertTriangle className="text-rose-500" /> 예약 취소 요청
-                </h2>
-                <button onClick={() => setIsCancelOpen(false)} className="p-2 bg-slate-200 hover:bg-slate-300 rounded-full text-slate-600 transition-colors">
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="p-6">
-                <div className="bg-rose-50 border border-rose-200 p-4 rounded-xl mb-6">
-                    <p className="text-sm font-bold text-rose-800 mb-1">⚠️ 취소 요청 전 주의사항</p>
-                    <p className="text-xs text-rose-700 leading-relaxed">
-                        접수 즉시 예약이 취소되는 것이 아니며, <strong>'취소요청' 상태로 변경</strong>됩니다. 관리자가 취소 패널티 규정(100%, 50%, 0%)을 확인한 후 카드 환불 등 최종 처리를 진행합니다. 
-                    </p>
-                </div>
-
-                <form onSubmit={onCancelSubmit} className="flex flex-col gap-5">
-                    <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">예약 번호 (영숫자 6자리)</label>
-                        <input
-                            type="text"
-                            required
-                            maxLength={6}
-                            placeholder="예: A4X9T2"
-                            value={cancelForm.order_id}
-                            onChange={(e) => setCancelForm({ ...cancelForm, order_id: e.target.value.toUpperCase() })}
-                            className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all uppercase tracking-widest font-mono font-bold"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">예약자 성함</label>
-                        <input
-                            type="text"
-                            required
-                            placeholder="예약하신 분의 성함을 입력해주세요"
-                            value={cancelForm.booker_name}
-                            onChange={(e) => setCancelForm({ ...cancelForm, booker_name: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all font-medium"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">취소 사유</label>
-                        <textarea
-                            required
-                            rows={3}
-                            placeholder="취소 사유를 간략히 적어주세요 (예: 개인 일정 변경, 기상 악화 등)"
-                            value={cancelForm.reason}
-                            onChange={(e) => setCancelForm({ ...cancelForm, reason: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all font-medium resize-none"
-                        ></textarea>
-                    </div>
-
-                    <div className="pt-4">
-                        <button
-                            type="submit"
-                            disabled={isSubmittingCancel}
-                            className="w-full bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-md flex justify-center items-center gap-2"
-                        >
-                            {isSubmittingCancel ? <Loader2 className="animate-spin" size={20} /> : <Check size={20} />}
-                            {isSubmittingCancel ? "처리 중..." : "취소 요청 제출하기"}
                         </button>
                     </div>
                 </form>
