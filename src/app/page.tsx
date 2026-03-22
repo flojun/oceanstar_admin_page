@@ -66,6 +66,7 @@ const calculateTieredPrivatePrice = (totalPax: number, exchangeRate: number): nu
 
 export default function ReservationPage() {
   const [selectedTour, setSelectedTour] = useState<string | null>(null);
+  const [expandedTourDetails, setExpandedTourDetails] = useState<any | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [pickupLocations, setPickupLocations] = useState<PickupLocation[]>([]);
   const [closestPickup, setClosestPickup] = useState<{ location: PickupLocation, minutes: number } | null>(null);
@@ -515,7 +516,15 @@ export default function ReservationPage() {
                                 )}
                               </p>
                             </div>
-                            <button onClick={() => { if(tour.tour_id !== 'combined_morning' && tour.tour_id) { setSelectedTour(tour.tour_id); } else { setSelectedTour(null); } if(tour.is_flat_rate) form.setValue("childCount", 0); setIsBookingOpen(true); }} className={`${theme.btn} text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-colors whitespace-nowrap shrink-0 ml-auto`}>예약하기</button>
+                            <div className="flex items-center gap-2 ml-auto shrink-0 w-full sm:w-auto">
+                                <button 
+                                  onClick={() => setExpandedTourDetails(tour)} 
+                                  className={`flex-1 sm:flex-none px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-all whitespace-nowrap border-2 ${theme.isDark ? 'border-slate-700 text-slate-300 hover:bg-slate-800' : 'border-slate-200 text-slate-600 hover:bg-slate-50'} flex justify-center items-center gap-1 active:scale-95`}
+                                >
+                                  자세히 보기
+                                </button>
+                                <button onClick={() => { if(tour.tour_id !== 'combined_morning' && tour.tour_id) { setSelectedTour(tour.tour_id); } else { setSelectedTour(null); } if(tour.is_flat_rate) form.setValue("childCount", 0); setIsBookingOpen(true); }} className={`flex-1 sm:flex-none ${theme.btn} text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-transform active:scale-95 whitespace-nowrap shadow-[0_4px_14px_0_rgba(0,118,255,0.39)]`}>예약하기</button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1129,6 +1138,56 @@ export default function ReservationPage() {
                 </form>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Tour Details Modal Popup */}
+        {expandedTourDetails && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 pb-20 sm:pb-6 animate-in fade-in duration-200">
+             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setExpandedTourDetails(null)}></div>
+             <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300">
+                 {/* Modal Header */}
+                 <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-100 bg-slate-50/50">
+                     <h3 className="text-lg sm:text-2xl font-black text-slate-800 flex items-center gap-2">
+                         <Info className="text-blue-500 hidden sm:block" size={24} />
+                         {expandedTourDetails.tour_id === 'private' ? '[단독] 프라이빗 와이키키 거북이 스노클링' : expandedTourDetails.name} 상세 정보
+                     </h3>
+                     <button onClick={() => setExpandedTourDetails(null)} className="p-2 bg-white hover:bg-slate-200 rounded-full text-slate-500 hover:text-slate-800 transition-colors shadow-sm border border-slate-200">
+                         <X size={20} />
+                     </button>
+                 </div>
+                 {/* Modal Body / Scrollable */}
+                 <div className="p-4 sm:p-8 overflow-y-auto flex-1 bg-slate-50">
+                     <div className="min-h-[40vh] sm:min-h-[50vh] border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center bg-white p-6">
+                         <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4">
+                             <ClipboardList size={32} opacity={0.5} />
+                         </div>
+                         <p className="font-bold text-slate-700 text-lg sm:text-xl mb-2 text-center">상세 정보가 아직 입력되지 않았습니다.</p>
+                         <p className="text-slate-500 text-sm text-center max-w-md leading-relaxed px-4">
+                             관리자님, 나중에 이곳에 투어 스케줄, 코스 다이어그램, 준비물, 주의사항, 수많은 사진들을 마음껏 올릴 수 있습니다. (상하 스크롤이 자유로운 넓은 영역입니다!)
+                         </p>
+                     </div>
+                 </div>
+                 {/* Modal Footer */}
+                 <div className="p-4 sm:p-6 border-t border-slate-100 bg-white flex flex-col sm:flex-row justify-end gap-3">
+                     <button onClick={() => setExpandedTourDetails(null)} className="px-6 py-3 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors w-full sm:w-auto text-center">
+                         닫기
+                     </button>
+                     <button 
+                        onClick={() => { 
+                            const tId = expandedTourDetails.tour_id;
+                            setExpandedTourDetails(null);
+                            if(tId !== 'combined_morning' && tId) setSelectedTour(tId);
+                            else setSelectedTour(null);
+                            if(expandedTourDetails.is_flat_rate) form.setValue("childCount", 0); 
+                            setIsBookingOpen(true); 
+                        }} 
+                        className="px-8 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30 w-full sm:w-auto text-center"
+                     >
+                         이 상품으로 예약하기
+                     </button>
+                 </div>
+             </div>
           </div>
         )}
 

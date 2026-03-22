@@ -170,7 +170,7 @@ export default function FAQSection() {
         {/* Sidebar / Tabs */}
         <div className="w-full md:w-1/3 bg-slate-50 p-4 sm:p-6 border-b md:border-b-0 md:border-r border-slate-200">
           <h3 className="font-bold text-slate-800 mb-4 px-2 tracking-tight">카테고리 분류</h3>
-          <div className="flex flex-row md:flex-col gap-2 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+          <div className="flex flex-row md:flex-col gap-2 overflow-x-auto pb-3 md:pb-0 mobile-scrollbar">
             {faqData.map((category, index) => (
               <button
                 key={index}
@@ -240,14 +240,30 @@ export default function FAQSection() {
         </div>
       </div>
       
-      {/* Hide scrollbar styles locally */}
+      {/* Mobile scrollbar styles */}
       <style dangerouslySetInnerHTML={{__html: `
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
+        @media (max-width: 767px) {
+            .mobile-scrollbar::-webkit-scrollbar {
+                height: 4px;
+                display: block;
+            }
+            .mobile-scrollbar::-webkit-scrollbar-track {
+                background: #f8fafc;
+                border-radius: 4px;
+            }
+            .mobile-scrollbar::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
         }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        @media (min-width: 768px) {
+            .mobile-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .mobile-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
         }
       `}} />
     </section>
