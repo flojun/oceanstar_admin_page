@@ -54,13 +54,33 @@ const courseData: TimelineItem[] = [
   }
 ];
 
-export default function TourCourseTimeline() {
+export default function TourCourseTimeline({ isSunset = false }: { isSunset?: boolean }) {
+  const displayData = [...courseData];
+  if (isSunset) {
+    const scooterIndex = displayData.findIndex(item => item.title === "씨두 스쿠터");
+    if (scooterIndex !== -1) {
+      displayData.splice(scooterIndex + 1, 0, {
+        title: "선셋과 와인",
+        description: "액티비티후 와인과 치즈보드 그리고 선셋을 함께 즐기세요!",
+        imgSrc: "/images/timeline/sunset_wine.jpg"
+      });
+    } else {
+      displayData.splice(displayData.length - 1, 0, {
+        title: "선셋과 와인",
+        description: "액티비티후 와인과 치즈보드 그리고 선셋을 함께 즐기세요!",
+        imgSrc: "/images/timeline/sunset_wine.jpg"
+      });
+    }
+  }
+
   return (
     <div className="w-full max-w-4xl mx-auto py-4 px-2 sm:px-6">
-      <h3 className="text-2xl font-black text-slate-900 border-b-2 border-slate-900 pb-3 mb-8">코스 일정</h3>
+      <h3 className="text-2xl font-black text-slate-900 border-b-2 border-slate-900 pb-3 mb-8">
+        코스 일정 {isSunset ? "(선셋+와인 모드)" : ""}
+      </h3>
       
       <div className="relative border-l-[3px] border-slate-200 ml-4 sm:ml-6 md:ml-8 space-y-12 pb-8">
-        {courseData.map((item, index) => (
+        {displayData.map((item, index) => (
           <div key={index} className="relative pl-8 sm:pl-10 md:pl-12 flex flex-col md:flex-row md:items-center gap-6 group">
             {/* Timeline Dot */}
             <div className="absolute -left-[11px] top-1 w-5 h-5 bg-white border-4 border-slate-300 rounded-full group-hover:border-blue-500 transition-colors duration-300 z-10 shadow-sm"></div>

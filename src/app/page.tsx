@@ -1159,9 +1159,9 @@ export default function ReservationPage() {
                  </div>
                  {/* Modal Body / Scrollable */}
                  <div className="p-4 sm:p-8 overflow-y-auto flex-1 bg-slate-50">
-                     {expandedTourDetails.is_combined || expandedTourDetails.tour_id?.includes('morning') || expandedTourDetails.tour_id?.includes('sunset') ? (
+                     {expandedTourDetails.is_combined || expandedTourDetails.tour_id?.toLowerCase().includes('morning') || expandedTourDetails.tour_id?.toLowerCase().includes('sunset') || (typeof expandedTourDetails.name === 'string' && expandedTourDetails.name.includes('선셋')) ? (
                          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-2 sm:p-6">
-                             <TourCourseTimeline />
+                             <TourCourseTimeline isSunset={(typeof expandedTourDetails.name === 'string' && expandedTourDetails.name.includes('선셋')) || expandedTourDetails.tour_id?.toLowerCase().includes('sunset')} />
                          </div>
                      ) : (
                          <div className="min-h-[40vh] sm:min-h-[50vh] border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center bg-white p-6">
