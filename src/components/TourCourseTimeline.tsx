@@ -60,13 +60,13 @@ export default function TourCourseTimeline({ isSunset = false }: { isSunset?: bo
     const scooterIndex = displayData.findIndex(item => item.title === "씨두 스쿠터");
     if (scooterIndex !== -1) {
       displayData.splice(scooterIndex + 1, 0, {
-        title: "선셋과 와인",
+        title: "와인과 치즈보드 with 선셋",
         description: "액티비티후 와인과 치즈보드 그리고 선셋을 함께 즐기세요!",
         imgSrc: "/images/timeline/sunset_wine.jpg"
       });
     } else {
       displayData.splice(displayData.length - 1, 0, {
-        title: "선셋과 와인",
+        title: "와인과 치즈보드 with 선셋",
         description: "액티비티후 와인과 치즈보드 그리고 선셋을 함께 즐기세요!",
         imgSrc: "/images/timeline/sunset_wine.jpg"
       });
