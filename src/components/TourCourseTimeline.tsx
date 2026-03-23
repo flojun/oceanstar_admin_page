@@ -75,9 +75,7 @@ export default function TourCourseTimeline({ isSunset = false }: { isSunset?: bo
 
   return (
     <div className="w-full max-w-4xl mx-auto py-4 px-2 sm:px-6">
-      <h3 className="text-2xl font-black text-slate-900 border-b-2 border-slate-900 pb-3 mb-8">
-        코스 일정 {isSunset ? "(선셋+와인 모드)" : ""}
-      </h3>
+      <h3 className="text-2xl font-black text-slate-900 border-b-2 border-slate-900 pb-3 mb-8">코스 일정</h3>
       
       <div className="relative border-l-[3px] border-slate-200 ml-4 sm:ml-6 md:ml-8 space-y-12 pb-8">
         {displayData.map((item, index) => (
