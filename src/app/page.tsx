@@ -14,6 +14,7 @@ import { format, parse } from "date-fns";
 import Image from "next/image";
 import FAQSection from "@/components/FAQSection";
 import PickupGuide from "@/components/PickupGuide";
+import TourCourseTimeline from "@/components/TourCourseTimeline";
 import { getPickupDisplayName } from '@/constants/pickupLocations';
 
 // Helper to format HH:mm:ss string to "hh:mm a"
@@ -1158,15 +1159,21 @@ export default function ReservationPage() {
                  </div>
                  {/* Modal Body / Scrollable */}
                  <div className="p-4 sm:p-8 overflow-y-auto flex-1 bg-slate-50">
-                     <div className="min-h-[40vh] sm:min-h-[50vh] border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center bg-white p-6">
-                         <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4">
-                             <ClipboardList size={32} opacity={0.5} />
+                     {expandedTourDetails.is_combined || expandedTourDetails.tour_id?.includes('morning') || expandedTourDetails.tour_id?.includes('sunset') ? (
+                         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-2 sm:p-6">
+                             <TourCourseTimeline />
                          </div>
-                         <p className="font-bold text-slate-700 text-lg sm:text-xl mb-2 text-center">상세 정보가 아직 입력되지 않았습니다.</p>
-                         <p className="text-slate-500 text-sm text-center max-w-md leading-relaxed px-4">
-                             관리자님, 나중에 이곳에 투어 스케줄, 코스 다이어그램, 준비물, 주의사항, 수많은 사진들을 마음껏 올릴 수 있습니다. (상하 스크롤이 자유로운 넓은 영역입니다!)
-                         </p>
-                     </div>
+                     ) : (
+                         <div className="min-h-[40vh] sm:min-h-[50vh] border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center bg-white p-6">
+                             <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4">
+                                 <ClipboardList size={32} opacity={0.5} />
+                             </div>
+                             <p className="font-bold text-slate-700 text-lg sm:text-xl mb-2 text-center">상세 정보가 아직 입력되지 않았습니다.</p>
+                             <p className="text-slate-500 text-sm text-center max-w-md leading-relaxed px-4">
+                                 관리자님, 나중에 이곳에 투어 스케줄, 코스 다이어그램, 준비물, 주의사항, 수많은 사진들을 마음껏 올릴 수 있습니다. (상하 스크롤이 자유로운 넓은 영역입니다!)
+                             </p>
+                         </div>
+                     )}
                  </div>
                  {/* Modal Footer */}
                  <div className="p-4 sm:p-6 border-t border-slate-100 bg-white flex flex-col sm:flex-row justify-end gap-3">
