@@ -9,7 +9,8 @@ export const PICKUP_LOCATIONS = [
     "HP",
     "HGI",
     "르네상스",
-    "알라모아나"
+    "알라모아나",
+    "직접"
 ] as const;
 
 export type PickupLocation = typeof PICKUP_LOCATIONS[number];
@@ -25,7 +26,8 @@ export const PICKUP_MAPPINGS: Record<string, string> = {
     '카라이': '카라이 호텔',
     '프린스': '프린스 호텔',
     '르네상스': '르네상스 호텔',
-    '알라모아나': '알라모아나 호텔'
+    '알라모아나': '알라모아나 호텔',
+    '직접': '개별 이동 (항구 직접 도착)'
 };
 
 export function getPickupDisplayName(name: string): string {

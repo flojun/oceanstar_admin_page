@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS pickup_locations (
   lng double precision NOT NULL,    -- 경도
   time_1 time,               -- 1부 픽업시간 (예: '07:30')
   time_2 time,               -- 2부 픽업시간
+  time_3 time,               -- 3부(선셋) 픽업시간
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

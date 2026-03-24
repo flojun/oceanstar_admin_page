@@ -16,6 +16,7 @@ import FAQSection from "@/components/FAQSection";
 import PickupGuide from "@/components/PickupGuide";
 import TourCourseTimeline from "@/components/TourCourseTimeline";
 import { getPickupDisplayName } from '@/constants/pickupLocations';
+import ImageCarousel from "@/components/ImageCarousel";
 
 // Helper to format HH:mm:ss string to "hh:mm a"
 const formatTimeAMPM = (timeString: string | null | undefined) => {
@@ -450,7 +451,7 @@ export default function ReservationPage() {
                     const isSunset = tour.tour_id?.toLowerCase().includes('sunset');
                     
                     const themes: { bg: string, gradient: string, text: string, badge: string, btn: string, specialLabel?: string, isDark?: boolean }[] = [
-                      { bg: 'bg-cyan-100', gradient: 'from-cyan-500 to-blue-400', text: 'text-blue-900', badge: '🌊 가장 인기있는 액티비티', btn: 'bg-slate-900 hover:bg-slate-800', isDark: false },
+                      { bg: 'bg-cyan-100', gradient: 'from-cyan-500 to-blue-400', text: 'text-blue-900', badge: '🌊 가장 인기있는 상품', btn: 'bg-slate-900 hover:bg-slate-800', isDark: false },
                       { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '⏰ 여유로운 출발시간', btn: 'bg-orange-500 hover:bg-orange-600', isDark: false },
                       { bg: 'bg-indigo-100', gradient: 'from-indigo-500 to-purple-500', text: 'text-indigo-900', badge: '✨ 프리미엄 투어', btn: 'bg-indigo-600 hover:bg-indigo-700', isDark: false }
                     ];
@@ -458,6 +459,23 @@ export default function ReservationPage() {
                     let theme = themes[idx % themes.length];
                     if (isPrivate) theme = { bg: 'bg-slate-800', gradient: 'from-slate-800 to-indigo-900', text: 'text-white', badge: '🛥️ VVIP 단독 보트 대관', btn: 'bg-indigo-500 hover:bg-indigo-400', isDark: true };
                     else if (isSunset) theme = { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '🌅 로맨틱 선셋 뷰', btn: 'bg-orange-500 hover:bg-orange-600', specialLabel: '커플/신혼 여행객 추천!', isDark: false };
+
+                      const tourImages = (() => {
+                        if (isSunset) {
+                          return [
+                            { src: '/images_option_card/sunset.jpg' },
+                            { src: '/images_option_card/snorkeling_turtle2.jpg', style: { objectPosition: 'center 20%', transform: 'rotate(-0.68deg) scale(1.03)' } },
+                            { src: '/images_option_card/kayak_sunset.jpg', style: { transform: 'rotate(1.64deg) scale(1.05)' } },
+                            { src: '/images_option_card/sunset_people.jpg', style: { objectPosition: 'right center', transform: 'rotate(0.91deg) scale(1.03)' } }
+                          ];
+                        } else {
+                          return [
+                            { src: '/images_option_card/snorkeling_turtle.jpg', style: { transform: 'rotate(-6deg) scale(1.15)' } },
+                            { src: '/images_option_card/paddleboad_people.jpg', style: { objectPosition: 'center 80%', transform: 'rotate(-1.12deg) scale(1.04)' } },
+                            { src: '/images_option_card/snorkeling_turtle2.jpg', style: { objectPosition: 'center 20%', transform: 'rotate(-0.68deg) scale(1.03)' } },
+                          ];
+                        }
+                      })();
 
                     return (
                       <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900 text-white' : 'bg-white'} flex-col rounded-3xl shadow-lg border ${theme.isDark ? 'border-slate-800' : 'border-slate-100'} overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 flex group relative`}>
@@ -467,7 +485,7 @@ export default function ReservationPage() {
                           </div>
                         )}
                         <div className={`h-48 ${theme.bg} relative overflow-hidden shrink-0`}>
-                          <div className={`absolute inset-0 bg-gradient-to-tr ${theme.gradient} group-hover:scale-105 transition-transform duration-500`} />
+                          <ImageCarousel images={tourImages} interval={2000} />
                           <div className={`absolute bottom-4 left-4 ${theme.isDark ? 'bg-white/10 text-white border border-white/20' : 'bg-white/90 text-' + theme.text} backdrop-blur text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 w-max z-10`}>
                             {theme.badge}
                           </div>

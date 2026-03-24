@@ -1,0 +1,6 @@
+kayak_sunset.jpg: 1.64
+paddleboad_people.jpg: -1.12
+snorkeling_turtle.jpg: -0.00
+snorkeling_turtle2.jpg: -0.68
+sunset.jpg: -0.00
+sunset_people.jpg: 0.91

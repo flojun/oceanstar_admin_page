@@ -51,6 +51,8 @@ function SuccessContent() {
         if (reservation.option.includes('1부') && pickupData.time_1) finalTime = pickupData.time_1;
         else if (reservation.option.includes('2부') && pickupData.time_2) finalTime = pickupData.time_2;
         else if (reservation.option.includes('3부') && pickupData.time_3) finalTime = pickupData.time_3;
+        // Fallback for '직접' 3부 in case time_3 column doesn't exist yet
+        else if (reservation.option.includes('3부') && pickupData.name === '직접') finalTime = '14:50:00';
     }
     
     // Format "07:40:00" to "07:40 AM"
@@ -114,7 +116,17 @@ function SuccessContent() {
                             ) : reservation ? (
                                 <div className="relative z-10">
                                     <p className="text-sm font-semibold text-blue-800 mb-1">지정 픽업 장소</p>
-                                    <p className="text-xl font-extrabold text-blue-900 mb-4">{reservation.pickup_location === 'DIRECT' ? '개별 이동 (직접 도착)' : reservation.pickup_location}</p>
+                                    <p className="text-xl font-extrabold text-blue-900 mb-4">
+                                        {reservation.pickup_location === 'DIRECT' || reservation.pickup_location === '직접' 
+                                            ? '개별 이동 (항구 직접 도착)' 
+                                            : reservation.pickup_location}
+                                    </p>
+                                    
+                                    {(reservation.pickup_location === 'DIRECT' || reservation.pickup_location === '직접') && (
+                                        <p className="text-sm font-bold text-slate-700 mb-4 mt-[-10px] break-keep">
+                                            주소: 1125 Ala Moana Blvd D110, Honolulu, HI 96814
+                                        </p>
+                                    )}
 
                                     <div className="flex flex-col gap-2">
                                         <div className="flex items-center gap-4">
