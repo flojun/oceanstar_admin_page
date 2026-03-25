@@ -3,8 +3,8 @@ export type ReservationStatus = '예약확정' | '취소' | '대기' | '취소�
 export interface Reservation {
   id: string;
   created_at: string;
-  is_reconfirmed: boolean; // New Checkbox
-  is_admin_checked: boolean; // Admin acknowledged this reservation
+  is_reconfirmed?: boolean; // New Checkbox
+  is_admin_checked?: boolean; // Admin acknowledged this reservation
   status: ReservationStatus;
   order_id?: string;
   receipt_date: string; // YYYY-MM-DD
