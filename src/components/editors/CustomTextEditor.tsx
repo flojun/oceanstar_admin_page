@@ -1,6 +1,7 @@
 import React, { useRef, useLayoutEffect, useState, useEffect } from "react";
 import { RenderEditCellProps } from "react-data-grid";
 import { smartParseRow } from "@/lib/smartParser";
+import { cn } from "@/lib/utils";
 
 interface CustomTextEditorProps {
     row: any;
@@ -11,6 +12,7 @@ interface CustomTextEditorProps {
     isSelected?: boolean;
     onNavigate?: (action: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' | 'TAB' | 'ENTER' | 'SHIFT_TAB') => void;
     className?: string;
+    textAlign?: 'left' | 'center' | 'right';
 }
 
 /**
@@ -32,7 +34,8 @@ export default function CustomTextEditor({
     isAlwaysOn = false,
     isSelected = false,
     onNavigate,
-    className
+    className,
+    textAlign = 'left'
 }: CustomTextEditorProps) {
     const inputRef = useRef<HTMLInputElement>(null);
     const [value, setValue] = useState((row as any)[column.key] ?? "");
@@ -222,12 +225,16 @@ export default function CustomTextEditor({
         >
             {/* Sizer Span: Invisible but dictates width */}
             <span
-                className="col-start-1 row-start-1 px-2 whitespace-pre invisible overflow-hidden"
+                className={cn(
+                    "col-start-1 row-start-1 px-2 whitespace-pre invisible overflow-hidden",
+                    textAlign === 'center' ? 'text-center' : textAlign === 'right' ? 'text-right' : 'text-left'
+                )}
                 style={{
                     font: 'inherit', // Important: Match input font metrics
                     height: '100%',
                     display: 'flex',
                     alignItems: 'center', // Vertical align match
+                    justifyContent: textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start',
                     visibility: 'hidden'
                 }}
                 aria-hidden="true"
@@ -240,11 +247,13 @@ export default function CustomTextEditor({
                 ref={inputRef}
                 value={value}
                 onChange={handleChange}
-                className={`col-start-1 row-start-1 w-full h-full px-2 outline-none text-gray-900 select-text transition-colors duration-75
-                    ${isAlwaysOn
+                className={cn(
+                    "col-start-1 row-start-1 w-full h-full px-2 outline-none text-gray-900 select-text transition-colors duration-75",
+                    textAlign === 'center' ? 'text-center' : textAlign === 'right' ? 'text-right' : 'text-left',
+                    isAlwaysOn
                         ? "border-2 border-transparent focus:border-blue-500 hover:border-gray-300"
                         : "border-2 border-blue-500"
-                    }`}
+                )}
                 style={{
                     // Background needed to cover span and underlying cell content
                     backgroundColor: 'white',

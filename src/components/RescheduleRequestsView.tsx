@@ -5,8 +5,10 @@ import { supabase } from "@/lib/supabase";
 import { Reservation } from "@/types/reservation";
 import { formatDateDisplay } from "@/lib/timeUtils";
 import { Check, X, AlertTriangle, CalendarRange } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function RescheduleRequestsView() {
+    const router = useRouter();
     const [requests, setRequests] = useState<Reservation[]>([]);
     const [loading, setLoading] = useState(true);
     const [processingId, setProcessingId] = useState<string | null>(null);
@@ -80,6 +82,7 @@ export default function RescheduleRequestsView() {
                 alert(`승인 처리되었습니다.\n\n(발송 예정 스니펫)\n${data.notificationTriggered}`);
                 // Remove from local list to trigger UI update instantly
                 setRequests(prev => prev.filter(r => r.id !== selectedReservation.id));
+                window.dispatchEvent(new Event("reservation_status_changed"));
                 setIsModalOpen(false);
             }
 
@@ -112,46 +115,28 @@ export default function RescheduleRequestsView() {
                 {requests.map((request) => {
                     const parsed = parseNoteForChanges(request.note);
                     return (
-                        <div key={request.id} className="bg-white border-l-4 border-blue-500 rounded shadow-sm p-4 flex items-center justify-between transition-all hover:shadow-md">
-                            <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-700">변경요청</span>
-                                    <span className="font-bold text-lg text-gray-800">{request.name}</span>
-                                    <span className="text-sm text-gray-500">({request.source})</span>
-                                </div>
-                                <div className="flex gap-4 text-sm text-gray-600 mb-2">
-                                    <div>
-                                        <span className="font-semibold text-gray-400 mr-1">기존 예약일:</span>
-                                        <span className="line-through text-gray-400">{formatDateDisplay(request.tour_date)}</span>
-                                        <span className="mx-2 text-blue-500 font-bold">➜</span>
-                                        <span className="font-bold text-blue-600">{formatDateDisplay(parsed.date)}</span>
-                                    </div>
-                                </div>
-                                <div className="flex gap-4 text-sm text-gray-600">
-                                    <div>
-                                        <span className="font-semibold text-gray-400 mr-1">인원:</span>
-                                        {request.pax}
-                                    </div>
-                                    <div>
-                                        <span className="font-semibold text-gray-400 mr-1">연락처:</span>
-                                        {request.contact}
-                                    </div>
-                                </div>
-                                {request.note && (
-                                    <div className="mt-2 text-sm text-gray-500 bg-gray-50 p-2 rounded whitespace-pre-wrap">
-                                        <span className="mr-1">📝</span> {request.note}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="flex items-center gap-2 ml-4">
-                                <button
-                                    onClick={() => openProcessModal(request)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-md font-bold hover:bg-blue-200 transition-colors"
-                                >
-                                    <CalendarRange className="w-5 h-5" />
-                                    변경 내용 확인 및 승인
-                                </button>
+                        <div 
+                            key={request.id} 
+                            onClick={() => openProcessModal(request)}
+                            className="bg-white rounded-lg border border-gray-100 px-3 py-2 hover:bg-gray-50 transition-colors text-sm flex items-start gap-2 cursor-pointer group"
+                        >
+                            <button
+                                onClick={(e) => { e.stopPropagation(); openProcessModal(request); }}
+                                className="shrink-0 text-gray-300 group-hover:text-blue-500 transition-colors mt-0.5"
+                                title="변경 승인"
+                            >
+                                <CalendarRange className="w-4 h-4" />
+                            </button>
+                            <div className="min-w-0 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                <span className="font-bold text-gray-900">{request.name}</span>
+                                <span className="text-[11px] px-1.5 py-0.5 rounded font-medium bg-blue-50 text-blue-700">변경요청</span>
+                                <span className="text-[11px] text-gray-400">{request.source}</span>
+                                <span className="text-xs text-gray-500 line-through">{formatDateDisplay(request.tour_date)}</span>
+                                <span className="text-blue-500 font-bold text-xs">➜</span>
+                                <span className="font-bold text-blue-600 text-xs">{formatDateDisplay(parsed.date)}</span>
+                                <span className="text-xs text-gray-500">{request.pax}</span>
+                                <span className="text-xs text-gray-400 truncate max-w-[120px]" title={parsed.pickup}>{parsed.pickup}</span>
+                                <span className="text-xs text-gray-400 truncate max-w-[100px]" title={request.contact}>{request.contact}</span>
                             </div>
                         </div>
                     );

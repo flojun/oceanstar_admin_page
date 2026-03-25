@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import NotificationBell from "@/components/NotificationBell";
+import AlertBadge from "@/components/AlertBadge";
+import ReservationToast from "@/components/ReservationToast";
 
 type SidebarItem =
     | { name: string; href: string; icon: React.ComponentType<{ className?: string }>; children?: undefined }
@@ -37,6 +39,7 @@ type SidebarItem =
 
 const SIDEBAR_ITEMS: SidebarItem[] = [
     { name: "홈", href: "/dashboard/home", icon: LayoutDashboard },
+    { name: "알림", href: "/dashboard/alerts", icon: Bell },
     { name: "명단보기", href: "/dashboard/list", icon: ListChecks },
     { name: "차량용 명단", href: "/dashboard/vehicle", icon: Car },
     { name: "캘린더", href: "/dashboard/monthly", icon: Calendar },
@@ -249,13 +252,18 @@ function AdminSidebar({
                                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                                 )}
                             >
-                                <item.icon className={cn("w-5 h-5 shrink-0", isActive ? "text-blue-600" : "text-gray-400")} />
+                                <span className="relative">
+                                    <item.icon className={cn("w-5 h-5 shrink-0", isActive ? "text-blue-600" : "text-gray-400")} />
+                                    {isCollapsed && item.href === "/dashboard/alerts" && <AlertBadge />}
+                                </span>
 
                                 {!isCollapsed && (
                                     <span className="whitespace-nowrap">
                                         {item.name}
                                     </span>
                                 )}
+
+                                {!isCollapsed && item.href === "/dashboard/alerts" && <AlertBadge />}
 
                                 {/* Tooltip for collapsed mode */}
                                 {isCollapsed && (
@@ -342,6 +350,7 @@ export default function AdminLayout({
         <div className="flex h-screen bg-gray-50 overflow-hidden">
             <UnsavedChangesProvider>
                 <AdminSidebar isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
+                <ReservationToast />
                 <main className="flex-1 overflow-auto flex flex-col min-w-0">
                     <div className="flex-1 p-4 md:p-8 max-w-[1600px] 2xl:max-w-[2200px] mx-auto w-full">
                         {children}

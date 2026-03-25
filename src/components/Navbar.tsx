@@ -4,9 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useUnsavedChanges } from "@/components/providers/UnsavedChangesProvider";
+import AlertBadge from "@/components/AlertBadge";
 
 const TABS = [
     { name: "홈", href: "/dashboard/home" },
+    { name: "알림", href: "/dashboard/alerts" },
     { name: "명단보기", href: "/dashboard/list" },
     { name: "차량용 명단", href: "/dashboard/vehicle" },
     { name: "캘린더", href: "/dashboard/monthly" },
@@ -27,18 +29,20 @@ export default function Navbar() {
                     <nav className="hidden space-x-2 md:flex">
                         {TABS.map((tab) => {
                             const isActive = pathname === tab.href;
+                            const isAlertTab = tab.href === "/dashboard/alerts";
                             return (
                                 <button
                                     key={tab.href}
                                     onClick={() => handleNavigationAttempt(tab.href)}
                                     className={cn(
-                                        "rounded-full px-4 py-1.5 text-sm font-bold transition-all duration-200",
+                                        "relative rounded-full px-4 py-1.5 text-sm font-bold transition-all duration-200",
                                         isActive
                                             ? "bg-blue-600 text-white shadow-md shadow-blue-200"
                                             : "bg-transparent text-blue-400 hover:bg-blue-50 hover:text-blue-700"
                                     )}
                                 >
                                     {tab.name}
+                                    {isAlertTab && <AlertBadge />}
                                 </button>
                             );
                         })}
@@ -51,18 +55,20 @@ export default function Navbar() {
             <div className="flex overflow-x-auto border-t border-blue-50 px-4 py-3 md:hidden space-x-2 bg-blue-50/50">
                 {TABS.map((tab) => {
                     const isActive = pathname === tab.href;
+                    const isAlertTab = tab.href === "/dashboard/alerts";
                     return (
                         <button
                             key={tab.href}
                             onClick={() => handleNavigationAttempt(tab.href)}
                             className={cn(
-                                "whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-bold transition-all",
+                                "relative whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-bold transition-all",
                                 isActive
                                     ? "bg-blue-600 text-white shadow-sm"
                                     : "bg-white text-blue-400 hover:bg-blue-50"
                             )}
                         >
                             {tab.name}
+                            {isAlertTab && <AlertBadge />}
                         </button>
                     );
                 })}

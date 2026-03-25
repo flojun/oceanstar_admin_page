@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Loader2, MapPin, Calendar, Info } from "lucide-react";
+import { Loader2, MapPin, Calendar, Info, AlertTriangle } from "lucide-react";
 import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 import { findClosestPickup, PickupLocation, getWalkingMinutes } from '@/lib/utils';
 import { DayPicker } from "react-day-picker";
@@ -19,7 +19,9 @@ export default function ManageBookingPage() {
 
   // Step 4: Cancellation Modal States
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false);
   const [hasAgreedToPolicy, setHasAgreedToPolicy] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   // Step 5: Rescheduling States
   const [isRescheduling, setIsRescheduling] = useState(false);
@@ -101,17 +103,29 @@ export default function ManageBookingPage() {
   }, [isRescheduling, currentMonth, fetchAvailability, tourData?.tourId]);
 
 
-  // 3일(72시간) 룰 계산 (오늘 날짜 vs 기존 투어 날짜)
-  const calculateDaysUntilTour = (tourDate: Date) => {
-    if (!tourDate) return 0;
-    const today = new Date();
-    const diffTime = tourDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+  // 하와이 시각 기준 D-Day 계산
+  const calculateDaysUntilTour = (tourDateStr: string) => {
+    if (!tourDateStr) return 0;
+    
+    // 현재 하와이 시각의 '연-월-일'
+    const hawaiiNow = new Date(new Date().toLocaleString("en-US", { timeZone: "Pacific/Honolulu" }));
+    const todayHawaii = new Date(hawaiiNow.getFullYear(), hawaiiNow.getMonth(), hawaiiNow.getDate());
+    
+    // 구분자 상관없이 숫자 연,월,일 추출
+    const digits = tourDateStr.match(/\d+/g);
+    if (!digits || digits.length < 3) return 0;
+
+    const y = parseInt(digits[0], 10);
+    const m = parseInt(digits[1], 10);
+    const d = parseInt(digits[2], 10);
+
+    const targetHawaii = new Date(y, m - 1, d);
+    
+    const diffTime = targetHawaii.getTime() - todayHawaii.getTime();
+    return Math.round(diffTime / (1000 * 60 * 60 * 24));
   };
 
-  const daysUntilTour = tourData ? calculateDaysUntilTour(tourData.tourDate) : 0;
-  const isRescheduleAvailable = daysUntilTour > 3;
+  const daysUntilTour = tourData ? calculateDaysUntilTour(tourData.tourDateStr) : 0;
 
   // 하와이 시간 기준 취소 규정용 룰 계산
   const calculateHoursUntilTour = (tourDate: Date) => {
@@ -135,11 +149,14 @@ export default function ManageBookingPage() {
   const hoursUntilTour = tourData ? calculateHoursUntilTour(tourData.tourDate) : 0;
   
   let refundStatus = 2; // 0% (2인 이내 및 당일)
-  if (hoursUntilTour >= 7 * 24) { // >= 168 hours
+  if (hoursUntilTour >= 168) { // >= 7 days
       refundStatus = 0; // 100%
-  } else if (hoursUntilTour >= 3 * 24) { // >= 72 hours
+  } else if (hoursUntilTour >= 72) { // >= 3 days
       refundStatus = 1; // 50%
   }
+
+  // 7일(168시간) 전까지만 셀프 일정 변경 가능 (하와이 시간 기준)
+  const isRescheduleAvailable = hoursUntilTour >= 168;
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,15 +195,21 @@ export default function ManageBookingPage() {
 
         const pickupLoc = reservation.pickup_location || '';
         
+        // 날짜 파싱 오차(UTC 변환 이슈) 방지
+        const [y, m, d] = reservation.tour_date.split('-').map(Number);
+        const correctLocalDate = new Date(y, m - 1, d);
+        
         setTourData({
             tourId,
-            tourDate: new Date(reservation.tour_date),
+            tourDate: correctLocalDate, // Keeps exact local date
+            tourDateStr: reservation.tour_date, // Raw string 'YYYY-MM-DD' for accurate math
             tourName: tourName,
             guests: parsedGuests,
             hotelName: pickupLoc,
             pickupLocation: pickupLoc,
             pickupTime: "안내됨",
-            status: reservation.status
+            status: reservation.status,
+            name: reservation.name
         });
         
         const matchedPick = pickupLocations.find(l => l.name === pickupLoc);
@@ -194,8 +217,8 @@ export default function ManageBookingPage() {
              setClosestPickup({ location: matchedPick, minutes: 0 });
         }
         
-        setNewTourDate(new Date(reservation.tour_date));
-        setCurrentMonth(new Date(reservation.tour_date));
+        setNewTourDate(correctLocalDate);
+        setCurrentMonth(correctLocalDate);
         setCustomHotelName(pickupLoc);
 
         setIsVerified(true);
@@ -207,9 +230,40 @@ export default function ManageBookingPage() {
     }
   };
 
-  const handleFinalCancel = () => {
-    alert("예약이 취소되었습니다.");
-    setShowCancelModal(false);
+  const handleFinalCancel = async () => {
+    if (!tourData?.name) {
+        alert("예약자명 정보가 누락되었습니다. 새로고침 후 다시 시도해주세요.");
+        return;
+    }
+    
+    setIsCancelling(true);
+    try {
+        const res = await fetch('/api/cancel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                order_id: resNumber,
+                booker_name: tourData.name,
+                reason: "고객 홈페이지 직접 취소 접수"
+            })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+            alert(`취소 요청 실패: ${data.error}`);
+        } else {
+            alert("취소 요청이 접수되었습니다. 관리자 확인 후 처리됩니다.");
+            setShowFinalConfirmModal(false);
+            setShowCancelModal(false);
+            setTourData((prev: any) => prev ? { ...prev, status: '취소요청' } : prev);
+        }
+    } catch (e) {
+        console.error(e);
+        alert("통신 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+        setIsCancelling(false);
+    }
   };
 
   const formatTimeAMPM = (timeString: string | null | undefined) => {
@@ -314,10 +368,11 @@ export default function ManageBookingPage() {
               </div>
 
               {/* CRITICAL UI TEXT 2 */}
-              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-8 text-sm text-blue-800 flex items-start shadow-sm">
-                <span className="text-xl mr-2">☕</span>
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-8 text-sm text-blue-800 flex items-start shadow-sm break-keep">
+                <span className="text-xl mr-2">⏳</span>
                 <p className="leading-relaxed">
-                  <span className="font-bold">안내:</span> 저희 투어는 커피, 물, 녹차 무한제공이며 컵라면도 공통으로 제공됨을 안내해 드립니다.
+                  <span className="font-bold shrink-0">안내:</span> 투어 일정 변경은 여행일 기준 7일 전까지만 셀프로 가능합니다. <br />
+                  <span className="text-xs opacity-90 mt-1 block">(여행일 7일 이내인 경우 카카오톡 비즈니스 채널로 문의 부탁드립니다)</span>
                 </p>
               </div>
 
@@ -333,7 +388,7 @@ export default function ManageBookingPage() {
                     </button>
                   ) : (
                     <button className="w-full bg-white text-gray-700 border-2 border-gray-300 font-semibold py-3 px-4 rounded-xl flex justify-center items-center hover:bg-gray-50 transition duration-200">
-                      <span>💬 일정 변경은 고객센터로 문의해주세요</span>
+                      <span>💬 일정 변경은 카카오톡 채널로 문의해주세요</span>
                     </button>
                   )}
 
@@ -558,15 +613,56 @@ export default function ManageBookingPage() {
                   돌아가기
                 </button>
                 <button 
-                  onClick={handleFinalCancel}
-                  disabled={!hasAgreedToPolicy}
-                  className={`flex-1 font-bold py-3.5 rounded-xl transition duration-200 ${
-                    hasAgreedToPolicy 
+                  onClick={() => setShowFinalConfirmModal(true)}
+                  disabled={!hasAgreedToPolicy || isCancelling}
+                  className={`flex-1 font-bold py-3.5 rounded-xl transition duration-200 flex justify-center items-center gap-2 ${
+                    hasAgreedToPolicy && !isCancelling
                     ? "bg-red-600 hover:bg-red-700 text-white shadow-md" 
                     : "bg-red-200 text-red-400 cursor-not-allowed"
                   }`}
                 >
-                  최종 취소 확정
+                  {isCancelling ? <Loader2 className="w-5 h-5 animate-spin" /> : "취소하기"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Step 4.5: Final Confirm Modal */}
+      {showFinalConfirmModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden animate-in zoom-in-95">
+            <div className="p-6 text-center">
+              <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-gray-900 mb-2">최종 취소 확인</h3>
+              
+              <div className="bg-red-50 p-4 rounded-xl text-sm mb-6 border border-red-100">
+                <p className="font-bold text-red-800 mb-2">현재 고객님 적용 취소 규정:</p>
+                <div className="font-bold text-red-600 text-base bg-white py-2 px-1 rounded shadow-sm border border-red-200 break-keep">
+                    {refundStatus === 0 ? "7일 전 접수 (100% 환불 가능)" : 
+                     refundStatus === 1 ? "6~3일 전 접수 (50% 공제 후 환불)" : 
+                     "2일 이내 및 당일 접수 (취소/환불 불가)"}
+                </div>
+                <p className="mt-3 text-xs text-red-500 font-medium">※ 하와이 현지 시각 기준으로 계산되었습니다.</p>
+              </div>
+
+              <p className="text-gray-600 text-sm mb-6">정말로 예약을 취소하시겠습니까?<br/>이 작업은 되돌릴 수 없습니다.</p>
+
+              <div className="flex space-x-3">
+                <button 
+                  onClick={() => setShowFinalConfirmModal(false)}
+                  className="flex-1 bg-gray-200 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-300 transition"
+                  disabled={isCancelling}
+                >
+                  아니오
+                </button>
+                <button 
+                  onClick={handleFinalCancel}
+                  disabled={isCancelling}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white shadow-md font-bold py-3.5 rounded-xl transition duration-200 flex justify-center items-center gap-2 disabled:opacity-50"
+                >
+                  {isCancelling ? <Loader2 className="w-5 h-5 animate-spin" /> : "최종 취소 확정"}
                 </button>
               </div>
             </div>

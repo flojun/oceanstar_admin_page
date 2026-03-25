@@ -4,7 +4,9 @@ export interface Reservation {
   id: string;
   created_at: string;
   is_reconfirmed: boolean; // New Checkbox
+  is_admin_checked: boolean; // Admin acknowledged this reservation
   status: ReservationStatus;
+  order_id?: string;
   receipt_date: string; // YYYY-MM-DD
   source: string;
   name: string;
@@ -21,6 +23,8 @@ export interface Reservation {
   vehicle_order?: number;
   // Admin fields
   agency_id?: string | null;
+  expected_refund?: number | null;
+  currency?: string;
 
   // UI/Transient fields
   isNew?: boolean;

@@ -33,11 +33,11 @@ export default function HomePage() {
     const fetchCounts = async () => {
         setLoading(true);
         try {
-            // Fetch '예약대기' count
+            // Fetch unchecked (new) reservations count
             const { count: waiting, error: waitingError } = await supabase
                 .from('reservations')
                 .select('*', { count: 'exact', head: true })
-                .eq('status', '예약대기');
+                .eq('is_admin_checked', false);
 
             if (waitingError) throw waitingError;
 

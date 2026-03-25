@@ -74,6 +74,18 @@ const fullHeightGridStyle = `
   }
 `;
 
+const highlightFlashStyle = `
+  @keyframes highlight-flash {
+    0%, 100% { background-color: transparent; }
+    25% { background-color: #fef08a; }
+    50% { background-color: transparent; }
+    75% { background-color: #fef08a; }
+  }
+  .rdg-row.highlight-row .rdg-cell {
+    animation: highlight-flash 2s ease-in-out;
+  }
+`;
+
 const parsePax = (str: string): number => {
     if (!str) return 0;
     const num = parseInt(str.toString().replace(/[^0-9]/g, ''), 10);
@@ -92,12 +104,15 @@ function AllReservationsContent() {
     const [activeTab, setActiveTab] = useState<'input' | 'cancellation' | 'reschedule'>(initialView);
 
     // Update activeTab when searchParams change (if navigating within same page)
+    const highlightId = searchParams.get('highlight');
     useEffect(() => {
         const view = searchParams.get('view');
         if (view === 'cancellation') {
             setActiveTab('cancellation');
         } else if (view === 'input') {
             setActiveTab('input');
+        } else if (view === 'reschedule') {
+            setActiveTab('reschedule');
         }
     }, [searchParams]);
 
@@ -207,6 +222,20 @@ function AllReservationsContent() {
             setHistoryIndex(0);
         }
     }, [loading, rows.length]); // Depend on rows.length to capture initial load
+
+    // Scroll to highlighted row from ?highlight=ID
+    useEffect(() => {
+        if (!highlightId || loading || rows.length === 0) return;
+        const rowIdx = rows.findIndex(r => r.id === highlightId);
+        if (rowIdx >= 0 && gridRef.current) {
+            // Ensure we're on the input tab to see the grid
+            setActiveTab('input');
+            // Small delay to let the grid render
+            setTimeout(() => {
+                gridRef.current?.scrollToCell({ rowIdx, idx: 0 });
+            }, 300);
+        }
+    }, [highlightId, loading, rows.length]);
 
     const handleUndo = useCallback(() => {
         if (historyIndex > 0) {
@@ -1232,6 +1261,7 @@ function AllReservationsContent() {
                         {...props}
                         isAlwaysOn={true}
                         isSelected={isSelected}
+                        textAlign="center"
                         onRowChange={(newRow: any) => handleSingleRowChangeDirect(newRow)}
                         onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
                     />
@@ -1447,8 +1477,11 @@ function AllReservationsContent() {
     }, [rangeSelection, columns]);
 
     const rowClass = (row: any) => {
-        if (row.isNew) return "bg-blue-50/50";
-        return row.status === "취소" ? "bg-red-50 text-gray-400 line-through" : "";
+        const classes: string[] = [];
+        if (row.isNew) classes.push("bg-blue-50/50");
+        if (row.status === "취소") classes.push("bg-red-50 text-gray-400 line-through");
+        if (highlightId && row.id === highlightId) classes.push("highlight-row");
+        return classes.join(" ");
     };
 
     // Filter rows based on search
@@ -1718,7 +1751,7 @@ function AllReservationsContent() {
                         </div>
                     ) : (
                         <>
-                            <style>{fullHeightGridStyle}</style>
+                            <style>{fullHeightGridStyle}{highlightFlashStyle}</style>
                             <DataGrid
                                 ref={gridRef}
                                 defaultColumnOptions={{ resizable: true }}

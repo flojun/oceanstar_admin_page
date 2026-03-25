@@ -5,8 +5,10 @@ import { supabase } from "@/lib/supabase";
 import { Reservation } from "@/types/reservation";
 import { formatDateDisplay } from "@/lib/timeUtils";
 import { Check, X, AlertTriangle, DollarSign } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function CancellationRequestsView() {
+    const router = useRouter();
     const [requests, setRequests] = useState<Reservation[]>([]);
     const [loading, setLoading] = useState(true);
     const [processingId, setProcessingId] = useState<string | null>(null);
@@ -39,7 +41,16 @@ export default function CancellationRequestsView() {
 
     const openProcessModal = (reservation: Reservation) => {
         setSelectedReservation(reservation);
-        setRefundAmount(""); // Default to empty or calculate logic later
+        
+        let defaultAmount = "";
+        if (reservation.expected_refund != null) {
+            const amountNum = Number(reservation.expected_refund);
+            defaultAmount = reservation.currency === 'USD' 
+                ? amountNum.toFixed(2) 
+                : Math.floor(amountNum).toString();
+        }
+
+        setRefundAmount(defaultAmount);
         setRefundReason("고객 요청으로 인한 취소");
         setIsModalOpen(true);
     };
@@ -57,7 +68,8 @@ export default function CancellationRequestsView() {
         try {
             // Update status to '취소' and append note
             const currentNote = selectedReservation.note || "";
-            const newNote = `${currentNote} [취소처리: ${new Date().toLocaleDateString()} / 환불: ${refundAmount || '0'}원 / 사유: ${refundReason}]`.trim();
+            const currencySymbol = selectedReservation.currency === 'USD' ? '$' : '₩';
+            const newNote = `${currentNote} [취소처리: ${new Date().toLocaleDateString()} / 환불: ${currencySymbol}${refundAmount || '0'} / 사유: ${refundReason}]`.trim();
 
             const { error } = await supabase
                 .from("reservations")
@@ -70,6 +82,7 @@ export default function CancellationRequestsView() {
             if (error) throw error;
 
             alert("취소 처리가 완료되었습니다.");
+            window.dispatchEvent(new Event("reservation_status_changed"));
         } catch (error) {
             console.error("Error processing cancellation:", error);
             alert("처리 중 오류가 발생했습니다.");
@@ -99,41 +112,40 @@ export default function CancellationRequestsView() {
             <h2 className="text-lg font-bold text-gray-700 mb-4">취소 요청 목록 ({requests.length}건)</h2>
             <div className="grid gap-4">
                 {requests.map((request) => (
-                    <div key={request.id} className="bg-white border-l-4 border-orange-500 rounded shadow-sm p-4 flex items-center justify-between transition-all hover:shadow-md">
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                                <span className="px-2 py-0.5 rounded text-xs font-bold bg-orange-100 text-orange-700">취소요청</span>
-                                <span className="font-bold text-lg text-gray-800">{request.name}</span>
-                                <span className="text-sm text-gray-500">({request.source})</span>
+                    <div 
+                        key={request.id} 
+                        onClick={() => openProcessModal(request)}
+                        className="bg-white rounded-lg border border-gray-100 p-3 hover:bg-gray-50 transition-colors text-sm flex flex-col gap-2 cursor-pointer group"
+                    >
+                        {/* Top Row */}
+                        <div className="flex items-start gap-2">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); openProcessModal(request); }}
+                                className="shrink-0 text-gray-300 group-hover:text-orange-500 transition-colors mt-0.5"
+                                title="취소 처리"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                            <div className="min-w-0 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                <span className="font-bold text-gray-900">{request.name}</span>
+                                <span className="text-[11px] px-1.5 py-0.5 rounded font-medium bg-orange-50 text-orange-600">취소요청</span>
+                                <span className="text-[11px] text-gray-400">{request.source}</span>
+                                <span className="text-xs text-gray-500">{formatDateDisplay(request.tour_date)}</span>
+                                <span className="text-xs text-gray-500">{request.pax}</span>
+                                <span className="text-xs text-gray-400 truncate max-w-[120px]" title={request.contact}>{request.contact}</span>
                             </div>
-                            <div className="flex gap-4 text-sm text-gray-600">
-                                <div>
-                                    <span className="font-semibold text-gray-400 mr-1">예약일:</span>
-                                    {formatDateDisplay(request.tour_date)}
-                                </div>
-                                <div>
-                                    <span className="font-semibold text-gray-400 mr-1">인원:</span>
-                                    {request.pax}
-                                </div>
-                                <div>
-                                    <span className="font-semibold text-gray-400 mr-1">연락처:</span>
-                                    {request.contact}
-                                </div>
-                            </div>
-                            {request.note && (
-                                <div className="mt-2 text-sm text-gray-500 bg-gray-50 p-2 rounded">
-                                    <span className="mr-1">📝</span> {request.note}
-                                </div>
-                            )}
                         </div>
 
-                        <div className="flex items-center gap-2 ml-4">
+                        {/* Bottom Row */}
+                        <div className="flex flex-row items-center justify-between ml-6 pl-2 border-l-2 border-gray-100 mt-1 gap-2">
+                            <span className="text-xs text-gray-500 line-clamp-2 leading-relaxed" title={request.note || "기타 사유 없음"}>
+                                <span className="mr-1">📝</span> {request.note || "기타 사유 없음"}
+                            </span>
                             <button
-                                onClick={() => openProcessModal(request)}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-md font-bold hover:bg-red-200 transition-colors"
+                                onClick={(e) => { e.stopPropagation(); openProcessModal(request); }}
+                                className="shrink-0 text-[11px] font-bold px-2.5 py-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors flex items-center gap-1"
                             >
-                                <DollarSign className="w-4 h-4" />
-                                취소 및 환불 처리
+                                취소 처리
                             </button>
                         </div>
                     </div>
@@ -151,15 +163,34 @@ export default function CancellationRequestsView() {
                             </h3>
                         </div>
                         <div className="p-6 space-y-4">
-                            <div className="bg-gray-50 p-3 rounded text-sm">
-                                <p><span className="font-bold">예약자:</span> {selectedReservation.name}</p>
-                                <p><span className="font-bold">예약일:</span> {selectedReservation.tour_date}</p>
+                            <div className="bg-gray-50 p-4 rounded text-sm space-y-1.5 border border-gray-100">
+                                <div className="flex items-center justify-between mb-1">
+                                    <p><span className="font-bold w-20 inline-block text-gray-500">예약자:</span> <span className="font-semibold text-gray-900">{selectedReservation.name}</span></p>
+                                    {selectedReservation.order_id && (
+                                        <p><span className="font-bold text-gray-500">예약 번호:</span> <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-gray-200">{selectedReservation.order_id}</span></p>
+                                    )}
+                                </div>
+                                <p><span className="font-bold w-20 inline-block text-gray-500">예약일:</span> {selectedReservation.tour_date}</p>
+                                <p><span className="font-bold w-20 inline-block text-gray-500">인원수:</span> {selectedReservation.pax}</p>
+                                <p><span className="font-bold w-20 inline-block text-gray-500">옵션:</span> {selectedReservation.option}</p>
+                                <p className="flex items-start">
+                                    <span className="font-bold w-20 shrink-0 inline-block text-gray-500">픽업장소:</span> 
+                                    <span className="break-words">{selectedReservation.pickup_location}</span>
+                                </p>
+                                {selectedReservation.note && (
+                                    <div className="mt-3 pt-3 border-t border-gray-200">
+                                        <p className="font-bold text-gray-500 mb-1.5">기타 정보 / 진행 상황:</p>
+                                        <p className="whitespace-pre-wrap text-gray-600 leading-relaxed text-xs p-2.5 bg-white rounded border border-gray-200">{selectedReservation.note}</p>
+                                    </div>
+                                )}
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">환불 예정 금액 (선택사항)</label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">₩</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">
+                                        {selectedReservation.currency === 'USD' ? '$' : '₩'}
+                                    </span>
                                     <input
                                         type="text"
                                         value={refundAmount}

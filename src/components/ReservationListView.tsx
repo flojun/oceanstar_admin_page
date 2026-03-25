@@ -15,6 +15,16 @@ import { ko } from "date-fns/locale";
 import type { TourSetting } from "@/lib/tourUtils";
 import { getFilterTabs } from "@/lib/tourUtils";
 
+const getShortTabName = (name: string) => {
+    if (!name) return "";
+    if (name === "전체") return name;
+    if (name.includes("1부")) return "1부";
+    if (name.includes("2부")) return "2부";
+    if (name.includes("3부") || name.includes("선셋 거북이")) return "3부";
+    if (name.includes("프라이빗")) return "프라이빗";
+    return name;
+};
+
 type ViewMode = 'today' | 'reconfirm' | 'custom';
 
 interface ReservationListViewProps {
@@ -203,7 +213,7 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
                         className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none bg-white font-semibold text-gray-700"
                     >
                         {tabs.map((tab) => (
-                            <option key={tab} value={tab}>{tab}</option>
+                            <option key={tab} value={tab}>{getShortTabName(tab)}</option>
                         ))}
                     </select>
                 </div>
@@ -221,7 +231,7 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
                                     : "bg-white text-gray-600 hover:bg-blue-50 border border-gray-200"
                             )}
                         >
-                            {tab}
+                            {getShortTabName(tab)}
                         </button>
                     ))}
                 </div>
@@ -403,7 +413,7 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
                                 <div key={groupName} className="p-4">
                                     <h3 className="mb-3 text-lg font-bold text-blue-800 flex items-center gap-2">
                                         <span className="w-2 h-6 bg-blue-500 rounded-sm inline-block"></span>
-                                        {groupName}
+                                        {getShortTabName(groupName)}
                                         <span className="text-sm font-bold text-black bg-gray-50 px-2 py-0.5 rounded-full border border-gray-200">
                                             총 {calculateTotalPax(items)}명
                                         </span>
@@ -427,7 +437,7 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
                         <div className="p-4 border-b border-gray-100">
                             <h3 className="text-lg font-bold text-blue-800 flex items-center gap-2">
                                 <span className="w-2 h-6 bg-blue-500 rounded-sm inline-block"></span>
-                                {activeTab}
+                                {getShortTabName(activeTab)}
                                 <span className="text-sm font-bold text-black bg-gray-50 px-2 py-0.5 rounded-full border border-gray-200">
                                     총 {calculateTotalPax(filteredData)}명
                                 </span>
@@ -466,7 +476,7 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
                                                 <div key={groupName} className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
                                                     <h3 className="mb-3 text-lg font-bold text-blue-800 flex items-center gap-2">
                                                         <span className="w-2 h-6 bg-blue-500 rounded-sm inline-block"></span>
-                                                        {groupName}
+                                                        {getShortTabName(groupName)}
                                                         <span className="text-sm font-bold text-black bg-gray-50 px-2 py-0.5 rounded-full border border-gray-200">
                                                             총 {calculateTotalPax(items)}명
                                                         </span>
@@ -491,7 +501,7 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
                                         <div className="mb-3">
                                             <h3 className="text-lg font-bold text-blue-800 flex items-center gap-2">
                                                 <span className="w-2 h-6 bg-blue-500 rounded-sm inline-block"></span>
-                                                {activeTab}
+                                                {getShortTabName(activeTab)}
                                                 <span className="text-sm font-bold text-black bg-gray-50 px-2 py-0.5 rounded-full border border-gray-200">
                                                     총 {calculateTotalPax(filteredData)}명
                                                 </span>

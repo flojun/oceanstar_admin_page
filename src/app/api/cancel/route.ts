@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { differenceInHours } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 export async function POST(req: Request) {
     try {
@@ -16,7 +18,7 @@ export async function POST(req: Request) {
         // 1. 예약 조회 (주문번호와 예약자명 동시 일치 검증)
         const { data: reservation, error: fetchError } = await supabase
             .from('reservations')
-            .select('id, status, name, note')
+            .select('id, status, name, note, tour_date, total_price, currency')
             .eq('order_id', normalizedOrderId)
             .ilike('name', normalizedBookerName)
             .single();
@@ -37,13 +39,48 @@ export async function POST(req: Request) {
             }, { status: 400 });
         }
 
-        // 3. 상태 업데이트 ('취소요청')
+        // 3. 환불 금액 및 상태 업데이트 ('취소요청')
+        let expectedRefund = null;
+        let diffHours = 0;
+        let refundPhrase = "취소/환불 불가 (2일 이내 및 당일)";
+
+        if (reservation.tour_date && typeof reservation.total_price === 'number') {
+            const hawaiiTimeZone = 'Pacific/Honolulu';
+            const now = new Date();
+            const nowHawaii = toZonedTime(now, hawaiiTimeZone); // 현재 하와이 벽시계 시간
+            
+            const [y, m, d] = reservation.tour_date.split('-').map(Number);
+            const tourStartHawaii = new Date(y, m - 1, d, 0, 0, 0); // 투어 당일 00:00
+
+            diffHours = differenceInHours(tourStartHawaii, nowHawaii);
+
+            let refundRate = 0;
+            if (diffHours >= 168) { // 7일 전 (24 * 7)
+                refundRate = 1;
+                refundPhrase = "전액 환불 (7일 전 접수)";
+            } else if (diffHours >= 72) { // 3일 전 (24 * 3)
+                refundRate = 0.5;
+                refundPhrase = "50% 공제 후 환불 (6~3일 전 접수)";
+            }
+
+            // 부동소수점 오차 방지 (센트 단위 반올림 후 저장)
+            expectedRefund = Math.round(reservation.total_price * refundRate * 100) / 100;
+        }
+
         const reasonText = reason ? `\n\n[고객 취소 사유]\n${reason}` : '';
-        const newNote = (reservation.note || '') + reasonText;
+        const systemCalcText = expectedRefund !== null 
+            ? `\n\n[시스템 자동 계산]\n취소시점: 하와이 투어까지 ${diffHours}시간 전\n적용규정: ${refundPhrase}` 
+            : '';
+            
+        const newNote = (reservation.note || '') + reasonText + systemCalcText;
 
         const { error: updateError } = await supabase
             .from('reservations')
-            .update({ status: '취소요청', note: newNote.trim() })
+            .update({ 
+                status: '취소요청', 
+                note: newNote.trim(),
+                expected_refund: expectedRefund
+            })
             .eq('id', reservation.id);
 
         if (updateError) {
