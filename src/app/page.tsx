@@ -334,7 +334,7 @@ export default function ReservationPage() {
           <div className="flex items-center gap-3">
              <Link 
                 href="/manage-booking"
-                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-5 py-2 rounded-full font-bold text-sm shadow-sm transition-all sm:block hidden">
+                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-4 py-1.5 sm:px-5 sm:py-2 rounded-full font-bold text-xs sm:text-sm shadow-sm transition-all">
                 내 예약 관리
              </Link>
              <button 
@@ -709,9 +709,16 @@ export default function ReservationPage() {
                 </div>
              </div>
 
-             <div className="border-t border-slate-800 mt-12 pt-8 text-center">
-                 <h4 className="text-white font-bold mb-2">대박하와이 (Waikiki Turtle Snorkel)</h4>
-                 <p className="text-slate-500 text-sm">하와이 한인 최초 거북이 스노클링 원조<br/>마이리얼트립 6,500 리뷰 · 구글 5,000 리뷰</p>
+             <div className="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-left">
+                 <div>
+                     <h4 className="text-white font-bold mb-2">대박하와이 (Waikiki Turtle Snorkel)</h4>
+                     <p className="text-slate-500 text-sm">하와이 한인 최초 거북이 스노클링 원조<br/>마이리얼트립 6,500 리뷰 · 구글 5,000 리뷰</p>
+                 </div>
+                 <div className="text-slate-500 text-sm md:text-right space-y-1">
+                     <p><span className="text-slate-400 font-medium">상호명:</span> 알로하 하와이 <span className="mx-2 hidden md:inline">|</span><br className="md:hidden" /> <span className="text-slate-400 font-medium">대표자명:</span> 정칠성</p>
+                     <p><span className="text-slate-400 font-medium">사업자등록번호:</span> 765-23-01629</p>
+                     <p><span className="text-slate-400 font-medium">사업장 소재지:</span> 경기도 안양시 만안구 양화로135번길 29, 3층 일부호(박달동)</p>
+                 </div>
              </div>
           </div>
         </section>
