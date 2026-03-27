@@ -665,8 +665,32 @@ export default function ReservationPage() {
                     <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Mail size={20} className="text-blue-400" /> 하와이 현지 영업시간 안내</h3>
                     <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 max-w-sm">
                         <div className="text-slate-300 font-medium flex items-center gap-3">
-                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs">영업시간</span>
+                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0">영업시간</span>
                             <span className="text-sm">하와이 현지 기준 월~토 09:00~17:00</span>
+                        </div>
+                    </div>
+                 </div>
+                 
+                 <div>
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><MapPin size={20} className="text-blue-400" /> 하와이 주소 및 연락처</h3>
+                    <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 max-w-sm flex flex-col gap-3">
+                        <div className="text-slate-300 font-medium flex items-center gap-3">
+                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0">이메일</span>
+                            <span className="text-sm">hioceanstar@gmail.com</span>
+                        </div>
+                        <div className="text-slate-300 font-medium flex items-start gap-3">
+                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0 mt-0.5">주소</span>
+                            <div className="flex flex-col gap-1.5 pt-0.5">
+                                <span className="text-sm leading-relaxed">1125 Kewalo Basin Harbor, Gate D #110, Honolulu, HI 96814</span>
+                                <a 
+                                    href="https://www.google.com/maps/place/%EC%98%A4%EC%85%98%EC%8A%A4%ED%83%80/@21.2909527,-157.8596751,17.95z/data=!4m6!3m5!1s0x7c006e0714500001:0x42c44e799ee07eac!8m2!3d21.2913542!4d-157.8586971!16s%2Fg%2F11t2p_627w?authuser=0&entry=ttu&g_ep=EgoyMDI2MDMyMy4xIKXMDSoASAFQAw%3D%3D" 
+                                    target="_blank" 
+                                    rel="noreferrer"
+                                    className="text-xs text-blue-400 hover:text-blue-300 underline underline-offset-2 flex items-center gap-1 w-fit transition-colors mt-0.5"
+                                >
+                                    구글 지도로 바로보기 <ChevronRight size={12} />
+                                </a>
+                            </div>
                         </div>
                     </div>
                  </div>
