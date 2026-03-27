@@ -38,7 +38,7 @@ const courseData: TimelineItem[] = [
   },
   {
     title: "선상 보트 다이빙",
-    description: "ONLY 하와이가자 에서만 즐기는 와이키키 터틀 캐니언의 유일한 보트 다이빙, 놓치지 마세요!",
+    description: "ONLY 오션스타 에서만 즐기는 와이키키 터틀 캐니언의 유일한 보트 다이빙, 놓치지 마세요!",
     imgSrc: "/images/timeline/diving_clean.png"
   },
   {
