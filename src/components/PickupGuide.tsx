@@ -33,7 +33,7 @@ export default function PickupGuide() {
                     오션스타 공식 픽업 노선도
                 </h2>
                 <p className="text-base text-slate-500 font-medium">
-                    투어 예약시 호텔주소(혹은 픽업 원하시는주소)를 입력하시면<br className="sm:hidden" /> 가장 가까운 픽업 장소로 배정해드립니다
+                    투어 예약시 호텔주소를 입력하시면<br className="sm:hidden" /> 가장 가까운 픽업 장소로 배정해드립니다
                 </p>
                 <div className="mt-6 flex justify-center">
                     <p className="text-xs sm:text-sm text-slate-600 bg-slate-50 font-bold px-4 py-2 border border-slate-200 rounded-full">

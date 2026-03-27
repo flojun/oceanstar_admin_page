@@ -363,7 +363,7 @@ export default function ReservationPage() {
                Original Hawaii Tour
              </span>
              <h1 className="text-[2.8rem] sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight sm:leading-tight drop-shadow-2xl animate-fade-in-up animation-delay-100 break-keep">
-                하와이 최초!<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">거북이 스노클링 투어,</span><br className="sm:hidden" /><span className="hidden sm:inline"> </span>오션스타★
+                하와이 최초!<br/>거북이 스노클링 투어,<br className="sm:hidden" /><span className="hidden sm:inline"> </span>오션스타★
              </h1>
           </div>
 
@@ -505,21 +505,35 @@ export default function ReservationPage() {
                                   <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
                                   {tour.is_flat_rate ? '원하는 옵션 커스터마이징 가능' : '스노클 장비/구명조끼, 음료/간식'}
                                 </li>
-                                <li className="flex items-start gap-2">
-                                  <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
-                                  <div className="flex flex-col gap-1">
-                                    {tour.is_flat_rate ? (
-                                      <span>인원수 연동 맞춤형 요금 적용</span>
-                                    ) : tour.is_combined ? (
-                                      <>
-                                        <span>1부 08:00 - 11:00</span>
-                                        <span>2부 11:00 - 14:00</span>
-                                      </>
-                                    ) : (
-                                      <span>{isSunset ? '시즌별 시간 변동' : `${tour.start_time?.slice(0,5) || '07:30'} - ${tour.end_time?.slice(0,5) || '14:30'}`}</span>
-                                    )}
-                                  </div>
-                                </li>
+                                {isSunset && (
+                                  <li className="flex items-start gap-2">
+                                    <Check className="text-emerald-500 w-4 h-4 mt-0.5 shrink-0" />
+                                    <span>치즈보드와 와인 제공</span>
+                                  </li>
+                                )}
+                                {tour.is_combined ? (
+                                  <>
+                                    <li className="flex items-start gap-2">
+                                      <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
+                                      <span>1부 08:00 - 11:00</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                      <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
+                                      <span>2부 11:00 - 14:00</span>
+                                    </li>
+                                  </>
+                                ) : (
+                                  <li className="flex items-start gap-2">
+                                    <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
+                                    <div className="flex flex-col gap-1">
+                                      {tour.is_flat_rate ? (
+                                        <span>인원수 연동 맞춤형 요금 적용</span>
+                                      ) : (
+                                        <span>{isSunset ? '시즌별 시간 변동' : `${tour.start_time?.slice(0,5) || '07:30'} - ${tour.end_time?.slice(0,5) || '14:30'}`}</span>
+                                      )}
+                                    </div>
+                                  </li>
+                                )}
                             </ul>
                           </div>
                           <div className={`flex flex-wrap items-end justify-between border-t ${theme.isDark ? 'border-slate-700' : 'border-slate-100'} pt-6 gap-2`}>
@@ -645,7 +659,7 @@ export default function ReservationPage() {
           <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
              <div className="text-center mb-10">
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">취소 및 환불 규정</h2>
-                <p className="text-slate-400">대박하와이 (Waikiki Turtle Snorkel) | 하와이 현지 시간 기준 · 특약 적용 상품</p>
+                <p className="text-slate-400">오션스타 (Waikiki Turtle Snorkel) | 하와이 현지 시간 기준 · 특약 적용 상품</p>
              </div>
              
              <div className="space-y-8 text-sm md:text-base">
@@ -701,7 +715,7 @@ export default function ReservationPage() {
                            <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50">
                                <div className="text-slate-300 font-medium flex items-center gap-3">
                                    <span className="bg-slate-700 px-2 py-1.5 rounded text-xs">영업시간</span>
-                                   <span className="text-sm">하와이 현지 기준 월~금 09:00~17:00</span>
+                                   <span className="text-sm">하와이 현지 기준 월~토 09:00~17:00</span>
                                </div>
                            </div>
                         </div>
@@ -711,7 +725,7 @@ export default function ReservationPage() {
 
              <div className="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-left">
                  <div>
-                     <h4 className="text-white font-bold mb-2">대박하와이 (Waikiki Turtle Snorkel)</h4>
+                     <h4 className="text-white font-bold mb-2">오션스타 (Waikiki Turtle Snorkel)</h4>
                      <p className="text-slate-500 text-sm">하와이 한인 최초 거북이 스노클링 원조<br/>마이리얼트립 6,500 리뷰 · 구글 5,000 리뷰</p>
                  </div>
                  <div className="text-slate-500 text-sm md:text-right space-y-1">
