@@ -668,24 +668,24 @@ export default function ReservationPage() {
                             <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0">영업시간</span>
                             <span className="text-sm">하와이 현지 기준 월~토 09:00~17:00</span>
                         </div>
-                        <div className="flex items-center gap-5 pt-3 mt-1">
+                        <div className="flex items-center gap-8 pt-6 mt-2">
                             <a 
                                 href="https://www.instagram.com/hawaii_turtlesnorkelling/" 
                                 target="_blank" 
                                 rel="noreferrer"
-                                className="transform transition-all duration-300 hover:-translate-y-1 hover:scale-110 drop-shadow-sm hover:drop-shadow-lg"
+                                className="transform transition-all duration-300 hover:-translate-y-2 hover:scale-110 drop-shadow-sm hover:drop-shadow-xl"
                                 title="Instagram"
                             >
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/9/95/Instagram_logo_2022.svg" alt="Instagram" className="w-10 h-10 object-contain" />
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/9/95/Instagram_logo_2022.svg" alt="Instagram" className="w-[120px] h-[120px] object-contain" />
                             </a>
                             <a 
                                 href="https://www.youtube.com/@oceanstarhi" 
                                 target="_blank" 
                                 rel="noreferrer"
-                                className="transform transition-all duration-300 hover:-translate-y-1 hover:scale-105 drop-shadow-sm hover:drop-shadow-lg"
+                                className="transform transition-all duration-300 hover:-translate-y-2 hover:scale-105 drop-shadow-sm hover:drop-shadow-xl"
                                 title="YouTube"
                             >
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube" className="w-[50px] h-[50px] object-contain" />
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube" className="w-[150px] h-[150px] object-contain" />
                             </a>
                         </div>
                     </div>
