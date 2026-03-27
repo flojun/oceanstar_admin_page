@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Check, MapPin, Calendar, Users, CreditCard, Loader2, ChevronRight, Info, X, ShieldCheck, Star, Anchor, UsersRound, Award, MessageSquare, User, ClipboardList, AlertTriangle, Mail } from "lucide-react";
+import { Check, MapPin, Calendar, Users, CreditCard, Loader2, ChevronRight, Info, X, ShieldCheck, Star, Anchor, UsersRound, Award, MessageSquare, User, ClipboardList, AlertTriangle, Mail, Instagram, Youtube } from "lucide-react";
 import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 import { calculateDistance, findClosestPickup, PickupLocation, getWalkingMinutes } from '@/lib/utils';
 import { DayPicker } from "react-day-picker";
@@ -663,10 +663,30 @@ export default function ReservationPage() {
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
                  <div>
                     <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Mail size={20} className="text-blue-400" /> 하와이 현지 영업시간 안내</h3>
-                    <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 max-w-sm">
+                    <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 max-w-sm flex flex-col gap-4">
                         <div className="text-slate-300 font-medium flex items-center gap-3">
                             <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0">영업시간</span>
                             <span className="text-sm">하와이 현지 기준 월~토 09:00~17:00</span>
+                        </div>
+                        <div className="flex items-center gap-4 pt-2 mt-1">
+                            <a 
+                                href="https://www.instagram.com/hawaii_turtlesnorkelling/" 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:border-pink-500 hover:text-pink-500 hover:shadow-[0_0_15px_rgba(236,72,153,0.3)] transition-all hover:scale-105"
+                                title="Instagram"
+                            >
+                                <Instagram size={24} />
+                            </a>
+                            <a 
+                                href="https://www.youtube.com/@oceanstarhi" 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:border-red-500 hover:text-red-500 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-all hover:scale-105"
+                                title="YouTube"
+                            >
+                                <Youtube size={24} />
+                            </a>
                         </div>
                     </div>
                  </div>
