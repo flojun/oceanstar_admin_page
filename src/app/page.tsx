@@ -330,7 +330,10 @@ export default function ReservationPage() {
       />
       <header className={`w-full z-40 transition-all duration-300 bg-white/80 backdrop-blur-md shrink-0 ${isScrolled ? 'shadow-sm border-b border-slate-200' : 'border-b border-transparent'}`}>
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-black text-blue-600 tracking-tighter uppercase drop-shadow-sm">OceanStar</h1>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold text-blue-500/80 tracking-widest leading-none mb-1 ml-0.5">하와이 거북이 스노클링</span>
+            <h1 className="text-2xl font-black text-blue-600 tracking-tighter uppercase drop-shadow-sm leading-none">OceanStar</h1>
+          </div>
           <div className="flex items-center gap-3">
              <Link 
                 href="/manage-booking"
