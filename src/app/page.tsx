@@ -657,73 +657,19 @@ export default function ReservationPage() {
         {/* === FAQ Section === */}
         <FAQSection />
 
-        {/* === 6. Cancellation and Refund Policy (Footer) === */}
+        {/* === 6. Business Hours and Company Info (Footer) === */}
         <section className="bg-slate-900 text-slate-300 py-16 mt-20 relative z-30 pb-32">
           <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
-             <div className="text-center mb-10">
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">취소 및 환불 규정</h2>
-                <p className="text-slate-400">오션스타 (Waikiki Turtle Snorkel) | 하와이 현지 시간 기준 · 특약 적용 상품</p>
-             </div>
-             
-             <div className="space-y-8 text-sm md:text-base">
-                <div>
-                   <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><ClipboardList size={20} className="text-blue-400" /> 기본 환불 특약 규정</h3>
-                   <div className="bg-slate-800/30 p-6 rounded-2xl border border-slate-700/50">
-                      <p className="text-sm text-slate-300 font-medium mb-5 bg-slate-800 p-4 rounded-xl border border-slate-700/50 leading-relaxed">
-                          본 상품은 국외여행 표준약관 제6조(특약)에 따라 일반 소비자분쟁해결기준과 다른 취소수수료가 적용됩니다.<br/>
-                          예약 전 취소 규정을 반드시 확인해 주세요.
-                      </p>
-                      <ul className="space-y-4 text-slate-400 text-sm">
-                         <li className="flex items-start gap-3">
-                            <span className="text-slate-300 font-bold shrink-0 mt-0.5">[전액 환불]</span>
-                            <span>여행시작 <strong>7일 전</strong>까지 (~7일) : 여행 요금 전액 환불</span>
-                         </li>
-                         <li className="flex items-start gap-3">
-                            <span className="text-slate-300 font-bold shrink-0 mt-0.5">[50% 공제]</span>
-                            <span>여행시작 <strong>3일 전</strong>까지 (6~3일) : 상품 요금의 50% 공제</span>
-                         </li>
-                         <li className="flex items-start gap-3">
-                            <span className="text-slate-300 font-bold shrink-0 mt-0.5">[환불 불가]</span>
-                            <span>여행시작 <strong>당일까지</strong> (2일~당일) : 취소/환불 불가</span>
-                         </li>
-                      </ul>
-                      <p className="mt-5 text-xs font-medium text-slate-500">※ 여행일은 현지 시각 기준입니다.</p>
-                   </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-8">
-                    <div>
-                       <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><AlertTriangle size={20} className="text-yellow-400" /> 추가 특약 사항</h3>
-                       <div className="space-y-4">
-                           <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50">
-                               <h4 className="font-bold text-white mb-2 text-sm">🌧 날씨 관련</h4>
-                               <ul className="list-disc ml-5 space-y-1 text-slate-400 text-sm">
-                                   <li>가벼운 비·바람·우천 시에도 와이키키 유일 루프탑 보트로 정상 진행합니다.</li>
-                                   <li>태풍·극심한 악천후·해안경비대 출항 금지 등 안전상 취소 시 <strong>전액 환불 또는 날짜 변경 가능</strong> (고객 선택)</li>
-                               </ul>
-                           </div>
-                           <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50">
-                               <h4 className="font-bold text-white mb-2 text-sm">🛥 프라이빗 / 단체 예약</h4>
-                               <ul className="list-disc ml-5 space-y-1 text-slate-400 text-sm">
-                                   <li>위 일반 규정이 동일하게 적용됩니다.</li>
-                                   <li>별도 계약 체결 시 조정 가능하오니 사전에 문의해 주세요.</li>
-                               </ul>
-                           </div>
-                       </div>
-                    </div>
-                    
-                    <div className="space-y-6">
-                        <div>
-                           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><Mail size={20} className="text-blue-400" /> 하와이 현지 영업시간 안내</h3>
-                           <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50">
-                               <div className="text-slate-300 font-medium flex items-center gap-3">
-                                   <span className="bg-slate-700 px-2 py-1.5 rounded text-xs">영업시간</span>
-                                   <span className="text-sm">하와이 현지 기준 월~토 09:00~17:00</span>
-                               </div>
-                           </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+                 <div>
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Mail size={20} className="text-blue-400" /> 하와이 현지 영업시간 안내</h3>
+                    <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 max-w-sm">
+                        <div className="text-slate-300 font-medium flex items-center gap-3">
+                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs">영업시간</span>
+                            <span className="text-sm">하와이 현지 기준 월~토 09:00~17:00</span>
                         </div>
                     </div>
-                </div>
+                 </div>
              </div>
 
              <div className="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-left">
