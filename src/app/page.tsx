@@ -668,24 +668,24 @@ export default function ReservationPage() {
                             <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0">영업시간</span>
                             <span className="text-sm">하와이 현지 기준 월~토 09:00~17:00</span>
                         </div>
-                        <div className="flex items-center gap-4 pt-2 mt-1">
+                        <div className="flex items-center gap-5 pt-3 mt-1">
                             <a 
                                 href="https://www.instagram.com/hawaii_turtlesnorkelling/" 
                                 target="_blank" 
                                 rel="noreferrer"
-                                className="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:border-pink-500 hover:text-pink-500 hover:shadow-[0_0_15px_rgba(236,72,153,0.3)] transition-all hover:scale-105"
+                                className="transform transition-all duration-300 hover:-translate-y-1 hover:scale-110 drop-shadow-sm hover:drop-shadow-lg"
                                 title="Instagram"
                             >
-                                <Instagram size={24} />
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/9/95/Instagram_logo_2022.svg" alt="Instagram" className="w-10 h-10 object-contain" />
                             </a>
                             <a 
                                 href="https://www.youtube.com/@oceanstarhi" 
                                 target="_blank" 
                                 rel="noreferrer"
-                                className="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:border-red-500 hover:text-red-500 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-all hover:scale-105"
+                                className="transform transition-all duration-300 hover:-translate-y-1 hover:scale-105 drop-shadow-sm hover:drop-shadow-lg"
                                 title="YouTube"
                             >
-                                <Youtube size={24} />
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube" className="w-[50px] h-[50px] object-contain" />
                             </a>
                         </div>
                     </div>
