@@ -698,8 +698,8 @@ export default function ReservationPage() {
 
              <div className="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-left">
                  <div>
-                     <h4 className="text-white font-bold mb-2">오션스타 (Waikiki Turtle Snorkel)</h4>
-                     <p className="text-slate-500 text-sm">하와이 한인 최초 거북이 스노클링 원조<br/>마이리얼트립 6,500 리뷰 · 구글 5,000 리뷰</p>
+                     <h4 className="text-white font-bold mb-2">오션스타 (Waikiki Turtle Snorkeling)</h4>
+                     <p className="text-slate-500 text-sm">하와이 한인 최초 거북이 스노클링 원조<br/>여행 플랫폼 8,000 리뷰 · 구글 5,000 리뷰</p>
                  </div>
                  <div className="text-slate-500 text-sm md:text-right space-y-1">
                      <p><span className="text-slate-400 font-medium">상호명:</span> 알로하 하와이 <span className="mx-2 hidden md:inline">|</span><br className="md:hidden" /> <span className="text-slate-400 font-medium">대표자명:</span> 정칠성</p>
