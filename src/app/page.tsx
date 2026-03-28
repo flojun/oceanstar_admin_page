@@ -12,6 +12,7 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { format, parse } from "date-fns";
 import Image from "next/image";
+import imageCompression from "browser-image-compression";
 import FAQSection from "@/components/FAQSection";
 import PickupGuide from "@/components/PickupGuide";
 import TourCourseTimeline from "@/components/TourCourseTimeline";
@@ -88,7 +89,7 @@ export default function ReservationPage() {
   // ==== 리뷰 상태 ====
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [reviewForm, setReviewForm] = useState({ order_id: '', author_name: '', rating: 5, content: '' });
+  const [reviewForm, setReviewForm] = useState<{ order_id: string; author_name: string; rating: number; content: string; images: File[] }>({ order_id: '', author_name: '', rating: 5, content: '', images: [] });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
 
@@ -151,15 +152,42 @@ export default function ReservationPage() {
     e.preventDefault();
     setIsSubmittingReview(true);
     try {
+      const formData = new FormData();
+      formData.append('order_id', reviewForm.order_id);
+      formData.append('author_name', reviewForm.author_name);
+      formData.append('rating', String(reviewForm.rating));
+      formData.append('content', reviewForm.content);
+
+      if (reviewForm.images.length > 5) {
+        alert("사진은 최대 5장까지만 업로드 가능합니다.");
+        setIsSubmittingReview(false);
+        return;
+      }
+
+      for (const file of reviewForm.images) {
+        try {
+            const options = {
+                maxSizeMB: 1, 
+                maxWidthOrHeight: 1920,
+                useWebWorker: true,
+                fileType: file.type
+            };
+            const compressedFile = await imageCompression(file, options);
+            formData.append('images', compressedFile);
+        } catch (error) {
+            console.error("Image compression error:", error);
+            formData.append('images', file);
+        }
+      }
+
       const res = await fetch('/api/reviews', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reviewForm)
+        body: formData
       });
       const data = await res.json();
       if (data.success) {
         alert("리뷰가 성공적으로 등록되었습니다. 감사합니다!");
-        setReviewForm({ order_id: '', author_name: '', rating: 5, content: '' });
+        setReviewForm({ order_id: '', author_name: '', rating: 5, content: '', images: [] });
         setIsReviewOpen(false);
         fetchReviews();
       } else {
@@ -601,10 +629,25 @@ export default function ReservationPage() {
                                     <Star key={i} size={16} className={i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-slate-200"} />
                                 ))}
                             </div>
-                            <p className="text-slate-700 italic flex-1 whitespace-pre-wrap leading-relaxed text-sm">
+                            <p className="text-slate-700 italic whitespace-pre-wrap leading-relaxed text-sm mb-4 font-medium flex-1">
                                 "{review.content}"
                             </p>
-                            <div className="border-t border-slate-100 mt-6 pt-4 flex items-center gap-3">
+                            {review.image_urls && review.image_urls.length > 0 && (
+                                <div className={`grid gap-2 mb-4 ${review.image_urls.length === 1 ? 'grid-cols-1' : review.image_urls.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                                    {review.image_urls.slice(0, 5).map((url: string, index: number) => (
+                                        <div key={index} className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-100 shadow-sm">
+                                            <Image 
+                                              src={url} 
+                                              alt={`스노클링 리뷰 이미지 ${index + 1}`} 
+                                              fill 
+                                              className="object-cover cursor-pointer hover:scale-105 transition-transform" 
+                                              sizes="(max-width: 768px) 33vw, 20vw" 
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <div className="border-t border-slate-100 pt-4 flex items-center gap-3 mt-auto">
                                 <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
                                     <User size={16} />
                                 </div>
@@ -676,7 +719,7 @@ export default function ReservationPage() {
                                 className="transform transition-all duration-300 hover:-translate-y-2 hover:scale-110 drop-shadow-sm hover:drop-shadow-xl"
                                 title="Instagram"
                             >
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/9/95/Instagram_logo_2022.svg" alt="Instagram" className="w-[80px] h-[80px] object-contain" />
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/9/95/Instagram_logo_2022.svg" alt="Instagram" className="w-[47px] h-[47px] object-contain" />
                             </a>
                             <a 
                                 href="https://www.youtube.com/@oceanstarhi" 
@@ -685,7 +728,7 @@ export default function ReservationPage() {
                                 className="transform transition-all duration-300 hover:-translate-y-2 hover:scale-105 drop-shadow-sm hover:drop-shadow-xl"
                                 title="YouTube"
                             >
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube" className="w-[100px] h-[100px] object-contain" />
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube" className="w-[59px] h-[59px] object-contain" />
                             </a>
                         </div>
                     </div>
@@ -1156,6 +1199,43 @@ export default function ReservationPage() {
                             onChange={(e) => setReviewForm({ ...reviewForm, content: e.target.value })}
                             className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none font-medium"
                         ></textarea>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">사진 첨부 (최대 5장)</label>
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/png, image/jpeg, image/webp"
+                            onChange={(e) => {
+                                if (e.target.files) {
+                                    const files = Array.from(e.target.files);
+                                    if (files.length > 5) {
+                                        alert("사진은 최대 5장까지만 선택할 수 있습니다.");
+                                        e.target.value = '';
+                                    } else {
+                                        setReviewForm({ ...reviewForm, images: files });
+                                    }
+                                }
+                            }}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                        {reviewForm.images && reviewForm.images.length > 0 && (
+                            <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
+                                {reviewForm.images.map((img, idx) => (
+                                    <div key={idx} className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border border-slate-200">
+                                        <img src={URL.createObjectURL(img)} alt="preview" className="w-full h-full object-cover" />
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setReviewForm(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== idx) }))}
+                                            className="absolute top-0 right-0 flex items-center justify-center bg-black/50 text-white w-5 h-5 cursor-pointer hover:bg-black/70 transition-colors"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div className="pt-2">

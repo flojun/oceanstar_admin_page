@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 // GET: Fetch all visible reviews
 export async function GET() {
@@ -28,11 +29,39 @@ export async function GET() {
 // POST: Submit a new review
 export async function POST(req: Request) {
     try {
-        const body = await req.json();
-        const { order_id, author_name, content, rating } = body;
+        const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+
+        const formData = await req.formData();
+        const order_id = formData.get('order_id') as string;
+        const author_name = formData.get('author_name') as string;
+        const content = formData.get('content') as string;
+        const ratingStr = formData.get('rating') as string;
+        const rating = parseInt(ratingStr, 10);
+        
+        const files = formData.getAll('images') as File[];
 
         if (!order_id || !author_name || !content || !rating) {
             return NextResponse.json({ success: false, error: '모든 필드를 입력해주세요.' }, { status: 400 });
+        }
+
+        const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+        const MAX_FILE_SIZE = 1.5 * 1024 * 1024; // 1.5MB
+        const MAX_FILES = 5;
+
+        if (files.length > MAX_FILES) {
+            return NextResponse.json({ success: false, error: '사진은 최대 5장까지만 업로드 가능합니다.' }, { status: 400 });
+        }
+
+        for (const file of files) {
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                return NextResponse.json({ success: false, error: '지원하지 않는 이미지 형식입니다. (JPG, PNG, WEBP만 가능)' }, { status: 400 });
+            }
+            if (file.size > MAX_FILE_SIZE) {
+                return NextResponse.json({ success: false, error: `파일 크기가 너무 큽니다. (최대 1.5MB): ${file.name}` }, { status: 400 });
+            }
         }
 
         const normalizedOrderId = order_id.toUpperCase().trim();
@@ -67,15 +96,46 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, error: '이미 리뷰가 등록된 예약번호입니다.' }, { status: 409 });
         }
 
-        // 4. Insert Review
-        const { error: insertError } = await supabase
+        // 4. Upload images
+        const uploadedUrls: string[] = [];
+        for (const file of files) {
+            const ext = file.name.split('.').pop() || 'jpg';
+            const safeFileName = `${crypto.randomUUID()}-${Date.now()}.${ext}`;
+            const filePath = `${safeFileName}`;
+            
+            const fileBuffer = await file.arrayBuffer();
+
+            const { error: uploadError } = await supabaseAdmin.storage
+                .from('review-images')
+                .upload(filePath, fileBuffer, {
+                    contentType: file.type,
+                    upsert: false
+                });
+
+            if (uploadError) {
+                console.error("Image upload error:", uploadError);
+                return NextResponse.json({ success: false, error: `이미지 업로드에 실패했습니다: ${uploadError.message}` }, { status: 500 });
+            }
+
+            const { data: publicUrlData } = supabaseAdmin.storage
+                .from('review-images')
+                .getPublicUrl(filePath);
+
+            if (publicUrlData && publicUrlData.publicUrl) {
+                uploadedUrls.push(publicUrlData.publicUrl);
+            }
+        }
+
+        // 5. Insert Review
+        const { error: insertError } = await supabaseAdmin
             .from('reviews')
             .insert([{
                 order_id: normalizedOrderId,
                 author_name,
                 content,
                 rating,
-                is_hidden: false
+                is_hidden: false,
+                image_urls: uploadedUrls
             }]);
 
         if (insertError) throw insertError;
