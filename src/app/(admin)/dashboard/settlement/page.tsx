@@ -91,20 +91,15 @@ export default function SettlementPage() {
         setMatchResults([]);
         setSummary(null);
         setUploadedFileName('');
-        setSummary(null);
-        setUploadedFileName('');
         setSelectedIds(new Set());
         setLastSelectedIdx(null);
     };
 
-    // ---- File handling ----
     const handleFile = useCallback(async (file: File) => {
         if (!file) return;
         setIsLoading(true);
         setUploadedFileName(file.name);
         setParseErrors([]);
-        setMatchResults([]);
-        setSummary(null);
         setMatchResults([]);
         setSummary(null);
         setSelectedIds(new Set());

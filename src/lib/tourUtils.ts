@@ -25,6 +25,7 @@ export interface TourSetting {
     is_flat_rate?: boolean;
     vessel_name?: string;
     display_order?: number;
+    is_combined?: boolean;
 }
 
 export interface ResolvedOption {

@@ -132,6 +132,7 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
             setReservations(data || []);
         } catch (error) {
             console.error("Error fetching reservations:", error);
+            alert("예약 데이터를 불러오는데 실패했습니다.");
         } finally {
             setLoading(false);
         }
@@ -139,8 +140,13 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
 
     // Fetch tour settings once
     useEffect(() => {
-        supabase.from('tour_settings').select('*').order('display_order').then(({ data }) => {
-            if (data) setTourSettings(data);
+        supabase.from('tour_settings').select('*').order('display_order').then(({ data, error }) => {
+            if (error) {
+                console.error("Error fetching tour settings:", error);
+                alert("설정 데이터를 불러오는데 실패했습니다.");
+            } else if (data) {
+                setTourSettings(data);
+            }
         });
     }, []);
 

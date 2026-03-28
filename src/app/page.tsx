@@ -9,10 +9,10 @@ import { Check, MapPin, Calendar, Users, CreditCard, Loader2, ChevronRight, Info
 import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 import { calculateDistance, findClosestPickup, PickupLocation, getWalkingMinutes } from '@/lib/utils';
 import { DayPicker } from "react-day-picker";
-import "react-day-picker/dist/style.css";
 import { format, parse } from "date-fns";
 import Image from "next/image";
 import imageCompression from "browser-image-compression";
+import { TourSetting } from "@/lib/tourUtils";
 import FAQSection from "@/components/FAQSection";
 import PickupGuide from "@/components/PickupGuide";
 import TourCourseTimeline from "@/components/TourCourseTimeline";
@@ -69,7 +69,7 @@ const calculateTieredPrivatePrice = (totalPax: number, exchangeRate: number): nu
 
 export default function ReservationPage() {
   const [selectedTour, setSelectedTour] = useState<string | null>(null);
-  const [expandedTourDetails, setExpandedTourDetails] = useState<any | null>(null);
+  const [expandedTourDetails, setExpandedTourDetails] = useState<TourSetting | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [pickupLocations, setPickupLocations] = useState<PickupLocation[]>([]);
   const [closestPickup, setClosestPickup] = useState<{ location: PickupLocation, minutes: number } | null>(null);
@@ -83,7 +83,7 @@ export default function ReservationPage() {
   const [maxCapacity, setMaxCapacity] = useState(45);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
 
-  const [tourSettings, setTourSettings] = useState<any[]>([]);
+  const [tourSettings, setTourSettings] = useState<TourSetting[]>([]);
   const [blockedDates, setBlockedDates] = useState<{ date: string; tour_id: string; reason: string | null }[]>([]);
 
   // ==== 리뷰 상태 ====
@@ -293,12 +293,12 @@ export default function ReservationPage() {
   // Calculate Total Price dynamically
   let totalPrice = 0;
   if (isFlatRate && selectedTour === 'private') {
-     const exchangeRate = selectedTourSetting?.adult_price_usd ? (selectedTourSetting.adult_price_krw / selectedTourSetting.adult_price_usd) : 1350;
+     const exchangeRate = selectedTourSetting?.adult_price_usd ? ((selectedTourSetting.adult_price_krw || 0) / selectedTourSetting.adult_price_usd) : 1350;
      totalPrice = calculateTieredPrivatePrice(totalSelectedPax, exchangeRate);
   } else if (isFlatRate) {
-     totalPrice = currentAdultPrice;
+     totalPrice = currentAdultPrice || 0;
   } else {
-     totalPrice = (adultCount * currentAdultPrice) + (childCount * currentChildPrice);
+     totalPrice = (adultCount * (currentAdultPrice || 0)) + (childCount * (currentChildPrice || 0));
   }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {

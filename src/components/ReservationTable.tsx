@@ -245,9 +245,7 @@ export function ReservationTable({
                                             <input
                                                 type="checkbox"
                                                 checked={res.is_reconfirmed || false}
-                                                onChange={(e) => {
-                                                    // @ts-ignore - Triggered by onClick in some frameworks, but here native checkbox
-                                                }}
+                                                onChange={() => {}}
                                                 // Using onClick to capture shiftKey
                                                 onClick={(e) => {
                                                     e.stopPropagation();
