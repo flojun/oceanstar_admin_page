@@ -7,7 +7,6 @@ import { findClosestPickup, PickupLocation, getWalkingMinutes } from '@/lib/util
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { format } from "date-fns";
-import { supabase } from '@/lib/supabase';
 
 const libraries: "places"[] = ["places"];
 
@@ -164,18 +163,20 @@ export default function ManageBookingPage() {
 
     setIsVerifying(true);
     try {
-        const { data: reservation, error } = await supabase
-            .from('reservations')
-            .select('*')
-            .eq('order_id', resNumber.trim().toUpperCase())
-            .ilike('booker_email', email.trim())
-            .single();
+        const res = await fetch('/api/verify-booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: resNumber.trim().toUpperCase(), booker_email: email.trim() })
+        });
+        const data = await res.json();
 
-        if (error || !reservation) {
-            alert('일치하는 예약 정보가 없습니다. 예약 번호와 이메일을 확인해주세요.');
+        if (!res.ok || !data.reservation) {
+            alert(data.error || '일치하는 예약 정보가 없습니다. 예약 번호와 이메일을 확인해주세요.');
             setIsVerifying(false);
             return;
         }
+
+        const reservation = data.reservation;
 
         // 인원 파싱
         let parsedGuests = 0;

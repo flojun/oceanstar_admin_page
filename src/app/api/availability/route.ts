@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseServer } from '@/lib/supabaseServer';
 import { parsePax } from '@/lib/utils'; // Uses our existing helper
 import { resolveOptionToTourSetting } from '@/lib/tourUtils';
 
@@ -14,7 +14,7 @@ export async function GET(req: Request) {
         }
 
         // 1. Fetch all tour settings for resolution
-        const { data: tourSettings } = await supabase.from('tour_settings').select('*');
+        const { data: tourSettings } = await supabaseServer.from('tour_settings').select('*');
         if (!tourSettings) {
             return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
         }
@@ -38,7 +38,7 @@ export async function GET(req: Request) {
         const endDate = `${nextYear}-${nextMonth}-01`;
 
         // 3. Fetch all non-cancelled reservations for the month
-        const { data: reservations, error } = await supabase
+        const { data: reservations, error } = await supabaseServer
             .from('reservations')
             .select('tour_date, pax, adult_count, child_count, status, option')
             .neq('status', '취소')

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseServer } from '@/lib/supabaseServer';
 
 export async function POST(req: Request) {
     try {
@@ -14,12 +14,11 @@ export async function POST(req: Request) {
             }
             return result;
         };
-        const order_id = generateOrderId();
 
         // ============================================
         // [중요 보안] 프론트엔드 가격 검증 및 서버 사이드 가격 재계산
         // ============================================
-        const { data: tourSetting, error: settingError } = await supabase
+        const { data: tourSetting, error: settingError } = await supabaseServer
             .from('tour_settings')
             .select('*')
             .eq('tour_id', body.selectedTour)
@@ -44,7 +43,6 @@ export async function POST(req: Request) {
         // 2. 예약 인원 및 포맷팅
         const totalCount = body.adultCount + body.childCount;
         const paxLabel = `${totalCount}명`;
-        const noteText = `(성${body.adultCount}/아${body.childCount}) (예약번호 ${order_id})`;
 
         // 프라이빗 차터 픽업 예외 처리
         let pickupLabel = body.pickupLocationName || body.hotelName;
@@ -74,33 +72,56 @@ export async function POST(req: Request) {
                 (body.childCount * tourSetting.child_price_krw);
         }
 
-        // 3. Insert into Supabase reservations with '결제대기' status
-        const { data, error } = await supabase
-            .from('reservations')
-            .insert([
-                {
-                    order_id: order_id,
-                    source: '웹사이트',
-                    name: body.bookerName,
-                    contact: body.bookerPhone,
-                    tour_date: body.tourDate,
-                    option: optionLabel,
-                    pax: paxLabel,
-                    note: noteText,
-                    pickup_location: pickupLabel,
-                    status: '결제대기',
-                    total_price: calculatedTotalPrice,
-                    booker_email: body.bookerEmail,
-                    adult_count: body.adultCount,
-                    child_count: body.childCount,
-                }
-            ])
-            .select()
-            .single();
+        // 3. Insert into Supabase reservations with '결제대기' status (retry up to 3 times for order_id collision)
+        let order_id = generateOrderId();
+        let insertData = null;
+        let lastError = null;
 
-        if (error) {
-            console.error('Supabase Insert Error:', error);
-            return NextResponse.json({ error: 'Database error', details: error }, { status: 500 });
+        for (let attempt = 0; attempt < 3; attempt++) {
+            const noteText = `(성${body.adultCount}/아${body.childCount}) (예약번호 ${order_id})`;
+
+            const { data, error } = await supabaseServer
+                .from('reservations')
+                .insert([
+                    {
+                        order_id: order_id,
+                        source: '웹사이트',
+                        name: body.bookerName,
+                        contact: body.bookerPhone,
+                        tour_date: body.tourDate,
+                        option: optionLabel,
+                        pax: paxLabel,
+                        note: noteText,
+                        pickup_location: pickupLabel,
+                        status: '결제대기',
+                        total_price: calculatedTotalPrice,
+                        booker_email: body.bookerEmail,
+                        adult_count: body.adultCount,
+                        child_count: body.childCount,
+                    }
+                ])
+                .select()
+                .single();
+
+            if (error) {
+                // 23505 = unique_violation (order_id 충돌)
+                if (error.code === '23505') {
+                    order_id = generateOrderId();
+                    lastError = error;
+                    continue;
+                }
+                console.error('Supabase Insert Error:', error);
+                return NextResponse.json({ error: 'Database error', details: error }, { status: 500 });
+            }
+
+            insertData = data;
+            lastError = null;
+            break;
+        }
+
+        if (!insertData) {
+            console.error('Failed to insert reservation after 3 attempts:', lastError);
+            return NextResponse.json({ error: '예약 번호 생성에 실패했습니다. 다시 시도해주세요.' }, { status: 500 });
         }
 
         // 4. Prepare Eximbay Request (Mocked for this implementation)

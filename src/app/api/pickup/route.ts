@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseServer } from '@/lib/supabaseServer';
 
 // Helper function to add a time offset (in minutes) to a "HH:MM" string
 function addMinutesToTimeString(timeStr: string | null, minutesToAdd: number): string | null {
@@ -24,12 +24,12 @@ function timeStringToMinutes(timeStr: string): number {
 export async function GET() {
     try {
         // Fetch pickup locations
-        const { data: pickupLocations, error } = await supabase
+        const { data: pickupLocations, error } = await supabaseServer
             .from('pickup_locations')
             .select('*');
 
         // Fetch tour settings to determine the offset for Tour 3
-        const { data: tourSettings } = await supabase
+        const { data: tourSettings } = await supabaseServer
             .from('tour_settings')
             .select('*');
 
@@ -68,7 +68,7 @@ export async function GET() {
 
         // Dynamically compute time_3 if it doesn't exist or override it 
         // using the start_time offset from tourSettings
-        const finalLocations = locationsToReturn.map(loc => {
+        const finalLocations = locationsToReturn.map((loc: any) => {
             // Take the base time_1 string (format: HH:MM or HH:MM:SS)
             let baseTimeStr = loc.time_1;
 

@@ -1,8 +1,24 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseServer } from '@/lib/supabaseServer';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
     try {
+        // 인증 검사
+        const cookieStore = await cookies();
+        const supabaseAuth = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                cookies: { getAll: () => cookieStore.getAll() }
+            }
+        );
+        const { data: { user } } = await supabaseAuth.auth.getUser();
+        if (!user) {
+            return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await request.json();
         const { updates } = body; // Expecting an array of { id, time_1, time_2, time_3 }
 
@@ -14,10 +30,10 @@ export async function POST(request: Request) {
         }
 
         // Supabase upsert/bulk update
-        const { error } = await supabase
+        const { error } = await supabaseServer
             .from('pickup_locations')
             .upsert(
-                updates.map(item => ({
+                updates.map((item: any) => ({
                     id: item.id,
                     time_1: item.time_1 || null,
                     time_2: item.time_2 || null,

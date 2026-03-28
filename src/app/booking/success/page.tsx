@@ -3,13 +3,14 @@
 import { CheckCircle, MapPin, Calendar, Clock, Download, ArrowRight, Loader2 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Suspense, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { Suspense, useEffect, useState, useRef } from "react";
+import { toPng } from 'html-to-image';
 
 function SuccessContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const orderId = searchParams.get('order_id');
+    const voucherRef = useRef<HTMLDivElement>(null);
 
     const [reservation, setReservation] = useState<any>(null);
     const [pickupData, setPickupData] = useState<any>(null);
@@ -19,13 +20,11 @@ function SuccessContent() {
         const fetchData = async () => {
             if (!orderId) return;
             try {
-                const { data } = await supabase.from('reservations').select('*').eq('order_id', orderId).single();
-                if (data) {
-                    setReservation(data);
-                    if (data.pickup_location && data.pickup_location !== 'DIRECT') {
-                        const { data: pData } = await supabase.from('pickup_locations').select('*').eq('name', data.pickup_location).single();
-                        if (pData) setPickupData(pData);
-                    }
+                const res = await fetch(`/api/reservation-detail?order_id=${orderId}`);
+                const data = await res.json();
+                if (data.reservation) {
+                    setReservation(data.reservation);
+                    setPickupData(data.pickupData || null);
                 }
             } catch (err) {
                 console.error("Error fetching reservation:", err);
@@ -35,6 +34,20 @@ function SuccessContent() {
         };
         fetchData();
     }, [orderId]);
+
+    const handleDownloadVoucher = async () => {
+        if (!voucherRef.current) return;
+        try {
+            const dataUrl = await toPng(voucherRef.current, { quality: 0.95 });
+            const link = document.createElement('a');
+            link.download = `oceanstar-voucher-${orderId}.png`;
+            link.href = dataUrl;
+            link.click();
+        } catch (err) {
+            console.error("Voucher download error:", err);
+            alert("바우처 저장에 실패했습니다. 스크린샷으로 저장해 주세요.");
+        }
+    };
 
     if (!orderId) {
         return (
@@ -67,7 +80,7 @@ function SuccessContent() {
     return (
         <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6">
             <div className="max-w-2xl mx-auto">
-                <div className="bg-white rounded-3xl shadow-xl shadow-blue-900/5 overflow-hidden">
+                <div ref={voucherRef} className="bg-white rounded-3xl shadow-xl shadow-blue-900/5 overflow-hidden">
                     {/* Header */}
                     <div className="bg-blue-600 p-8 text-center text-white relative">
                         <div className="w-20 h-20 bg-white rounded-full mx-auto flex items-center justify-center mb-4 shadow-inner">
@@ -168,7 +181,10 @@ function SuccessContent() {
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-100">
-                            <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30">
+                            <button 
+                                onClick={handleDownloadVoucher}
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
+                            >
                                 <Download size={18} /> 바우처 저장
                             </button>
                             <Link href="/" className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseServer } from '@/lib/supabaseServer';
 
 export async function POST(req: Request) {
     try {
@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
         if (rescode === '0000') {
             // 결제 성공 -> Supabase 예약 상태 '예약확정'으로 업데이트 (기존 DB 구조)
-            const { data, error } = await supabase
+            const { data, error } = await supabaseServer
                 .from('reservations')
                 .update({
                     status: '예약확정',
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true, message: 'Payment confirmed' });
         } else {
             // 결제 실패
-            await supabase
+            await supabaseServer
                 .from('reservations')
                 .update({ status: '결제실패' })
                 .eq('order_id', order_id);

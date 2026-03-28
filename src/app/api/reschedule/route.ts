@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseServer } from '@/lib/supabaseServer';
+import { differenceInHours } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 export async function POST(req: Request) {
     try {
@@ -14,7 +16,7 @@ export async function POST(req: Request) {
         const normalizedOrderId = order_id.trim().toUpperCase();
 
         // 2. 예약 내역 검증 및 조회
-        const { data: reservation, error: fetchError } = await supabase
+        const { data: reservation, error: fetchError } = await supabaseServer
             .from('reservations')
             .select('id, status, note, tour_date')
             .eq('order_id', normalizedOrderId)
@@ -25,22 +27,14 @@ export async function POST(req: Request) {
              return NextResponse.json({ error: '일치하는 예약 정보가 없거나 이메일이 다릅니다.' }, { status: 404 });
         }
 
-        // 3. 72시간 엄격한 서버측 검증 로직 (보안 이슈)
-        const tourDate = new Date(reservation.tour_date);
-        
-        // 현재 하와이 시간 생성
-        const hawaiiTimeStr = new Date().toLocaleString("en-US", { timeZone: "Pacific/Honolulu" });
-        const hawaiiNow = new Date(hawaiiTimeStr);
+        // 3. 72시간 엄격한 서버측 검증 로직 (date-fns-tz 기반)
+        const hawaiiTimeZone = 'Pacific/Honolulu';
+        const nowHawaii = toZonedTime(new Date(), hawaiiTimeZone);
 
-        // 투어일 자정 (하와이 시간)으로 강제 변환
-        const y = tourDate.getFullYear();
-        const m = tourDate.getMonth() + 1;
-        const d = tourDate.getDate();
-        const tourStartStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}T00:00:00-10:00`;
-        const hawaiiTourStart = new Date(tourStartStr);
+        const [y, m, d] = reservation.tour_date.split('-').map(Number);
+        const tourStartHawaii = new Date(y, m - 1, d, 0, 0, 0);
 
-        const diffTime = hawaiiTourStart.getTime() - hawaiiNow.getTime();
-        const diffHours = diffTime / (1000 * 60 * 60);
+        const diffHours = differenceInHours(tourStartHawaii, nowHawaii);
 
         if (diffHours < 72) {
              return NextResponse.json({ 
@@ -57,7 +51,7 @@ export async function POST(req: Request) {
         const rescheduleData = `\n\n[변경요청] <NewDate:${new_date}> <NewPickup:${new_pickup}>`;
         const newNote = (reservation.note || '') + rescheduleData;
 
-        const { error: updateError } = await supabase
+        const { error: updateError } = await supabaseServer
             .from('reservations')
             .update({ status: '변경요청', note: newNote.trim() })
             .eq('id', reservation.id);

@@ -40,3 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+# temp / debug files
+tmp*
+lint_log.txt
+rotations.txt
+verify_*
+test-tz.mjs

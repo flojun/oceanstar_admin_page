@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseServer } from '@/lib/supabaseServer';
 import { differenceInHours } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
         const normalizedBookerName = booker_name.trim();
 
         // 1. 예약 조회 (주문번호와 예약자명 동시 일치 검증)
-        const { data: reservation, error: fetchError } = await supabase
+        const { data: reservation, error: fetchError } = await supabaseServer
             .from('reservations')
             .select('id, status, name, note, tour_date, total_price, currency')
             .eq('order_id', normalizedOrderId)
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
             
         const newNote = (reservation.note || '') + reasonText + systemCalcText;
 
-        const { error: updateError } = await supabase
+        const { error: updateError } = await supabaseServer
             .from('reservations')
             .update({ 
                 status: '취소요청', 

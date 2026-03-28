@@ -11,6 +11,7 @@ function MockPaymentContent() {
 
     const order_id = searchParams.get('order_id');
     const amount = searchParams.get('amount');
+    const cur = searchParams.get('cur');
 
     const handleSimulatePayment = async () => {
         setIsProcessing(true);
@@ -55,7 +56,7 @@ function MockPaymentContent() {
                     <p className="text-sm text-slate-500 mb-1">주문 번호</p>
                     <p className="font-mono text-sm font-bold mb-3">{order_id}</p>
                     <p className="text-sm text-slate-500 mb-1">결제 금액</p>
-                    <p className="text-xl font-extrabold text-blue-600">${amount}</p>
+                    <p className="text-xl font-extrabold text-blue-600">{cur === 'KRW' ? `₩${Number(amount).toLocaleString()}` : `$${amount}`}</p>
                 </div>
 
                 <button

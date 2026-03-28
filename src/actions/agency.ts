@@ -6,7 +6,7 @@ import { ReservationInsert, ReservationUpdate } from "@/types/reservation";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "oceanstar-agency-super-secret-key-change-in-prod";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Helper to get supabase client on demand instead of at build time
 const getSupabase = () => {
@@ -17,6 +17,7 @@ const getSupabase = () => {
 
 export async function loginAgency(login_id: string, password_input: string) {
     try {
+        if (!JWT_SECRET) throw new Error("JWT_SECRET 환경변수가 설정되지 않았습니다.");
         const supabase = getSupabase();
         const { data: agency, error } = await supabase
             .from("agencies")
@@ -75,6 +76,7 @@ export async function getAgencySession() {
     const token = c.get("agency_session")?.value;
 
     if (!token) return { id: undefined, name: undefined };
+    if (!JWT_SECRET) return { id: undefined, name: undefined };
 
     try {
         const decoded = jwt.verify(token, JWT_SECRET) as { id: string; name: string };
@@ -85,11 +87,32 @@ export async function getAgencySession() {
     }
 }
 
-// Helper: Check if adding additionalPax to a specific date/option exceeds the max capacity of 35.
+// 옵션명 → tour_id 매핑
+const OPTION_TO_TOUR_ID: Record<string, string> = {
+    '1부': 'morning1',
+    '2부': 'morning2',
+    '3부': 'sunset',
+    '프라이빗': 'private',
+};
+
+// Helper: Check if adding additionalPax to a specific date/option exceeds the max capacity.
 async function checkCapacity(tourDate: string, option: string, additionalPax: number, excludeId?: string): Promise<string | null> {
     if (!tourDate || !option) return null;
 
     const supabase = getSupabase();
+
+    // 동적 max_capacity 조회
+    const tourId = OPTION_TO_TOUR_ID[option];
+    let limit = 35; // fallback
+    if (tourId) {
+        const { data: setting } = await supabase
+            .from('tour_settings')
+            .select('max_capacity')
+            .eq('tour_id', tourId)
+            .single();
+        if (setting?.max_capacity) limit = setting.max_capacity;
+    }
+
     let query = supabase
         .from("reservations")
         .select("pax")
@@ -117,8 +140,8 @@ async function checkCapacity(tourDate: string, option: string, additionalPax: nu
         }
     }
 
-    if (currentPax + additionalPax > 35) {
-        return `선택하신 날짜와 시간은 인원이 마감되어 예약할 수 없습니다. (현재 잔여: ${Math.max(0, 35 - currentPax)}명)`;
+    if (currentPax + additionalPax > limit) {
+        return `선택하신 날짜와 시간은 인원이 마감되어 예약할 수 없습니다. (현재 잔여: ${Math.max(0, limit - currentPax)}명)`;
     }
 
     return null;

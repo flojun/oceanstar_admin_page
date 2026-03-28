@@ -92,6 +92,14 @@ export default function ReservationPage() {
   const [reviewForm, setReviewForm] = useState<{ order_id: string; author_name: string; rating: number; content: string; images: File[] }>({ order_id: '', author_name: '', rating: 5, content: '', images: [] });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  // Image preview URL 생성 및 메모리 해제 (problem 10)
+  useEffect(() => {
+    const urls = reviewForm.images.map(f => URL.createObjectURL(f));
+    setPreviewUrls(urls);
+    return () => urls.forEach(url => URL.revokeObjectURL(url));
+  }, [reviewForm.images]);
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
@@ -234,8 +242,7 @@ export default function ReservationPage() {
     } catch (e) {
       console.error("Failed to fetch availability", e);
     } finally {
-      setIsLoadingAvailability(true);
-      setTimeout(() => setIsLoadingAvailability(false), 300);
+      setIsLoadingAvailability(false);
     }
   }, [tourSettings]);
 
@@ -719,7 +726,7 @@ export default function ReservationPage() {
                                 className="transform transition-all duration-300 hover:-translate-y-2 hover:scale-110 drop-shadow-sm hover:drop-shadow-xl"
                                 title="Instagram"
                             >
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/9/95/Instagram_logo_2022.svg" alt="Instagram" className="w-[47px] h-[47px] object-contain" />
+                                <Instagram size={47} className="text-pink-500" />
                             </a>
                             <a 
                                 href="https://www.youtube.com/@oceanstarhi" 
@@ -728,7 +735,7 @@ export default function ReservationPage() {
                                 className="transform transition-all duration-300 hover:-translate-y-2 hover:scale-105 drop-shadow-sm hover:drop-shadow-xl"
                                 title="YouTube"
                             >
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube" className="w-[59px] h-[59px] object-contain" />
+                                <Youtube size={52} className="text-red-600" />
                             </a>
                         </div>
                     </div>
@@ -1224,7 +1231,7 @@ export default function ReservationPage() {
                             <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
                                 {reviewForm.images.map((img, idx) => (
                                     <div key={idx} className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border border-slate-200">
-                                        <img src={URL.createObjectURL(img)} alt="preview" className="w-full h-full object-cover" />
+                                        <img src={previewUrls[idx] || ''} alt="preview" className="w-full h-full object-cover" />
                                         <button 
                                             type="button" 
                                             onClick={() => setReviewForm(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== idx) }))}

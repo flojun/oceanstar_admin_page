@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseServer } from '@/lib/supabaseServer';
 
 export async function GET() {
     try {
         // 1. Fetch tour settings
-        const { data: tourSettings, error: tourError } = await supabase
+        const { data: tourSettings, error: tourError } = await supabaseServer
             .from('tour_settings')
             .select('*');
 
@@ -12,7 +12,7 @@ export async function GET() {
 
         // 2. Fetch future blocked dates
         const todayStr = new Date().toISOString().split('T')[0];
-        const { data: blockedDates, error: blockedError } = await supabase
+        const { data: blockedDates, error: blockedError } = await supabaseServer
             .from('blocked_dates')
             .select('*')
             .gte('date', todayStr);

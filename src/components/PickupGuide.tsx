@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Bus, Clock, Navigation } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 import { getPickupDisplayName } from '@/constants/pickupLocations';
 
 export default function PickupGuide() {
@@ -10,14 +9,16 @@ export default function PickupGuide() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        supabase.from('pickup_locations').select('*')
-            .then(({ data }) => {
-                if (data && data.length > 0) {
-                    const sorted = data.sort((a, b) => (a.time_1 || '').localeCompare(b.time_1 || ''));
+        fetch('/api/pickup')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    const sorted = data.sort((a: any, b: any) => (a.time_1 || '').localeCompare(b.time_1 || ''));
                     setLocations(sorted);
                 }
                 setIsLoading(false);
-            });
+            })
+            .catch(() => setIsLoading(false));
     }, []);
 
     if (isLoading || locations.length === 0) return null;

@@ -1,14 +1,30 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseServer } from '@/lib/supabaseServer';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import { resolveOptionToTourSetting } from '@/lib/tourUtils';
 
 export async function POST(req: Request) {
     try {
+        // 인증 검사
+        const cookieStore = await cookies();
+        const supabaseAuth = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                cookies: { getAll: () => cookieStore.getAll() }
+            }
+        );
+        const { data: { user } } = await supabaseAuth.auth.getUser();
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await req.json();
         const { reservation_id, new_date, new_pickup, current_note } = body;
 
         // 1. 현재 대기중인 예약 정보 가져오기
-        const { data: reservation, error: fetchErr } = await supabase
+        const { data: reservation, error: fetchErr } = await supabaseServer
             .from('reservations')
             .select('id, pax, option, booker_email, name')
             .eq('id', reservation_id)
@@ -19,7 +35,7 @@ export async function POST(req: Request) {
         }
 
         // 2. 오버부킹 방지 (Capacity Validation)
-        const { data: settings } = await supabase.from('tour_settings').select('*');
+        const { data: settings } = await supabaseServer.from('tour_settings').select('*');
         if (!settings) {
              return NextResponse.json({ error: '투어 설정을 불러올 수 없습니다.' }, { status: 500 });
         }
@@ -34,7 +50,7 @@ export async function POST(req: Request) {
         const newPax = parseInt(newPaxStr.replace(/[^0-9]/g, ''), 10) || 0;
         
         // 해당 변경 희망일(new_date)의 동일한 배(옵션) 승객 수 합산
-        const { data: existingReservations, error: existErr } = await supabase
+        const { data: existingReservations, error: existErr } = await supabaseServer
             .from('reservations')
             .select('pax, option')
             .eq('tour_date', new_date)
@@ -44,7 +60,7 @@ export async function POST(req: Request) {
 
         let dbTotal = 0;
         if (existingReservations) {
-            existingReservations.forEach(r => {
+            existingReservations.forEach((r: any) => {
                 const rResolved = resolveOptionToTourSetting(r.option || "", settings);
                 if (rResolved.group === resolved.group && rResolved.vessel === resolved.vessel) {
                     dbTotal += parseInt((r.pax || "0").replace(/[^0-9]/g, ''), 10) || 0;
@@ -64,7 +80,7 @@ export async function POST(req: Request) {
         const cleanedNote = (current_note || "").replace(/\[변경요청\] <NewDate:.*?> <NewPickup:.*?>/g, '').trim();
         const finalNote = cleanedNote + `\n\n[✅투어 변경 자동처리 완료 (관리자)] 변경일: ${new_date} / 장소: ${new_pickup}`;
 
-        const { error: updateErr } = await supabase
+        const { error: updateErr } = await supabaseServer
             .from('reservations')
             .update({
                 status: '예약확정',
@@ -77,9 +93,7 @@ export async function POST(req: Request) {
         if (updateErr) throw updateErr;
 
         // 4. 이메일/알림톡 발송 로직 가이드 (안내 스니펫 연동 구조)
-        // 향후 AWS SES나 NodeMailer 또는 알림톡 API(알리고, 비즈톡 등) 연결 시 아래 포맷을 사용.
         const notificationSnippet = `예약 변경이 확정되었습니다.\n\n픽업 장소 및 시간, ${new_pickup}`;
-        // TO-DO: sendNotificationService(reservation.booker_email, reservation.name, notificationSnippet);
 
         return NextResponse.json({ 
             success: true, 

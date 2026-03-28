@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseServer } from '@/lib/supabaseServer';
 
 // GET: Fetch all visible reviews
 export async function GET() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseServer
             .from('reviews')
             .select('*')
             .eq('is_hidden', false)
@@ -29,11 +28,6 @@ export async function GET() {
 // POST: Submit a new review
 export async function POST(req: Request) {
     try {
-        const supabaseAdmin = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
-
         const formData = await req.formData();
         const order_id = formData.get('order_id') as string;
         const author_name = formData.get('author_name') as string;
@@ -67,7 +61,7 @@ export async function POST(req: Request) {
         const normalizedOrderId = order_id.toUpperCase().trim();
 
         // 1. Check reservation validity & status
-        const { data: reservation, error: resError } = await supabase
+        const { data: reservation, error: resError } = await supabaseServer
             .from('reservations')
             .select('status')
             .eq('order_id', normalizedOrderId)
@@ -86,7 +80,7 @@ export async function POST(req: Request) {
         }
 
         // 3. Check for existing review (1 예약 1 리뷰 제한)
-        const { data: existingReview, error: exError } = await supabase
+        const { data: existingReview } = await supabaseServer
             .from('reviews')
             .select('id')
             .eq('order_id', normalizedOrderId)
@@ -105,7 +99,7 @@ export async function POST(req: Request) {
             
             const fileBuffer = await file.arrayBuffer();
 
-            const { error: uploadError } = await supabaseAdmin.storage
+            const { error: uploadError } = await supabaseServer.storage
                 .from('review-images')
                 .upload(filePath, fileBuffer, {
                     contentType: file.type,
@@ -117,7 +111,7 @@ export async function POST(req: Request) {
                 return NextResponse.json({ success: false, error: `이미지 업로드에 실패했습니다: ${uploadError.message}` }, { status: 500 });
             }
 
-            const { data: publicUrlData } = supabaseAdmin.storage
+            const { data: publicUrlData } = supabaseServer.storage
                 .from('review-images')
                 .getPublicUrl(filePath);
 
@@ -127,7 +121,7 @@ export async function POST(req: Request) {
         }
 
         // 5. Insert Review
-        const { error: insertError } = await supabaseAdmin
+        const { error: insertError } = await supabaseServer
             .from('reviews')
             .insert([{
                 order_id: normalizedOrderId,
