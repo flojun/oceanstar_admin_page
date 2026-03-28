@@ -9,6 +9,7 @@ import { Check, MapPin, Calendar, Users, CreditCard, Loader2, ChevronRight, Info
 import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 import { calculateDistance, findClosestPickup, PickupLocation, getWalkingMinutes } from '@/lib/utils';
 import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
 import { format, parse } from "date-fns";
 import Image from "next/image";
 import imageCompression from "browser-image-compression";
