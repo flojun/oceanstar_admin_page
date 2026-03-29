@@ -50,11 +50,13 @@ export async function POST(req: Request) {
             pickupLabel = body.hotelName + ' (개별안내)';
         }
 
-        // 가격 계산 (고정 요금제 처리)
+        // 가격 계산 (언어 및 고정 요금제 분기)
+        const isEn = body.lang === 'en';
         let calculatedTotalPrice = 0;
+        let currency = isEn ? 'USD' : 'KRW';
+
         if (tourSetting.is_flat_rate && tourSetting.tour_id === 'private') {
             // 프라이빗 차터 계단식 요금 (동적 환율 적용)
-            const exchangeRate = tourSetting.adult_price_usd ? (tourSetting.adult_price_krw / tourSetting.adult_price_usd) : 1350;
             let usdPrice = 0;
             if (totalCount <= 4) usdPrice = 1800;
             else if (totalCount <= 10) usdPrice = 2200;
@@ -62,14 +64,22 @@ export async function POST(req: Request) {
             else if (totalCount <= 30) usdPrice = 3500;
             else usdPrice = 4500;
 
-            calculatedTotalPrice = Math.floor(usdPrice * exchangeRate);
+            if (isEn) {
+                calculatedTotalPrice = usdPrice;
+            } else {
+                const exchangeRate = tourSetting.adult_price_usd ? (tourSetting.adult_price_krw / tourSetting.adult_price_usd) : 1350;
+                calculatedTotalPrice = Math.floor(usdPrice * exchangeRate);
+            }
         } else if (tourSetting.is_flat_rate) {
-            // 다른 고정 요금 상품 대비
-            calculatedTotalPrice = tourSetting.adult_price_krw;
+            // 일반 고정 요금 상품
+            calculatedTotalPrice = isEn ? tourSetting.adult_price_usd : tourSetting.adult_price_krw;
         } else {
-            // 일반 상품 (성인/아동 인원수별 합산)
-            calculatedTotalPrice = (body.adultCount * tourSetting.adult_price_krw) +
-                (body.childCount * tourSetting.child_price_krw);
+            // 일반 스노클링 상품 (성인/아동 합산)
+            if (isEn) {
+                calculatedTotalPrice = (body.adultCount * (tourSetting.adult_price_usd || 0)) + (body.childCount * (tourSetting.child_price_usd || 0));
+            } else {
+                calculatedTotalPrice = (body.adultCount * tourSetting.adult_price_krw) + (body.childCount * tourSetting.child_price_krw);
+            }
         }
 
         // 3. Insert into Supabase reservations with '결제대기' status (retry up to 3 times for order_id collision)
@@ -78,14 +88,14 @@ export async function POST(req: Request) {
         let lastError = null;
 
         for (let attempt = 0; attempt < 3; attempt++) {
-            const noteText = `(성${body.adultCount}/아${body.childCount}) (예약번호 ${order_id})`;
+            const noteText = `(성${body.adultCount}/아${body.childCount}) (예약번호 ${order_id}) ${isEn ? '[USD결제]' : ''}`;
 
             const { data, error } = await supabaseServer
                 .from('reservations')
                 .insert([
                     {
                         order_id: order_id,
-                        source: '웹사이트',
+                        source: isEn ? '웹사이트(EN)' : '웹사이트',
                         name: body.bookerName,
                         contact: body.bookerPhone,
                         tour_date: body.tourDate,
@@ -124,9 +134,12 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: '예약 번호 생성에 실패했습니다. 다시 시도해주세요.' }, { status: 500 });
         }
 
-        // 4. Prepare Eximbay Request (Mocked for this implementation)
-        // [수정사항] 결제 화폐 단위를 기존 USD에서 DB 기반의 KRW 총합 금액으로 전달합니다.
-        const eximbayMockUrl = `/booking/mock-payment?order_id=${order_id}&amount=${calculatedTotalPrice}&cur=KRW`;
+        // 4. Prepare Eximbay Request (Dual MID integration handling)
+        const EXIMBAY_MID = isEn ? process.env.EXIMBAY_MID_EN : process.env.EXIMBAY_MID_KR;
+        const EXIMBAY_SECRET = isEn ? process.env.EXIMBAY_SECRET_EN : process.env.EXIMBAY_SECRET_KR;
+        
+        // Mock payload structure that will be later transitioned to Real PG form parameters
+        const eximbayMockUrl = `/booking/mock-payment?order_id=${order_id}&amount=${calculatedTotalPrice}&cur=${currency}&mid=${EXIMBAY_MID || 'DEMO'}`;
 
         return NextResponse.json({
             success: true,
