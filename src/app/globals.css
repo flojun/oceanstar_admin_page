@@ -110,3 +110,27 @@ input[type="date"].date-input-horizontal::-webkit-calendar-picker-indicator {
   top: 0;
   cursor: pointer;
 }
+
+/* =========================================
+   [알림 벨 애니메이션]
+   실시간 알림 수신 시 흔들림 효과
+   ========================================= */
+
+@keyframes bell-shake {
+  0%, 100% { transform: rotate(0deg); }
+  10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+  20%, 40%, 60%, 80% { transform: rotate(10deg); }
+}
+
+.animate-bell-shake {
+  animation: bell-shake 0.6s ease-in-out;
+}
+
+@keyframes notification-ping {
+  0% { transform: scale(1); opacity: 1; }
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+
+.animate-notification-ping {
+  animation: notification-ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}

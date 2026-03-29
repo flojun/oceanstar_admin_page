@@ -20,7 +20,7 @@ self.addEventListener('push', (event) => {
         icon: '/oceanstar_logo.jpg',
         badge: '/oceanstar_logo.jpg',
         tag: 'reservation-notification',
-        data: { url: '/dashboard/home' }
+        data: { url: '/dashboard/alerts' }
     };
 
     try {
@@ -43,7 +43,7 @@ self.addEventListener('push', (event) => {
             { action: 'view', title: '확인하기' },
             { action: 'dismiss', title: '닫기' }
         ],
-        data: data.data || { url: '/dashboard/home' }
+        data: data.data || { url: '/dashboard/alerts' }
     };
 
     event.waitUntil(
@@ -53,7 +53,7 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    const urlToOpen = event.notification.data?.url || '/dashboard/home';
+    const urlToOpen = event.notification.data?.url || '/dashboard/alerts';
 
     if (event.action === 'dismiss') return;
 

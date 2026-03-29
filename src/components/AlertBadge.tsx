@@ -20,18 +20,11 @@ export default function AlertBadge() {
 
         const handleLocalUpdate = () => fetchCount();
         window.addEventListener("reservation_status_changed", handleLocalUpdate);
+        window.addEventListener("admin-alert-counts-changed", handleLocalUpdate);
 
-        // Realtime: update badge when reservations change
-        const channel = supabase
-            .channel("sidebar_alert_badge")
-            .on("postgres_changes", { event: "*", schema: "public", table: "reservations" }, () => {
-                fetchCount();
-            })
-            .subscribe();
-
-        return () => { 
-            supabase.removeChannel(channel); 
+        return () => {
             window.removeEventListener("reservation_status_changed", handleLocalUpdate);
+            window.removeEventListener("admin-alert-counts-changed", handleLocalUpdate);
         };
     }, []);
 

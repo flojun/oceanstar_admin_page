@@ -31,7 +31,6 @@ import {
 import { useState, useEffect } from "react";
 import NotificationBell from "@/components/NotificationBell";
 import AlertBadge from "@/components/AlertBadge";
-import ReservationToast from "@/components/ReservationToast";
 
 type SidebarItem =
     | { name: string; href: string; icon: React.ComponentType<{ className?: string }>; children?: undefined }
@@ -145,15 +144,19 @@ function AdminSidebar({
                 {/* Logo & Toggle */}
                 <div className={cn(
                     "h-16 flex flex-row items-center border-b border-gray-100",
-                    isCollapsed ? "justify-center px-0" : "justify-between px-4"
+                    isCollapsed ? "justify-center px-0 gap-1" : "justify-between px-4"
                 )}>
                     {!isCollapsed && (
                         <div className="flex items-center gap-2 flex-1">
                             <h1 className="text-xl font-extrabold text-blue-600 tracking-tight truncate pt-1">
                                 OCEANSTAR
                             </h1>
-                            <NotificationBell />
+                            <NotificationBell isCollapsed={false} />
                         </div>
+                    )}
+
+                    {isCollapsed && (
+                        <NotificationBell isCollapsed={true} />
                     )}
 
                     <button
@@ -350,7 +353,6 @@ export default function AdminLayout({
         <div className="flex h-screen bg-gray-50 overflow-hidden">
             <UnsavedChangesProvider>
                 <AdminSidebar isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
-                <ReservationToast />
                 <main className="flex-1 overflow-auto flex flex-col min-w-0">
                     <div className="flex-1 p-4 md:p-8 max-w-[1600px] 2xl:max-w-[2200px] mx-auto w-full">
                         {children}
