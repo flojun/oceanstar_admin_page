@@ -121,6 +121,7 @@ const ko = {
     usd_currency: "USD",
     checkout_btn: "엑심베이 결제하기",
     waiting: "응답 대기 중...",
+    safe_notice: "안전하게 온라인 예약이 완료되며 현장 결제는 지원하지 않습니다.",
   },
   reviewModal: {
     title: "솔직한 후기를 남겨주세요",
@@ -134,6 +135,14 @@ const ko = {
     image: "사진 첨부 (최대 5장)",
     submit: "리뷰 등록하기",
     submitting: "등록 중...",
+    name_label: "이름 (초성 또는 닉네임 가능)",
+    name_placeholder: "김오션",
+    rating_label: "별점",
+    content_label: "후기 내용",
+    photo_label: "사진 첨부 (선택, 최대 3장)",
+    upload_btn: "클릭하여 사진 업로드",
+    upload_desc: "또는 사진을 이곳으로 드래그",
+    submitBtn: "리뷰 등록하기",
   },
   tourDetailsModal: {
     no_info: "상세 정보가 아직 입력되지 않았습니다.",

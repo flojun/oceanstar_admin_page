@@ -170,7 +170,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
       formData.append('content', reviewForm.content);
 
       if (reviewForm.images.length > 5) {
-        alert("사진은 최대 5장까지만 업로드 가능합니다.");
+        alert(lang === 'en' ? "You can upload up to 5 photos." : "사진은 최대 5장까지만 업로드 가능합니다.");
         setIsSubmittingReview(false);
         return;
       }
@@ -197,15 +197,15 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
       });
       const data = await res.json();
       if (data.success) {
-        alert("리뷰가 성공적으로 등록되었습니다. 감사합니다!");
+        alert(lang === 'en' ? "Review submitted successfully. Thank you!" : "리뷰가 성공적으로 등록되었습니다. 감사합니다!");
         setReviewForm({ order_id: '', author_name: '', rating: 5, content: '', images: [] });
         setIsReviewOpen(false);
         fetchReviews();
       } else {
-        alert(data.error || "리뷰 등록 중 오류가 발생했습니다.");
+        alert(data.error || (lang === 'en' ? "An error occurred while submitting." : "리뷰 등록 중 오류가 발생했습니다."));
       }
     } catch (e) {
-      alert("서버와 통신 중 오류가 발생했습니다.");
+      alert(lang === 'en' ? "Communication error with server." : "서버와 통신 중 오류가 발생했습니다.");
     } finally {
       setIsSubmittingReview(false);
     }
@@ -338,11 +338,11 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
       if (data.success && data.redirectUrl) {
         window.location.href = data.redirectUrl;
       } else {
-        alert("결제 준비 중 오류가 발생했습니다: " + (data.error || "Unknown error"));
+        alert((lang === 'en' ? "Payment error: " : "결제 준비 중 오류가 발생했습니다: ") + (data.error || "Unknown error"));
       }
     } catch (e) {
       console.error(e);
-      alert("서버 통신 중 오류가 발생했습니다.");
+      alert(lang === 'en' ? "Server communication error." : "서버 통신 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
     }
@@ -442,39 +442,39 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
           <section className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-12 sm:mb-20">
             <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <Award className="w-10 h-10 text-amber-500 mb-4 shrink-0" />
-              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">Since 2019,</h3>
-              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">한국인에게 가장 사랑받는 하와이 와이키키 거북이 스노클링 투어</p>
+              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc1_title')}</h3>
+              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">{t('bento.desc1_text')}</p>
             </div>
             <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-6 lg:p-7 shadow-xl text-white flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <Star className="w-10 h-10 text-yellow-300 mb-4 fill-yellow-300 shrink-0" />
-              <h3 className="text-lg lg:text-xl font-bold text-white mb-2 break-keep">13,000+ 누적 리뷰 ★업계 최다★</h3>
-              <p className="text-blue-100 font-medium text-sm leading-relaxed break-keep">압도적인 신뢰와 만족도</p>
+              <h3 className="text-lg lg:text-xl font-bold text-white mb-2 break-keep">{t('bento.desc2_title')}</h3>
+              <p className="text-blue-100 font-medium text-sm leading-relaxed break-keep">{t('bento.desc2_text')}</p>
             </div>
             
             <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <ShieldCheck className="w-10 h-10 text-emerald-500 mb-4 shrink-0" />
-              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">거북이 100% 만남 보장</h3>
-              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">오션스타와 함께라면 와이키키 자연산 바다 거북이를 반드시 만나실 수 있습니다.</p>
+              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc3_title')}</h3>
+              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">{t('bento.desc3_text')}</p>
             </div>
             
             <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <Anchor className="w-10 h-10 text-blue-500 mb-4 shrink-0" />
-              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">51인승 루프탑 보트</h3>
-              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">와이키키 유일! 자외선·비 100% 차단, 흔들림을 최소화하여 멀미 없는 쾌적함.</p>
+              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc4_title')}</h3>
+              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">{t('bento.desc4_text')}</p>
             </div>
             
             <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <UsersRound className="w-10 h-10 text-purple-500 mb-4 shrink-0" />
-              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">해양 전문 한국인 크루</h3>
-              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">수영을 전혀 못해도, 영어를 전혀 못해도 괜찮습니다! 한국인 크루 상주!</p>
+              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc5_title')}</h3>
+              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">{t('bento.desc5_text')}</p>
             </div>
           </section>
 
           {/* === 3. Tour Packages (Cards) === */}
           <section className="mb-10">
             <div className="text-center mb-12">
-               <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">오션스타 추천 프로그램</h2>
-               <p className="text-lg text-slate-500">당신의 완벽한 하와이 여행을 위한 최고의 선택</p>
+               <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">{t('tour.title')}</h2>
+               <p className="text-lg text-slate-500">{t('tour.subtitle')}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -495,10 +495,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                      displayCards = [combined, ...others].sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0));
                   }
 
-                  displayCards = displayCards.map((t: any) => {
-                    if (t.tour_id?.toLowerCase().includes('sunset')) return { ...t, name: '선셋·와인 & 와이키키 거북이 스노클링' };
-                    if (t.tour_id === 'private') return { ...t, name: <span className="block text-center leading-snug">[단독] 프라이빗<br/>와이키키 거북이 스노클링</span> };
-                    return t;
+                  displayCards = displayCards.map((tItem: any) => {
+                    if (tItem.tour_id?.toLowerCase().includes('sunset')) return { ...tItem, name: t('tour.names.sunset') };
+                    if (tItem.tour_id === 'private') return { ...tItem, name: <span className="block text-center leading-snug whitespace-pre-wrap">{t('tour.names.private').replace('] ', ']\n')}</span> };
+                    return tItem;
                   });
 
                   return displayCards.map((tour: any, idx: number) => {
@@ -506,14 +506,14 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     const isSunset = tour.tour_id?.toLowerCase().includes('sunset');
                     
                     const themes: { bg: string, gradient: string, text: string, badge: string, btn: string, specialLabel?: string, isDark?: boolean }[] = [
-                      { bg: 'bg-cyan-100', gradient: 'from-cyan-500 to-blue-400', text: 'text-blue-900', badge: '🌊 가장 인기있는 상품', btn: 'bg-slate-900 hover:bg-slate-800', isDark: false },
-                      { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '⏰ 여유로운 출발시간', btn: 'bg-orange-500 hover:bg-orange-600', isDark: false },
-                      { bg: 'bg-indigo-100', gradient: 'from-indigo-500 to-purple-500', text: 'text-indigo-900', badge: '✨ 프리미엄 투어', btn: 'bg-indigo-600 hover:bg-indigo-700', isDark: false }
+                      { bg: 'bg-cyan-100', gradient: 'from-cyan-500 to-blue-400', text: 'text-blue-900', badge: t('tour.badges.popular'), btn: 'bg-slate-900 hover:bg-slate-800', isDark: false },
+                      { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: t('tour.badges.morning'), btn: 'bg-orange-500 hover:bg-orange-600', isDark: false },
+                      { bg: 'bg-indigo-100', gradient: 'from-indigo-500 to-purple-500', text: 'text-indigo-900', badge: t('tour.badges.premium'), btn: 'bg-indigo-600 hover:bg-indigo-700', isDark: false }
                     ];
                     
                     let theme = themes[idx % themes.length];
-                    if (isPrivate) theme = { bg: 'bg-slate-800', gradient: 'from-slate-800 to-indigo-900', text: 'text-white', badge: '🛥️ VVIP 단독 보트 대관', btn: 'bg-indigo-500 hover:bg-indigo-400', isDark: true };
-                    else if (isSunset) theme = { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '🌅 로맨틱 선셋 뷰', btn: 'bg-orange-500 hover:bg-orange-600', specialLabel: '커플/신혼 여행객 추천!', isDark: false };
+                    if (isPrivate) theme = { bg: 'bg-slate-800', gradient: 'from-slate-800 to-indigo-900', text: 'text-white', badge: t('tour.badges.private'), btn: 'bg-indigo-500 hover:bg-indigo-400', isDark: true };
+                    else if (isSunset) theme = { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: t('tour.badges.sunset'), btn: 'bg-orange-500 hover:bg-orange-600', specialLabel: t('tour.badges.couple'), isDark: false };
 
                       const tourImages = (() => {
                         if (isSunset) {
@@ -548,33 +548,33 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         <div className={`p-6 sm:p-8 flex-1 flex flex-col`}>
                           <h3 className={`text-2xl font-bold text-center ${theme.isDark ? 'text-white' : 'text-slate-800'} mb-3`}>{tour.name}</h3>
                           <p className={`${theme.isDark ? 'text-slate-300' : 'text-slate-600'} mb-6 text-sm leading-relaxed flex-1`}>
-                            {tour.description || "와이키키 최고의 투어를 오션스타와 함께하세요. 전문가의 안내로 안전하고 즐거운 시간을 보장합니다."}
+                            {lang === 'en' ? (tour.description_en || "Enjoy the best tour in Waikiki with OceanStar. Guaranteed safe and fun time with expert guides.") : (tour.description || "와이키키 최고의 투어를 오션스타와 함께하세요. 전문가의 안내로 안전하고 즐거운 시간을 보장합니다.")}
                           </p>
                           <div className={`${theme.isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-100'} p-4 rounded-2xl mb-6 border`}>
                             <ul className={`space-y-2 text-sm ${theme.isDark ? 'text-slate-300' : 'text-slate-700'} font-medium`}>
                                 <li className="flex items-start gap-2">
                                   <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
-                                  {tour.is_flat_rate ? `우리 일행 단독 탑승 (최대 ${tour.max_capacity}인)` : '거북이 스노클링 + 해양 5종'}
+                                  {tour.is_flat_rate ? t('tour.features.private_only').replace('{max}', tour.max_capacity) : t('tour.features.snorkeling_5')}
                                 </li>
                                 <li className="flex items-start gap-2">
                                   <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
-                                  {tour.is_flat_rate ? '원하는 옵션 커스터마이징 가능' : '스노클 장비/구명조끼, 음료/간식'}
+                                  {tour.is_flat_rate ? t('tour.features.customizable') : t('tour.features.equip_snacks')}
                                 </li>
                                 {isSunset && (
                                   <li className="flex items-start gap-2">
                                     <Check className="text-emerald-500 w-4 h-4 mt-0.5 shrink-0" />
-                                    <span>치즈보드와 와인 제공</span>
+                                    <span>{t('tour.features.cheese_wine')}</span>
                                   </li>
                                 )}
                                 {tour.is_combined ? (
                                   <>
                                     <li className="flex items-start gap-2">
                                       <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
-                                      <span>1부 08:00 - 11:00</span>
+                                      <span>{t('tour.features.time_1')}</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                       <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
-                                      <span>2부 11:00 - 14:00</span>
+                                      <span>{t('tour.features.time_2')}</span>
                                     </li>
                                   </>
                                 ) : (
@@ -582,9 +582,9 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
                                     <div className="flex flex-col gap-1">
                                       {tour.is_flat_rate ? (
-                                        <span>인원수 연동 맞춤형 요금 적용</span>
+                                        <span>{t('tour.features.custom_price')}</span>
                                       ) : (
-                                        <span>{isSunset ? '시즌별 시간 변동' : `${tour.start_time?.slice(0,5) || '07:30'} - ${tour.end_time?.slice(0,5) || '14:30'}`}</span>
+                                        <span>{isSunset ? t('tour.details.time_variable') : t('tour.features.time_format').replace('{start}', tour.start_time?.slice(0,5) || '07:30').replace('{end}', tour.end_time?.slice(0,5) || '14:30')}</span>
                                       )}
                                     </div>
                                   </li>
@@ -617,9 +617,9 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                   onClick={() => setExpandedTourDetails(tour)} 
                                   className={`flex-1 sm:flex-none px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-all whitespace-nowrap border-2 ${theme.isDark ? 'border-slate-700 text-slate-300 hover:bg-slate-800' : 'border-slate-200 text-slate-600 hover:bg-slate-50'} flex justify-center items-center gap-1 active:scale-95`}
                                 >
-                                  자세히 보기
+                                  {t('tour.seeDetails')}
                                 </button>
-                                <button onClick={() => { if(tour.tour_id !== 'combined_morning' && tour.tour_id) { setSelectedTour(tour.tour_id); } else { setSelectedTour(null); } if(tour.is_flat_rate) form.setValue("childCount", 0); setIsBookingOpen(true); }} className={`flex-1 sm:flex-none ${theme.btn} text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-transform active:scale-95 whitespace-nowrap shadow-[0_4px_14px_0_rgba(0,118,255,0.39)]`}>예약하기</button>
+                                <button onClick={() => { if(tour.tour_id !== 'combined_morning' && tour.tour_id) { setSelectedTour(tour.tour_id); } else { setSelectedTour(null); } if(tour.is_flat_rate) form.setValue("childCount", 0); setIsBookingOpen(true); }} className={`flex-1 sm:flex-none ${theme.btn} text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-transform active:scale-95 whitespace-nowrap shadow-[0_4px_14px_0_rgba(0,118,255,0.39)]`}>{t('tour.bookBtn')}</button>
                             </div>
                           </div>
                         </div>
@@ -635,14 +635,14 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         <section className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-20 relative z-30">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
                 <div>
-                   <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">생생한 리얼 후기</h2>
-                   <p className="text-lg text-slate-500">당일 취소, 노쇼 없이 검증된 고객님들의 찐 후기입니다.</p>
+                   <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">{t('review.title')}</h2>
+                   <p className="text-lg text-slate-500">{t('review.subtitle')}</p>
                 </div>
                 <button 
                    onClick={() => setIsReviewOpen(true)}
                    className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 whitespace-nowrap">
                    <MessageSquare size={18} />
-                   리뷰 작성하기
+                   {t('review.writeBtn')}
                 </button>
             </div>
 
@@ -650,7 +650,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                 <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-blue-500 w-10 h-10" /></div>
             ) : reviews.length === 0 ? (
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-12 text-center text-slate-500 font-medium">
-                    첫 번째 리뷰의 주인공이 되어주세요!
+                    {t('review.empty')}
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -709,7 +709,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                 ))}
                             </div>
                         </div>
-                        <p className="text-slate-600 font-medium">구글 맵 기준 <strong className="text-slate-900">5,000+</strong>개의 실제 고객 리뷰</p>
+                        <p className="text-slate-600 font-medium">{t('review.google_desc1')}<strong className="text-slate-900">5,000+</strong>{t('review.google_desc2')}</p>
                     </div>
                 </div>
                 
@@ -719,7 +719,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     rel="noopener noreferrer"
                     className="w-full md:w-auto bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800 font-bold px-8 py-4 rounded-xl transition-all flex items-center justify-center gap-3 shrink-0"
                 >
-                    구글에서 전체 리뷰 보기 <ChevronRight size={18} />
+                    {t('review.google_btn')} <ChevronRight size={18} />
                 </a>
             </div>
         </section>
@@ -737,11 +737,11 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
           <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
                  <div>
-                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Mail size={20} className="text-blue-400" /> 하와이 현지 영업시간 안내</h3>
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Mail size={20} className="text-blue-400" /> {t('footer.hours_title')}</h3>
                     <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 max-w-sm flex flex-col gap-4">
                         <div className="text-slate-300 font-medium flex items-center gap-3">
-                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0">영업시간</span>
-                            <span className="text-sm">하와이 현지 기준 월~토 09:00~17:00</span>
+                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0">{t('footer.hours_badge')}</span>
+                            <span className="text-sm">{t('footer.hours_text')}</span>
                         </div>
                         <div className="flex items-center gap-6 pt-5 mt-2">
                             <a 
@@ -767,14 +767,14 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                  </div>
                  
                  <div>
-                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><MapPin size={20} className="text-blue-400" /> 하와이 주소 및 연락처</h3>
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><MapPin size={20} className="text-blue-400" /> {t('footer.address_title')}</h3>
                     <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 max-w-sm flex flex-col gap-3">
                         <div className="text-slate-300 font-medium flex items-center gap-3">
-                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0">이메일</span>
+                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0">{t('footer.email_badge')}</span>
                             <span className="text-sm">hioceanstar@gmail.com</span>
                         </div>
                         <div className="text-slate-300 font-medium flex items-start gap-3">
-                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0 mt-0.5">주소</span>
+                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0 mt-0.5">{t('footer.addr_badge')}</span>
                             <div className="flex flex-col gap-1.5 pt-0.5">
                                 <span className="text-sm leading-relaxed">1125 Kewalo Basin Harbor, Gate D #110, Honolulu, HI 96814</span>
                                 <a 
@@ -783,7 +783,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     rel="noreferrer"
                                     className="text-xs text-blue-400 hover:text-blue-300 underline underline-offset-2 flex items-center gap-1 w-fit transition-colors mt-0.5"
                                 >
-                                    구글 지도로 바로보기 <ChevronRight size={12} />
+                                    {t('footer.google_map')} <ChevronRight size={12} />
                                 </a>
                             </div>
                         </div>
@@ -793,13 +793,13 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
              <div className="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-left">
                  <div>
-                     <h4 className="text-white font-bold mb-2">오션스타 (Waikiki Turtle Snorkeling)</h4>
-                     <p className="text-slate-500 text-sm">하와이 한인 최초 거북이 스노클링 원조<br/>여행 플랫폼 8,000 리뷰 · 구글 5,000 리뷰</p>
+                     <h4 className="text-white font-bold mb-2">{t('footer.company_name')}</h4>
+                     <p className="text-slate-500 text-sm whitespace-pre-wrap">{t('footer.company_desc')}</p>
                  </div>
                  <div className="text-slate-500 text-sm md:text-right space-y-1">
-                     <p><span className="text-slate-400 font-medium">상호명:</span> 알로하 하와이 <span className="mx-2 hidden md:inline">|</span><br className="md:hidden" /> <span className="text-slate-400 font-medium">대표자명:</span> 정칠성</p>
-                     <p><span className="text-slate-400 font-medium">사업자등록번호:</span> 765-23-01629</p>
-                     <p><span className="text-slate-400 font-medium">사업장 소재지:</span> 경기도 안양시 만안구 양화로135번길 29, 3층 일부호(박달동)</p>
+                     <p><span className="text-slate-400 font-medium">{t('footer.biz_name')}</span> 알로하 하와이 <span className="mx-2 hidden md:inline">|</span><br className="md:hidden" /> <span className="text-slate-400 font-medium">{t('footer.biz_rep')}</span> 정칠성</p>
+                     <p><span className="text-slate-400 font-medium">{t('footer.biz_no')}</span> 765-23-01629</p>
+                     <p><span className="text-slate-400 font-medium">{t('footer.biz_addr')}</span> 경기도 안양시 만안구 양화로135번길 29, 3층 일부호(박달동)</p>
                  </div>
              </div>
           </div>
@@ -812,14 +812,14 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         <div className="w-full shrink-0 p-3 sm:p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex justify-center">
           <div className="max-w-[1600px] w-full flex justify-between items-center gap-3 px-2 sm:px-4">
             <div className="min-w-0 shrink-0">
-              <p className="text-xs sm:text-sm text-slate-500 font-medium">하와이 단연 1위</p>
-              <p className="text-base sm:text-xl font-extrabold text-blue-600 whitespace-nowrap">최고의 스노클링 투어 예약</p>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium">{t('floater.subtitle')}</p>
+              <p className="text-base sm:text-xl font-extrabold text-blue-600 whitespace-nowrap">{t('floater.title')}</p>
             </div>
             <button
               onClick={() => setIsBookingOpen(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 sm:py-3 sm:px-8 rounded-full shadow-lg shadow-blue-500/30 transition-transform active:scale-95 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0"
             >
-              예약하기 <ChevronRight size={18} />
+              {t('floater.btn')} <ChevronRight size={18} />
             </button>
           </div>
         </div>
@@ -831,7 +831,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setIsBookingOpen(false)}></div>
             <div className="relative w-full max-w-[550px] h-full bg-slate-50 shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-300">
               <div className="sticky top-0 bg-white/90 backdrop-blur-md px-6 py-4 border-b border-slate-200 flex justify-between items-center z-10 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-900">투어 예약</h2>
+                <h2 className="text-xl font-bold text-slate-900">{t('bookingModal.title')}</h2>
                 <button onClick={() => setIsBookingOpen(false)} className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 transition-colors">
                   <X size={20} />
                 </button>
@@ -844,7 +844,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     <section className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                       <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
                         <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">1</span>
-                        투어 선택
+                        {t('bookingModal.step1')}
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {tourSettings.filter((t: any) => t.is_active !== false).sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)).map((tour: any) => (
@@ -887,25 +887,25 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                       <section className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
                           <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">2</span>
-                          인원 입력
+                          {t('bookingModal.step2')}
                         </h2>
                         {isFlatRate && selectedTour === 'private' && (
                             <div className="mb-4 bg-indigo-50 text-indigo-900 p-4 rounded-xl text-sm border border-indigo-100 shadow-sm">
-                                <strong className="flex items-center gap-2 mb-1"><Info size={16} className="text-indigo-600" /> 프라이빗 차터 요금 안내</strong>
-                                <p className="text-xs mb-2 opacity-80">(총 인원, 단일 예약 기준)</p>
+                                <strong className="flex items-center gap-2 mb-1"><Info size={16} className="text-indigo-600" /> {lang === 'en' ? 'Private Charter Pricing' : '프라이빗 차터 요금 안내'}</strong>
+                                <p className="text-xs mb-2 opacity-80">{lang === 'en' ? '(Based on total passengers, single booking)' : '(총 인원, 단일 예약 기준)'}</p>
                                 <ul className="space-y-1 ml-6 list-disc opacity-90 font-medium">
-                                    <li>1~4명: $1,800</li>
-                                    <li>5~10명: $2,200</li>
-                                    <li>11~20명: $2,800</li>
-                                    <li>21~30명: $3,500</li>
-                                    <li>31~40명: $4,500</li>
+                                    <li>1~4{lang === 'en' ? ' pax' : '명'}: $1,800</li>
+                                    <li>5~10{lang === 'en' ? ' pax' : '명'}: $2,200</li>
+                                    <li>11~20{lang === 'en' ? ' pax' : '명'}: $2,800</li>
+                                    <li>21~30{lang === 'en' ? ' pax' : '명'}: $3,500</li>
+                                    <li>31~40{lang === 'en' ? ' pax' : '명'}: $4,500</li>
                                 </ul>
                             </div>
                         )}
                         <div className={`grid ${(isFlatRate) ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
                           <div>
                             <label className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                              {isFlatRate ? <><Users size={16} className="text-blue-500" /> 총 탑승 인원</> : <><Users size={16} className="text-blue-500" /> 성인</>}
+                              {isFlatRate ? <><Users size={16} className="text-blue-500" /> {t('bookingModal.totalPax')}</> : <><Users size={16} className="text-blue-500" /> {t('bookingModal.adultPax')}</>}
                             </label>
                             <input
                               type="number"
@@ -915,13 +915,13 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                               className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-lg bg-slate-50 focus:bg-white"
                             />
                             {isFlatRate && (
-                              <p className="text-xs text-slate-500 mt-2">※ 탑승 정원은 최대 {selectedTourSetting?.max_capacity || 40}명입니다.</p>
+                              <p className="text-xs text-slate-500 mt-2">{t('bookingModal.maxPax_notice').replace('{max}', String(selectedTourSetting?.max_capacity || 40))}</p>
                             )}
                           </div>
                           {!(isFlatRate) && (
                             <div>
                               <label className="block text-sm font-bold text-slate-700 mb-2">
-                                아동 (만3-11세)
+                                {t('bookingModal.childPax')}
                               </label>
                               <input
                                 type="number"
@@ -941,10 +941,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         <div className="flex items-center justify-between mb-4">
                           <h2 className="text-lg font-bold flex items-center gap-2 text-slate-900">
                             <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">3</span>
-                            날짜 선택
+                            {t('bookingModal.step3')}
                           </h2>
                           <div className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-                            예약가능 정원: {maxCapacity}명
+                            {t('bookingModal.avail_pax').replace('{max}', String(maxCapacity))}
                           </div>
                         </div>
 
@@ -1022,7 +1022,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         {form.formState.errors.tourDate && <p className="text-red-500 text-xs mt-3 text-center font-bold bg-red-50 p-2 rounded-lg">{form.formState.errors.tourDate.message}</p>}
 
                         <p className="text-center text-xs text-slate-500 mt-4 font-medium">
-                          선택하신 <strong className="text-blue-600">{totalSelectedPax}명</strong> 인원에 맞춰 예약 가능한 날짜만 활성화됩니다.
+                          {t('bookingModal.pax_notice').split('{pax}')[0]}<strong className="text-blue-600">{totalSelectedPax}</strong>{t('bookingModal.pax_notice').split('{pax}')[1]}
                         </p>
                       </section>
                     )}
@@ -1034,14 +1034,14 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                       <section ref={infoSectionRef} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
                         <h2 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-900">
                           <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">4</span>
-                          예약 정보 입력
+                          {t('bookingModal.step4')}
                         </h2>
 
                         <div className="space-y-6">
                             <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-4">
                                 <div>
                                     <label className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                                        <MapPin size={16} className="text-blue-500" /> 숙소 입력 (구글 지도 연동)
+                                        <MapPin size={16} className="text-blue-500" /> {t('bookingModal.hotel_label')}
                                     </label>
                                     {isLoaded ? (
                                     <Autocomplete
@@ -1051,7 +1051,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                         <input
                                         type="text"
                                         {...form.register("hotelName")}
-                                        placeholder="머무시는 숙소/호텔 이름 입력 (영문)"
+                                        placeholder={t('bookingModal.hotel_placeholder')}
                                         className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
                                         />
                                     </Autocomplete>
@@ -1059,7 +1059,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     <input
                                         type="text"
                                         {...form.register("hotelName")}
-                                        placeholder="머무시는 숙소를 입력해주세요"
+                                        placeholder={t('bookingModal.hotel_placeholder')}
                                         className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
                                     />
                                     )}
@@ -1067,7 +1067,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">픽업 장소 선택</label>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">{t('bookingModal.pickup_label')}</label>
                                     <select
                                     className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white cursor-pointer font-medium"
                                     value={closestPickup?.location?.id || ""}
@@ -1081,7 +1081,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                         }
                                     }}
                                     >
-                                    <option value="" disabled>가까운 장소가 추천되거나 직접 골라주세요</option>
+                                    <option value="" disabled>{t('bookingModal.pickup_placeholder')}</option>
                                     {pickupLocations.map(loc => (
                                         <option key={loc.id} value={loc.id}>
                                         {getPickupDisplayName(loc.name)}
@@ -1093,7 +1093,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     </select>
                                     {isFlatRate && selectedTour === 'private' && (
                                     <p className="text-sm text-indigo-700 mt-2 font-bold bg-indigo-100/50 p-2.5 rounded-lg flex items-center gap-2">
-                                        <Info size={16} /> 프라이빗 차터 픽업 시간은 예약 후 개별 조율됩니다.
+                                        <Info size={16} /> {t('bookingModal.private_pickup_notice')}
                                     </p>
                                     )}
                                 </div>
@@ -1101,7 +1101,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-sm font-bold text-slate-700 mb-2">예약자 성함 (여권 영문명)</label>
+                              <label className="block text-sm font-bold text-slate-700 mb-2">{t('bookingModal.name_label')}</label>
                               <input
                                 type="text"
                                 placeholder="예: HONG GILDONG"
@@ -1111,7 +1111,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                               {form.formState.errors.bookerName && <p className="text-red-500 text-xs mt-1 font-bold">{form.formState.errors.bookerName.message}</p>}
                             </div>
                             <div>
-                              <label className="block text-sm font-bold text-slate-700 mb-2">이메일 (바우처 수신용)</label>
+                              <label className="block text-sm font-bold text-slate-700 mb-2">{t('bookingModal.email_label')}</label>
                               <input
                                 type="email"
                                 placeholder="example@email.com"
@@ -1121,7 +1121,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                               {form.formState.errors.bookerEmail && <p className="text-red-500 text-xs mt-1 font-bold">{form.formState.errors.bookerEmail.message}</p>}
                             </div>
                             <div className="md:col-span-2">
-                              <label className="block text-sm font-bold text-slate-700 mb-2">연락처 (카카오톡 ID 또는 연락처)</label>
+                              <label className="block text-sm font-bold text-slate-700 mb-2">{t('bookingModal.phone_label')}</label>
                               <input
                                 type="text"
                                 placeholder="+82 10-1234-5678"
@@ -1180,7 +1180,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
             <div className="relative w-full max-w-[500px] bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
               <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
                 <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                    <MessageSquare className="text-blue-500" /> 솔직한 후기를 남겨주세요
+                    <MessageSquare className="text-blue-500" /> {t('reviewModal.title')}
                 </h2>
                 <button onClick={() => setIsReviewOpen(false)} className="p-2 bg-slate-200 hover:bg-slate-300 rounded-full text-slate-600 transition-colors">
                   <X size={20} />
@@ -1190,31 +1190,31 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
               <div className="p-6">
                 <form onSubmit={onReviewSubmit} className="flex flex-col gap-5">
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">예약 번호 (영숫자 6자리)</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">{lang === 'en' ? 'Booking ID (6 alphanumeric characters)' : '예약 번호 (영숫자 6자리)'}</label>
                         <input
                             type="text"
                             required
                             maxLength={6}
-                            placeholder="예: A4X9T2"
+                            placeholder={lang === 'en' ? "e.g.: A4X9T2" : "예: A4X9T2"}
                             value={reviewForm.order_id}
                             onChange={(e) => setReviewForm({ ...reviewForm, order_id: e.target.value.toUpperCase() })}
                             className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all uppercase tracking-widest font-mono font-bold"
                         />
-                        <p className="text-xs text-slate-500 mt-1">예약 확정 및 결제 후 전송된 바우처에서 확인하실 수 있습니다.</p>
+                        <p className="text-xs text-slate-500 mt-1">{lang === 'en' ? 'You can find it on your booking confirmation voucher.' : '예약 확정 및 결제 후 전송된 바우처에서 확인하실 수 있습니다.'}</p>
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">작성자 성함 (또는 닉네임)</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">{t('reviewModal.name_label')}</label>
                         <input
                             type="text"
                             required
-                            placeholder="홍길동"
+                            placeholder={t('reviewModal.name_placeholder')}
                             value={reviewForm.author_name}
                             onChange={(e) => setReviewForm({ ...reviewForm, author_name: e.target.value })}
                             className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">만족도 별점</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t('reviewModal.rating_label')}</label>
                         <div className="flex items-center gap-2">
                             {[1, 2, 3, 4, 5].map((star) => (
                                 <button
@@ -1226,15 +1226,15 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     <Star size={32} className={star <= reviewForm.rating ? "text-yellow-400 fill-yellow-400" : "text-slate-200"} />
                                 </button>
                             ))}
-                            <span className="ml-2 font-bold text-slate-700">{reviewForm.rating}점</span>
+                            <span className="ml-2 font-bold text-slate-700">{reviewForm.rating}{lang === 'en' ? ' pts' : '점'}</span>
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">리뷰 내용</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">{t('reviewModal.content_label')}</label>
                         <textarea
                             required
                             rows={4}
-                            placeholder="다녀오신 투어의 소중한 경험을 들려주세요!"
+                            placeholder={t('reviewModal.content_placeholder')}
                             value={reviewForm.content}
                             onChange={(e) => setReviewForm({ ...reviewForm, content: e.target.value })}
                             className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none font-medium"
@@ -1242,7 +1242,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">사진 첨부 (최대 5장)</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">{t('reviewModal.photo_label')} (Max 5)</label>
                         <input
                             type="file"
                             multiple
@@ -1285,7 +1285,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-md flex justify-center items-center gap-2"
                         >
                             {isSubmittingReview ? <Loader2 className="animate-spin" size={20} /> : <Check size={20} />}
-                            {isSubmittingReview ? "등록 중..." : "리뷰 등록하기"}
+                            {isSubmittingReview ? (lang === 'en' ? "Submitting..." : "등록 중...") : t('reviewModal.submitBtn')}
                         </button>
                     </div>
                 </form>
@@ -1303,7 +1303,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                  <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-100 bg-slate-50/50">
                      <h3 className="text-lg sm:text-2xl font-black text-slate-800 flex items-center gap-2">
                          <Info className="text-blue-500 hidden sm:block" size={24} />
-                         {expandedTourDetails.tour_id === 'private' ? '[단독] 프라이빗 와이키키 거북이 스노클링' : expandedTourDetails.name} 상세 정보
+                         {expandedTourDetails.tour_id === 'private' ? t('tour.names.private') : expandedTourDetails.name} {t('tour.details.title') || (lang === 'en' ? 'Details' : '상세 정보')}
                      </h3>
                      <button onClick={() => setExpandedTourDetails(null)} className="p-2 bg-white hover:bg-slate-200 rounded-full text-slate-500 hover:text-slate-800 transition-colors shadow-sm border border-slate-200">
                          <X size={20} />
@@ -1320,9 +1320,9 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                              <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4">
                                  <ClipboardList size={32} opacity={0.5} />
                              </div>
-                             <p className="font-bold text-slate-700 text-lg sm:text-xl mb-2 text-center">상세 정보가 아직 입력되지 않았습니다.</p>
+                             <p className="font-bold text-slate-700 text-lg sm:text-xl mb-2 text-center">{lang === 'en' ? 'Detailed information is not yet available.' : '상세 정보가 아직 입력되지 않았습니다.'}</p>
                              <p className="text-slate-500 text-sm text-center max-w-md leading-relaxed px-4">
-                                 관리자님, 나중에 이곳에 투어 스케줄, 코스 다이어그램, 준비물, 주의사항, 수많은 사진들을 마음껏 올릴 수 있습니다. (상하 스크롤이 자유로운 넓은 영역입니다!)
+                                 {lang === 'en' ? 'More information like schedule, diagrams, and photos will be added here soon!' : '관리자님, 나중에 이곳에 투어 스케줄, 코스 다이어그램, 준비물, 주의사항, 수많은 사진들을 마음껏 올릴 수 있습니다. (상하 스크롤이 자유로운 넓은 영역입니다!)'}
                              </p>
                          </div>
                      )}
@@ -1330,7 +1330,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                  {/* Modal Footer */}
                  <div className="p-4 sm:p-6 border-t border-slate-100 bg-white flex flex-col sm:flex-row justify-end gap-3">
                      <button onClick={() => setExpandedTourDetails(null)} className="px-6 py-3 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors w-full sm:w-auto text-center">
-                         닫기
+                         {lang === 'en' ? 'Close' : '닫기'}
                      </button>
                      <button 
                         onClick={() => { 
@@ -1343,7 +1343,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         }} 
                         className="px-8 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30 w-full sm:w-auto text-center"
                      >
-                         이 상품으로 예약하기
+                         {t('tour.bookBtn')}
                      </button>
                  </div>
              </div>

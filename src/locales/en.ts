@@ -121,6 +121,7 @@ const en = {
     usd_currency: "USD",
     checkout_btn: "Checkout with EXIMBAY",
     waiting: "Awaiting response...",
+    safe_notice: "Safe online booking is completed; on-site payments are not supported.",
   },
   reviewModal: {
     title: "Please leave a genuine review",
@@ -134,6 +135,14 @@ const en = {
     image: "Attach Photos (Max 5)",
     submit: "Submit Review",
     submitting: "Submitting...",
+    name_label: "Name (Initials or Nickname)",
+    name_placeholder: "John Doe",
+    rating_label: "Rating",
+    content_label: "Review Content",
+    photo_label: "Attach Photos (Optional, Max 3)",
+    upload_btn: "Click to upload photos",
+    upload_desc: "or drag photos here",
+    submitBtn: "Submit Review",
   },
   tourDetailsModal: {
     no_info: "Detailed information is not yet provided.",
