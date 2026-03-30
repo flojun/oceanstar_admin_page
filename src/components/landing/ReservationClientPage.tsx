@@ -349,7 +349,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-slate-50 text-slate-800 font-sans selection:bg-blue-200 selection:text-blue-900">
+    <div className="fixed inset-0 flex flex-col bg-white text-slate-800 font-sans selection:bg-blue-200 selection:text-blue-900">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -371,25 +371,25 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         }}
       />
       <header className={`w-full z-40 transition-all duration-300 bg-white/80 backdrop-blur-md shrink-0 ${isScrolled ? 'shadow-sm border-b border-slate-200' : 'border-b border-transparent'}`}>
-        <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex flex-col items-center">
-            <span className="text-[11.5px] font-bold text-blue-500/90 tracking-widest leading-none mb-1">{t('header.subtitle')}</span>
-            <h1 className="text-2xl font-black text-blue-600 tracking-tighter uppercase drop-shadow-sm leading-none">OceanStar</h1>
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5 sm:py-4 flex items-center justify-between">
+          <div className="flex flex-col items-center shrink-0">
+            <span className="text-[10px] sm:text-[11.5px] font-bold text-blue-500/90 tracking-widest leading-none mb-1">{t('header.subtitle')}</span>
+            <h1 className="text-[22px] sm:text-2xl font-black text-blue-600 tracking-tighter uppercase drop-shadow-sm leading-none">OceanStar</h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
              <button
                 onClick={() => {
                    const targetLang = lang === 'ko' ? 'en' : 'ko';
                    setLanguageCookie(targetLang);
                    window.location.href = targetLang === 'en' ? '/en' : '/';
                 }}
-                className="bg-white hover:bg-slate-50 text-blue-600 border border-blue-200 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center gap-1 whitespace-nowrap"
+                className="bg-white hover:bg-slate-50 text-blue-600 border border-blue-200 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-bold text-[11.5px] sm:text-sm shadow-sm transition-all flex items-center gap-1 whitespace-nowrap"
              >
                 {lang === 'ko' ? '🇺🇸 EN' : '🇰🇷 KR'}
              </button>
              <Link 
                 href={lang === 'en' ? '/en/manage-booking' : '/manage-booking'}
-                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-4 py-1.5 sm:px-5 sm:py-2 rounded-full font-bold text-xs sm:text-sm shadow-sm transition-all whitespace-nowrap">
+                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-full font-bold text-[11.5px] sm:text-sm shadow-sm transition-all whitespace-nowrap shrink-0">
                 {t('header.manageBooking')}
              </Link>
              <button 
@@ -401,7 +401,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         </div>
       </header>
 
-      <main ref={mainRef} className="w-full flex-1 overflow-y-auto pb-0">
+      <main ref={mainRef} className="w-full flex-1 overflow-y-auto pb-0 bg-slate-50">
         {/* === 1. Hero Section === */}
         <section className="relative w-full h-[100svh] sm:h-[85vh] min-h-[500px] sm:min-h-[600px] overflow-hidden">
           {/* Background Overlay - Top and Bottom gradient for text readability */}
@@ -417,16 +417,23 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
              <span className="inline-block py-1 px-3 sm:py-1.5 sm:px-4 rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 text-xs sm:text-sm md:text-sm font-bold uppercase tracking-widest mb-2 sm:mb-4 animate-fade-in-up">
                {t('hero.badge')}
              </span>
-             <h1 className="text-[2.8rem] sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight sm:leading-tight drop-shadow-2xl animate-fade-in-up animation-delay-100 break-keep">
-                {t('hero.title1')}<br/>{t('hero.title2')}<br className="sm:hidden" /><span className="hidden sm:inline"> </span>{t('hero.title3')}
+             <h1 className={`font-extrabold text-white leading-tight sm:leading-tight drop-shadow-2xl animate-fade-in-up animation-delay-100 ${lang === 'ko' ? 'text-[2.8rem] break-keep' : 'text-3xl break-words'} sm:text-4xl md:text-5xl lg:text-6xl`}>
+                {lang === 'ko' ? (
+                  <>{t('hero.title1')}<br/>{t('hero.title2')}<br className="sm:hidden" /><span className="hidden sm:inline"> </span>{t('hero.title3')}</>
+                ) : (
+                  <>{t('hero.title1')} {t('hero.title2')} {t('hero.title3')}</>
+                )}
              </h1>
           </div>
 
           {/* Bottom Text Content & Button */}
           <div className="absolute bottom-0 left-0 right-0 z-20 text-center px-4 pb-24 sm:pb-28 lg:pb-32 max-w-4xl mx-auto flex flex-col items-center">
-             <p className="text-sm sm:text-base md:text-xl text-white font-medium mb-4 sm:mb-8 drop-shadow-lg leading-relaxed animate-fade-in-up animation-delay-200 max-w-[90%] sm:max-w-none">
-                {t('hero.desc1')}<br />
-                {t('hero.desc2')}
+             <p className={`text-sm sm:text-base md:text-xl text-white font-medium mb-4 sm:mb-8 drop-shadow-lg leading-relaxed animate-fade-in-up animation-delay-200 max-w-[90%] sm:max-w-none ${lang === 'en' ? 'break-words' : 'break-keep'}`}>
+                {lang === 'ko' ? (
+                  <>{t('hero.desc1')}<br />{t('hero.desc2')}</>
+                ) : (
+                  <>{t('hero.desc1')} {t('hero.desc2')}</>
+                )}
              </p>
              <button 
                 onClick={() => setIsBookingOpen(true)}
@@ -811,9 +818,9 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
       {!isBookingOpen && !isReviewOpen && (
         <div className="w-full shrink-0 p-3 sm:p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex justify-center">
           <div className="max-w-[1600px] w-full flex justify-between items-center gap-3 px-2 sm:px-4">
-            <div className="min-w-0 shrink-0">
-              <p className="text-xs sm:text-sm text-slate-500 font-medium">{t('floater.subtitle')}</p>
-              <p className="text-base sm:text-xl font-extrabold text-blue-600 whitespace-nowrap">{t('floater.title')}</p>
+            <div className="min-w-0 flex-1 pr-2">
+              <p className="text-xs sm:text-sm text-slate-500 font-medium truncate">{t('floater.subtitle')}</p>
+              <p className="text-sm sm:text-xl font-extrabold text-blue-600 leading-tight line-clamp-2">{t('floater.title')}</p>
             </div>
             <button
               onClick={() => setIsBookingOpen(true)}
