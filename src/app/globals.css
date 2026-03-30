@@ -8,7 +8,7 @@
 }
 
 :root {
-  --background: #eff6ff;
+  --background: #ffffff; /* 강제로 노치 영역(body)을 흰색으로 만들기 위해 수정 */
   --foreground: #171717;
 }
 
