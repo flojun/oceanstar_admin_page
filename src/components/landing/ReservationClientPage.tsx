@@ -401,7 +401,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         </div>
       </header>
 
-      <main ref={mainRef} className="w-full flex-1 overflow-y-auto pb-0 bg-slate-50">
+      <main ref={mainRef} className="w-full flex-1 overflow-y-auto pb-0 bg-white">
         {/* === 1. Hero Section === */}
         <section className="relative w-full h-[100svh] sm:h-[85vh] min-h-[500px] sm:min-h-[600px] overflow-hidden">
           {/* Background Overlay - Top and Bottom gradient for text readability */}
