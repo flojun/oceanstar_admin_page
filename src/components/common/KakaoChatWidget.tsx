@@ -17,7 +17,7 @@ export default function KakaoChatWidget() {
   const chatUrl = `http://pf.kakao.com/${kakaoChannelId}`;
 
   return (
-    <div className="fixed bottom-28 right-6 z-[60] animate-in slide-in-from-bottom-5 duration-500">
+    <div className="fixed bottom-14 right-3 sm:bottom-28 sm:right-6 z-[60] animate-in slide-in-from-bottom-5 duration-500">
       <Link 
         href={chatUrl} 
         target="_blank" 
@@ -26,9 +26,12 @@ export default function KakaoChatWidget() {
         className="group relative flex items-center justify-center w-16 h-16 bg-[#FEE500] hover:bg-[#FEE500]/90 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all hover:scale-105 hover:-translate-y-1 active:scale-95"
       >
         <div className="absolute inset-0 rounded-full overflow-hidden flex items-center justify-center">
-            {/* Official KakaoTalk SVG Logo (Speech bubble with TALK cutout) */}
+            {/* KakaoTalk Speech Bubble with "Ch" text */}
              <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path fill="#3A1D1D" d="M16 4C7.163 4 0 9.73 0 16.8c0 4.54 2.846 8.528 7.228 10.758a.488.488 0 0 1 .253.5l-1.09 4.108a.56.56 0 0 0 .807.619l4.904-3.235a.519.519 0 0 1 .42-.047c1.1.309 2.26.477 3.478.477 8.837 0 16-5.73 16-12.8S24.837 4 16 4Zm-9.39 9.948h3.313v1.171h-1.077v4.062H7.63v-4.062H6.61v-1.171Zm5.626 5.233H9.992c-.37-.033-.48-.276-.231-.56l1.328-1.554-1.393-3.118h1.285l.798 2.058.852-1.066v-.992h1.164v5.232h-1.16v-2.155l-1.079 1.255.68 1.46Zm3.14-5.233h1.16v4.061h1.722v1.171h-2.882v-5.232Zm5.797 2.296c0 .412.339.75.766.75s.765-.338.765-.75-.339-.75-.765-.75-.766.338-.766.75Zm.766 3.092c-1.383 0-2.522-1.229-2.522-2.71 0-1.48 1.14-2.71 2.522-2.71 1.384 0 2.523 1.23 2.523 2.71 0 1.48-1.14 2.71-2.523 2.71Zm5.051-5.388v5.232H25.83v-2.028l-1.306 2.028H23.11l1.713-2.5-1.636-2.732h1.378l1.018 1.84.03.067v-1.907h1.378Z"/>
+                {/* Solid Brown Bubble */}
+                <path fill="#3A1D1D" d="M16 4C7.163 4 0 9.73 0 16.8c0 4.54 2.846 8.528 7.228 10.758a.488.488 0 0 1 .253.5l-1.09 4.108a.56.56 0 0 0 .807.619l4.904-3.235a.519.519 0 0 1 .42-.047c1.1.309 2.26.477 3.478.477 8.837 0 16-5.73 16-12.8S24.837 4 16 4Z"/>
+                {/* "Ch" Text in Yellow */}
+                <text x="16" y="21.5" fill="#FEE500" fontSize="13" fontWeight="900" fontFamily="sans-serif" letterSpacing="-0.5" textAnchor="middle">Ch</text>
             </svg>
         </div>
 
