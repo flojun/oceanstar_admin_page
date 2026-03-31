@@ -669,7 +669,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                 ))}
                             </div>
                             <p className="text-slate-700 italic whitespace-pre-wrap leading-relaxed text-sm mb-4 font-medium flex-1">
-                                "{review.content}"
+                                "{lang === 'en' && review.content_en ? review.content_en : review.content}"
                             </p>
                             {review.image_urls && review.image_urls.length > 0 && (
                                 <div className={`grid gap-2 mb-4 ${review.image_urls.length === 1 ? 'grid-cols-1' : review.image_urls.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
