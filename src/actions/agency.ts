@@ -228,7 +228,6 @@ export async function updateAgencyReservation(id: string, updates: ReservationUp
             .from("reservations")
             .update(updates)
             .eq("id", id)
-            .eq("agency_id", session.id) // Ensure they only edit their own
             .select()
             .single();
 
@@ -258,7 +257,6 @@ export async function cancelAgencyReservation(id: string, reserverName: string) 
             .from("reservations")
             .update({ status: "취소요청" })
             .eq("id", id)
-            .eq("agency_id", session.id)
             .select()
             .single();
 
