@@ -96,6 +96,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   // Image preview URL 생성 및 메모리 해제 (problem 10)
   useEffect(() => {
@@ -383,9 +384,14 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                    setLanguageCookie(targetLang);
                    window.location.href = targetLang === 'en' ? '/en' : '/';
                 }}
-                className="bg-white hover:bg-slate-50 text-blue-600 border border-blue-200 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-bold text-[11.5px] sm:text-sm shadow-sm transition-all flex items-center gap-1 whitespace-nowrap"
+                className="bg-white hover:bg-slate-50 text-blue-600 border border-blue-200 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-bold text-[11.5px] sm:text-sm shadow-sm transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap"
              >
-                {lang === 'ko' ? '🇺🇸 EN' : '🇰🇷 KR'}
+                <img 
+                   src={lang === 'ko' ? "https://flagcdn.com/w40/us.png" : "https://flagcdn.com/w40/kr.png"} 
+                   alt={lang === 'ko' ? "English" : "한국어"} 
+                   className="w-5 h-auto sm:w-6 object-contain rounded-[2px]"
+                />
+                <span>{lang === 'ko' ? 'EN' : 'KR'}</span>
              </button>
              <Link 
                 href={lang === 'en' ? '/en/manage-booking' : '/manage-booking'}
@@ -505,6 +511,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                   displayCards = displayCards.map((tItem: any) => {
                     if (tItem.tour_id?.toLowerCase().includes('sunset')) return { ...tItem, name: t('tour.names.sunset') };
                     if (tItem.tour_id === 'private') return { ...tItem, name: <span className="block text-center leading-snug whitespace-pre-wrap">{t('tour.names.private').replace('] ', ']\n')}</span> };
+                    if (tItem.is_combined || tItem.tour_id?.toLowerCase().includes('morning')) return { ...tItem, name: t('tour.names.combined') };
                     return tItem;
                   });
 
@@ -660,9 +667,15 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     {t('review.empty')}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {reviews.map((review) => (
-                        <div key={review.id} className="bg-white rounded-3xl p-6 shadow-md border border-slate-100 flex flex-col h-full transform hover:-translate-y-1 transition duration-300">
+                <div 
+                    className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 -mx-4 px-4 sm:mx-0 sm:px-0" 
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                    <style dangerouslySetInnerHTML={{__html: `
+                        .hide-scroll::-webkit-scrollbar { display: none; }
+                    `}} />
+                    {reviews.slice(0, 6).map((review) => (
+                        <div key={review.id} className="bg-white rounded-3xl p-6 shadow-md border border-slate-100 flex flex-col h-full shrink-0 w-[85vw] sm:w-[320px] lg:w-[350px] snap-center transform hover:-translate-y-1 transition duration-300">
                             <div className="flex items-center gap-1 mb-3">
                                 {[...Array(5)].map((_, i) => (
                                     <Star key={i} size={16} className={i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-slate-200"} />
@@ -674,13 +687,15 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             {review.image_urls && review.image_urls.length > 0 && (
                                 <div className={`grid gap-2 mb-4 ${review.image_urls.length === 1 ? 'grid-cols-1' : review.image_urls.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
                                     {review.image_urls.slice(0, 5).map((url: string, index: number) => (
-                                        <div key={index} className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-50 border border-slate-100 shadow-sm flex items-center justify-center">
+                                        <div key={index} className="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-100 border border-slate-50 shadow-sm flex items-center justify-center group">
                                             <Image 
                                               src={url} 
                                               alt={`스노클링 리뷰 이미지 ${index + 1}`} 
                                               fill 
-                                              className="object-contain cursor-pointer transition-transform hover:scale-105" 
-                                              sizes="(max-width: 768px) 33vw, 20vw" 
+                                              quality={90}
+                                              className="object-cover cursor-pointer transition-transform duration-500 group-hover:scale-110" 
+                                              sizes="(max-width: 768px) 50vw, 33vw" 
+                                              onClick={() => setLightboxImage(url)}
                                             />
                                         </div>
                                     ))}
@@ -873,7 +888,15 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                 <Check size={16} strokeWidth={3} />
                               </div>
                             )}
-                            <h3 className="font-bold text-base mb-1 text-slate-800">{tour.name}</h3>
+                            <h3 className="font-bold text-base mb-1 text-slate-800">
+                              {lang === 'en' ? (
+                                tour.tour_id === 'morning1' ? '1st Charter Waikiki Turtle Snorkeling' :
+                                tour.tour_id === 'morning2' ? '2nd Charter Waikiki Turtle Snorkeling' :
+                                tour.tour_id?.toLowerCase().includes('sunset') ? 'Sunset Wine & Waikiki Turtle Snorkeling' :
+                                tour.tour_id === 'private' ? '[Private] Waikiki Turtle Snorkeling Charter' :
+                                tour.name
+                              ) : tour.name}
+                            </h3>
                             <p className="text-xs text-slate-500 mb-3">
                               {tour.is_flat_rate ? t('bookingModal.flatRate_sub').replace('{max}', tour.max_capacity) : (tour.tour_id?.toLowerCase().includes('sunset') ? t('tour.details.time_variable') : t('bookingModal.normalRate_sub').replace('{start}', tour.start_time || 'AM').replace('{end}', tour.end_time || ''))}
                             </p>
@@ -1310,7 +1333,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                  <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-100 bg-slate-50/50">
                      <h3 className="text-lg sm:text-2xl font-black text-slate-800 flex items-center gap-2">
                          <Info className="text-blue-500 hidden sm:block" size={24} />
-                         {expandedTourDetails.tour_id === 'private' ? t('tour.names.private') : expandedTourDetails.name} {t('tour.details.title') || (lang === 'en' ? 'Details' : '상세 정보')}
+                         {expandedTourDetails.tour_id === 'private' ? t('tour.names.private') : expandedTourDetails.name}
                      </h3>
                      <button onClick={() => setExpandedTourDetails(null)} className="p-2 bg-white hover:bg-slate-200 rounded-full text-slate-500 hover:text-slate-800 transition-colors shadow-sm border border-slate-200">
                          <X size={20} />
@@ -1318,7 +1341,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                  </div>
                  {/* Modal Body / Scrollable */}
                  <div className="p-4 sm:p-8 overflow-y-auto flex-1 bg-slate-50">
-                     {expandedTourDetails.is_combined || expandedTourDetails.tour_id?.toLowerCase().includes('morning') || expandedTourDetails.tour_id?.toLowerCase().includes('sunset') || (typeof expandedTourDetails.name === 'string' && expandedTourDetails.name.includes('선셋')) ? (
+                     {expandedTourDetails.tour_id === 'private' || expandedTourDetails.is_combined || expandedTourDetails.tour_id?.toLowerCase().includes('morning') || expandedTourDetails.tour_id?.toLowerCase().includes('sunset') || (typeof expandedTourDetails.name === 'string' && expandedTourDetails.name.includes('선셋')) ? (
                          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-2 sm:p-6">
                              <TourCourseTimeline isSunset={(typeof expandedTourDetails.name === 'string' && expandedTourDetails.name.includes('선셋')) || expandedTourDetails.tour_id?.toLowerCase().includes('sunset')} lang={lang} />
                          </div>
@@ -1354,6 +1377,27 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                      </button>
                  </div>
              </div>
+          </div>
+        )}
+
+        {/* Fullscreen Image Lightbox Modal */}
+        {lightboxImage && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/90 p-4 sm:p-8 animate-in fade-in duration-200" onClick={() => setLightboxImage(null)}>
+            <div className="relative w-full h-full max-w-5xl max-h-[90vh] flex items-center justify-center">
+              <button 
+                onClick={(e) => { e.stopPropagation(); setLightboxImage(null); }} 
+                className="absolute top-0 right-0 z-50 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-md transition-colors m-2 sm:m-4 shadow-lg border border-white/20"
+                title="Close"
+              >
+                <X size={28} />
+              </button>
+              <img 
+                src={lightboxImage} 
+                alt="Enlarged review photo" 
+                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" 
+                onClick={(e) => e.stopPropagation()} 
+              />
+            </div>
           </div>
         )}
 
