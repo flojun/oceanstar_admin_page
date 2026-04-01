@@ -354,7 +354,7 @@ export default function AgencyDashboardPage() {
                 <div className="flex-1 overflow-auto bg-white relative">
                     <table className="w-full text-sm text-left whitespace-nowrap min-w-[800px]">
                         <thead className="sticky top-0 bg-gray-100/95 backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.05)] border-b border-gray-200 z-10 text-xs font-bold text-gray-600 uppercase tracking-widest">
-                            <tr>
+                            <tr className="divide-x divide-gray-200">
                                 <th className="px-5 py-3 w-24">상태</th>
                                 <th className="px-5 py-3 w-32">투어 날짜</th>
                                 <th className="px-5 py-3 w-28">옵션</th>
@@ -369,7 +369,7 @@ export default function AgencyDashboardPage() {
                             {loading ? (
                                 // 스켈레톤 로딩 (Skeleton UI)
                                 Array.from({ length: 15 }).map((_, i) => (
-                                    <tr key={i} className="animate-pulse bg-white">
+                                    <tr key={i} className="animate-pulse bg-white divide-x divide-gray-100">
                                         <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-12"></div></td>
                                         <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-20"></div></td>
                                         <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-10"></div></td>
@@ -394,7 +394,7 @@ export default function AgencyDashboardPage() {
                                     if(isCancelled) statusColor = "bg-red-50 text-red-600 border-red-100 line-through";
 
                                     return (
-                                        <tr key={res.id} className={`hover:bg-indigo-50/40 transition-colors group ${isCancelled ? 'bg-red-50/10 opacity-70' : 'bg-white'}`}>
+                                        <tr key={res.id} className={`hover:bg-indigo-50/40 transition-colors group ${isCancelled ? 'bg-red-50/10 opacity-70' : 'bg-white'} divide-x divide-gray-100`}>
                                             <td className="px-5 py-3">
                                                 <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded text-[11px] font-bold border ${statusColor}`}>
                                                     {res.status}

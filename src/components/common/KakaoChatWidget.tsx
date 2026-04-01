@@ -3,8 +3,16 @@
 import React from 'react';
 import Link from 'next/link';
 import { MessageCircle } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export default function KakaoChatWidget() {
+  const pathname = usePathname();
+
+  // Hide on agency pages and admin dashboard
+  if (pathname?.startsWith('/agency-') || pathname?.startsWith('/dashboard') || pathname?.startsWith('/login')) {
+    return null;
+  }
+
   // `.env.local`이나 Vercel 환경 변수가 없을 경우를 대비하여 하드코딩된 fallback 아이디를 제공합니다.
   const kakaoChannelId = process.env.NEXT_PUBLIC_KAKAO_CHANNEL_ID || '_hzxeEn';
 
