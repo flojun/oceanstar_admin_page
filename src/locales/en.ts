@@ -109,7 +109,7 @@ const en = {
     avail_pax: "Available Seats: {max}",
     pax_notice: "Only dates with available capacity for your {pax} passengers are activated.",
     hotel_label: "Accommodation Input (Automatic recommendation for nearest pickup point)",
-    hotel_placeholder: "Enter the name of your hotel/accommodation (English)",
+    hotel_placeholder: "Please enter your hotel address",
     pickup_label: "Select Pickup Location",
     pickup_placeholder: "Nearby location will be suggested or pick manually",
     private_pickup_notice: "Pickup time for private charters will be coordinated individually after booking.",
