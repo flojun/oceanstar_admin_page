@@ -42,11 +42,6 @@ export async function middleware(request: NextRequest) {
         const localeCookie = request.cookies.get('NEXT_LOCALE')?.value;
         if (localeCookie === 'en') {
             return NextResponse.redirect(new URL('/en', request.url));
-        } else if (!localeCookie) {
-            const acceptLanguage = request.headers.get('accept-language');
-            if (acceptLanguage && !acceptLanguage.startsWith('ko')) {
-                return NextResponse.redirect(new URL('/en', request.url));
-            }
         }
     }
 
