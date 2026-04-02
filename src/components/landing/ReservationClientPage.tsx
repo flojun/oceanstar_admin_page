@@ -1134,7 +1134,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                               <label className="block text-sm font-bold text-slate-700 mb-2">{t('bookingModal.name_label')}</label>
                               <input
                                 type="text"
-                                placeholder="예: HONG GILDONG"
+                                placeholder={lang === 'en' ? "e.g., HONG GILDONG" : "예: 홍길동"}
                                 {...form.register("bookerName")}
                                 className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium"
                               />
@@ -1154,7 +1154,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                               <label className="block text-sm font-bold text-slate-700 mb-2">{t('bookingModal.phone_label')}</label>
                               <input
                                 type="text"
-                                placeholder="+82 10-1234-5678"
+                                placeholder={lang === 'en' ? "+1 808-123-4567 or WhatsApp/Line" : "010-0000-0000 혹은 카카오톡 ID"}
                                 {...form.register("bookerPhone")}
                                 className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium"
                               />

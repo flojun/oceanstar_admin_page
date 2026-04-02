@@ -113,7 +113,7 @@ const ko = {
     pickup_label: "픽업 장소 선택",
     pickup_placeholder: "가까운 장소가 추천되거나 직접 골라주세요",
     private_pickup_notice: "프라이빗 차터 픽업 시간은 예약 후 개별 조율됩니다.",
-    name_label: "예약자 성함 (여권 영문명)",
+    name_label: "예약자 성함(한국어)",
     email_label: "이메일 (바우처 수신용)",
     phone_label: "연락처 (카카오톡 ID 또는 연락처)",
     total_payment: "총 결제 금액",
