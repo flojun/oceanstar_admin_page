@@ -1086,6 +1086,7 @@ function AllReservationsContent() {
             }
 
             alert(`저장 완료 (추가: ${inserts.length}건, 수정: ${updates.length}건)`);
+            setChangedRowIds(new Set());
             fetchReservations(0, true);
         } catch (error: any) {
             console.error("Save error:", error);
@@ -1373,6 +1374,27 @@ function AllReservationsContent() {
                 return hoverTooltipRenderer(props, false);
             },
             editorOptions: { commitOnOutsideClick: true }
+        },
+        {
+            key: "booker_email",
+            name: "이메일",
+            renderEditCell: CustomTextEditor,
+            width: 160,
+            cellClass: "p-0",
+            headerCellClass: "text-center",
+            renderCell: (props: any) => {
+                const idx = rows.indexOf(props.row);
+                const isSelected = selectedCell?.rowIdx === idx && selectedCell?.idx === props.column.idx;
+                return (
+                    <CustomTextEditor
+                        {...props}
+                        isAlwaysOn={true}
+                        isSelected={isSelected}
+                        onRowChange={(newRow: any) => handleSingleRowChangeDirect(newRow)}
+                        onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
+                    />
+                );
+            }
         },
         {
             key: "note",

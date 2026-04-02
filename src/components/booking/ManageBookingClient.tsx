@@ -479,7 +479,7 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                             >
                             <input
                                 type="text"
-                                placeholder="머무시는 숙소/호텔 이름 입력 (영문)"
+                                placeholder="머무시는 숙소/호텔 주소 입력"
                                 value={customHotelName}
                                 onChange={(e) => setCustomHotelName(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
@@ -488,7 +488,7 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                         ) : (
                             <input
                                 type="text"
-                                placeholder="머무시는 숙소를 입력해주세요"
+                                placeholder="머무시는 숙소/호텔 주소 입력"
                                 value={customHotelName}
                                 onChange={(e) => setCustomHotelName(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"

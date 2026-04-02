@@ -15,6 +15,7 @@ export interface Reservation {
   option: string;
   pickup_location: string;
   contact: string;
+  booker_email?: string;
   note: string;
   // Settlement fields
   settlement_status?: 'completed' | 'excluded' | null;

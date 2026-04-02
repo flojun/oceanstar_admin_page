@@ -80,6 +80,7 @@ export function ReservationTable({
         { label: "옵션", key: "option", width: "w-24 md:w-32", align: "center" }, // Increased for Korean text
         { label: "픽업장소", key: "pickup_location", width: "w-28", align: "left" },
         { label: "연락처", key: "contact", width: "w-36", align: "left" },
+        { label: "이메일", key: "booker_email", width: "w-40", align: "left" },
         { label: "기타사항", key: "note", width: "w-48", align: "left" },
         { label: "접수일", key: "receipt_date", width: "w-28", align: "left" },
     ];
@@ -328,6 +329,9 @@ export function ReservationTable({
                                         onClick={(e) => handleContactClick(e, res)}
                                     >
                                         {res.contact}
+                                    </td>
+                                    <td className={cn("px-4 text-gray-600 truncate max-w-[160px]", isSimpleView ? "py-1" : "py-3")} title={res.booker_email}>
+                                        {res.booker_email || ""}
                                     </td>
                                     <td className={cn("px-4 text-gray-500 truncate max-w-[200px]", isSimpleView ? "py-1" : "py-3")} title={res.note}>
                                         {res.note}
