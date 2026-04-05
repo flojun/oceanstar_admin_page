@@ -9,11 +9,11 @@ const en = {
     subtitle: "Hawaii Turtle Snorkeling",
   },
   hero: {
-    badge: "Original Hawaii Tour",
-    title1: "First in Hawaii!",
-    title2: "Turtle Snorkeling Tour,",
-    title3: " OceanStar★",
-    desc1: "The undeniable #1 Hawaii Turtle Snorkeling Tour, verified by over 20,000 customers yearly and 13,000+ reviews!",
+    badge: "Rated #1 in Hawaii!",
+    title1: "",
+    title2: "Waikiki’s Best Turtle Snorkeling Tour,",
+    title3: " Oceanstar",
+    desc1: "The undeniable #1 Waikiki Turtle Snorkeling Tour, verified by over 20,000 customers yearly and 13,000+ reviews!",
     desc2: "Experience the most fun and special moments in Waikiki with OceanStar!",
     mainBtn: "Book Now & Get Best Rate Guarantee",
   },
@@ -30,8 +30,8 @@ const en = {
     desc5_text: "Can't swim? Can't speak English? No problem! Friendly dedicated crew always on board!",
   },
   tour: {
-    title: "OceanStar Recommended Programs",
-    subtitle: "The best choice for your perfect Hawaiian vacation.",
+    title: "OceanStar Recommended Tours",
+    subtitle: "The best choice for your perfect Hawaii vacation.",
     seeDetails: "View Details",
     bookBtn: "Book Now",
     badges: {
@@ -43,9 +43,9 @@ const en = {
       couple: "Perfect for Couples!"
     },
     names: {
-      sunset: "Sunset Wine & Waikiki Turtle Snorkeling",
+      sunset: "Sunset & Wine Waikiki Turtle Snorkeling Adventure",
       private: "[Private] Waikiki Turtle Snorkeling Charter",
-      combined: "Waikiki Turtle Snorkeling"
+      combined: "Waikiki Turtle Snorkeling Adventure"
     },
     details: {
       privatePax: "Base 1~4 Pax (Varies by capacity)",
@@ -60,8 +60,9 @@ const en = {
       private_only: "Private boarding for your group (Max {max} pax)",
       snorkeling_5: "Turtle snorkeling + 5 water activities",
       customizable: "Fully customizable options available",
-      equip_snacks: "Snorkeling gear/Life jackets, Drinks/Snacks provided",
+      equip_snacks: "Snorkeling gear/Life jackets, Beverage/Snacks provided",
       cheese_wine: "Cheese board and wine provided",
+      pickup_service: "Complimentary pickup service",
       time_1: "Session 1: 08:00 - 11:00",
       time_2: "Session 2: 11:00 - 14:00",
       time_format: "{start} - {end}",

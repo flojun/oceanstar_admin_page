@@ -17,7 +17,7 @@ import { TourSetting } from "@/lib/tourUtils";
 import FAQSection from "@/components/landing/FAQSection";
 import PickupGuide from "@/components/landing/PickupGuide";
 import TourCourseTimeline from "@/components/landing/TourCourseTimeline";
-import { getPickupDisplayName } from '@/constants/pickupLocations';
+import { getPickupDisplayNameByLang } from '@/constants/pickupLocations';
 import ImageCarousel from "@/components/landing/ImageCarousel";
 import { getTranslation, setLanguageCookie, type Language } from "@/lib/translations";
 
@@ -427,7 +427,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                 {lang === 'ko' ? (
                   <>{t('hero.title1')}<br/>{t('hero.title2')}<br className="sm:hidden" /><span className="hidden sm:inline"> </span>{t('hero.title3')}</>
                 ) : (
-                  <>{t('hero.title1')} {t('hero.title2')} {t('hero.title3')}</>
+                  <>{t('hero.title1')}{t('hero.title1') ? <br/> : null}{t('hero.title2')}{t('hero.title3')}</>
                 )}
              </h1>
           </div>
@@ -443,7 +443,8 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
              </p>
              <button 
                 onClick={() => setIsBookingOpen(true)}
-                className="bg-white text-blue-800 hover:bg-blue-50 hover:scale-105 transition-all px-5 py-2.5 sm:px-8 sm:py-4 rounded-full font-extrabold text-sm sm:text-lg shadow-[0_0_40px_rgba(255,255,255,0.3)] animate-fade-in-up animation-delay-300">
+                className="bg-white text-blue-800 hover:bg-blue-50 hover:scale-105 transition-all px-5 py-2.5 sm:px-8 sm:py-4 rounded-full font-bold tracking-tight text-[15px] sm:text-lg shadow-[0_0_40px_rgba(255,255,255,0.3)] animate-fade-in-up animation-delay-300"
+                style={{ fontFamily: "'Inter', 'Pretendard', -apple-system, sans-serif" }}>
                 {t('hero.mainBtn')}
              </button>
           </div>
@@ -456,30 +457,30 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
             <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <Award className="w-10 h-10 text-amber-500 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc1_title')}</h3>
-              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">{t('bento.desc1_text')}</p>
+              <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc1_text')}</p>
             </div>
             <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-6 lg:p-7 shadow-xl text-white flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <Star className="w-10 h-10 text-yellow-300 mb-4 fill-yellow-300 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-white mb-2 break-keep">{t('bento.desc2_title')}</h3>
-              <p className="text-blue-100 font-medium text-sm leading-relaxed break-keep">{t('bento.desc2_text')}</p>
+              <p className="text-blue-100 font-medium text-base leading-relaxed break-keep">{t('bento.desc2_text')}</p>
             </div>
             
             <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <ShieldCheck className="w-10 h-10 text-emerald-500 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc3_title')}</h3>
-              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">{t('bento.desc3_text')}</p>
+              <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc3_text')}</p>
             </div>
             
             <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <Anchor className="w-10 h-10 text-blue-500 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc4_title')}</h3>
-              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">{t('bento.desc4_text')}</p>
+              <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc4_text')}</p>
             </div>
             
             <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <UsersRound className="w-10 h-10 text-purple-500 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc5_title')}</h3>
-              <p className="text-slate-600 font-medium text-sm leading-relaxed break-keep">{t('bento.desc5_text')}</p>
+              <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc5_text')}</p>
             </div>
           </section>
 
@@ -562,7 +563,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         <div className={`p-6 sm:p-8 flex-1 flex flex-col`}>
                           <h3 className={`text-2xl font-bold text-center ${theme.isDark ? 'text-white' : 'text-slate-800'} mb-3`}>{tour.name}</h3>
                           <p className={`${theme.isDark ? 'text-slate-300' : 'text-slate-600'} mb-6 text-sm leading-relaxed flex-1`}>
-                            {lang === 'en' ? (tour.description_en || "Enjoy the best tour in Waikiki with OceanStar. Guaranteed safe and fun time with expert guides.") : (tour.description || "와이키키 최고의 투어를 오션스타와 함께하세요. 전문가의 안내로 안전하고 즐거운 시간을 보장합니다.")}
+                            {lang === 'en' ? (tour.description_en || "Enjoy the best snorkeling tour in Waikiki with OceanStar. Guaranteed safe and fun time with professional guides.") : (tour.description || "와이키키 최고의 투어를 오션스타와 함께하세요. 전문가의 안내로 안전하고 즐거운 시간을 보장합니다.")}
                           </p>
                           <div className={`${theme.isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-100'} p-4 rounded-2xl mb-6 border`}>
                             <ul className={`space-y-2 text-sm ${theme.isDark ? 'text-slate-300' : 'text-slate-700'} font-medium`}>
@@ -601,6 +602,12 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                         <span>{isSunset ? t('tour.details.time_variable') : t('tour.features.time_format').replace('{start}', tour.start_time?.slice(0,5) || '07:30').replace('{end}', tour.end_time?.slice(0,5) || '14:30')}</span>
                                       )}
                                     </div>
+                                  </li>
+                                )}
+                                {!tour.is_flat_rate && lang === 'en' && (
+                                  <li className="flex items-start gap-2">
+                                    <Check className="text-emerald-500 w-4 h-4 mt-0.5 shrink-0" />
+                                    <span>{t('tour.features.pickup_service')}</span>
                                   </li>
                                 )}
                             </ul>
@@ -1114,7 +1121,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     <option value="" disabled>{t('bookingModal.pickup_placeholder')}</option>
                                     {pickupLocations.map(loc => (
                                         <option key={loc.id} value={loc.id}>
-                                        {getPickupDisplayName(loc.name)}
+                                        {getPickupDisplayNameByLang(loc.name, lang)}
                                         {(!isFlatRate || selectedTour !== 'private') && selectedTour === 'morning1' && loc.time_1 ? ` (${formatTimeAMPM(loc.time_1)})` : ''}
                                         {(!isFlatRate || selectedTour !== 'private') && selectedTour === 'morning2' && loc.time_2 ? ` (${formatTimeAMPM(loc.time_2)})` : ''}
                                         {(!isFlatRate || selectedTour !== 'private') && selectedTour === 'sunset' && loc.time_3 ? ` (${formatTimeAMPM(loc.time_3)})` : ''}

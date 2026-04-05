@@ -352,10 +352,17 @@ export async function getAgencyAvailabilityWeekly(startDate: string, endDate: st
                 const currentPax = slots[option];
                 let statusText = "출발 미정";
 
-                if (currentPax <= 10) statusText = "출발 미정";
-                else if (currentPax <= 31) statusText = "예약 가능";
-                else if (currentPax <= 35) statusText = "마감 임박";
-                else statusText = "마감";
+                if (option === "3부" || option === "선셋") {
+                    if (currentPax <= 10) statusText = "출발 미정";
+                    else if (currentPax <= 21) statusText = "예약 가능";
+                    else if (currentPax <= 24) statusText = "마감 임박";
+                    else statusText = "마감";
+                } else {
+                    if (currentPax <= 10) statusText = "출발 미정";
+                    else if (currentPax <= 31) statusText = "예약 가능";
+                    else if (currentPax <= 35) statusText = "마감 임박";
+                    else statusText = "마감";
+                }
 
                 return {
                     option,

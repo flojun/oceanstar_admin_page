@@ -16,21 +16,42 @@ export const PICKUP_LOCATIONS = [
 export type PickupLocation = typeof PICKUP_LOCATIONS[number];
 
 export const PICKUP_MAPPINGS: Record<string, string> = {
-    'HP': '하얏트 플레이스',
-    '녹색천막': '녹색천막(하얏트 리젠시 뒷편)',
-    'WR': '와이키키 리조트',
-    'HGI': '힐튼 가든 인',
-    'HIE': '홀리데이 인 익스프레스',
+    'HP': 'Hyatt Place',
+    '녹색천막': 'A Green Tent (located behind the Hyatt Regency Hotel)',
+    'WR': 'Waikiki Resort',
+    'HGI': 'Hilton Garden Inn',
+    'HIE': 'Holiday Inn Express',
     'HM': 'H&M',
     '아이홉': 'IHOP',
-    '카라이': '카라이 호텔',
-    '프린스': '프린스 호텔',
-    '르네상스': '르네상스 호텔',
-    '알라모아나': '알라모아나 호텔',
+    '카라이': "Ka La'i Waikiki Hotel",
+    '프린스': 'Prince Hotel',
+    '르네상스': 'Renaissance Hotel',
+    '알라모아나': 'Ala Moana Hotel',
     '직접': '개별 이동 (항구 직접 도착)'
+};
+
+export const PICKUP_MAPPINGS_EN: Record<string, string> = {
+    'HP': 'Hyatt Place',
+    '녹색천막': 'A Green Tent (located behind the Hyatt Regency Hotel)',
+    'WR': 'Waikiki Resort',
+    'HGI': 'Hilton Garden Inn',
+    'HIE': 'Holiday Inn Express',
+    'HM': 'H&M',
+    '아이홉': 'IHOP',
+    '카라이': "Ka La'i Waikiki Hotel",
+    '프린스': 'Prince Hotel',
+    '르네상스': 'Renaissance Hotel',
+    '알라모아나': 'Ala Moana Hotel',
+    '직접': 'Self Arrival'
 };
 
 export function getPickupDisplayName(name: string): string {
     return PICKUP_MAPPINGS[name] || name;
 }
 
+export function getPickupDisplayNameByLang(name: string, lang: 'ko' | 'en'): string {
+    if (lang === 'en') {
+        return PICKUP_MAPPINGS_EN[name] || PICKUP_MAPPINGS[name] || name;
+    }
+    return PICKUP_MAPPINGS[name] || name;
+}

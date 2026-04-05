@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Bus, Clock, Navigation } from 'lucide-react';
-import { getPickupDisplayName } from '@/constants/pickupLocations';
+import { getPickupDisplayNameByLang } from '@/constants/pickupLocations';
 import type { Language } from '@/lib/translations';
 
 export default function PickupGuide({ lang }: { lang: Language }) {
@@ -72,7 +72,7 @@ export default function PickupGuide({ lang }: { lang: Language }) {
                                 <div className={`ml-12 md:ml-0 w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] bg-white border border-slate-200 p-3 sm:p-4 rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-lg hover:border-blue-400 transition-all duration-300 group`}>
                                     <div className="flex justify-between items-center mb-3">
                                         <h3 className="text-base sm:text-lg font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">
-                                            {getPickupDisplayName(loc.name)}
+                                            {getPickupDisplayNameByLang(loc.name, lang)}
                                         </h3>
                                         {loc.lat && loc.lng && (
                                             <a 
