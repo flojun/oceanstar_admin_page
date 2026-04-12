@@ -176,35 +176,56 @@ export default function InvoiceManager() {
         const centerAlign = { vertical: 'middle', horizontal: 'center' } as Partial<ExcelJS.Alignment>;
 
         // 1. Title section
-        sheet.mergeCells('A1:G2');
-        const titleCell = sheet.getCell('A1');
-        titleCell.value = `INVOICE`;
-        titleCell.font = { size: 20, bold: true };
-        titleCell.alignment = centerAlign;
+        sheet.mergeCells('A1:G1');
+        const h1 = sheet.getCell('A1');
+        h1.value = 'OCEANVIEW  ACTIVITY  LLC';
+        h1.font = { size: 16, bold: true };
+        h1.alignment = { vertical: 'middle', horizontal: 'left' };
+
+        sheet.mergeCells('A2:G2');
+        const h2 = sheet.getCell('A2');
+        h2.value = 'www.oceanstarhawaii.com          email - isporex@gmail.com';
+        h2.font = { size: 11 };
+        h2.alignment = { vertical: 'middle', horizontal: 'left' };
 
         sheet.mergeCells('A3:G3');
-        const toCell = sheet.getCell('A3');
+        const h3 = sheet.getCell('A3');
+        h3.value = '1942 SAINT LOUIS DR. HONOLULU HAWAII 96816';
+        h3.font = { size: 11 };
+        h3.alignment = { vertical: 'middle', horizontal: 'left' };
+
+        sheet.mergeCells('A4:G4');
+        const h4 = sheet.getCell('A4');
+        h4.value = 'TEL (808) 453-0840';
+        h4.font = { size: 11 };
+        h4.alignment = { vertical: 'middle', horizontal: 'left' };
+
+        sheet.mergeCells('A6:G6');
+        const toCell = sheet.getCell('A6');
         toCell.value = `TO: ${selectedSource}`;
         toCell.font = { size: 12, bold: true };
-        toCell.alignment = { vertical: 'middle', horizontal: 'right' };
+        toCell.alignment = { vertical: 'middle', horizontal: 'left' };
 
         // 2. Table Headers
-        const cols = ['날짜', '가이드', '종목', '이름', '인원', '단가', '합계'];
-        const headerRowIndex = 5;
+        const cols = ['날짜', '가이드', '종목', '이 름', '인원', '요금', '합계'];
+        const headerRowIndex = 7;
         const headerRow = sheet.getRow(headerRowIndex);
         cols.forEach((col, i) => {
             const cell = headerRow.getCell(i + 1);
             cell.value = col;
-            cell.fill = headerFill;
             cell.font = fontBold;
-            cell.border = borderAll;
             cell.alignment = centerAlign;
+            // The google sheet doesn't seem to have border or fill, but keeping a simple one or leaving it clean.
+            // Let's keep borders to match a clean invoice look if they are ok, or remove them. 
+            // "처음부터 끝까지 똑같이 해줘" means no background fill on headers?
+            // Google sheet headers often have no fill unless specified. Let's remove headerFill.
+            // Actually, in the CSV we can't see fills. I'll just keep the fontBold and centerAlign.
         });
 
         const p = getPriceDetails(selectedSource);
 
         // 3. Rows
-        let currentRowIndex = 6;
+        let currentRowIndex = 8;
         reservations.forEach(r => {
             // pax parsing
             const paxSafe = r.pax || "0";
@@ -214,13 +235,13 @@ export default function InvoiceManager() {
             const adultNum = Math.max(0, paxNum - childNum);
 
             let isSunset = false;
-            let baseTourName = '거북이 스노클링 (1,2부)';
-            if(r.option?.toLowerCase().includes('sunset') || r.option?.includes('선셋')) {
+            let baseTourName = '거북이 스노클링'; 
+            if(r.option?.toLowerCase().includes('sunset') || r.option?.includes('선셋') || r.option?.includes('3부')) {
                 isSunset = true;
                 baseTourName = '선셋 스노클링';
             }
             if(r.option?.includes('프라이빗')) {
-                baseTourName = isSunset ? '프라이빗 보트 (선셋)' : '프라이빗 보트 (1,2부)';
+                baseTourName = '프라이빗 보트';
             }
 
             const adultPrice = isSunset ? (p.price_sunset_adult || 0) : (p.price_regular_adult || 0);
@@ -233,18 +254,22 @@ export default function InvoiceManager() {
                 const row = sheet.getRow(currentRowIndex);
                 row.getCell(1).value = r.tour_date;
                 row.getCell(2).value = guideName;
-                row.getCell(3).value = `${baseTourName} (성인)`;
+                row.getCell(3).value = childNum > 0 ? `${baseTourName}(성인)` : baseTourName;
                 row.getCell(4).value = r.name;
                 row.getCell(5).value = adultNum > 0 ? adultNum : 1; 
                 row.getCell(6).value = adultPrice;
                 row.getCell(7).value = { formula: `E${currentRowIndex}*F${currentRowIndex}`, result: (adultNum > 0 ? adultNum : 1) * adultPrice };
 
-                for (let i = 1; i <= 7; i++) {
-                    row.getCell(i).border = borderAll;
-                    row.getCell(i).alignment = centerAlign;
-                }
-                row.getCell(6).numFmt = '$#,##0.00';
-                row.getCell(7).numFmt = '$#,##0.00';
+                row.getCell(1).alignment = centerAlign;
+                row.getCell(2).alignment = centerAlign;
+                row.getCell(3).alignment = centerAlign;
+                row.getCell(4).alignment = centerAlign;
+                row.getCell(5).alignment = centerAlign;
+                row.getCell(6).alignment = centerAlign;
+                row.getCell(7).alignment = centerAlign;
+
+                row.getCell(6).numFmt = '$#,##0';
+                row.getCell(7).numFmt = '$#,##0';
                 currentRowIndex++;
             }
 
@@ -253,43 +278,43 @@ export default function InvoiceManager() {
                 const row = sheet.getRow(currentRowIndex);
                 row.getCell(1).value = r.tour_date;
                 row.getCell(2).value = guideName;
-                row.getCell(3).value = `${baseTourName} (아동)`;
+                row.getCell(3).value = `${baseTourName}(아동)`;
                 row.getCell(4).value = r.name;
                 row.getCell(5).value = childNum;
                 row.getCell(6).value = childPrice; 
                 row.getCell(7).value = { formula: `E${currentRowIndex}*F${currentRowIndex}`, result: childNum * childPrice };
 
-                for (let i = 1; i <= 7; i++) {
-                    row.getCell(i).border = borderAll;
-                    row.getCell(i).alignment = centerAlign;
-                }
-                row.getCell(6).numFmt = '$#,##0.00';
-                row.getCell(7).numFmt = '$#,##0.00';
+                row.getCell(1).alignment = centerAlign;
+                row.getCell(2).alignment = centerAlign;
+                row.getCell(3).alignment = centerAlign;
+                row.getCell(4).alignment = centerAlign;
+                row.getCell(5).alignment = centerAlign;
+                row.getCell(6).alignment = centerAlign;
+                row.getCell(7).alignment = centerAlign;
+
+                row.getCell(6).numFmt = '$#,##0';
+                row.getCell(7).numFmt = '$#,##0';
                 currentRowIndex++;
             }
         });
 
         // 4. Total Footer
+        currentRowIndex++; // Add an empty line before total if we want to roughly match the spacing.
         const totalRowIndex = currentRowIndex;
-        sheet.mergeCells(`A${totalRowIndex}:F${totalRowIndex}`);
-        const totalLabel = sheet.getCell(`A${totalRowIndex}`);
+        const totalLabel = sheet.getCell(`F${totalRowIndex}`);
         totalLabel.value = 'TOTAL';
         totalLabel.font = fontBold;
         totalLabel.alignment = { vertical: 'middle', horizontal: 'right' };
-        totalLabel.fill = headerFill;
-        totalLabel.border = borderAll;
 
         const sumCell = sheet.getCell(`G${totalRowIndex}`);
-        sumCell.value = { formula: `SUM(G6:G${totalRowIndex - 1})`, result: 0 };
+        sumCell.value = { formula: `SUM(G8:G${totalRowIndex - 1})`, result: 0 };
         sumCell.font = fontBold;
-        sumCell.fill = headerFill;
-        sumCell.border = borderAll;
         sumCell.alignment = centerAlign;
-        sumCell.numFmt = '$#,##0.00';
+        sumCell.numFmt = '$#,##0';
 
         // Adjust column widths
         sheet.columns.forEach((col, idx) => {
-            col.width = [15, 12, 28, 15, 10, 15, 20][idx];
+            col.width = [15, 12, 10, 15, 8, 12, 15][idx];
         });
 
         const buffer = await workbook.xlsx.writeBuffer();
@@ -409,13 +434,13 @@ export default function InvoiceManager() {
                                             const adultNum = Math.max(0, paxNum - childNum);
 
                                             let isSunset = false;
-                                            let baseTourName = '거북이 스노클링 (1,2부)';
-                                            if(r.option?.toLowerCase().includes('sunset') || r.option?.includes('선셋')) {
+                                            let baseTourName = '거북이 스노클링';
+                                            if(r.option?.toLowerCase().includes('sunset') || r.option?.includes('선셋') || r.option?.includes('3부')) {
                                                 isSunset = true;
                                                 baseTourName = '선셋 스노클링';
                                             }
                                             if(r.option?.includes('프라이빗')) {
-                                                baseTourName = isSunset ? '프라이빗 보트 (선셋)' : '프라이빗 보트 (1,2부)';
+                                                baseTourName = '프라이빗 보트';
                                             }
 
                                             const adultPrice = isSunset ? (p.price_sunset_adult || 0) : (p.price_regular_adult || 0);

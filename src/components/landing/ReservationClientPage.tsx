@@ -897,10 +897,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             )}
                             <h3 className="font-bold text-base mb-1 text-slate-800">
                               {lang === 'en' ? (
-                                tour.tour_id === 'morning1' ? '1st Charter Waikiki Turtle Snorkeling' :
-                                tour.tour_id === 'morning2' ? '2nd Charter Waikiki Turtle Snorkeling' :
+                                tour.tour_id === 'morning1' ? '1st Trip Waikiki Turtle Snorkeling' :
+                                tour.tour_id === 'morning2' ? '2nd Trip Waikiki Turtle Snorkeling' :
                                 tour.tour_id?.toLowerCase().includes('sunset') ? 'Sunset Wine & Waikiki Turtle Snorkeling' :
-                                tour.tour_id === 'private' ? '[Private] Waikiki Turtle Snorkeling Charter' :
+                                tour.tour_id === 'private' ? '[Private] Waikiki Turtle Snorkeling Trip' :
                                 tour.name
                               ) : tour.name}
                             </h3>
@@ -910,7 +910,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             <div className="flex flex-col">
                               <p className="font-extrabold text-blue-700 text-sm">
                                 {lang === 'en' ? (
-                                  tour.is_flat_rate && tour.tour_id === 'private' ? 'Private Charter (Tiered)' : tour.is_flat_rate ? `$${tour.adult_price_usd?.toLocaleString()} / Team` : `$${tour.adult_price_usd?.toLocaleString()} / Adult`
+                                  tour.is_flat_rate && tour.tour_id === 'private' ? 'Private Trip (Tiered)' : tour.is_flat_rate ? `$${tour.adult_price_usd?.toLocaleString()} / Team` : `$${tour.adult_price_usd?.toLocaleString()} / Adult`
                                 ) : (
                                   tour.is_flat_rate && tour.tour_id === 'private' ? '단독 차터 (계단식 요금)' : tour.is_flat_rate ? `₩${tour.adult_price_krw?.toLocaleString()} / 팀` : `₩${tour.adult_price_krw?.toLocaleString()} / 성인`
                                 )}
@@ -937,7 +937,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         </h2>
                         {isFlatRate && selectedTour === 'private' && (
                             <div className="mb-4 bg-indigo-50 text-indigo-900 p-4 rounded-xl text-sm border border-indigo-100 shadow-sm">
-                                <strong className="flex items-center gap-2 mb-1"><Info size={16} className="text-indigo-600" /> {lang === 'en' ? 'Private Charter Pricing' : '프라이빗 차터 요금 안내'}</strong>
+                                <strong className="flex items-center gap-2 mb-1"><Info size={16} className="text-indigo-600" /> {lang === 'en' ? 'Private Trip Pricing' : '프라이빗 차터 요금 안내'}</strong>
                                 <p className="text-xs mb-2 opacity-80">{lang === 'en' ? '(Based on total passengers, single booking)' : '(총 인원, 단일 예약 기준)'}</p>
                                 <ul className="space-y-1 ml-6 list-disc opacity-90 font-medium">
                                     <li>1~4{lang === 'en' ? ' pax' : '명'}: $1,800</li>
@@ -1190,7 +1190,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     <span className="text-slate-500 font-bold text-sm">{t('bookingModal.total_payment')} <span className="text-xs bg-slate-100 px-1.5 py-0.5 rounded ml-1 text-slate-600">{lang === 'en' ? t('bookingModal.usd_currency') : t('bookingModal.pay_currency')}</span></span>
                                     <span className="text-xs text-slate-400 mt-1 font-medium bg-slate-100 px-2 py-1 rounded w-fit">
                                       {(isFlatRate && selectedTour === 'private') 
-                                        ? (lang === 'en' ? `Private Charter (Total ${totalSelectedPax})` : `프라이빗 차터 (총 ${totalSelectedPax}명)`) 
+                                        ? (lang === 'en' ? `Private Trip (Total ${totalSelectedPax})` : `프라이빗 차터 (총 ${totalSelectedPax}명)`) 
                                         : (lang === 'en' ? `Adult ${adultCount} / Child ${childCount}` : `성인 ${adultCount}명 / 아동 ${childCount}명`)}
                                     </span>
                                 </div>

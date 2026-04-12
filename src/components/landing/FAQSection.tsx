@@ -146,7 +146,7 @@ const faqDataKo = [
         a: "가능한 경우 일정 변경을 도와드리며, 자세한 내용은 예약 플랫폼 규정을 따릅니다."
       },
       {
-        q: "왜 대박하와이(오션스타)를 선택해야 하나요?",
+        q: "왜 오션스타를 선택해야 하나요?",
         a: "하와이 한인 대상 거북이 스노클링 최초 시작 + 마이리얼트립 6,500+ · 구글 5,000+ 리뷰 No.1. 루프탑 보트·한국어 풀케어·4종 액티비티·거북이 보장까지, 수천 명이 \"하와이 최고의 추억\"이라고 말합니다."
       },
       {
@@ -203,7 +203,7 @@ const faqDataEn = [
     category: "Private & Special",
     items: [
       { q: "What if the weather is bad?", a: "If the Coast Guard restricts departure, we offer a full refund or reschedule. Our boat has a wooden roof, so light rain is perfectly fine." },
-      { q: "Can we book a private event?", a: "Yes, our Private Charter allows you to exclusively rent out the boat for parties, corporate events, or large families up to 45 pax. Custom catering and decorators available." },
+      { q: "Can we book a private event?", a: "Yes, our Private Trip allows you to exclusively rent out the boat for parties, corporate events, or large families up to 45 pax. Custom catering and decorators available." },
       { q: "Is tipping required?", a: "Gratuity is not legally required but highly appreciated in US culture for good service ($10-$20 per person is standard)." }
     ]
   },
@@ -212,7 +212,7 @@ const faqDataEn = [
     items: [
       { q: "What is your refund policy?", a: "- 7 days before tour: 100% refund\n- 3-6 days before tour: 50% refund\n- 2 days or less: No refund\n* Based on Hawaii Standard Time." },
       { q: "What about weather cancellations?", a: "If we cancel due to severe weather, you can choose either a full refund or a date change." },
-      { q: "Refund policy for private charters?", a: "The same policy applies unless a special contract was signed. Please contact us in advance for any major changes." }
+      { q: "Refund policy for private trips?", a: "The same policy applies unless a special contract was signed. Please contact us in advance for any major changes." }
     ]
   },
   {

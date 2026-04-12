@@ -30,9 +30,9 @@ function getAvailableOptions(hstDate: Date): string[] {
 }
 
 const SESSION_LABEL: Record<string, string> = {
-    "1부": "1st Charter",
-    "2부": "2nd Charter",
-    "3부": "3rd Charter",
+    "1부": "1st Trip",
+    "2부": "2nd Trip",
+    "3부": "3rd Trip",
 };
 const SESSION_TIME: Record<string, string> = {
     "1부": "7:30 – 10:59 AM",
@@ -239,14 +239,14 @@ function CheckinContent() {
                                 <div className="text-center py-6 text-gray-400">
                                     <p className="text-sm font-semibold">No check-in available right now.</p>
                                     <div className="mt-3 text-xs space-y-1">
-                                        <p>1st Charter · 7:30 – 10:59 AM</p>
-                                        <p>2nd Charter · 10:45 AM – 1:59 PM</p>
-                                        <p>3rd Charter · 2:00 – 7:00 PM</p>
+                                        <p>1st Trip · 7:30 – 10:59 AM</p>
+                                        <p>2nd Trip · 10:45 AM – 1:59 PM</p>
+                                        <p>3rd Trip · 2:00 – 7:00 PM</p>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="space-y-2">
-                                    <p className="text-sm text-center text-gray-500">Select your charter</p>
+                                    <p className="text-sm text-center text-gray-500">Select your trip</p>
                                     {(["1부", "2부", "3부"] as const).map(opt => {
                                         const avail = availableOptions.includes(opt);
                                         const alreadyDone = isAttended(opt);

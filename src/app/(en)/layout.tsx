@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.oceanstarhawaii.com'),
   title: "Hawaii Turtle Snorkeling & Sunset Cruise | Ocean Star",
-  description: "Highest rated in Waikiki! Hawaii turtle snorkeling, marine activities, sunset cruise, and private boat charters. Book now with Waikiki pickup included.",
+  description: "Highest rated in Waikiki! Hawaii turtle snorkeling, marine activities, sunset cruise, and private boat trips. Book now with Waikiki pickup included.",
   keywords: "Hawaii turtle snorkeling, Hawaii activities, Hawaii sunset cruise, Waikiki snorkeling, Ocean Star Hawaii, Hawaii private boat",
   openGraph: {
     title: "Hawaii Turtle Snorkeling & Sunset Cruise | Ocean Star",
-    description: "Highest rated in Waikiki! Hawaii turtle snorkeling, marine activities, sunset cruise, and private boat charters. Book now with Waikiki pickup included.",
+    description: "Highest rated in Waikiki! Hawaii turtle snorkeling, marine activities, sunset cruise, and private boat trips. Book now with Waikiki pickup included.",
     type: "website",
     url: "/",
     images: [

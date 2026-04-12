@@ -147,7 +147,10 @@ export default function AgencyDashboardPage() {
 
         const totalPax = formData.adults + formData.children + formData.infants;
         const paxString = `${totalPax}명`;
-        const paxBreakdown = `(성${formData.adults}, 아${formData.children}, 유${formData.infants}) `;
+        let parts = [`성${formData.adults}`];
+        if (formData.children > 0) parts.push(`아${formData.children}`);
+        if (formData.infants > 0) parts.push(`유${formData.infants}`);
+        const paxBreakdown = `(${parts.join(', ')}) `;
         const finalNote = formData.note ? `${paxBreakdown}${formData.note}` : paxBreakdown.trimEnd();
 
         const payload = {
@@ -481,9 +484,9 @@ export default function AgencyDashboardPage() {
                                 
                                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                                     <label className="block text-sm font-bold text-gray-800 mb-3">탑승 인원 <span className="text-red-500">*</span></label>
-                                    <div className="grid grid-cols-3 gap-3">
-                                        {['adults', 'children', 'infants'].map((type, idx) => {
-                                            const labels = ["성인", "아동", "유아"];
+                                    <div className={`grid ${agencyName.includes('타미스') ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
+                                        {(agencyName.includes('타미스') ? ['adults', 'children'] : ['adults']).map((type, idx) => {
+                                            const labels = ["성인 (기본)", "아동"];
                                             const key = type as keyof typeof formData;
                                             return (
                                                 <div key={type} className="text-center">

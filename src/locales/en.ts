@@ -38,13 +38,13 @@ const en = {
       popular: "🌊 Most Popular",
       morning: "⏰ Relaxed Departure",
       premium: "✨ Premium Tour",
-      private: "🛥️ VVIP Private Charter",
+      private: "🛥️ VVIP Private Trip",
       sunset: "🌅 Romantic Sunset View",
       couple: "Perfect for Couples!"
     },
     names: {
       sunset: "Sunset & Wine Waikiki Turtle Snorkeling Adventure",
-      private: "[Private] Waikiki Turtle Snorkeling Charter",
+      private: "[Private] Waikiki Turtle Snorkeling Trip",
       combined: "Waikiki Turtle Snorkeling Adventure"
     },
     details: {
@@ -101,7 +101,7 @@ const en = {
     step4: "Enter Booking Info",
     alert_selectTour: "Please select a tour option first.",
     alert_error: "Error occurred: ",
-    flatRate_sub: "Max {max} pax private charter",
+    flatRate_sub: "Max {max} pax private trip",
     normalRate_sub: "{start} - {end}",
     totalPax: "Total Passengers",
     adultPax: "Adult Number",
@@ -113,7 +113,7 @@ const en = {
     hotel_placeholder: "Please enter your hotel address",
     pickup_label: "Select Pickup Location",
     pickup_placeholder: "Nearby location will be suggested or pick manually",
-    private_pickup_notice: "Pickup time for private charters will be coordinated individually after booking.",
+    private_pickup_notice: "Pickup time for private trips will be coordinated individually after booking.",
     name_label: "Booker Name",
     email_label: "Email (For receiving vouchers)",
     phone_label: "Contact Number (Phone Number)",
