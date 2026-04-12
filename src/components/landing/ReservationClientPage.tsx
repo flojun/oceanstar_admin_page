@@ -510,8 +510,8 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                   }
 
                   displayCards = displayCards.map((tItem: any) => {
-                    if (tItem.tour_id?.toLowerCase().includes('sunset')) return { ...tItem, name: t('tour.names.sunset') };
-                    if (tItem.tour_id === 'private') return { ...tItem, name: <span className="block text-center leading-snug whitespace-pre-wrap">{t('tour.names.private').replace('] ', ']\n')}</span> };
+                    if (tItem.tour_id?.toLowerCase().includes('sunset')) return { ...tItem, name: <span className="block text-center leading-snug whitespace-pre-wrap">{lang === 'ko' ? t('tour.names.sunset').replace('와이키키 ', '와이키키\n') : t('tour.names.sunset')}</span> };
+                    if (tItem.tour_id === 'private') return { ...tItem, name: <span className="block text-center leading-snug whitespace-pre-wrap">{lang === 'ko' ? t('tour.names.private').replace('] ', ']\n').replace('거북이 ', '거북이\n') : t('tour.names.private').replace('] ', ']\n')}</span> };
                     if (tItem.is_combined || tItem.tour_id?.toLowerCase().includes('morning')) return { ...tItem, name: t('tour.names.combined') };
                     return tItem;
                   });
@@ -907,13 +907,22 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             <p className="text-xs text-slate-500 mb-3">
                               {tour.is_flat_rate ? t('bookingModal.flatRate_sub').replace('{max}', tour.max_capacity) : (tour.tour_id?.toLowerCase().includes('sunset') ? t('tour.details.time_variable') : t('bookingModal.normalRate_sub').replace('{start}', tour.start_time || 'AM').replace('{end}', tour.end_time || ''))}
                             </p>
-                            <p className="font-extrabold text-blue-700 text-sm">
-                              {lang === 'en' ? (
-                                tour.is_flat_rate && tour.tour_id === 'private' ? 'Private Charter (Tiered)' : tour.is_flat_rate ? `$${tour.adult_price_usd?.toLocaleString()} / Team` : `$${tour.adult_price_usd?.toLocaleString()} / Adult`
-                              ) : (
-                                tour.is_flat_rate && tour.tour_id === 'private' ? '단독 차터 (계단식 요금)' : tour.is_flat_rate ? `₩${tour.adult_price_krw?.toLocaleString()} / 팀` : `₩${tour.adult_price_krw?.toLocaleString()} / 성인`
-                              )}
-                            </p>
+                            <div className="flex flex-col">
+                              <p className="font-extrabold text-blue-700 text-sm">
+                                {lang === 'en' ? (
+                                  tour.is_flat_rate && tour.tour_id === 'private' ? 'Private Charter (Tiered)' : tour.is_flat_rate ? `$${tour.adult_price_usd?.toLocaleString()} / Team` : `$${tour.adult_price_usd?.toLocaleString()} / Adult`
+                                ) : (
+                                  tour.is_flat_rate && tour.tour_id === 'private' ? '단독 차터 (계단식 요금)' : tour.is_flat_rate ? `₩${tour.adult_price_krw?.toLocaleString()} / 팀` : `₩${tour.adult_price_krw?.toLocaleString()} / 성인`
+                                )}
+                              </p>
+                              {!tour.is_flat_rate && (tour.child_price_krw || tour.child_price_usd) ? (
+                                <p className="font-bold text-blue-500/90 text-xs mt-0.5">
+                                  {lang === 'en' 
+                                    ? (tour.child_price_usd ? `$${tour.child_price_usd.toLocaleString()} / Child` : '') 
+                                    : (tour.child_price_krw ? `₩${tour.child_price_krw.toLocaleString()} / 아동` : '')}
+                                </p>
+                              ) : null}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -935,7 +944,6 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     <li>5~10{lang === 'en' ? ' pax' : '명'}: $2,200</li>
                                     <li>11~20{lang === 'en' ? ' pax' : '명'}: $2,800</li>
                                     <li>21~30{lang === 'en' ? ' pax' : '명'}: $3,500</li>
-                                    <li>31~40{lang === 'en' ? ' pax' : '명'}: $4,500</li>
                                 </ul>
                             </div>
                         )}

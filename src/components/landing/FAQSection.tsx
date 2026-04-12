@@ -63,11 +63,11 @@ const faqDataKo = [
       },
       {
         q: "투어가 총 몇 시간인가요? 어떤 순서로 진행되나요?",
-        a: "총 4시간 진행됩니다. 호텔 픽업 → 케왈로 하버 승선 → 터틀캐니언 이동(15분) → 거북이 스노클링 + 5종 해양 액티비티 → 선상 스냅샷 + 간식 → 하버 복귀 → 호텔 드랍 순으로 진행됩니다. 타 업체 대비 1시간 더 넉넉하게 운영하여 모든 프로그램을 여유 있게 즐기실 수 있습니다."
+        a: "총 4시간 진행됩니다. 호텔 픽업 → 케왈로 하버 승선 → 터틀캐니언 이동(15분) → 거북이 스노클링 + 4종 해양 액티비티 → 선상 스냅샷 + 간식 → 하버 복귀 → 호텔 드랍 순으로 진행됩니다. 타 업체 대비 1시간 더 넉넉하게 운영하여 모든 프로그램을 여유 있게 즐기실 수 있습니다."
       },
       {
-        q: "5종 해양 액티비티가 정확히 무엇인가요? 모두 강제 참여인가요?",
-        a: "스탠드업 패들보드, 씨카약, 씨두 스쿠터, 선상 보트다이빙, 씨체어입니다. 모두 자유 참여이며 원하지 않는 항목은 건너뛰셔도 됩니다. 보트 위에서 쉬거나 경치를 즐기시는 분들도 많습니다."
+        q: "4종 해양 액티비티가 정확히 무엇인가요? 모두 강제 참여인가요?",
+        a: "스탠드업 패들보드, 카약, 선상 보트다이빙, 씨체어입니다. 모두 자유 참여이며 원하지 않는 항목은 건너뛰셔도 됩니다. 보트 위에서 쉬거나 경치를 즐기시는 분들도 많습니다."
       },
       {
         q: "돌고래나 다른 바다 생물도 볼 수 있나요?",
@@ -147,7 +147,7 @@ const faqDataKo = [
       },
       {
         q: "왜 대박하와이(오션스타)를 선택해야 하나요?",
-        a: "하와이 한인 대상 거북이 스노클링 최초 시작 + 마이리얼트립 6,500+ · 구글 5,000+ 리뷰 No.1. 루프탑 보트·한국어 풀케어·5종 액티비티·거북이 보장까지, 수천 명이 \"하와이 최고의 추억\"이라고 말합니다."
+        a: "하와이 한인 대상 거북이 스노클링 최초 시작 + 마이리얼트립 6,500+ · 구글 5,000+ 리뷰 No.1. 루프탑 보트·한국어 풀케어·4종 액티비티·거북이 보장까지, 수천 명이 \"하와이 최고의 추억\"이라고 말합니다."
       },
       {
         q: "거북이를 만지거나 같이 사진 찍어도 되나요?",
@@ -186,8 +186,8 @@ const faqDataEn = [
     category: "Tour & Turtles",
     items: [
       { q: "Is seeing turtles 100% guaranteed?", a: "Yes! As the original Turtle Canyon tour operator, we know exactly where to find them. If you don't see one, we offer special benefits for your next visit (which is extremely rare)." },
-      { q: "How long is the tour?", a: "It takes about 4 hours including hotel pickup, 15m boat ride, snorkeling, 5 marine activities, snacks, and hotel drop-off." },
-      { q: "Are the 5 marine activities mandatory?", a: "No, you can freely choose to do SUP, sea kayak, sea scooter, boat diving, or sea chair. You can also just relax on the boat." },
+      { q: "How long is the tour?", a: "It takes about 4 hours including hotel pickup, 15m boat ride, snorkeling, 4 marine activities, snacks, and hotel drop-off." },
+      { q: "Are the 4 marine activities mandatory?", a: "No, you can freely choose to do SUP, kayak, boat diving, or sea chair. You can also just relax on the boat." },
       { q: "Can we see dolphins or other marine life?", a: "Yes, we spot dolphins 3-4 times a month, along with tropical fish and corals. Whales or manta rays are rare but possible." }
     ]
   },
@@ -220,7 +220,7 @@ const faqDataEn = [
     items: [
       { q: "Should I wear my swimsuit in advance?", a: "Yes, we strongly recommend wearing it under your clothes." },
       { q: "Can I bring my luggage?", a: "Small bags are fine, but please leave large suitcases at your hotel due to limited boat space." },
-      { q: "Why choose OceanStar?", a: "We are the first Korean-operated Turtle Snorkeling tour with over 6,500+ reviews. We offer rooftop boats, full care, 5 activities, and guaranteed turtle sightings." },
+      { q: "Why choose OceanStar?", a: "We are the first Korean-operated Turtle Snorkeling tour with over 6,500+ reviews. We offer rooftop boats, full care, 4 activities, and guaranteed turtle sightings." },
       { q: "Can I touch the sea turtles?", a: "No. Federal law prohibits touching sea turtles; a 10-foot distance must be maintained. Our guides will help you get the best photos safely!" },
       { q: "What if I miss the pickup time?", a: "We wait 5-10 minutes, but if you're over 15 minutes late, you may need to take a taxi at your own expense. Please contact us in advance if you'll be late." }
     ]

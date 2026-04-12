@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Instagram } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 export default function KakaoChatWidget() {
@@ -25,7 +25,32 @@ export default function KakaoChatWidget() {
   const chatUrl = `http://pf.kakao.com/${kakaoChannelId}`;
 
   return (
-    <div className="fixed bottom-[90px] right-4 sm:bottom-28 sm:right-6 z-[60] animate-in slide-in-from-bottom-5 duration-500">
+    <div className="fixed bottom-[90px] right-4 sm:bottom-28 sm:right-6 z-[60] flex flex-col gap-3 animate-in slide-in-from-bottom-5 duration-500">
+      
+      {/* Instagram Button */}
+      <Link 
+        href="https://www.instagram.com/hawaii_turtlesnorkelling/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        aria-label="인스타그램 DM 문의하기"
+        className="group relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all hover:scale-105 hover:-translate-y-1 active:scale-95"
+        style={{
+          background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)'
+        }}
+      >
+        <Instagram size={30} className="text-white" />
+        
+        {/* Hover Tooltip */}
+        <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300">
+          <div className="bg-slate-900 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-lg whitespace-nowrap flex items-center gap-2">
+            <Instagram size={16} /> 인스타그램 DM 문의
+            {/* Small arrow pointing right */}
+            <div className="absolute top-1/2 -translate-y-1/2 -right-1 w-2 h-2 bg-slate-900 rotate-45"></div>
+          </div>
+        </div>
+      </Link>
+
+      {/* KakaoTalk Button */}
       <Link 
         href={chatUrl} 
         target="_blank" 

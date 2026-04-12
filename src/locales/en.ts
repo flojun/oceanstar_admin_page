@@ -9,7 +9,7 @@ const en = {
     subtitle: "Hawaii Turtle Snorkeling",
   },
   hero: {
-    badge: "Rated #1 in Hawaii!",
+    badge: "Hawaii's Best Tour",
     title1: "",
     title2: "Waikiki’s Best Turtle Snorkeling Tour,",
     title3: " Oceanstar",
@@ -58,7 +58,7 @@ const en = {
     },
     features: {
       private_only: "Private boarding for your group (Max {max} pax)",
-      snorkeling_5: "Turtle snorkeling + 5 water activities",
+      snorkeling_5: "Turtle snorkeling + 4 water activities",
       customizable: "Fully customizable options available",
       equip_snacks: "Snorkeling gear/Life jackets, Beverage/Snacks provided",
       cheese_wine: "Cheese board and wine provided",

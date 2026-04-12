@@ -33,19 +33,14 @@ const courseDataKo: TimelineItem[] = [
     imgSrc: "/images/timeline/paddleboard.png"
   },
   {
-    title: "씨카약",
-    description: "태평양에 둥실둥실~ 씨카약을 타고 와이키키 바다의 시원함을 만끽해보세요.",
+    title: "카약",
+    description: "태평양에 둥실둥실~ 카약을 타고 와이키키 바다의 시원함을 만끽해보세요.",
     imgSrc: "/images/timeline/kayak.png"
   },
   {
     title: "선상 보트 다이빙",
     description: "ONLY 오션스타 에서만 즐기는 와이키키 터틀 캐니언의 유일한 보트 다이빙, 놓치지 마세요!",
     imgSrc: "/images/timeline/diving_clean.png"
-  },
-  {
-    title: "씨두 스쿠터",
-    description: "바다 속의 스쿠터~ 작지만 강한 위력의 프로펠러로 와이키키 바다를 누벼보세요!",
-    imgSrc: "/images/timeline/scooter.png"
   },
   {
     title: "호텔 드랍오프",
@@ -79,19 +74,14 @@ const courseDataEn: TimelineItem[] = [
     imgSrc: "/images/timeline/paddleboard.png"
   },
   {
-    title: "Sea Kayak",
-    description: "Float on the Pacific! Ride a sea kayak and feel the refreshing breeze of Waikiki.",
+    title: "Kayak",
+    description: "Float on the Pacific! Ride a kayak and feel the refreshing breeze of Waikiki.",
     imgSrc: "/images/timeline/kayak.png"
   },
   {
     title: "Boat Diving",
     description: "Experience the thrill of boat diving at Turtle Canyon, available ONLY at OceanStar!",
     imgSrc: "/images/timeline/diving_clean.png"
-  },
-  {
-    title: "Sea-Doo Scooter",
-    description: "An underwater scooter! Explore the Waikiki waters with this small but powerful propeller.",
-    imgSrc: "/images/timeline/scooter.png"
   },
   {
     title: "Hotel Drop-off",
@@ -104,20 +94,11 @@ const courseDataEn: TimelineItem[] = [
 export default function TourCourseTimeline({ isSunset = false, lang }: { isSunset?: boolean, lang: Language }) {
   const displayData = lang === 'en' ? [...courseDataEn] : [...courseDataKo];
   if (isSunset) {
-    const scooterIndex = displayData.findIndex(item => item.title === "씨두 스쿠터");
-    if (scooterIndex !== -1) {
-      displayData.splice(scooterIndex + 1, 0, {
-        title: lang === 'en' ? "Wine & Cheese with Sunset" : "와인과 치즈보드 with 선셋",
-        description: lang === 'en' ? "Enjoy wine, cheese, and a beautiful sunset after your activities!" : "액티비티후 와인과 치즈보드 그리고 선셋을 함께 즐기세요!",
-        imgSrc: "/images/timeline/sunset_wine.jpg"
-      });
-    } else {
-      displayData.splice(displayData.length - 1, 0, {
-        title: lang === 'en' ? "Wine & Cheese with Sunset" : "와인과 치즈보드 with 선셋",
-        description: lang === 'en' ? "Enjoy wine, cheese, and a beautiful sunset after your activities!" : "액티비티후 와인과 치즈보드 그리고 선셋을 함께 즐기세요!",
-        imgSrc: "/images/timeline/sunset_wine.jpg"
-      });
-    }
+    displayData.splice(displayData.length - 1, 0, {
+      title: lang === 'en' ? "Wine & Cheese with Sunset" : "와인과 치즈보드 with 선셋",
+      description: lang === 'en' ? "Enjoy wine, cheese, and a beautiful sunset after your activities!" : "액티비티후 와인과 치즈보드 그리고 선셋을 함께 즐기세요!",
+      imgSrc: "/images/timeline/sunset_wine.jpg"
+    });
   }
 
   return (

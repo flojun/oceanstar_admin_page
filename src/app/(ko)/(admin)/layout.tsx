@@ -56,6 +56,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
         children: [
             { name: "Overview", href: "/dashboard/overview" },
             { name: "정산 검토", href: "/dashboard/settlement" },
+            { name: "인보이스 발급", href: "/dashboard/invoice" },
         ]
     },
     {

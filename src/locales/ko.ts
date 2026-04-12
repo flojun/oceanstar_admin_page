@@ -9,7 +9,7 @@ const ko = {
     subtitle: "하와이 거북이 스노클링",
   },
   hero: {
-    badge: "Original Hawaii Tour",
+    badge: "Hawaii's Best Tour",
     title1: "하와이 최초!",
     title2: "거북이 스노클링 투어,",
     title3: " 오션스타★",
@@ -58,7 +58,7 @@ const ko = {
     },
     features: {
       private_only: "우리 일행 단독 탑승 (최대 {max}인)",
-      snorkeling_5: "거북이 스노클링 + 해양 5종",
+      snorkeling_5: "거북이 스노클링 + 해양 4종",
       customizable: "원하는 옵션 커스터마이징 가능",
       equip_snacks: "스노클 장비/구명조끼, 음료/간식",
       cheese_wine: "치즈보드와 와인 제공",
