@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
+import { sendVoucherEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
     try {
@@ -30,6 +31,26 @@ export async function POST(req: Request) {
             }
 
             console.log(`Payment confirmed for order: ${order_id}`);
+
+            // 바우처 이메일 발송 (이메일 주소가 있고 예약확정된 경우)
+            if (data && data.length > 0) {
+                const reservation = data[0];
+                if (reservation.booker_email) {
+                    sendVoucherEmail({
+                        to: reservation.booker_email,
+                        name: reservation.name,
+                        order_id: reservation.order_id || order_id,
+                        tour_name: '오션스타 하와이 거북이 스노클링', // 기본 상품명 (필요 시 DB 구조에 맞춰 변경)
+                        tour_date: reservation.tour_date,
+                        pax: reservation.pax,
+                        option: reservation.option,
+                        pickup_location: reservation.pickup_location,
+                    }).catch(err => {
+                        console.error('Failed to send voucher email:', err);
+                    });
+                }
+            }
+
             return NextResponse.json({ success: true, message: 'Payment confirmed' });
         } else {
             // 결제 실패
