@@ -120,7 +120,7 @@ const ko = {
     total_payment: "총 결제 금액",
     pay_currency: "KRW",
     usd_currency: "USD",
-    checkout_btn: "엑심베이 결제하기",
+    checkout_btn: "현재 빌드중인 웹사이트 입니다. 예약 문의는 디엠 혹은 카카오톡으로 부탁드립니다.",
     waiting: "응답 대기 중...",
     safe_notice: "안전하게 온라인 예약이 완료되며 현장 결제는 지원하지 않습니다.",
   },

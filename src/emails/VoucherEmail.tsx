@@ -75,11 +75,11 @@ export const VoucherEmail = ({
           <Hr style={hr} />
           <Text style={footer}>
             안내 사항<br />
-            - 픽업 시간 10분 전까지 지정된 장소에 대기해 주시기 바랍니다.<br />
+            - 픽업 시간 5분전까지로 지정된 장소에 대기해 주시기 바랍니다.<br />
             - 일자 변경은 투어일 기준 7일 전까지만 가능합니다.<br />
             - 당일 취소 및 노쇼는 환불이 불가합니다.<br />
             <br />
-            오션스타 고객센터 (카카오톡 채널: @oceanstar)
+            오션스타 문의 (카카오톡 ID : hioceanstar)
           </Text>
         </Container>
       </Body>

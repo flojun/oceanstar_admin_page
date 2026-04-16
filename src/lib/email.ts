@@ -71,7 +71,7 @@ export async function sendVoucherEmail({
   const attachments = [];
   if (fs.existsSync(filePath)) {
     attachments.push({
-      filename: `오션스타_바우처_${name}.pdf`,
+      filename: `오션스타_${fileName}`,
       path: filePath,
     });
   } else {

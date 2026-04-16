@@ -120,7 +120,7 @@ const en = {
     total_payment: "Total Payment",
     pay_currency: "KRW",
     usd_currency: "USD",
-    checkout_btn: "Checkout with EXIMBAY",
+    checkout_btn: "Website is currently under construction. Please DM or Kakao for reservations.",
     waiting: "Awaiting response...",
     safe_notice: "Safe online booking is completed; on-site payments are not supported.",
   },
