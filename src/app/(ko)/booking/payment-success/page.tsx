@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { CheckCircle2, ChevronRight, Home } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
     const searchParams = useSearchParams();
     const [orderId, setOrderId] = useState<string | null>(null);
 
@@ -62,5 +62,13 @@ export default function PaymentSuccessPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function PaymentSuccessPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+            <PaymentSuccessContent />
+        </Suspense>
     );
 }
