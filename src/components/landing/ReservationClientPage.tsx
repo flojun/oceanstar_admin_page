@@ -318,7 +318,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
     try {
       const formattedDate = format(values.tourDate, "yyyy-MM-dd");
 
-      const response = await fetch('/api/eximbay/checkout', {
+      const response = await fetch('/api/pay2pay/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
