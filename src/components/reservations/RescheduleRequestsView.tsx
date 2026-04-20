@@ -25,10 +25,11 @@ export default function RescheduleRequestsView() {
             .from("reservations")
             .select("*")
             .eq("status", "변경요청")
-            .order("created_at", { ascending: false });
+            .order("created_at", { ascending: false })
+            .limit(100);
 
         if (error) {
-            console.error("Error fetching reschedule requests:", error);
+            console.error("Error fetching reschedule requests:", error.message || error);
         } else {
             setRequests(data || []);
         }

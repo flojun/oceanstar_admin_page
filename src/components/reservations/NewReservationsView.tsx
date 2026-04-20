@@ -27,10 +27,11 @@ export default function NewReservationsView({ onBack, onCountChange }: NewReserv
             .from("reservations")
             .select("*")
             .eq("is_admin_checked", false)
-            .order("created_at", { ascending: true });
+            .order("created_at", { ascending: true })
+            .limit(300); // 300건으로 제한하여 API 크래시 및 브라우저 다운 방지
 
         if (error) {
-            console.error("Failed to fetch unchecked reservations:", error);
+            console.error("Failed to fetch unchecked reservations:", error.message || error);
         } else {
             setRequests(data || []);
         }
@@ -55,14 +56,27 @@ export default function NewReservationsView({ onBack, onCountChange }: NewReserv
         if (requests.length === 0) return;
         if (!confirm(`${requests.length}건의 예약을 모두 확인 완료 처리하시겠습니까?`)) return;
         const ids = requests.map(r => r.id);
-        setRequests([]);
-        const { error } = await supabase
-            .from("reservations")
-            .update({ is_admin_checked: true })
-            .in("id", ids);
-        if (error) {
-            console.error("Failed to mark all as checked:", error);
-            fetchRequests();
+        setRequests([]); // Optimistic update
+        
+        // Chunk update to avoid 'URI Too Long' error for thousands of records
+        const chunkSize = 200;
+        let hasError = false;
+        
+        for (let i = 0; i < ids.length; i += chunkSize) {
+            const chunk = ids.slice(i, i + chunkSize);
+            const { error } = await supabase
+                .from("reservations")
+                .update({ is_admin_checked: true })
+                .in("id", chunk);
+                
+            if (error) {
+                console.error(`Failed to mark chunk as checked (${i} to ${i + chunkSize}):`, error);
+                hasError = true;
+            }
+        }
+        
+        if (hasError) {
+            fetchRequests(); // Revert optimistic update nicely for remaining failures
         }
         onCountChange?.();
         window.dispatchEvent(new Event("reservation_status_changed"));
