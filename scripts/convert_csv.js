@@ -1,13 +1,10 @@
 const fs = require('fs');
-const readline = require('readline');
-const path = require('path');
 
 const inputPath = 'c:\\Users\\skyli\\Downloads\\오션스타 예약(원본) - 예약입력 (3).csv';
-const outputPath = 'c:\\Users\\skyli\\Downloads\\supabase_import.csv';
+const outputPath = 'c:\\Users\\skyli\\Downloads\\supabase_import_strict_order.csv';
 
 function formatDatePattern(dateStr, defaultYear) {
     if (!dateStr) return '';
-    // If it already has a year like 2/4/2026
     let parts = dateStr.trim().split('/');
     if (parts.length === 3) {
         let y = parts[2].length === 2 ? `20${parts[2]}` : parts[2];
@@ -18,7 +15,6 @@ function formatDatePattern(dateStr, defaultYear) {
     if (parts.length === 2) {
         let m = parts[0].padStart(2, '0');
         let d = parts[1].padStart(2, '0');
-        // Heuristic: if month is 7,8,9,10,11,12 probably 2025. if 1,2,3,4,5,6 probably 2026 (for receipt dates)
         let y = parseInt(m) >= 7 ? '2025' : '2026';
         if (defaultYear) y = defaultYear;
         return `${y}-${m}-${d}`;
@@ -31,11 +27,13 @@ function processCSV() {
     const records = [];
     let currentReceiptDate = '';
 
-    for (let i = 1; i < lines.length; i++) { // Skip header
+    // A열부터 I열까지 (index 0~8)만 사용 및 행 순서 절대 유지
+    let baseTime = new Date('2024-01-01T00:00:00.000Z').getTime();
+
+    for (let i = 1; i < lines.length; i++) {
         const rawLine = lines[i].replace(/\r/g, '');
         if (!rawLine.trim()) continue;
 
-        // Manually split by comma, respecting quotes if there are any
         const row = [];
         let insideQuote = false;
         let currentValue = "";
@@ -58,46 +56,30 @@ function processCSV() {
             currentReceiptDate = cd;
         }
 
-        // Left side: [접수일 0, 예약경로 1, 예약자명 2, 여행일 3, 요일 4, 인원수 5, 옵션 6, 픽업 장소 7, 연락처 8]
-        if (row[1] && row[2]) {
+        // Only process left side (A~I), index 1 (source) and 2 (name) should exist or we skip empty rows
+        if (row[1] || row[2] || row[3]) {
+            baseTime += 1000; // Increment 1 second per row to strictly preserve order
+            
             records.push({
+                created_at: new Date(baseTime).toISOString(),
                 receipt_date: formatDatePattern(currentReceiptDate),
-                source: row[1] || '',
-                name: row[2] || '',
-                tour_date: formatDatePattern(row[3]) || '',
-                pax: row[5] || '',
-                option: row[6] || '',
-                pickup_location: row[7] || '',
-                contact: row[8] || '',
-                status: '예약확정', // Default
+                source: row[1] ? row[1].trim() : '',
+                name: row[2] ? row[2].trim() : '',
+                tour_date: row[3] ? formatDatePattern(row[3]) : '',
+                pax: row[5] ? row[5].trim() : '', // index 4 is 요일 (Day of Week), skip
+                option: row[6] ? row[6].trim() : '',
+                pickup_location: row[7] ? row[7].trim() : '',
+                contact: row[8] ? row[8].trim() : '',
+                status: '예약확정',
                 note: ''
-            });
-        }
-
-        // Right side: starting at col 10 in many cases
-        // 10: 예약경로, 11: 예약자명, 12: 여행일, 13: 요일, 14: 인원수, 15: 옵션, 16: 픽업 장소, 17: 안내완/상태
-        if (row.length > 11 && row[10] && row[11]) {
-            records.push({
-                receipt_date: formatDatePattern(currentReceiptDate), // Use same receipt date context
-                source: row[10] || '',
-                name: row[11] || '',
-                tour_date: formatDatePattern(row[12]) || '',
-                pax: row[14] || '',
-                option: row[15] || '',
-                pickup_location: row[16] || '',
-                contact: '', // not recorded on right side usually
-                status: '예약확정', 
-                note: row[17] || '' // often "안내완"
             });
         }
     }
 
-    // Generate CSV string
-    const headers = ['receipt_date', 'source', 'name', 'tour_date', 'pax', 'option', 'pickup_location', 'contact', 'status', 'note'];
+    const headers = ['created_at', 'receipt_date', 'source', 'name', 'tour_date', 'pax', 'option', 'pickup_location', 'contact', 'status', 'note'];
     let csvString = headers.join(',') + '\n';
     
     for (const r of records) {
-        // escape quotes / commas
         const esc = (val) => {
             if (!val) return '';
             let s = val.toString().replace(/"/g, '""');
@@ -110,7 +92,7 @@ function processCSV() {
     }
 
     fs.writeFileSync(outputPath, csvString, 'utf-8');
-    console.log(`Processed ${records.length} records to ${outputPath}`);
+    console.log(`Successfully strictly ordered and processed ${records.length} records to ${outputPath}`);
 }
 
 processCSV();

@@ -23,17 +23,18 @@ export default function NewReservationsView({ onBack, onCountChange }: NewReserv
 
     const fetchRequests = async () => {
         setLoading(true);
+        // 필요한 컬럼만 선택하여 응답 크기를 최소화 (27컬럼 → 8컬럼)
         const { data, error } = await supabase
             .from("reservations")
-            .select("*")
+            .select("id, name, status, source, tour_date, pax, option, pickup_location")
             .eq("is_admin_checked", false)
             .order("created_at", { ascending: true })
-            .limit(300); // 300건으로 제한하여 API 크래시 및 브라우저 다운 방지
+            .limit(50);
 
         if (error) {
             console.error("Failed to fetch unchecked reservations:", error.message || error);
         } else {
-            setRequests(data || []);
+            setRequests((data as Reservation[]) || []);
         }
         setLoading(false);
     };

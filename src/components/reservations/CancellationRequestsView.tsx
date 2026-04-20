@@ -25,10 +25,11 @@ export default function CancellationRequestsView() {
             .from("reservations")
             .select("*")
             .eq("status", "취소요청")
-            .order("created_at", { ascending: false });
+            .order("created_at", { ascending: false })
+            .limit(100);
 
         if (error) {
-            console.error("Error fetching cancellation requests:", error);
+            console.error("Error fetching cancellation requests:", error.message || error);
         } else {
             setRequests(data || []);
         }
