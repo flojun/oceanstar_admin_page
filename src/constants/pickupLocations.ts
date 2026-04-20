@@ -5,6 +5,7 @@ export const PICKUP_LOCATIONS = [
     "HIE",
     "HM",
     "녹색천막",
+    "소화전",
     "WR",
     "HP",
     "HGI",
@@ -18,6 +19,7 @@ export type PickupLocation = typeof PICKUP_LOCATIONS[number];
 export const PICKUP_MAPPINGS: Record<string, string> = {
     'HP': 'Hyatt Place',
     '녹색천막': 'A Green Tent (located behind the Hyatt Regency Hotel)',
+    '소화전': '소화전',
     'WR': 'Waikiki Resort',
     'HGI': 'Hilton Garden Inn',
     'HIE': 'Holiday Inn Express',
@@ -33,6 +35,7 @@ export const PICKUP_MAPPINGS: Record<string, string> = {
 export const PICKUP_MAPPINGS_EN: Record<string, string> = {
     'HP': 'Hyatt Place',
     '녹색천막': 'A Green Tent (located behind the Hyatt Regency Hotel)',
+    '소화전': 'Sohwajeon (Fire Hydrant)',
     'WR': 'Waikiki Resort',
     'HGI': 'Hilton Garden Inn',
     'HIE': 'Holiday Inn Express',
