@@ -333,8 +333,10 @@ export function ReservationModal({
                                             {loc}
                                         </option>
                                     ))}
+                                    {/* 관리자 전용 픽업장소 추가 */}
+                                    <option value="소화전">소화전</option>
                                     {/* Keep existing value if not in list (for backward compatibility) */}
-                                    {formData.pickup_location && !PICKUP_LOCATIONS.includes(formData.pickup_location as any) && (
+                                    {formData.pickup_location && formData.pickup_location !== "소화전" && !PICKUP_LOCATIONS.includes(formData.pickup_location as any) && (
                                         <option value={formData.pickup_location}>{formData.pickup_location}</option>
                                     )}
                                 </select>
