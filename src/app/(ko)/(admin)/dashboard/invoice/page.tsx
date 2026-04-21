@@ -92,6 +92,25 @@ export default function InvoiceManager() {
         setPrices(prices.filter((_, i) => i !== index));
     };
 
+    // --- Source Alias Mapping ---
+    // DB에 "탐" 또는 "타미스"로 저장된 건 모두 "타미스"로 통합 조회
+    // DB에 "팜" 또는 "팜투어"로 저장된 건 모두 "팜투어"로 통합 조회
+    const SOURCE_ALIASES: Record<string, string[]> = {
+        '타미스': ['타미스', '탐'],
+        '팜투어': ['팜투어', '팜'],
+    };
+
+    const getSourceVariants = (source: string): string[] => {
+        // 정방향: "타미스" 선택 → ["타미스", "탐"]
+        if (SOURCE_ALIASES[source]) return SOURCE_ALIASES[source];
+        // 역방향: "탐" 선택 → ["타미스", "탐"] (혹시 별칭으로 등록된 경우)
+        for (const [canonical, aliases] of Object.entries(SOURCE_ALIASES)) {
+            if (aliases.includes(source)) return aliases;
+        }
+        // 매칭 없으면 원본만
+        return [source];
+    };
+
     // --- Invoice Generation ---
     const fetchReservations = async () => {
         if (!selectedSource) {
@@ -110,10 +129,12 @@ export default function InvoiceManager() {
             endDate = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
         }
 
+        const sourceVariants = getSourceVariants(selectedSource);
+
         const { data, error } = await supabase
             .from('reservations')
             .select('*')
-            .eq('source', selectedSource)
+            .in('source', sourceVariants)
             .gte('tour_date', startDate)
             .lte('tour_date', endDate)
             .neq('status', '취소')
