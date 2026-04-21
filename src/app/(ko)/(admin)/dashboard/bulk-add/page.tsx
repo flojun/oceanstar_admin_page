@@ -297,7 +297,8 @@ export default function BulkAddPage() {
             return;
         }
 
-        const insertData = validRows.map(r => {
+        const baseTime = Date.now();
+        const insertData = validRows.map((r, index) => {
             // ... Logic identical to original ...
             let isReconfirmed = false;
             if (typeof r.is_reconfirmed === 'boolean') isReconfirmed = r.is_reconfirmed;
@@ -314,7 +315,9 @@ export default function BulkAddPage() {
                 pickup_location: r.pickup_location || "",
                 contact: r.contact || "",
                 note: r.note || "",
-                is_reconfirmed: isReconfirmed
+                is_reconfirmed: isReconfirmed,
+                // Ensure order is perfectly preserved. Index 0 gets highest timestamp.
+                created_at: new Date(baseTime - index * 1000).toISOString()
             };
         });
 
