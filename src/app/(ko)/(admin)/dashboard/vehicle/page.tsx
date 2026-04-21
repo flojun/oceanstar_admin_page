@@ -204,16 +204,21 @@ export default function VehiclePage() {
             Object.keys(state).forEach(key => {
                 if (key === 'unassigned') {
                     state[key].items.sort((a: Reservation, b: Reservation) => {
-                        if (a.vehicle_order !== undefined && b.vehicle_order !== undefined && a.vehicle_order !== 999 && b.vehicle_order !== 999) {
-                            return a.vehicle_order - b.vehicle_order;
+                        // If both have a valid vehicle_order (not null/undefined), sort by it
+                        const oA = a.vehicle_order ?? 999;
+                        const oB = b.vehicle_order ?? 999;
+                        if (oA !== 999 && oB !== 999) {
+                            return oA - oB;
                         }
+                        // Fallback: sort by pickup time
                         const timeA = getPickupSortKey(a.pickup_location);
                         const timeB = getPickupSortKey(b.pickup_location);
                         if (timeA !== timeB) return timeA.localeCompare(timeB);
                         return (a.pickup_location || "").localeCompare(b.pickup_location || "");
                     });
                 } else {
-                    state[key].items.sort((a: Reservation, b: Reservation) => (a.vehicle_order || 999) - (b.vehicle_order || 999));
+                    // Use ?? 999 (NOT || 999) so vehicle_order=0 is preserved correctly
+                    state[key].items.sort((a: Reservation, b: Reservation) => (a.vehicle_order ?? 999) - (b.vehicle_order ?? 999));
                 }
             });
 
@@ -327,8 +332,10 @@ export default function VehiclePage() {
                     const items = state[key].items;
                     if (key === 'unassigned') {
                         items.sort((a: Reservation, b: Reservation) => {
-                            if (a.vehicle_order !== undefined && b.vehicle_order !== undefined && a.vehicle_order !== 999) {
-                                return a.vehicle_order - b.vehicle_order;
+                            const oA = a.vehicle_order ?? 999;
+                            const oB = b.vehicle_order ?? 999;
+                            if (oA !== 999 && oB !== 999) {
+                                return oA - oB;
                             }
                             const timeA = getPickupSortKey(a.pickup_location);
                             const timeB = getPickupSortKey(b.pickup_location);
@@ -336,7 +343,8 @@ export default function VehiclePage() {
                             return (a.pickup_location || "").localeCompare(b.pickup_location || "");
                         });
                     } else {
-                        items.sort((a: Reservation, b: Reservation) => (a.vehicle_order || 999) - (b.vehicle_order || 999));
+                        // Use ?? 999 (NOT || 999) so vehicle_order=0 is preserved correctly
+                        items.sort((a: Reservation, b: Reservation) => (a.vehicle_order ?? 999) - (b.vehicle_order ?? 999));
                     }
                 });
 
