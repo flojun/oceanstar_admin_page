@@ -1044,7 +1044,8 @@ function AllReservationsContent() {
         Object.entries(grouped).forEach(([dateStr, groupRows]) => {
             // Convert MM-DD-YYYY to *MM/DD/YYYY
             const dateSlash = dateStr.replace(/-/g, '/');
-            const dayOfWeek = getKoreanDay(dateStr); // e.g. "(Mon)"
+            const rawTourDate = (groupRows[0] as any).tour_date || "";
+            const dayOfWeek = getKoreanDay(rawTourDate); // Fix: dateStr is MM-DD-YYYY, use raw YYYY-MM-DD
             textToCopy += `${dayOfWeek} ${dateSlash}\n`;
 
             groupRows.forEach((row: any) => {
