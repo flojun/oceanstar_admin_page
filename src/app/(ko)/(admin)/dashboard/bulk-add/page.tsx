@@ -316,6 +316,7 @@ export default function BulkAddPage() {
                 contact: r.contact || "",
                 note: r.note || "",
                 is_reconfirmed: isReconfirmed,
+                is_admin_checked: true, // 어드민 직접 입력 예약은 알림센터에 안뜨도록
                 // Ensure order is perfectly preserved. Index 0 gets highest timestamp.
                 created_at: new Date(baseTime - index * 1000).toISOString()
             };

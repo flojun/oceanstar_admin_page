@@ -1170,6 +1170,7 @@ function AllReservationsContent() {
                         receipt_date: receiptDate,
                         status: status,
                         is_reconfirmed: isReconfirmed,
+                        is_admin_checked: true, // 어드민 직접 입력 예약은 알림센터에 안뜨도록
                         option: rest.option || "",
                         pax: rest.pax || "",
                         pickup_location: rest.pickup_location || "",
