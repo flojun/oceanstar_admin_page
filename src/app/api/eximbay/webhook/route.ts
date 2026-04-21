@@ -2,6 +2,17 @@ import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { sendVoucherEmail } from '@/lib/email';
 
+// Hawaii is UTC-10 with no DST
+function getHawaiiDateStrServer(): string {
+    const now = new Date();
+    const hawaiiOffset = -10 * 60;
+    const hawaiiDate = new Date((now.getTime() / 60000 + hawaiiOffset) * 60000);
+    const y = hawaiiDate.getUTCFullYear();
+    const m = String(hawaiiDate.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(hawaiiDate.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
 export async function POST(req: Request) {
     try {
         const body = await req.json();
@@ -20,7 +31,7 @@ export async function POST(req: Request) {
                 .from('reservations')
                 .update({
                     status: '예약확정',
-                    receipt_date: new Date().toISOString().split('T')[0] // 접수일(receipt_date) 업데이트 추가 
+                    receipt_date: getHawaiiDateStrServer(), // 하와이 시간 기준 접수일
                 })
                 .eq('order_id', order_id)
                 .select();

@@ -1,6 +1,19 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 
+// Hawaii time helper (서버사이드는 date-fns-tz 사용)
+function getHawaiiDateStrServer(): string {
+    const now = new Date();
+    // Hawaii is UTC-10, no DST
+    const hawaiiOffset = -10 * 60; // minutes
+    const utcMinutes = now.getTime() / 60000;
+    const hawaiiDate = new Date((utcMinutes + hawaiiOffset) * 60000);
+    const y = hawaiiDate.getUTCFullYear();
+    const m = String(hawaiiDate.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(hawaiiDate.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
 export async function POST(req: Request) {
     try {
         const body = await req.json();
@@ -109,6 +122,7 @@ export async function POST(req: Request) {
                         adult_count: body.adultCount,
                         child_count: body.childCount,
                         currency: currency, // 명시적 통화 저장
+                        receipt_date: getHawaiiDateStrServer(), // 하와이 시간 기준 접수일
                     }
                 ])
                 .select()
