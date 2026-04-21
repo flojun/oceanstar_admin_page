@@ -12,6 +12,13 @@ interface VehicleManifestTableProps {
 export function VehicleManifestTable({ vehicles, drivers, optionName, date }: VehicleManifestTableProps) {
     const vehicleKeys = ['vehicle-1', 'vehicle-2', 'vehicle-3', 'personal-1'];
 
+    const getShortOptionName = (name: string): string => {
+        if (name.includes('1부')) return '1부';
+        if (name.includes('2부')) return '2부';
+        if (name.includes('선셋') || name.includes('3부')) return '3부';
+        return name;
+    };
+
     const getColorForOption = (name: string) => {
         if (name.includes('1부')) return 'bg-gray-600';
         if (name.includes('2부')) return 'bg-[#990000]';
@@ -23,9 +30,16 @@ export function VehicleManifestTable({ vehicles, drivers, optionName, date }: Ve
         return colors[hash % colors.length];
     };
 
+    const shortName = getShortOptionName(optionName);
+
+    // Split unassigned into 직접(self-arrival) vs truly unassigned
+    const unassignedItems = vehicles.unassigned?.items || [];
+    const selfArrivalItems = unassignedItems.filter(item => item.pickup_location === '직접');
+    const trulyUnassignedItems = unassignedItems.filter(item => item.pickup_location !== '직접');
+
     return (
         <div className="bg-black p-4 w-fit min-w-[800px] text-white font-sans inline-block">
-            <h2 className="text-2xl font-bold mb-4 text-center">{date} [{optionName}] 배치 명단</h2>
+            <h2 className="text-2xl font-bold mb-4 text-center">{date} [{shortName}] 배치 명단</h2>
 
             {/* Flex container to allow natural width for tables but wrap if needed */}
             <div className="flex flex-wrap gap-4 items-start justify-center">
@@ -41,7 +55,7 @@ export function VehicleManifestTable({ vehicles, drivers, optionName, date }: Ve
                             {/* Header: Option Name (Colored) + Vehicle Name */}
                             <div className="flex text-lg font-bold border-b border-gray-700">
                                 <div className={`px-3 py-1 w-20 flex items-center justify-center shrink-0 text-white ${getColorForOption(optionName)}`}>
-                                    {optionName}
+                                    {shortName}
                                 </div>
                                 <div className="bg-black text-white px-3 py-1 flex-1 flex items-center justify-between">
                                     <span>{vehicle.name}</span>
@@ -88,10 +102,17 @@ export function VehicleManifestTable({ vehicles, drivers, optionName, date }: Ve
                 })}
             </div>
 
-            {/* Unassigned Warning if any */}
-            {vehicles.unassigned?.items.length > 0 && (
-                <div className="mt-4 p-2 border border-red-500 text-red-400 font-bold text-center">
-                    ⚠️ 미배정 인원 {vehicles.unassigned.items.length}팀 있습니다.
+            {/* Self-arrival (직접) notice - informational, not a warning */}
+            {selfArrivalItems.length > 0 && (
+                <div className="mt-4 p-2 border border-gray-500 text-gray-300 font-bold text-center">
+                    ℹ️ 직접 {selfArrivalItems.length}팀 있습니다.
+                </div>
+            )}
+
+            {/* Truly unassigned warning (non-직접 items) */}
+            {trulyUnassignedItems.length > 0 && (
+                <div className="mt-2 p-2 border border-red-500 text-red-400 font-bold text-center">
+                    ⚠️ 미배정 인원 {trulyUnassignedItems.length}팀 있습니다.
                 </div>
             )}
         </div>
