@@ -854,6 +854,120 @@ function AllReservationsContent() {
         }
     };
 
+    const handleSwapOrder = async (direction: 'up' | 'down') => {
+        if (selectedRows.size !== 1) return;
+        const selectedId = Array.from(selectedRows)[0];
+        const currentIndex = rows.findIndex(r => r._grid_id === selectedId);
+
+        if (currentIndex === -1) return;
+        if (direction === 'up' && currentIndex === 0) return;
+        if (direction === 'down' && currentIndex === rows.length - 1) return;
+
+        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        const currentRow = rows[currentIndex];
+        const targetRow = rows[targetIndex];
+
+        if (currentRow.isNew || targetRow.isNew) {
+            alert("저장되지 않은 새로운 예약은 순서를 변경할 수 없습니다. 먼저 저장해주세요.");
+            return;
+        }
+
+        try {
+            setSaving(true);
+
+            // 1. Fetch current DB values for both rows
+            const { data: dbData, error: fetchErr } = await supabase
+                .from('reservations')
+                .select('id, created_at, receipt_date')
+                .in('id', [currentRow.id, targetRow.id]);
+
+            if (fetchErr || !dbData || dbData.length !== 2) {
+                console.error('Swap fetch error:', fetchErr, 'data:', dbData);
+                throw new Error("DB에서 순서 정보를 가져올 수 없습니다. (ID 불일치 가능)");
+            }
+
+            const dbCurrent = dbData.find(d => d.id === currentRow.id);
+            const dbTarget = dbData.find(d => d.id === targetRow.id);
+            if (!dbCurrent || !dbTarget) throw new Error("서버 데이터 불일치");
+
+            // 2. Prepare new values - swap created_at and receipt_date
+            let newCurrentCreatedAt = dbTarget.created_at;
+            let newTargetCreatedAt = dbCurrent.created_at;
+            let newCurrentReceiptDate = dbTarget.receipt_date;
+            let newTargetReceiptDate = dbCurrent.receipt_date;
+
+            // If created_at values are identical, create an artificial 1-second gap
+            if (dbCurrent.created_at === dbTarget.created_at) {
+                const baseTime = new Date(dbCurrent.created_at).getTime();
+                if (direction === 'up') {
+                    // "Up" in DESC list = needs MORE recent timestamp to appear higher
+                    newCurrentCreatedAt = new Date(baseTime + 1000).toISOString();
+                    newTargetCreatedAt = new Date(baseTime).toISOString();
+                } else {
+                    newCurrentCreatedAt = new Date(baseTime).toISOString();
+                    newTargetCreatedAt = new Date(baseTime + 1000).toISOString();
+                }
+            }
+
+            // 3. Update row 1 with .select() to verify the write actually happened
+            const { data: r1, error: e1 } = await supabase
+                .from('reservations')
+                .update({ created_at: newCurrentCreatedAt, receipt_date: newCurrentReceiptDate })
+                .eq('id', currentRow.id!)
+                .select('id, created_at, receipt_date');
+
+            if (e1) {
+                console.error('Swap update1 error:', e1);
+                throw new Error("첫 번째 행 업데이트 실패: " + e1.message);
+            }
+            if (!r1 || r1.length === 0) {
+                console.error('Swap update1 returned no rows. ID:', currentRow.id);
+                throw new Error("첫 번째 행 업데이트 확인 실패 (0건 반영)");
+            }
+
+            // 4. Update row 2 with .select() to verify
+            const { data: r2, error: e2 } = await supabase
+                .from('reservations')
+                .update({ created_at: newTargetCreatedAt, receipt_date: newTargetReceiptDate })
+                .eq('id', targetRow.id!)
+                .select('id, created_at, receipt_date');
+
+            if (e2) {
+                console.error('Swap update2 error:', e2);
+                throw new Error("두 번째 행 업데이트 실패: " + e2.message);
+            }
+            if (!r2 || r2.length === 0) {
+                console.error('Swap update2 returned no rows. ID:', targetRow.id);
+                throw new Error("두 번째 행 업데이트 확인 실패 (0건 반영)");
+            }
+
+            // 5. Swap positions locally using the confirmed DB values
+            const newRows = [...rows];
+            const updatedCurrentRow = {
+                ...currentRow as any,
+                created_at: r1[0].created_at,
+                receipt_date: r1[0].receipt_date
+            };
+            const updatedTargetRow = {
+                ...targetRow as any,
+                created_at: r2[0].created_at,
+                receipt_date: r2[0].receipt_date
+            };
+
+            newRows[currentIndex] = updatedTargetRow;
+            newRows[targetIndex] = updatedCurrentRow;
+
+            updateRowsWithHistory(newRows, changedRowIds);
+
+        } catch (err: any) {
+            console.error('handleSwapOrder failed:', err);
+            alert("순서 변경 실패: " + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+
     const handleCopy = async () => {
         const start = parseInt(copyStartRow);
         const end = parseInt(copyEndRow);
@@ -1699,6 +1813,23 @@ function AllReservationsContent() {
                     </span>
                     <div className="h-4 w-px bg-gray-300" />
                     <div className="flex items-center gap-2">
+                        {selectedRows.size === 1 && (
+                            <>
+                                <button
+                                    onClick={() => handleSwapOrder('up')}
+                                    className="px-3 py-1.5 text-xs font-bold bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-100 flex items-center gap-1"
+                                >
+                                    <span>▲</span> 위로
+                                </button>
+                                <button
+                                    onClick={() => handleSwapOrder('down')}
+                                    className="px-3 py-1.5 text-xs font-bold bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-100 flex items-center gap-1"
+                                >
+                                    <span>▼</span> 아래로
+                                </button>
+                                <div className="h-4 w-px bg-gray-300 mx-1" />
+                            </>
+                        )}
                         <button
                             onClick={() => handleBulkAction('confirmed')}
                             className="px-3 py-1.5 text-xs font-bold bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100"
