@@ -1194,13 +1194,11 @@ function AllReservationsContent() {
                 }
             });
 
-            // 2차 패스: 그리드 순서(위→아래 = 먼저 입력→나중 입력)에 맞게 created_at 부여
-            // 나중에 입력한 행(inserts 뒤쪽)이 더 최신 타임스탬프 → DESC 정렬에서 위에 표시
-            // inserts[0](먼저 입력) → baseTime - (n-1)*1000 (가장 오래됨, 아래)
-            // inserts[n-1](나중 입력) → baseTime - 0 (가장 최신, 위)
-            const totalInserts = inserts.length;
+            // 2차 패스: 그리드 위치를 보존하기 위해 created_at 부여
+            // inserts[0] = 그리드 상단 → 가장 최신 타임스탬프 → DESC 정렬에서 상단 유지
+            // inserts[n-1] = 그리드 하단 → 가장 오래된 타임스탬프 → DESC 정렬에서 하단 유지
             inserts.forEach((item, idx) => {
-                item.created_at = new Date(insertBaseTime - (totalInserts - 1 - idx) * 1000).toISOString();
+                item.created_at = new Date(insertBaseTime - idx * 1000).toISOString();
             });
 
             if (inserts.length > 0) {
