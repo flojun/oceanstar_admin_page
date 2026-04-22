@@ -1,17 +1,22 @@
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { RenderEditCellProps } from 'react-data-grid';
 
 interface ComboSelectEditorProps<TRow, TSummary> extends RenderEditCellProps<TRow, TSummary> {
     options: readonly string[];
-    customInputLabel?: string; // Label for the "직접입력" option
+    customInputLabel?: string;
 }
 
 /**
- * ComboSelectEditor: A hybrid editor that combines dropdown selection with free-text input.
+ * ComboSelectEditor: 드롭다운 선택 + 직접입력 콤보박스 에디터.
  * 
- * - Shows a dropdown with predefined options
- * - Has a "직접입력" option that switches to a text input field
- * - If the current value is not in the options list, shows the text input mode
+ * - 미리 정의된 옵션 목록에서 선택 가능
+ * - "✏️ 직접입력" 선택 시 텍스트 입력 모드로 전환
+ * - 기존에 직접 입력된 값이 있는 셀은 자동으로 텍스트 입력 모드로 표시
+ * 
+ * 커밋 전략:
+ * - onBlur: 값만 업데이트(커밋 X) → 에디터가 즉시 닫히지 않음
+ * - Enter: 값 업데이트 + 커밋 (에디터 닫힘)
+ * - 외부 클릭: editorOptions.commitOnOutsideClick=true가 자동 커밋 처리
  */
 export default function ComboSelectEditor<TRow, TSummary>({
     row,
@@ -28,68 +33,56 @@ export default function ComboSelectEditor<TRow, TSummary>({
     const [customText, setCustomText] = useState(isCustomValue ? currentValue : "");
     const inputRef = useRef<HTMLInputElement>(null);
     const selectRef = useRef<HTMLSelectElement>(null);
-    const committedRef = useRef(false); // 중복 커밋 방지
 
-    // Auto-focus the text input when switching to custom mode
+    // Auto-focus: 커스텀 모드 전환 시 input에 포커스
     useEffect(() => {
-        if (isCustomMode && inputRef.current) {
-            inputRef.current.focus();
+        if (isCustomMode) {
+            // requestAnimationFrame으로 지연시켜 react-data-grid의 포커스 관리와 충돌 방지
+            const frameId = requestAnimationFrame(() => {
+                inputRef.current?.focus();
+            });
+            return () => cancelAnimationFrame(frameId);
         }
     }, [isCustomMode]);
 
-    // Auto-focus select on mount if not in custom mode
+    // Auto-focus: select 모드 마운트 시
     useEffect(() => {
         if (!isCustomMode && selectRef.current) {
             selectRef.current.focus();
         }
     }, []);
 
-    // 언마운트 시 커스텀 입력값 자동 저장 (셀 이동 시 보호)
-    // Promise.resolve().then()으로 microtask 지연 → flushSync 충돌 방지
-    useLayoutEffect(() => {
-        return () => {
-            if (isCustomMode && !committedRef.current && inputRef.current) {
-                const trimmed = inputRef.current.value.trim();
-                Promise.resolve().then(() => {
-                    onRowChange({ ...row, [column.key]: trimmed } as TRow, true);
-                });
-            }
-        };
-    }, [isCustomMode, row, column.key]);
-
     const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const val = e.target.value;
         if (val === "__CUSTOM__") {
             setIsCustomMode(true);
             setCustomText("");
-            // Don't update row yet - wait for text input
         } else {
+            // 선택 값은 바로 row에 반영 (커밋은 안 함 - blur/외부클릭이 커밋)
             onRowChange({ ...row, [column.key]: val } as TRow);
         }
     };
 
-    const commitCustomValue = () => {
-        if (committedRef.current) return;
-        committedRef.current = true;
-        const trimmed = customText.trim();
-        // onRowChange with commit=true: 업데이트+커밋을 원자적으로 처리
-        onRowChange({ ...row, [column.key]: trimmed } as TRow, true);
+    const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setCustomText(newValue);
+        // 매 타이핑마다 row를 동기화 → commitOnOutsideClick 시 최신 값 커밋
+        onRowChange({ ...row, [column.key]: newValue } as TRow);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             if (isCustomMode) {
-                commitCustomValue();
+                // Enter: 값 업데이트 + 커밋 (에디터 닫힘)
+                const trimmed = customText.trim();
+                onRowChange({ ...row, [column.key]: trimmed } as TRow, true);
             } else {
                 onClose(true);
             }
         } else if (e.key === 'Escape') {
             if (isCustomMode) {
-                // Go back to select mode
                 setIsCustomMode(false);
                 setCustomText("");
-                committedRef.current = false;
-                // Restore original select value
                 setTimeout(() => selectRef.current?.focus(), 0);
             } else {
                 onClose(false);
@@ -104,9 +97,8 @@ export default function ComboSelectEditor<TRow, TSummary>({
                     ref={inputRef}
                     className="flex-1 h-full min-w-0 px-1 text-sm border-none outline-none bg-transparent focus:ring-1 focus:ring-blue-500 rounded"
                     value={customText}
-                    onChange={(e) => setCustomText(e.target.value)}
+                    onChange={handleCustomChange}
                     onKeyDown={handleKeyDown}
-                    onBlur={commitCustomValue}
                     placeholder="픽업장소 입력"
                     autoComplete="off"
                 />
@@ -114,10 +106,9 @@ export default function ComboSelectEditor<TRow, TSummary>({
                     type="button"
                     className="shrink-0 text-xs text-gray-400 hover:text-gray-600 px-1"
                     onMouseDown={(e) => {
-                        e.preventDefault(); // Prevent blur on input
+                        e.preventDefault(); // blur 방지
                         setIsCustomMode(false);
                         setCustomText("");
-                        committedRef.current = false;
                         setTimeout(() => selectRef.current?.focus(), 0);
                     }}
                     title="목록으로 돌아가기"
