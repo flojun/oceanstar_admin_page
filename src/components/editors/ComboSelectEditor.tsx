@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { RenderEditCellProps } from 'react-data-grid';
 
 interface ComboSelectEditorProps<TRow, TSummary> extends RenderEditCellProps<TRow, TSummary> {
@@ -28,6 +28,7 @@ export default function ComboSelectEditor<TRow, TSummary>({
     const [customText, setCustomText] = useState(isCustomValue ? currentValue : "");
     const inputRef = useRef<HTMLInputElement>(null);
     const selectRef = useRef<HTMLSelectElement>(null);
+    const committedRef = useRef(false); // 중복 커밋 방지
 
     // Auto-focus the text input when switching to custom mode
     useEffect(() => {
@@ -43,6 +44,19 @@ export default function ComboSelectEditor<TRow, TSummary>({
         }
     }, []);
 
+    // 언마운트 시 커스텀 입력값 자동 저장 (셀 이동 시 보호)
+    // Promise.resolve().then()으로 microtask 지연 → flushSync 충돌 방지
+    useLayoutEffect(() => {
+        return () => {
+            if (isCustomMode && !committedRef.current && inputRef.current) {
+                const trimmed = inputRef.current.value.trim();
+                Promise.resolve().then(() => {
+                    onRowChange({ ...row, [column.key]: trimmed } as TRow, true);
+                });
+            }
+        };
+    }, [isCustomMode, row, column.key]);
+
     const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const val = e.target.value;
         if (val === "__CUSTOM__") {
@@ -50,20 +64,22 @@ export default function ComboSelectEditor<TRow, TSummary>({
             setCustomText("");
             // Don't update row yet - wait for text input
         } else {
-            onRowChange({ ...row, [column.key]: val });
+            onRowChange({ ...row, [column.key]: val } as TRow);
         }
     };
 
-    const handleCustomSubmit = () => {
+    const commitCustomValue = () => {
+        if (committedRef.current) return;
+        committedRef.current = true;
         const trimmed = customText.trim();
-        onRowChange({ ...row, [column.key]: trimmed });
-        onClose(true);
+        // onRowChange with commit=true: 업데이트+커밋을 원자적으로 처리
+        onRowChange({ ...row, [column.key]: trimmed } as TRow, true);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             if (isCustomMode) {
-                handleCustomSubmit();
+                commitCustomValue();
             } else {
                 onClose(true);
             }
@@ -72,6 +88,7 @@ export default function ComboSelectEditor<TRow, TSummary>({
                 // Go back to select mode
                 setIsCustomMode(false);
                 setCustomText("");
+                committedRef.current = false;
                 // Restore original select value
                 setTimeout(() => selectRef.current?.focus(), 0);
             } else {
@@ -89,7 +106,7 @@ export default function ComboSelectEditor<TRow, TSummary>({
                     value={customText}
                     onChange={(e) => setCustomText(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    onBlur={handleCustomSubmit}
+                    onBlur={commitCustomValue}
                     placeholder="픽업장소 입력"
                     autoComplete="off"
                 />
@@ -100,6 +117,7 @@ export default function ComboSelectEditor<TRow, TSummary>({
                         e.preventDefault(); // Prevent blur on input
                         setIsCustomMode(false);
                         setCustomText("");
+                        committedRef.current = false;
                         setTimeout(() => selectRef.current?.focus(), 0);
                     }}
                     title="목록으로 돌아가기"
