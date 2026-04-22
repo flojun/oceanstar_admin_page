@@ -533,9 +533,9 @@ export default function WebsiteSettingsPage() {
                         <CalendarOff className="w-5 h-5 text-red-500" /> 예약 불가(휴무) 날짜 지정
                     </h2>
 
-                    <div className="flex flex-col md:flex-row gap-8 flex-1">
+                    <div className="flex flex-col lg:flex-row xl:flex-col gap-8 flex-1 overflow-hidden">
                         {/* 달력 */}
-                        <div className="flex justify-center border border-gray-100 rounded-xl p-4 bg-slate-50/50 h-fit">
+                        <div className="flex justify-center border border-gray-100 rounded-xl p-4 bg-slate-50/50 h-fit shrink-0 overflow-x-auto">
                             <DayPicker
                                 mode="multiple"
                                 selected={selectedBlockedDates}
@@ -601,23 +601,25 @@ export default function WebsiteSettingsPage() {
                                 ) : (
                                     <ul className="divide-y divide-gray-100">
                                         {blockedDates.map((bd) => (
-                                            <li key={`${bd.date}-${bd.tour_id}`} className="p-3 hover:bg-gray-50 flex items-center justify-between group">
-                                                <div>
-                                                    <p className="font-bold text-gray-800 text-sm">{format(new Date(bd.date), 'yyyy년 MM월 dd일')}
-                                                        <span className="ml-2 text-xs font-normal text-gray-500">
+                                            <li key={`${bd.date}-${bd.tour_id}`} className="p-3 hover:bg-gray-50 flex items-start sm:items-center justify-between group gap-2">
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+                                                        <span className="font-bold text-gray-800 text-sm whitespace-nowrap">{format(new Date(bd.date), 'yyyy년 MM월 dd일')}</span>
+                                                        <span className="text-xs font-normal text-gray-500 whitespace-nowrap">
                                                             ({format(new Date(bd.date), 'EEEE', { locale: ko })})
                                                         </span>
-                                                        <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${bd.tour_id === 'all' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'}`}>
+                                                        <span className={`px-2 py-0.5 text-xs rounded-full whitespace-nowrap ${bd.tour_id === 'all' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'}`}>
                                                             {getBlockLabel(bd.tour_id)}
                                                         </span>
-                                                    </p>
-                                                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                                                        <CalendarOff className="w-3 h-3" /> {bd.reason}
+                                                    </div>
+                                                    <p className="text-xs text-red-500 flex items-start sm:items-center gap-1 break-keep">
+                                                        <CalendarOff className="w-3 h-3 shrink-0 mt-0.5 sm:mt-0" /> 
+                                                        <span>{bd.reason}</span>
                                                     </p>
                                                 </div>
                                                 <button
                                                     onClick={() => removeBlockedDate(bd.date, bd.tour_id)}
-                                                    className="text-gray-300 hover:text-red-500 p-2 rounded transition-colors"
+                                                    className="text-gray-300 hover:text-red-500 p-2 rounded transition-colors shrink-0"
                                                     title="차단 해제"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
