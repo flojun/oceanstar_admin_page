@@ -1484,7 +1484,8 @@ function AllReservationsContent() {
             headerCellClass: "text-center",
             renderCell: (props: any) => {
                 return <div className="w-full h-full flex items-center justify-center px-1">{props.row.pickup_location}</div>;
-            }
+            },
+            editorOptions: { commitOnOutsideClick: true }
         },
         {
             key: "contact",
