@@ -774,7 +774,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         </div>
                         <div className="flex items-center gap-6 pt-5 mt-2">
                             <a 
-                                href="https://www.instagram.com/hawaii_turtlesnorkelling/" 
+                                href="https://www.instagram.com/oceanstar_turtlesnorkelling?igsh=dG8zMDZxczF2Z2t1" 
                                 target="_blank" 
                                 rel="noreferrer"
                                 className="transform transition-all duration-300 hover:-translate-y-2 hover:scale-110 drop-shadow-sm hover:drop-shadow-xl"

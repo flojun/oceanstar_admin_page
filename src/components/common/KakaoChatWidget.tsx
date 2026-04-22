@@ -29,7 +29,7 @@ export default function KakaoChatWidget() {
       
       {/* Instagram Button */}
       <Link 
-        href="https://www.instagram.com/hawaii_turtlesnorkelling/" 
+        href="https://www.instagram.com/oceanstar_turtlesnorkelling?igsh=dG8zMDZxczF2Z2t1" 
         target="_blank" 
         rel="noopener noreferrer"
         aria-label="인스타그램 DM 문의하기"
