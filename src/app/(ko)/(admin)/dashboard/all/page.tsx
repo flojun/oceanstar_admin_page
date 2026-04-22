@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { getHawaiiDateStr, formatDateDisplay, getKoreanDay, getKoreanDayShort } from "@/lib/timeUtils";
 import { useUnsavedChanges } from "@/components/providers/UnsavedChangesProvider";
 import CustomTextEditor from "@/components/editors/CustomTextEditor";
-import SelectEditor from "@/components/editors/SelectEditor";
+import ComboSelectEditor from "@/components/editors/ComboSelectEditor";
 import { PICKUP_LOCATIONS } from "@/constants/pickupLocations";
 import StatusEditor from "@/components/editors/StatusEditor";
 import type { TourSetting } from "@/lib/tourUtils";
@@ -1478,7 +1478,7 @@ function AllReservationsContent() {
         {
             key: "pickup_location",
             name: "픽업장소",
-            renderEditCell: (props: any) => <SelectEditor {...props} options={PICKUP_LOCATIONS} />,
+            renderEditCell: (props: any) => <ComboSelectEditor {...props} options={PICKUP_LOCATIONS} />,
             width: 140,
             cellClass: "p-0 text-center",
             headerCellClass: "text-center",
