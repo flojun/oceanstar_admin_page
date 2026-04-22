@@ -751,6 +751,23 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     {t('review.google_btn')} <ChevronRight size={18} />
                 </a>
             </div>
+
+            {/* YouTube Video Section */}
+            <div className="mt-12">
+                <div className="text-center mb-8">
+                    <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">{t('review.video_title')}</h3>
+                    <p className="text-base text-slate-500 mt-2">{t('review.video_subtitle')}</p>
+                </div>
+                <div className="relative w-full overflow-hidden rounded-3xl shadow-lg border border-slate-200 bg-black" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                        className="absolute inset-0 w-full h-full"
+                        src="https://www.youtube.com/embed/HaxDMbuuJHE"
+                        title="OceanStar Hawaii Turtle Snorkeling Tour"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                    />
+                </div>
+            </div>
         </section>
 
         {/* === Pickup Guide Section === */}

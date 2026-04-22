@@ -76,6 +76,8 @@ const ko = {
     google_desc1: "구글 맵 기준 ",
     google_desc2: "개의 실제 고객 리뷰",
     google_btn: "구글에서 전체 리뷰 보기 ",
+    video_title: "🎬 오션스타 투어 영상으로 미리보기",
+    video_subtitle: "실제 투어 현장을 영상으로 직접 확인하세요!",
   },
   footer: {
     hours_title: "하와이 현지 영업시간 안내",

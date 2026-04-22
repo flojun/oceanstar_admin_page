@@ -77,6 +77,8 @@ const en = {
     google_desc1: "Based on Google Maps ",
     google_desc2: " real customer reviews",
     google_btn: "View all reviews on Google ",
+    video_title: "🎬 Preview Our Tour in Action",
+    video_subtitle: "Watch the real tour experience before you book!",
   },
   footer: {
     hours_title: "Local Hawaii Business Hours",
