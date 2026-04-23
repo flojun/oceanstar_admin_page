@@ -67,10 +67,10 @@ export async function parseMyRealTrip(file: File): Promise<ParseResult> {
                 const productName = String(getVal(col.productName) || '').trim();
                 let tourDate = parseDateValue(getVal(col.tourDate));
                 
-                // MyRealTrip aggregate date (집계일) is 1 day behind actual tour date
+                // MyRealTrip aggregate date (집계일) is 1 day after actual tour date
                 if (tourDate) {
                     try {
-                        tourDate = format(addDays(parseISO(tourDate), 1), 'yyyy-MM-dd');
+                        tourDate = format(addDays(parseISO(tourDate), -1), 'yyyy-MM-dd');
                     } catch (e) {
                         // ignore error and keep original tourDate if invalid
                     }
