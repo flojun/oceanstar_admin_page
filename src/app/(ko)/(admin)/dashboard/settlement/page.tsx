@@ -95,6 +95,16 @@ export default function SettlementPage() {
         setLastSelectedIdx(null);
     };
 
+    // Always fetch unsettled items for the current platform
+    useEffect(() => {
+        const fetchUnsettled = async () => {
+            const today = format(new Date(), 'yyyy-MM-dd');
+            const items = await fetchUnsettledPastReservations(platform.sourceCode, today);
+            setUnsettledItems(items);
+        };
+        fetchUnsettled();
+    }, [currentPlatform, platform.sourceCode]);
+
     const handleFile = useCallback(async (file: File) => {
         if (!file) return;
         setIsLoading(true);
@@ -131,12 +141,15 @@ export default function SettlementPage() {
 
             // Fetch DB data
             const dateField = 'tour_date';
-            const [dbGroups, productPrices, pastUnsettled] = await Promise.all([
+            const [dbGroups, productPrices] = await Promise.all([
                 fetchAndMergeReservations(platform.sourceCode, expandedStartDate, expandedEndDate, dateField),
                 fetchProductPrices(),
-                fetchUnsettledPastReservations(platform.sourceCode, minDate),
             ]);
 
+            // We no longer overwrite unsettledItems here because the useEffect handles it globally for the platform
+            // However, we might want to refresh it to get the latest state after an upload
+            const today = format(new Date(), 'yyyy-MM-dd');
+            const pastUnsettled = await fetchUnsettledPastReservations(platform.sourceCode, today);
             setUnsettledItems(pastUnsettled);
 
             // Match
@@ -302,26 +315,6 @@ export default function SettlementPage() {
                 </Link>
             </div>
 
-            {/* Unsettled Items Banner */}
-            {unsettledItems.length > 0 && (
-                <div
-                    onClick={() => setShowUnsettledModal(true)}
-                    className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:bg-orange-100 transition shadow-sm"
-                >
-                    <div className="flex items-center gap-3">
-                        <div className="bg-orange-100 p-2 rounded-full">
-                            <AlertTriangle className="w-5 h-5 text-orange-600" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-orange-800">확인되지 않은 과거 미정산 내역이 {unsettledItems.length}건 있습니다.</h3>
-                            <p className="text-xs text-orange-600 mt-0.5">이월된 예약이 누락되지 않도록 확인해주세요.</p>
-                        </div>
-                    </div>
-                    <div className="px-4 py-2 bg-white border border-orange-200 rounded-lg text-sm font-bold text-orange-700 hover:bg-orange-50 shadow-sm">
-                        내역 확인하기
-                    </div>
-                </div>
-            )}
 
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -358,6 +351,27 @@ export default function SettlementPage() {
                     );
                 })}
             </div>
+
+            {/* Unsettled Items Banner (Moved below tabs) */}
+            {unsettledItems.length > 0 && (
+                <div
+                    onClick={() => setShowUnsettledModal(true)}
+                    className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:bg-orange-100 transition shadow-sm"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="bg-orange-100 p-2 rounded-full">
+                            <AlertTriangle className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-orange-800">확인되지 않은 과거 미정산 내역이 {unsettledItems.length}건 있습니다.</h3>
+                            <p className="text-xs text-orange-600 mt-0.5">이월된 예약이 누락되지 않도록 확인해주세요.</p>
+                        </div>
+                    </div>
+                    <div className="px-4 py-2 bg-white border border-orange-200 rounded-lg text-sm font-bold text-orange-700 hover:bg-orange-50 shadow-sm">
+                        내역 확인하기
+                    </div>
+                </div>
+            )}
 
             {/* File Upload */}
             <div
