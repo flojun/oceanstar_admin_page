@@ -45,7 +45,8 @@ export function VehicleManifestTable({ vehicles, drivers, optionName, date, targ
         activeVehicleKeys = activeVehicleKeys.filter(key => vehicles[key].driverId === targetDriverId);
     }
 
-    const grandTotalPax = activeVehicleKeys.reduce((total, key) => {
+    const grandTotalPax = vehicleKeys.reduce((total, key) => {
+        if (!vehicles[key]) return total;
         return total + vehicles[key].items.reduce((sum, item) => sum + Number(item.pax?.replace(/[^0-9]/g, '') || 0), 0);
     }, 0);
 
@@ -116,10 +117,12 @@ export function VehicleManifestTable({ vehicles, drivers, optionName, date, targ
                 })}
             </div>
 
-            {/* Grand Total Pax */}
-            <div className="mt-4 pt-4 border-t-2 border-gray-600 text-right text-xl font-black text-white">
-                {shortName} 총인원 : {grandTotalPax}명
-            </div>
+            {/* Grand Total Pax (Only for driver specific view) */}
+            {targetDriverId && (
+                <div className="mt-4 pt-4 border-t-2 border-gray-600 text-right text-xl font-black text-white">
+                    {shortName} 총 탑승객 : {grandTotalPax}명
+                </div>
+            )}
 
             {/* Self-arrival (직접) notice - informational, not a warning */}
             {!targetDriverId && selfArrivalItems.length > 0 && (
