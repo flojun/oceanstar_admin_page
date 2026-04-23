@@ -3,6 +3,7 @@
 // Uses exceljs for robust parsing
 
 import ExcelJS from 'exceljs';
+import { addDays, parseISO, format } from 'date-fns';
 import { SettlementRow } from '@/types/settlement';
 import { ParseResult } from './index';
 
@@ -65,6 +66,15 @@ export async function parseMyRealTrip(file: File): Promise<ParseResult> {
                 const reservationId = String(getVal(col.reservationId) || '').trim();
                 const productName = String(getVal(col.productName) || '').trim();
                 let tourDate = parseDateValue(getVal(col.tourDate));
+                
+                // MyRealTrip aggregate date (집계일) is 1 day behind actual tour date
+                if (tourDate) {
+                    try {
+                        tourDate = format(addDays(parseISO(tourDate), 1), 'yyyy-MM-dd');
+                    } catch (e) {
+                        // ignore error and keep original tourDate if invalid
+                    }
+                }
 
                 // Fallback: Extract Receipt Date from Reservation ID (EXP-20251225-...)
                 let receiptDate = '';
@@ -168,7 +178,7 @@ interface ColumnMapping {
 const PATTERNS: Record<keyof ColumnMapping, RegExp[]> = {
     reservationId: [/예약번호/i, /예약.?id/i, /reservation/i, /booking.?id/i, /주문번호/i],
     productName: [/^상품명$/i, /product name/i, /투어명/i],
-    tourDate: [/여행일/i, /투어일/i, /tour.?date/i, /이용일/i, /날짜/i, /사용일/i, /탑승일/i, /출국일/i, /입국일/i],
+    tourDate: [/여행일/i, /투어일/i, /tour.?date/i, /이용일/i, /날짜/i, /사용일/i, /탑승일/i, /출국일/i, /입국일/i, /집계일/i],
     adultCount: [/성인/i, /adult/i, /대인/i],
     childCount: [/아동/i, /child/i, /소인/i, /어린이/i],
     amount: [/판매금액/i, /sales.?amount/i, /총.?판매금액/i, /결제금액/i],
