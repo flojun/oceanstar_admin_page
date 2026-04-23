@@ -141,6 +141,7 @@ export default function CrewPage() {
     const memoRef = useRef<HTMLTextAreaElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);
+    const [hoveredCol, setHoveredCol] = useState<number | null>(null);
 
     // Unsaved Changes
     const { setIsDirty, registerSaveHandler } = useUnsavedChanges();
@@ -668,29 +669,40 @@ export default function CrewPage() {
                     <table className="w-full border-collapse text-xs table-fixed min-w-[1000px] bg-white">
                         <thead className="bg-green-800 text-white">
                             <tr>
-                                <th rowSpan={3} className="border border-green-700 w-20 p-1 bg-gray-100 text-gray-800 sticky left-0 z-30 shadow-md">
+                                <th rowSpan={3} className="border border-green-700 w-20 p-1 bg-gray-100 text-gray-800 sticky left-0 z-30 shadow-md border-b-[3px] !border-b-black border-r-[3px] !border-r-black">
                                     <div className="text-[10px] text-gray-500">{format(weekDates[0], "M/d")}-{format(weekDates[6], "M/d")}</div>
                                     <div className="font-bold">CAPTAIN</div>
                                 </th>
-                                {weekDates.map(date => (
-                                    <th key={'day-' + date.toString()} colSpan={3} className={`border p-1 font-bold text-center ${format(date, 'E') === 'Sun' ? 'bg-red-600 border-red-500' : 'bg-green-800 border-green-600'}`}>
+                                {weekDates.map((date, dayIdx) => (
+                                    <th key={'day-' + date.toString()} colSpan={3} className={`border p-1 font-bold text-center ${format(date, 'E') === 'Sun' ? 'bg-red-600 border-red-500' : 'bg-green-800 border-green-600'} ${dayIdx !== weekDates.length - 1 ? 'border-r-[3px] !border-r-black' : ''}`}>
                                         {format(date, "EEE").toUpperCase()}
                                     </th>
                                 ))}
                             </tr>
                             <tr className="bg-gray-100 text-gray-800">
-                                {weekDates.map(date => (
-                                    OPTIONS.map(opt => (
-                                        <th key={'opt-' + date + opt} className="border border-gray-300 p-0.5 text-center w-10 font-semibold bg-green-50">
+                                {weekDates.map((date, dayIdx) => (
+                                    OPTIONS.map((opt, optIdx) => {
+                                        const colIndex = dayIdx * 3 + optIdx;
+                                        return (
+                                        <th key={'opt-' + date + opt} className={`border border-gray-300 p-0.5 text-center w-10 font-semibold transition-colors ${hoveredCol === colIndex ? 'bg-green-200' : 'bg-green-50'} ${optIdx === 2 && dayIdx !== weekDates.length - 1 ? 'border-r-[3px] !border-r-black' : ''}`}
+                                            onMouseEnter={() => setHoveredCol(colIndex)}
+                                            onMouseLeave={() => setHoveredCol(null)}
+                                        >
                                             {opt.replace('부', '')}
                                         </th>
-                                    ))
+                                        );
+                                    })
                                 ))}
                             </tr>
                             <tr className="bg-white">
-                                {weekDates.map(date => (
-                                    OPTIONS.map(opt => (
-                                        <th key={'cap-' + date + opt} className="border border-gray-300 p-0 h-6">
+                                {weekDates.map((date, dayIdx) => (
+                                    OPTIONS.map((opt, optIdx) => {
+                                        const colIndex = dayIdx * 3 + optIdx;
+                                        return (
+                                        <th key={'cap-' + date + opt} className={`border border-gray-300 p-0 h-6 transition-colors border-b-[3px] !border-b-black ${hoveredCol === colIndex ? 'bg-gray-200' : 'bg-white'} ${optIdx === 2 && dayIdx !== weekDates.length - 1 ? 'border-r-[3px] !border-r-black' : ''}`}
+                                            onMouseEnter={() => setHoveredCol(colIndex)}
+                                            onMouseLeave={() => setHoveredCol(null)}
+                                        >
                                             <select
                                                 className="w-full h-full p-0 text-[10px] text-center border-none focus:ring-0 bg-transparent font-bold text-gray-700 appearance-none cursor-pointer hover:bg-gray-50 dark:bg-transparent"
                                                 value={getShiftCaptain(date, opt)}
@@ -700,30 +712,44 @@ export default function CrewPage() {
                                                 {captains.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                             </select>
                                         </th>
-                                    ))
+                                        );
+                                    })
                                 ))}
                             </tr>
                         </thead>
 
                         <tbody>
                             {crew.map(c => (
-                                <tr key={c.id} className="hover:bg-gray-50 h-8">
-                                    <td className="p-1 border font-bold text-gray-800 bg-white sticky left-0 z-20 text-center shadow-md truncate">
+                                <tr key={c.id} className="group hover:bg-gray-100 h-8 transition-colors">
+                                    <td className="p-1 border font-bold text-gray-800 bg-white group-hover:bg-gray-200 sticky left-0 z-20 text-center shadow-md truncate transition-colors border-r-[3px] !border-r-black">
                                         {c.name}
                                     </td>
-                                    {weekDates.map(date => (
-                                        OPTIONS.map(opt => {
+                                    {weekDates.map((date, dayIdx) => (
+                                        OPTIONS.map((opt, optIdx) => {
+                                            const colIndex = dayIdx * 3 + optIdx;
                                             const role = getScheduleRole(c.id, date, opt);
-                                            let cellClass = "bg-white";
+                                            
+                                            // Base colors
+                                            let baseBg = "bg-transparent";
                                             let text = "";
-                                            if (role === 'CREW') { cellClass = "bg-blue-100 text-blue-800"; text = "CREW"; }
-                                            else if (role === 'MC') { cellClass = "bg-yellow-100 text-yellow-800"; text = "MC"; }
+                                            if (role === 'CREW') { baseBg = "bg-blue-100 text-blue-800"; text = "CREW"; }
+                                            else if (role === 'MC') { baseBg = "bg-yellow-100 text-yellow-800"; text = "MC"; }
+
+                                            const isHoveredCol = hoveredCol === colIndex;
+                                            
+                                            // Right border for the last option of the day
+                                            const rightBorder = optIdx === 2 && dayIdx !== weekDates.length - 1 ? 'border-r-[3px] !border-r-black' : '';
+                                            
+                                            // Apply gray highlight if the column is hovered
+                                            const highlightBg = isHoveredCol ? (role ? 'brightness-95' : 'bg-gray-200') : baseBg;
 
                                             return (
                                                 <td
                                                     key={'cell-' + c.id + date + opt}
-                                                    className={`border p-0 text-center cursor-pointer transition-colors hover:opacity-80 ${cellClass}`}
+                                                    className={`border p-0 text-center cursor-pointer transition-colors hover:!brightness-90 hover:!bg-gray-300 ${rightBorder} ${highlightBg}`}
                                                     onClick={() => toggleSchedule(c.id, date, opt)}
+                                                    onMouseEnter={() => setHoveredCol(colIndex)}
+                                                    onMouseLeave={() => setHoveredCol(null)}
                                                 >
                                                     <div className="w-full h-full flex items-center justify-center font-bold text-[10px] select-none">{text}</div>
                                                 </td>
