@@ -414,7 +414,19 @@ export function matchSettlementData(
     const results: MatchResult[] = [];
     const matchedDbKeys = new Set<string>();
 
+    // Assign original index to preserve file order
+    rawExcelRows.forEach((row, i) => {
+        row.originalIndex = i;
+    });
+
     const excelGroups = groupExcelRows(rawExcelRows);
+
+    // Sort excelGroups back to original file order
+    excelGroups.sort((a, b) => {
+        const minA = Math.min(...a.rows.map(r => r.originalIndex ?? 0));
+        const minB = Math.min(...b.rows.map(r => r.originalIndex ?? 0));
+        return minA - minB;
+    });
 
     console.log(`[Settlement Match] Raw Rows: ${rawExcelRows.length} -> Excel Groups: ${excelGroups.length}`);
 

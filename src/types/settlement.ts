@@ -36,6 +36,7 @@ export interface SettlementRow {
     status: string;           // "예약확정", "취소" etc.
     receiptDate?: string;     // Extracted from Reservation ID if available (YYYY-MM-DD)
     rawData: Record<string, unknown>;
+    originalIndex?: number;   // To preserve original Excel row order
 }
 
 // ---- DB Virtual Merge ----
