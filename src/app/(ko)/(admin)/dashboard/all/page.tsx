@@ -1154,7 +1154,14 @@ function AllReservationsContent() {
     };
 
     const handleSave = async () => {
-        const toSave = rows.filter(r => (r as any).isNew || changedRowIds.has(r.id!));
+        // Collect all unique available rows from both global rows and search results
+        const availableRowsMap = new Map();
+        rows.forEach(r => availableRowsMap.set(r.id || (r as any)._grid_id, r));
+        if (searchResults) {
+            searchResults.forEach(r => availableRowsMap.set(r.id || (r as any)._grid_id, r));
+        }
+
+        const toSave = Array.from(availableRowsMap.values()).filter(r => (r as any).isNew || changedRowIds.has(r.id!));
 
         if (toSave.length === 0) {
             alert("저장할 변경사항이 없습니다.");
