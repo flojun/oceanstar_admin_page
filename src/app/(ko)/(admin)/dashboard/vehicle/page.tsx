@@ -151,6 +151,9 @@ export default function VehiclePage() {
     const [selectedDate, setSelectedDate] = useState<string>(getHawaiiTomorrowStr());
     const [activeId, setActiveId] = useState<string | null>(null);
 
+    const [driverDropdownOpen, setDriverDropdownOpen] = useState(false);
+    const [selectedDriverForShare, setSelectedDriverForShare] = useState<string | null>(null);
+
     const [vehicles, setVehicles] = useState<VehicleState>(createFreshVehicleState);
     const [bulkData, setBulkData] = useState<Record<string, VehicleState>>({});
 
@@ -192,6 +195,21 @@ export default function VehiclePage() {
         const { data } = await supabase.from('drivers').select('*').order('created_at');
         if (data) setDrivers(data);
     };
+
+    // Compute assigned drivers from bulkData
+    const assignedDriverIds = useMemo(() => {
+        const ids = new Set<string>();
+        Object.values(bulkData).forEach(vState => {
+            Object.values(vState).forEach(v => {
+                if (v.driverId) ids.add(v.driverId);
+            });
+        });
+        return ids;
+    }, [bulkData]);
+
+    const assignedDrivers = useMemo(() => {
+        return drivers.filter(d => assignedDriverIds.has(d.id));
+    }, [drivers, assignedDriverIds]);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -748,6 +766,77 @@ export default function VehiclePage() {
         }
     };
 
+    const handleOpenDriverDropdown = async () => {
+        if (!driverDropdownOpen) {
+            setDriverDropdownOpen(true);
+            await fetchAllOptionsData(); // Make sure bulkData is fresh
+        } else {
+            setDriverDropdownOpen(false);
+        }
+    };
+
+    const handleShareDriver = async (driverId: string) => {
+        setDriverDropdownOpen(false);
+        setSelectedDriverForShare(driverId);
+        
+        // Wait a tick for the DOM to render the new selectedDriverForShare containers
+        setTimeout(async () => {
+            const files: File[] = [];
+            for (const opt of dynamicOptions) {
+                // Only generate if the driver is actually assigned in this option
+                const isAssignedInOpt = Object.values(bulkData[opt] || {}).some(v => v.driverId === driverId && v.items.length > 0);
+                if (!isAssignedInOpt) continue;
+
+                const element = document.getElementById(`export-driver-container-${opt}`);
+                if (element) {
+                    try {
+                        const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' });
+                        const blob = await (await fetch(dataUrl)).blob();
+                        const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
+                        files.push(file);
+                    } catch (e) {
+                        console.error(`Failed to generate driver image for ${opt}`, e);
+                    }
+                }
+            }
+
+            if (files.length === 0) {
+                alert("해당 기사님에게 배정된 명단이 없습니다.");
+                setSelectedDriverForShare(null);
+                return;
+            }
+
+            // Share Logic
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const driverName = drivers.find(d => d.id === driverId)?.name || '기사님';
+
+            if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files })) {
+                try {
+                    await navigator.share({
+                        files: files,
+                        title: `${selectedDate} ${driverName} 기사님 배차 명단`,
+                        text: `${selectedDate} ${driverName} 기사님 배차 명단입니다.`
+                    });
+                } catch (err) {
+                    console.warn("Mobile share failed", err);
+                    alert("공유하기가 취소되었거나 지원되지 않습니다.");
+                }
+            } else {
+                if (confirm(`${driverName} 기사님의 배차 명단 이미지 ${files.length}장을 다운로드합니다.`)) {
+                    files.forEach(file => {
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(file);
+                        link.download = file.name;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
+                }
+            }
+            setSelectedDriverForShare(null); // Clean up
+        }, 100);
+    };
+
     return (
         <div className="flex flex-col h-full bg-gray-100 p-4 gap-4 overflow-y-auto relative">
 
@@ -777,22 +866,63 @@ export default function VehiclePage() {
                 </div>
             </div>
 
+            {/* Hidden Export Container for Driver Specific Share */}
+            <div style={{ position: 'absolute', top: -9999, left: -9999 }}>
+                {selectedDriverForShare && Object.entries(bulkData).map(([opt, vState]) => (
+                    <div key={`driver-export-${opt}`} id={`export-driver-container-${opt}`}>
+                        <VehicleManifestTable
+                            vehicles={vState}
+                            drivers={drivers}
+                            optionName={opt}
+                            date={selectedDate}
+                            targetDriverId={selectedDriverForShare}
+                        />
+                    </div>
+                ))}
+            </div>
+
             {/* Sticky Action Bar */}
-            <div className="sticky top-0 z-10 bg-white p-2 rounded-lg shadow-sm flex items-center gap-2 justify-between lg:justify-end shrink-0">
-                {/* Mobile Order: Image, Share | Copy */}
-                {/* Desktop Order: Copy, Image, Share */}
+            <div className="sticky top-0 z-10 bg-white p-2 rounded-lg shadow-sm flex flex-wrap items-center gap-2 justify-between shrink-0">
+                
+                {/* Left side: Driver Share */}
+                <div className="relative">
+                    <button
+                        onClick={handleOpenDriverDropdown}
+                        className="flex items-center gap-1 px-3 py-2 lg:px-6 lg:py-3 bg-blue-600 text-white rounded text-xs lg:text-base font-bold hover:bg-blue-700 transition"
+                    >
+                        <Share2 size={14} className="lg:w-5 lg:h-5" />
+                        <span className="lg:hidden">기사 공유</span>
+                        <span className="hidden lg:inline">기사님 명단 공유</span>
+                    </button>
+                    {driverDropdownOpen && (
+                        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 shadow-xl rounded-lg p-2 z-50 min-w-[180px] max-h-64 overflow-y-auto">
+                            {assignedDrivers.length === 0 ? (
+                                <div className="text-sm text-gray-500 p-2 text-center whitespace-nowrap">배정된 기사님이 없습니다.</div>
+                            ) : (
+                                assignedDrivers.map(d => (
+                                    <button
+                                        key={d.id}
+                                        onClick={() => handleShareDriver(d.id)}
+                                        className="w-full text-left px-4 py-3 hover:bg-blue-50 text-gray-800 font-bold border-b border-gray-100 last:border-0 rounded whitespace-nowrap"
+                                    >
+                                        {d.name} 기사님
+                                    </button>
+                                ))
+                            )}
+                        </div>
+                    )}
+                </div>
 
-                {/* Copy Button */}
-                <button
-                    onClick={handleCopyToClipboard}
-                    className="flex items-center gap-1 px-3 py-2 lg:px-6 lg:py-3 bg-yellow-400 text-black rounded text-xs lg:text-base font-bold hover:bg-yellow-500 transition order-3 lg:order-1"
-                >
-                    <Copy size={14} className="lg:w-5 lg:h-5" />
-                    <span className="lg:hidden">복사</span>
-                    <span className="hidden lg:inline">텍스트로 복사</span>
-                </button>
-
-                <div className="flex gap-2 order-1 lg:order-2">
+                {/* Right side: Existing buttons */}
+                <div className="flex flex-wrap gap-2 justify-end">
+                    <button
+                        onClick={handleCopyToClipboard}
+                        className="flex items-center gap-1 px-3 py-2 lg:px-6 lg:py-3 bg-yellow-400 text-black rounded text-xs lg:text-base font-bold hover:bg-yellow-500 transition"
+                    >
+                        <Copy size={14} className="lg:w-5 lg:h-5" />
+                        <span className="lg:hidden">복사</span>
+                        <span className="hidden lg:inline">텍스트로 복사</span>
+                    </button>
                     <button
                         onClick={handleDownloadImage}
                         className="flex items-center gap-1 px-3 py-2 lg:px-6 lg:py-3 bg-green-600 text-white rounded text-xs lg:text-base font-bold hover:bg-green-700 transition"
