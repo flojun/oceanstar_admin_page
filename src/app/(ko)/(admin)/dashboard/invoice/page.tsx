@@ -98,6 +98,7 @@ export default function InvoiceManager() {
     const SOURCE_ALIASES: Record<string, string[]> = {
         '타미스': ['타미스', '탐'],
         '팜투어': ['팜투어', '팜'],
+        '헬로우': ['헬로우', '핼로우'],
     };
 
     const getSourceVariants = (source: string): string[] => {
