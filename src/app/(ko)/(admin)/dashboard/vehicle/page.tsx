@@ -24,7 +24,7 @@ import {
 } from '@dnd-kit/sortable';
 import { supabase } from '@/lib/supabase';
 import { Reservation } from '@/types/reservation';
-import { calculateTotalPax, cn } from '@/lib/utils';
+import { calculateTotalPax, cn, parseSplitPickup } from '@/lib/utils';
 import { getHawaiiTomorrowStr, getKoreanDay } from '@/lib/timeUtils';
 import { Vehicle, Driver, VehicleState } from '@/types/vehicle';
 import { VehicleDropZone } from '@/components/vehicle/VehicleDropZone';
@@ -98,6 +98,49 @@ const initialVehiclesState: VehicleState = {
 
 function createFreshVehicleState(): VehicleState {
     return JSON.parse(JSON.stringify(initialVehiclesState));
+}
+
+function distributeReservationsToState(resData: Reservation[], state: VehicleState) {
+    const unassignedItems: Reservation[] = [];
+
+    resData.forEach((res: Reservation) => {
+        const splits = parseSplitPickup(res.pickup_location);
+        if (splits && splits.length >= 2) {
+            let vData: Record<string, {v: string, o: number}> = {};
+            if (res.vehicle_id && res.vehicle_id.startsWith('{')) {
+                try { vData = JSON.parse(res.vehicle_id); } catch(e){}
+            } else if (res.vehicle_id) {
+                // Legacy format: one assigned vehicle for all splits
+                splits.forEach((_, i) => vData[i.toString()] = { v: res.vehicle_id as string, o: res.vehicle_order ?? 999 });
+            }
+
+            splits.forEach((splitGrp, i) => {
+                const splitRes = {
+                    ...res,
+                    id: `${res.id}__split__${i}`,
+                    pickup_location: splitGrp.pickup,
+                    pax: splitGrp.pax + "명",
+                    name: splitGrp.name,
+                } as any;
+                
+                const assignment = vData[i.toString()] || { v: 'unassigned', o: 999 };
+                splitRes.vehicle_id = assignment.v;
+                splitRes.vehicle_order = assignment.o;
+
+                const vId = splitRes.vehicle_id;
+                if (state[vId]) state[vId].items.push(splitRes);
+                else unassignedItems.push(splitRes);
+            });
+        } else {
+            const vId = res.vehicle_id || 'unassigned';
+            if (state[vId]) state[vId].items.push(res);
+            else unassignedItems.push(res);
+        }
+    });
+
+    if (unassignedItems.length > 0) {
+        state.unassigned.items.push(...unassignedItems);
+    }
 }
 
 export default function VehiclePage() {
@@ -189,16 +232,7 @@ export default function VehiclePage() {
             }
 
             // Distribute Reservations
-            const unassignedItems: Reservation[] = [];
-
-            activeResData.forEach((res: Reservation) => {
-                const vId = res.vehicle_id || 'unassigned';
-                if (state[vId]) {
-                    state[vId].items.push(res);
-                } else {
-                    unassignedItems.push(res);
-                }
-            });
+            distributeReservationsToState(activeResData, state);
 
             // Sort items in each vehicle
             Object.keys(state).forEach(key => {
@@ -222,10 +256,7 @@ export default function VehiclePage() {
                 }
             });
 
-            // Add any invalid-vehicle items to unassigned
-            if (unassignedItems.length > 0) {
-                state.unassigned.items.push(...unassignedItems);
-            }
+            // Sort items in each vehicle
 
             setVehicles(state);
 
@@ -321,11 +352,7 @@ export default function VehiclePage() {
 
                 // Reservations
                 const optRes = allRes?.filter(r => getOptionGroupKey(r.option, tourSettings) === opt) || [];
-                optRes.forEach((res: Reservation) => {
-                    const vId = res.vehicle_id || 'unassigned';
-                    if (state[vId]) state[vId].items.push(res);
-                    else state.unassigned.items.push(res);
-                });
+                distributeReservationsToState(optRes, state);
 
                 // Sort
                 Object.keys(state).forEach(key => {
@@ -515,17 +542,55 @@ export default function VehiclePage() {
             }
 
             // Build DB updates from the new state
-            const containersToUpdate = Array.from(new Set([activeContainer, overContainer]));
-            const updates: { id: string; vehicle_id: string | null; vehicle_order: number }[] = [];
+            // To correctly save split items, we scan all items, grouping split siblings back into their base id
+            const allItems = Object.values(newState).flatMap(c => c.items.map((item, idx) => ({ ...item, _current_cId: c.id, _current_idx: idx })));
+            
+            const updatesMap = new Map<string, { id: string; vehicle_id: string | null; vehicle_order: number }>();
+            const splitMap = new Map<string, Record<string, { v: string, o: number }>>();
 
-            containersToUpdate.forEach(cId => {
-                newState[cId].items.forEach((item, idx) => {
-                    updates.push({
+            allItems.forEach(item => {
+                const cId = (item as any)._current_cId;
+                const idx = (item as any)._current_idx;
+                const isSplit = item.id.includes('__split__');
+                
+                if (isSplit) {
+                    const [baseId, splitIndex] = item.id.split('__split__');
+                    if (!splitMap.has(baseId)) splitMap.set(baseId, {});
+                    splitMap.get(baseId)![splitIndex] = { v: cId === 'unassigned' ? null : cId, o: idx } as any;
+                } else {
+                    updatesMap.set(item.id, {
                         id: item.id,
                         vehicle_id: cId === 'unassigned' ? null : cId,
                         vehicle_order: idx
                     });
+                }
+            });
+
+            // Convert split maps to JSON strings
+            for (const [baseId, assignments] of splitMap.entries()) {
+                updatesMap.set(baseId, {
+                    id: baseId,
+                    vehicle_id: JSON.stringify(assignments),
+                    vehicle_order: 999 // Base order doesn't matter, it's inside the JSON
                 });
+            }
+
+            // Upsert items that belong to the containers that just updated (including their split siblings)
+            const containersToUpdate = Array.from(new Set([activeContainer, overContainer]));
+            const baseIdsToUpdate = new Set<string>();
+            
+            containersToUpdate.forEach(cId => {
+                newState[cId].items.forEach(item => {
+                    const baseId = item.id.split('__split__')[0];
+                    baseIdsToUpdate.add(baseId);
+                });
+            });
+
+            const updates: { id: string; vehicle_id: string | null; vehicle_order: number }[] = [];
+            baseIdsToUpdate.forEach(id => {
+                if (updatesMap.has(id)) {
+                    updates.push(updatesMap.get(id)!);
+                }
             });
 
             updatesForDB = updates;

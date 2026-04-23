@@ -64,25 +64,25 @@ export function VehicleManifestTable({ vehicles, drivers, optionName, date }: Ve
                             </div>
 
                             {/* Table Content */}
-                            <table className="w-full text-sm border-collapse bg-black text-white">
+                            <table className="w-full text-sm border-collapse bg-black text-white table-auto">
                                 <thead>
-                                    <tr className="border-b border-gray-700 text-gray-400">
-                                        <th className="px-2 py-1 border-r border-gray-700 w-24">픽업</th>
-                                        <th className="px-2 py-1 border-r border-gray-700 w-20">이름</th>
-                                        <th className="px-2 py-1 border-r border-gray-700 w-12">인원</th>
-                                        <th className="px-2 py-1">연락처</th>
+                                    <tr className="border-b border-gray-700 text-gray-400 whitespace-nowrap">
+                                        <th className="px-2 py-1 border-r border-gray-700">픽업</th>
+                                        <th className="px-2 py-1 border-r border-gray-700">이름</th>
+                                        <th className="px-2 py-1 border-r border-gray-700">인원</th>
+                                        <th className="px-2 py-1 text-right">연락처</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {vehicle.items.map((item, idx) => (
                                         <tr key={item.id} className={idx !== vehicle.items.length - 1 ? 'border-b border-gray-800' : ''}>
-                                            <td className="px-2 py-1 border-r border-gray-700 font-bold truncate max-w-[120px] text-center">
+                                            <td className="px-2 py-1 border-r border-gray-700 font-bold whitespace-nowrap text-center">
                                                 {item.pickup_location}
                                             </td>
-                                            <td className="px-2 py-1 border-r border-gray-700 truncate max-w-[100px] text-center">
+                                            <td className="px-2 py-1 border-r border-gray-700 whitespace-nowrap text-center">
                                                 {item.name}
                                             </td>
-                                            <td className="px-2 py-1 border-r border-gray-700 text-center">
+                                            <td className="px-2 py-1 border-r border-gray-700 whitespace-nowrap text-center">
                                                 {item.pax?.replace("명", "")}
                                             </td>
                                             <td className="px-2 py-1 text-right text-gray-300 font-mono tracking-wide whitespace-nowrap">

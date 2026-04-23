@@ -160,6 +160,8 @@ function AllReservationsContent() {
     // Search State
     const [searchCriteria, setSearchCriteria] = useState<'name' | 'source' | 'tour_date' | 'contact'>('name');
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<any[] | null>(null); // null = no active search
+    const [isSearching, setIsSearching] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
     // Expanded Cell State (Tooltip)
@@ -1633,27 +1635,63 @@ function AllReservationsContent() {
         return classes.join(" ");
     };
 
+    // DB-level search: query Supabase directly so results aren't limited to loaded rows
+    useEffect(() => {
+        const query = searchQuery.trim();
+        if (!query) {
+            setSearchResults(null);
+            setIsSearching(false);
+            return;
+        }
+
+        setIsSearching(true);
+        const timer = setTimeout(async () => {
+            try {
+                let normalizedQuery = query;
+
+                // Special handling for tour_date: normalize date formats
+                if (searchCriteria === 'tour_date') {
+                    const dateMatch = normalizedQuery.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+                    if (dateMatch) {
+                        const [, month, day, year] = dateMatch;
+                        normalizedQuery = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                    }
+                }
+
+                const { data, error } = await supabase
+                    .from('reservations')
+                    .select('*')
+                    .ilike(searchCriteria, `%${normalizedQuery}%`)
+                    .order('receipt_date', { ascending: false })
+                    .order('created_at', { ascending: false })
+                    .limit(200);
+
+                if (error) throw error;
+
+                const sanitized = ensureUniqueIds(data || []);
+                setSearchResults(sanitized);
+            } catch (err) {
+                console.error('Search error:', err);
+                // Fallback: filter locally
+                const localQuery = query.toLowerCase();
+                setSearchResults(rows.filter(row => {
+                    const value = String((row as any)[searchCriteria] || '').toLowerCase();
+                    return value.includes(localQuery);
+                }));
+            } finally {
+                setIsSearching(false);
+            }
+        }, 400); // 400ms debounce
+
+        return () => clearTimeout(timer);
+    }, [searchQuery, searchCriteria]);
+
     // Filter rows based on search
     const filteredRows = useMemo(() => {
         if (!searchQuery.trim()) return rows;
-
-        let query = searchQuery.toLowerCase().trim();
-
-        // Special handling for tour_date: normalize date formats
-        if (searchCriteria === 'tour_date') {
-            // Try to convert common date formats to YYYY-MM-DD
-            const dateMatch = query.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-            if (dateMatch) {
-                const [, month, day, year] = dateMatch;
-                query = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-            }
-        }
-
-        return rows.filter(row => {
-            const value = String(row[searchCriteria] || '').toLowerCase();
-            return value.includes(query);
-        });
-    }, [rows, searchQuery, searchCriteria]);
+        if (searchResults !== null) return searchResults;
+        return rows; // While searching, show all rows (isSearching indicator handles UX)
+    }, [rows, searchQuery, searchResults]);
 
     // Range overlay calculation
     const rangeOverlayStyle = useMemo(() => {
@@ -1814,7 +1852,11 @@ function AllReservationsContent() {
             {searchQuery && (
                 <div className="relative z-10 px-4 pb-2">
                     <p className="text-sm text-gray-600">
-                        <strong>{filteredRows.length}</strong>개의 검색 결과 (전체: {rows.length}개)
+                        {isSearching ? (
+                            <span className="text-blue-500 font-medium">검색 중...</span>
+                        ) : (
+                            <><strong>{filteredRows.length}</strong>개의 검색 결과 (DB 전체 검색)</>
+                        )}
                     </p>
                 </div>
             )}
