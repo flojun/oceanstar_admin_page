@@ -42,6 +42,7 @@ export function ReservationModal({
     const [formData, setFormData] = useState<ReservationInsert>(INITIAL_FORM);
     const [tourSettings, setTourSettings] = useState<TourSetting[]>([]);
     const [loading, setLoading] = useState(false);
+    const isSubmitting = React.useRef(false);
     // Explicit capacity info: { current, limit, group }
     const [capacityInfo, setCapacityInfo] = useState<{ current: number, limit: number, group: string, incoming: number } | null>(null);
 
@@ -75,6 +76,8 @@ export function ReservationModal({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSubmitting.current) return;
+        isSubmitting.current = true;
         setLoading(true);
         try {
             if (reservation) {
@@ -98,6 +101,7 @@ export function ReservationModal({
             alert("저장 중 오류가 발생했습니다.");
         } finally {
             setLoading(false);
+            isSubmitting.current = false;
         }
     };
 

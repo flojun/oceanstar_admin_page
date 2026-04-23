@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { Reservation, ReservationStatus } from "@/types/reservation";
 import { createAgencyReservation, updateAgencyReservation, cancelAgencyReservation, getAgencyAvailabilityWeekly } from "@/actions/agency";
@@ -44,6 +44,7 @@ export default function AgencyDashboardPage() {
 
     const [formData, setFormData] = useState(initialForm);
     const [formLoading, setFormLoading] = useState(false);
+    const isSubmitting = React.useRef(false);
     const [agencyName, setAgencyName] = useState<string>("여행사");
 
     const fetchReservations = async () => {
@@ -143,6 +144,8 @@ export default function AgencyDashboardPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSubmitting.current) return;
+        isSubmitting.current = true;
         setFormLoading(true);
 
         const totalPax = formData.adults + formData.children + formData.infants;
@@ -188,6 +191,7 @@ export default function AgencyDashboardPage() {
             alert(`오류가 발생했습니다: ${result?.error}`);
         }
         setFormLoading(false);
+        isSubmitting.current = false;
     };
 
     const handleCancel = async (id: string, name: string) => {

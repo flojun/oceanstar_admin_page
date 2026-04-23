@@ -87,6 +87,7 @@ const initialRows = Array.from({ length: 50 }, () => createEmptyRow());
 export default function BulkAddPage() {
     const [rows, setRows] = useState<GridRow[]>(initialRows);
     const [saving, setSaving] = useState(false);
+    const isSubmitting = React.useRef(false);
     const [tourSettings, setTourSettings] = useState<TourSetting[]>([]);
 
     useEffect(() => {
@@ -288,6 +289,8 @@ export default function BulkAddPage() {
     const handleAddManyRows = () => setRows(prev => [...prev, ...Array.from({ length: 200 }, () => createEmptyRow())]);
 
     const handleSave = async () => {
+        if (isSubmitting.current) return;
+        isSubmitting.current = true;
         setSaving(true);
         const validRows = rows.filter(r => r.name && r.tour_date);
 
@@ -333,6 +336,7 @@ export default function BulkAddPage() {
             alert("저장 실패");
         } finally {
             setSaving(false);
+            isSubmitting.current = false;
         }
     };
 

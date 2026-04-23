@@ -128,6 +128,7 @@ function AllReservationsContent() {
     const gridContainerRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<DataGridHandle>(null);
     const [saving, setSaving] = useState(false);
+    const isSubmitting = useRef(false);
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(0);
 
@@ -1193,6 +1194,9 @@ function AllReservationsContent() {
     };
 
     const handleSave = async () => {
+        if (isSubmitting.current) return;
+        isSubmitting.current = true;
+
         // Read from refs to avoid stale closure (blur + click batching race)
         const latestRows = rowsRef.current;
         const latestSearchResults = searchResultsRef.current;
@@ -1305,10 +1309,38 @@ function AllReservationsContent() {
                 if (updateError) throw updateError;
             }
 
+            // Immediately clear isNew locally to prevent double saves during fetch latency
+            const cleanRows = (arr: any[]) => {
+                let modified = false;
+                const newArr = arr.map(r => {
+                    if (r.isNew) {
+                        modified = true;
+                        const { isNew, ...rest } = r;
+                        return rest;
+                    }
+                    return r;
+                });
+                return modified ? newArr : arr;
+            };
+
+            const updatedGlobal = cleanRows(rowsRef.current);
+            if (updatedGlobal !== rowsRef.current) {
+                setRows(updatedGlobal);
+                rowsRef.current = updatedGlobal;
+            }
+
+            if (searchResultsRef.current) {
+                const updatedSearch = cleanRows(searchResultsRef.current);
+                if (updatedSearch !== searchResultsRef.current) {
+                    setSearchResults(updatedSearch);
+                    searchResultsRef.current = updatedSearch;
+                }
+            }
+
             alert(`저장 완료 (추가: ${inserts.length}건, 수정: ${updates.length}건)`);
             setChangedRowIds(new Set());
             changedRowIdsRef.current = new Set();
-            fetchReservations(0, true);
+            await fetchReservations(0, true);
         } catch (error: any) {
             console.error("Save error:", error);
             console.error("Error details:", {
@@ -1321,6 +1353,7 @@ function AllReservationsContent() {
             alert(`저장 중 오류가 발생했습니다.\n${error?.message || '알 수 없는 오류'}`);
         } finally {
             setSaving(false);
+            isSubmitting.current = false;
         }
     };
 
