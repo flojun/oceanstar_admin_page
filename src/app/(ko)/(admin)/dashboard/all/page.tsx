@@ -492,12 +492,20 @@ function AllReservationsContent() {
     };
 
     // Async Overbooking Check (Dynamic)
-    const checkOverbooking = async (row: any, index: number) => {
+    const checkOverbooking = async (row: any) => {
         const resolved = resolveOptionToTourSetting(row.option || "", tourSettings);
         if (!resolved.tourSetting) {
             setRows(prev => {
                 const updated = [...prev];
-                if (updated[index]) (updated[index] as any)._capacityStatus = null;
+                const realIdx = updated.findIndex(r => r._grid_id === row._grid_id);
+                if (realIdx >= 0) (updated[realIdx] as any)._capacityStatus = null;
+                return updated;
+            });
+            setSearchResults(prev => {
+                if (!prev) return prev;
+                const updated = [...prev];
+                const realIdx = updated.findIndex(r => r._grid_id === row._grid_id);
+                if (realIdx >= 0) (updated[realIdx] as any)._capacityStatus = null;
                 return updated;
             });
             return;
@@ -535,9 +543,20 @@ function AllReservationsContent() {
 
             setRows(prev => {
                 const updated = [...prev];
-                if (updated[index] && (updated[index] as any)._grid_id === row._grid_id) {
-                    (updated[index] as any)._capacityStatus = isOver ? 'warning' : 'safe';
-                    (updated[index] as any)._capacityMsg = msg;
+                const realIdx = updated.findIndex(r => r._grid_id === row._grid_id);
+                if (realIdx >= 0) {
+                    (updated[realIdx] as any)._capacityStatus = isOver ? 'warning' : 'safe';
+                    (updated[realIdx] as any)._capacityMsg = msg;
+                }
+                return updated;
+            });
+            setSearchResults(prev => {
+                if (!prev) return prev;
+                const updated = [...prev];
+                const realIdx = updated.findIndex(r => r._grid_id === row._grid_id);
+                if (realIdx >= 0) {
+                    (updated[realIdx] as any)._capacityStatus = isOver ? 'warning' : 'safe';
+                    (updated[realIdx] as any)._capacityMsg = msg;
                 }
                 return updated;
             });
@@ -676,8 +695,11 @@ function AllReservationsContent() {
 
     const handleRowsChange = (newRows: any[], { indexes }: { indexes: number[] }) => {
         const newChangedIds = new Set(changedRowIds);
+        const updatedGlobalRows = [...rows];
+        const updatedSearchResults = searchResults ? [...searchResults] : null;
+
         indexes.forEach((index) => {
-            const oldRow = rows[index];
+            const oldRow = filteredRows[index];
             let newRow = newRows[index];
             newRow = { ...smartParseRow(newRow), _grid_id: oldRow._grid_id };
 
@@ -685,15 +707,13 @@ function AllReservationsContent() {
             if (newRow.tour_date !== oldRow.tour_date || newRow.option !== oldRow.option || newRow.pax !== oldRow.pax) {
                 if (newRow.tour_date && newRow.option && newRow.pax) {
                     (newRow as any)._capacityStatus = 'checking'; // Instant visual feedback
-                    checkOverbooking(newRow, index);
+                    checkOverbooking(newRow);
                 }
             } else {
                 // Preserve status if not changed
                 (newRow as any)._capacityStatus = (oldRow as any)._capacityStatus;
                 (newRow as any)._capacityMsg = (oldRow as any)._capacityMsg;
             }
-
-            newRows[index] = newRow;
 
             const hasChanged = Object.keys(newRow).some((k) => {
                 const key = k as keyof Reservation;
@@ -703,9 +723,30 @@ function AllReservationsContent() {
             if (hasChanged) {
                 newChangedIds.add(newRow.id!);
             }
+
+            // Sync with searchResults if active
+            if (updatedSearchResults) {
+                updatedSearchResults[index] = newRow;
+            }
+
+            // Sync with global rows
+            if (newRow.id && !newRow.isNew) {
+                const globalIdx = updatedGlobalRows.findIndex(r => r.id === newRow.id);
+                if (globalIdx >= 0) {
+                    updatedGlobalRows[globalIdx] = newRow;
+                }
+            } else if (newRow.isNew) {
+                const globalIdx = updatedGlobalRows.findIndex(r => r._grid_id === newRow._grid_id);
+                if (globalIdx >= 0) {
+                    updatedGlobalRows[globalIdx] = newRow;
+                }
+            }
         });
 
-        updateRowsWithHistory(newRows, newChangedIds);
+        if (updatedSearchResults) {
+            setSearchResults(updatedSearchResults);
+        }
+        updateRowsWithHistory(updatedGlobalRows, newChangedIds);
     };
 
     useEffect(() => {
@@ -1576,6 +1617,11 @@ function AllReservationsContent() {
 
     const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
         if ((event.key === 'Delete' || event.key === 'Backspace') && rangeSelection) {
+            if (searchQuery.trim() || searchResults) {
+                alert('검색 중에는 일괄 삭제 기능을 사용할 수 없습니다. 개별 셀 수정을 이용해주세요.');
+                return;
+            }
+
             const { startCol, endCol, startRow, endRow } = rangeSelection;
             const keysToClear: string[] = [];
 
@@ -1625,7 +1671,7 @@ function AllReservationsContent() {
                 return newRows;
             });
         }
-    }, [rangeSelection, columns]);
+    }, [rangeSelection, columns, searchQuery, searchResults]);
 
     const rowClass = (row: any) => {
         const classes: string[] = [];
