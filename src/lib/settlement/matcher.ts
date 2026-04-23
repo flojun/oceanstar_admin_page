@@ -156,7 +156,7 @@ export async function fetchProductPrices(): Promise<ProductPrice[]> {
         .eq('is_active', true);
 
     if (error) {
-        console.error('product_prices fetch error:', error);
+        console.error('product_prices fetch error:', error, 'details:', JSON.stringify(error), 'message:', (error as any).message);
         return [];
     }
     return (data || []) as ProductPrice[];
@@ -184,7 +184,7 @@ export async function fetchAndMergeReservations(
 
     const { data, error } = await query;
     if (error) {
-        console.error('reservations fetch error:', error);
+        console.error('reservations fetch error:', error, 'details:', JSON.stringify(error), 'message:', (error as any).message);
         return [];
     }
 
@@ -780,7 +780,7 @@ export async function fetchUnsettledPastReservations(
         .is('settlement_status', null); // Unsettled only
 
     if (error) {
-        console.error('fetchUnsettledPastReservations error:', error);
+        console.error('fetchUnsettledPastReservations error:', error, 'details:', JSON.stringify(error), 'message:', (error as any).message);
         return [];
     }
 
