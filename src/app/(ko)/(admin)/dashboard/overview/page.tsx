@@ -30,21 +30,45 @@ export default function DashboardStatsPage() {
 
     useEffect(() => {
         fetchReservations();
-    }, []);
+    }, [startYear, startMonth, endYear, endMonth]);
 
     const fetchReservations = async () => {
         try {
             setLoading(true);
-            // Fetch all reservations
-            const { data, error } = await supabase
-                .from('reservations')
-                .select('*')
-                .order('tour_date', { ascending: true });
+            
+            const startDate = `${startYear}-${String(startMonth).padStart(2, '0')}-01`;
+            const lastDay = new Date(endYear, endMonth, 0).getDate();
+            const endDate = `${endYear}-${String(endMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
 
-            if (error) throw error;
-            if (data) {
-                setReservations(data as Reservation[]);
+            let allData: Reservation[] = [];
+            let hasMore = true;
+            let page = 0;
+            const limit = 1000;
+
+            while (hasMore) {
+                const { data, error } = await supabase
+                    .from('reservations')
+                    .select('*')
+                    .gte('tour_date', startDate)
+                    .lte('tour_date', endDate)
+                    .order('tour_date', { ascending: true })
+                    .range(page * limit, (page + 1) * limit - 1);
+
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    allData = [...allData, ...(data as Reservation[])];
+                    if (data.length < limit) {
+                        hasMore = false;
+                    } else {
+                        page++;
+                    }
+                } else {
+                    hasMore = false;
+                }
             }
+            
+            setReservations(allData);
         } catch (error) {
             console.error('Error fetching stats:', error);
         } finally {
