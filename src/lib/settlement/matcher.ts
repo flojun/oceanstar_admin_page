@@ -717,17 +717,21 @@ export function calculateSummary(results: MatchResult[]): SettlementSummary {
 export async function confirmSettlement(reservationIds: string[]): Promise<{ success: boolean; error?: string }> {
     if (reservationIds.length === 0) return { success: true };
 
-    const { error } = await supabase
-        .from('reservations')
-        .update({
-            settlement_status: 'completed',
-            settled_at: new Date().toISOString(),
-        })
-        .in('id', reservationIds);
+    const CHUNK_SIZE = 50;
+    for (let i = 0; i < reservationIds.length; i += CHUNK_SIZE) {
+        const chunk = reservationIds.slice(i, i + CHUNK_SIZE);
+        const { error } = await supabase
+            .from('reservations')
+            .update({
+                settlement_status: 'completed',
+                settled_at: new Date().toISOString(),
+            })
+            .in('id', chunk);
 
-    if (error) {
-        console.error('Settlement confirmation error:', error);
-        return { success: false, error: error.message };
+        if (error) {
+            console.error('Settlement confirmation error on chunk:', error, 'details:', JSON.stringify(error));
+            return { success: false, error: error.message || JSON.stringify(error) };
+        }
     }
 
     return { success: true };
@@ -736,17 +740,21 @@ export async function confirmSettlement(reservationIds: string[]): Promise<{ suc
 export async function excludeSettlement(reservationIds: string[]): Promise<{ success: boolean; error?: string }> {
     if (reservationIds.length === 0) return { success: true };
 
-    const { error } = await supabase
-        .from('reservations')
-        .update({
-            settlement_status: 'excluded',
-            settled_at: new Date().toISOString(),
-        })
-        .in('id', reservationIds);
+    const CHUNK_SIZE = 50;
+    for (let i = 0; i < reservationIds.length; i += CHUNK_SIZE) {
+        const chunk = reservationIds.slice(i, i + CHUNK_SIZE);
+        const { error } = await supabase
+            .from('reservations')
+            .update({
+                settlement_status: 'excluded',
+                settled_at: new Date().toISOString(),
+            })
+            .in('id', chunk);
 
-    if (error) {
-        console.error('Settlement exclusion error:', error);
-        return { success: false, error: error.message };
+        if (error) {
+            console.error('Settlement exclusion error on chunk:', error, 'details:', JSON.stringify(error));
+            return { success: false, error: error.message || JSON.stringify(error) };
+        }
     }
 
     return { success: true };
