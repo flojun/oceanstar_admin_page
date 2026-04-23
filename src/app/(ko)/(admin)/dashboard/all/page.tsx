@@ -301,20 +301,40 @@ function AllReservationsContent() {
     // Redefining handleSingleRowChange to use updateRowsWithHistory directly
     // This allows history tracking.
     const handleSingleRowChangeDirect = useCallback((updatedRow: any) => {
-        const idx = rows.findIndex(r => (r as any)._grid_id === (updatedRow as any)._grid_id);
-        if (idx === -1) return;
-
-        const newRows = [...rows];
-        newRows[idx] = updatedRow;
+        const updatedGlobalRows = [...rows];
+        const updatedSearchResults = searchResults ? [...searchResults] : null;
 
         const nextChangedIds = new Set(changedRowIds);
         if (updatedRow.id && !updatedRow.isNew) {
             nextChangedIds.add(updatedRow.id);
         }
 
-        updateRowsWithHistory(newRows, nextChangedIds);
+        let found = false;
 
-    }, [rows, changedRowIds, updateRowsWithHistory]);
+        // Update in global rows
+        const idx = updatedGlobalRows.findIndex(r => (r as any)._grid_id === (updatedRow as any)._grid_id);
+        if (idx !== -1) {
+            updatedGlobalRows[idx] = updatedRow;
+            found = true;
+        }
+
+        // Update in search results
+        if (updatedSearchResults) {
+            const searchIdx = updatedSearchResults.findIndex(r => (r as any)._grid_id === (updatedRow as any)._grid_id);
+            if (searchIdx !== -1) {
+                updatedSearchResults[searchIdx] = updatedRow;
+                found = true;
+            }
+        }
+
+        if (!found) return;
+
+        if (updatedSearchResults) {
+            setSearchResults(updatedSearchResults);
+        }
+        updateRowsWithHistory(updatedGlobalRows, nextChangedIds);
+
+    }, [rows, searchResults, changedRowIds, updateRowsWithHistory]);
 
     // Navigation Handler for Always-Edit Inputs
     const handleEditorNavigation = useCallback((action: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' | 'TAB' | 'ENTER' | 'SHIFT_TAB', rowIdx: number, colIdx: number) => {
