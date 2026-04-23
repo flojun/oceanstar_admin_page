@@ -121,6 +121,9 @@ function AllReservationsContent() {
     const [totalCount, setTotalCount] = useState<number>(0); // Store total count for row numbering
     const [selectedRows, setSelectedRows] = useState<ReadonlySet<string>>(new Set());
     const [changedRowIds, setChangedRowIds] = useState<Set<string>>(new Set());
+    const changedRowIdsRef = useRef<Set<string>>(new Set());
+    const rowsRef = useRef<any[]>([]);
+    const searchResultsRef = useRef<any[] | null>(null);
     const [loading, setLoading] = useState(true);
     const gridContainerRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<DataGridHandle>(null);
@@ -213,7 +216,9 @@ function AllReservationsContent() {
         }
 
         setRows(newRows);
+        rowsRef.current = newRows;
         setChangedRowIds(newChangedIds);
+        changedRowIdsRef.current = newChangedIds;
     };
 
     // Initialize history when data is first loaded (only if history is empty)
@@ -271,6 +276,7 @@ function AllReservationsContent() {
                 setChangedRowIds(prev => {
                     const next = new Set(prev);
                     next.add(updatedRow.id);
+                    changedRowIdsRef.current = next;
                     return next;
                 });
             }
@@ -311,10 +317,15 @@ function AllReservationsContent() {
 
         let found = false;
 
-        // Update in global rows
-        const idx = updatedGlobalRows.findIndex(r => (r as any)._grid_id === (updatedRow as any)._grid_id);
+        // Update in global rows (try _grid_id first, then fall back to id)
+        let idx = updatedGlobalRows.findIndex(r => (r as any)._grid_id === (updatedRow as any)._grid_id);
+        if (idx === -1 && updatedRow.id && !updatedRow.isNew) {
+            // Fallback: search results have different _grid_id than global rows
+            idx = updatedGlobalRows.findIndex(r => r.id === updatedRow.id);
+        }
         if (idx !== -1) {
-            updatedGlobalRows[idx] = updatedRow;
+            // Preserve the global row's _grid_id to avoid breaking grid key tracking
+            updatedGlobalRows[idx] = { ...updatedRow, _grid_id: (updatedGlobalRows[idx] as any)._grid_id };
             found = true;
         }
 
@@ -331,10 +342,15 @@ function AllReservationsContent() {
 
         if (updatedSearchResults) {
             setSearchResults(updatedSearchResults);
+            searchResultsRef.current = updatedSearchResults;
         }
         updateRowsWithHistory(updatedGlobalRows, nextChangedIds);
 
     }, [rows, searchResults, changedRowIds, updateRowsWithHistory]);
+
+    // Ref to always point to the latest handler (avoids stale closure in columns useMemo)
+    const handleSingleRowChangeDirectRef = useRef(handleSingleRowChangeDirect);
+    handleSingleRowChangeDirectRef.current = handleSingleRowChangeDirect;
 
     // Navigation Handler for Always-Edit Inputs
     const handleEditorNavigation = useCallback((action: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' | 'TAB' | 'ENTER' | 'SHIFT_TAB', rowIdx: number, colIdx: number) => {
@@ -708,6 +724,7 @@ function AllReservationsContent() {
         // 변경 추적
         if (!updatedRow.isNew && updatedRow.id) {
             setChangedRowIds(prev => new Set(prev).add(updatedRow.id));
+                changedRowIdsRef.current = new Set(changedRowIdsRef.current).add(updatedRow.id);
         }
 
         return updatedRow;
@@ -753,7 +770,8 @@ function AllReservationsContent() {
             if (newRow.id && !newRow.isNew) {
                 const globalIdx = updatedGlobalRows.findIndex(r => r.id === newRow.id);
                 if (globalIdx >= 0) {
-                    updatedGlobalRows[globalIdx] = newRow;
+                    // Preserve the global row's _grid_id to avoid breaking grid key tracking
+                    updatedGlobalRows[globalIdx] = { ...newRow, _grid_id: (updatedGlobalRows[globalIdx] as any)._grid_id };
                 }
             } else if (newRow.isNew) {
                 const globalIdx = updatedGlobalRows.findIndex(r => r._grid_id === newRow._grid_id);
@@ -765,6 +783,7 @@ function AllReservationsContent() {
 
         if (updatedSearchResults) {
             setSearchResults(updatedSearchResults);
+            searchResultsRef.current = updatedSearchResults;
         }
         updateRowsWithHistory(updatedGlobalRows, newChangedIds);
     };
@@ -1174,14 +1193,19 @@ function AllReservationsContent() {
     };
 
     const handleSave = async () => {
+        // Read from refs to avoid stale closure (blur + click batching race)
+        const latestRows = rowsRef.current;
+        const latestSearchResults = searchResultsRef.current;
+        const latestChangedIds = changedRowIdsRef.current;
+
         // Collect all unique available rows from both global rows and search results
         const availableRowsMap = new Map();
-        rows.forEach(r => availableRowsMap.set(r.id || (r as any)._grid_id, r));
-        if (searchResults) {
-            searchResults.forEach(r => availableRowsMap.set(r.id || (r as any)._grid_id, r));
+        latestRows.forEach(r => availableRowsMap.set(r.id || (r as any)._grid_id, r));
+        if (latestSearchResults) {
+            latestSearchResults.forEach(r => availableRowsMap.set(r.id || (r as any)._grid_id, r));
         }
 
-        const toSave = Array.from(availableRowsMap.values()).filter(r => (r as any).isNew || changedRowIds.has(r.id!));
+        const toSave = Array.from(availableRowsMap.values()).filter(r => (r as any).isNew || latestChangedIds.has(r.id!));
 
         if (toSave.length === 0) {
             alert("저장할 변경사항이 없습니다.");
@@ -1283,6 +1307,7 @@ function AllReservationsContent() {
 
             alert(`저장 완료 (추가: ${inserts.length}건, 수정: ${updates.length}건)`);
             setChangedRowIds(new Set());
+            changedRowIdsRef.current = new Set();
             fetchReservations(0, true);
         } catch (error: any) {
             console.error("Save error:", error);
@@ -1459,7 +1484,7 @@ function AllReservationsContent() {
                         isAlwaysOn={true}
                         isSelected={isSelected}
                         textAlign="center"
-                        onRowChange={(newRow: any) => handleSingleRowChangeDirect(newRow)}
+                        onRowChange={(newRow: any) => handleSingleRowChangeDirectRef.current(newRow)}
                         onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
                     />
                 );
@@ -1587,7 +1612,7 @@ function AllReservationsContent() {
                         {...props}
                         isAlwaysOn={true}
                         isSelected={isSelected}
-                        onRowChange={(newRow: any) => handleSingleRowChangeDirect(newRow)}
+                        onRowChange={(newRow: any) => handleSingleRowChangeDirectRef.current(newRow)}
                         onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
                     />
                 );
@@ -1608,7 +1633,7 @@ function AllReservationsContent() {
                         {...props}
                         isAlwaysOn={true}
                         isSelected={isSelected}
-                        onRowChange={(newRow: any) => handleSingleRowChangeDirect(newRow)}
+                        onRowChange={(newRow: any) => handleSingleRowChangeDirectRef.current(newRow)}
                         onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
                     />
                 );
@@ -1691,6 +1716,7 @@ function AllReservationsContent() {
                     setChangedRowIds(prev => {
                         const next = new Set(prev);
                         changedIds.forEach(id => next.add(id));
+                        changedRowIdsRef.current = next;
                         return next;
                     });
                 }
@@ -1713,6 +1739,7 @@ function AllReservationsContent() {
         const query = searchQuery.trim();
         if (!query) {
             setSearchResults(null);
+            searchResultsRef.current = null;
             setIsSearching(false);
             return;
         }
@@ -1743,14 +1770,17 @@ function AllReservationsContent() {
 
                 const sanitized = ensureUniqueIds(data || []);
                 setSearchResults(sanitized);
+                searchResultsRef.current = sanitized;
             } catch (err) {
                 console.error('Search error:', err);
                 // Fallback: filter locally
                 const localQuery = query.toLowerCase();
-                setSearchResults(rows.filter(row => {
+                const localFiltered = rows.filter(row => {
                     const value = String((row as any)[searchCriteria] || '').toLowerCase();
                     return value.includes(localQuery);
-                }));
+                });
+                setSearchResults(localFiltered);
+                searchResultsRef.current = localFiltered;
             } finally {
                 setIsSearching(false);
             }
