@@ -44,7 +44,7 @@ export default function AgencyDashboardPage() {
 
     const [formData, setFormData] = useState(initialForm);
     const [formLoading, setFormLoading] = useState(false);
-    const isSubmitting = React.useRef(false);
+    const isSubmitting = useRef(false);
     const [agencyName, setAgencyName] = useState<string>("여행사");
 
     const fetchReservations = async () => {
