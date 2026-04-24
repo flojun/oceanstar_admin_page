@@ -99,6 +99,10 @@ export default function InvoiceManager() {
         '타미스': ['타미스', '탐'],
         '팜투어': ['팜투어', '팜'],
         '헬로우': ['헬로우', '핼로우', '헬로', '핼로'],
+        '마이리얼트립': ['마이리얼트립', 'M'],
+        '줌줌': ['줌줌', 'Z'],
+        '트리플': ['트리플', 'T'],
+        '와그': ['와그', 'W'],
     };
 
     const getSourceVariants = (source: string): string[] => {
