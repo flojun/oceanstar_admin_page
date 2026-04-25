@@ -13,7 +13,7 @@ const TABS = [
     { name: "캘린더", href: "/dashboard/monthly" },
     { name: "예약관리", href: "/dashboard/all" },
     { name: "크루 스케쥴", href: "/dashboard/crew" },
-    { name: "대시보드", href: "/dashboard/stats" },
+    { name: "대시보드", href: "/dashboard/overview" },
     { name: "인보이스", href: "/dashboard/invoice" },
 ];
 

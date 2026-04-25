@@ -237,7 +237,7 @@ export default function DashboardStatsPage() {
             {/* Tab Navigation */}
             <div className="flex gap-1 bg-gray-100 p-1.5 rounded-xl">
                 <Link
-                    href="/dashboard/stats"
+                    href="/dashboard/overview"
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200 bg-indigo-600 text-white shadow-md"
                 >
                     <BarChart2 className="w-4 h-4" />
