@@ -1278,6 +1278,15 @@ function AllReservationsContent() {
             const isChanged = (r as any).isNew || latestChangedIds.has(r.id!);
             if (!isChanged) return false;
 
+            // Completely empty rows
+            if (!r.name && !r.tour_date && !r.contact && !r.receipt_date) return false;
+
+            // Prevent saving drag-filled ghost rows: New rows must have at least a tour_date
+            // If they only have a name or source (from drag-fill), they will be ignored.
+            if ((r as any).isNew && !r.tour_date) {
+                return false;
+            }
+
             if (!isValidDateStr(r.tour_date) || !isValidDateStr(r.receipt_date)) {
                 if (r.id) skippedIds.add(r.id);
                 return false;
@@ -1326,7 +1335,6 @@ function AllReservationsContent() {
 
             toSave.forEach(r => {
                 const row = r as any;
-                if (!row.name && !row.tour_date && !row.contact && !row.receipt_date) return;
 
                 if (row.isNew) {
                     const { id, isNew, created_at, _grid_id, _capacityMsg, _capacityStatus, ...rest } = row;
@@ -1541,13 +1549,23 @@ function AllReservationsContent() {
             name: "접수일",
             renderEditCell: CustomTextEditor,
             width: 100,
-            cellClass: "select-none p-0",
+            cellClass: "p-0",
             headerCellClass: "text-center",
             renderCell: (props: any) => {
-                const displayValue = formatDateDisplay(props.row.receipt_date);
-                return hoverTooltipRenderer({ ...props, row: { ...props.row, receipt_date: displayValue } }, false, true);
-            },
-            editorOptions: { commitOnOutsideClick: true }
+                const idx = rows.indexOf(props.row);
+                const isSelected = selectedCell?.rowIdx === idx && selectedCell?.idx === props.column.idx;
+                return (
+                    <CustomTextEditor
+                        {...props}
+                        isAlwaysOn={true}
+                        isSelected={isSelected}
+                        textAlign="center"
+                        formatDisplay={formatDateDisplay}
+                        onRowChange={(newRow: any) => handleSingleRowChangeDirectRef.current(newRow)}
+                        onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
+                    />
+                );
+            }
         },
         {
             key: "status",
@@ -1575,11 +1593,32 @@ function AllReservationsContent() {
                 );
             }
         },
-        { key: "source", name: "경로", renderEditCell: CustomTextEditor, width: 80, cellClass: "select-none p-0 text-center", headerCellClass: "text-center", renderCell: (props: any) => hoverTooltipRenderer(props, true, true), editorOptions: { commitOnOutsideClick: true } },
+        { 
+            key: "source", 
+            name: "경로", 
+            renderEditCell: CustomTextEditor,
+            width: 80, 
+            cellClass: "p-0 text-center", 
+            headerCellClass: "text-center", 
+            renderCell: (props: any) => {
+                const idx = rows.indexOf(props.row);
+                const isSelected = selectedCell?.rowIdx === idx && selectedCell?.idx === props.column.idx;
+                return (
+                    <CustomTextEditor
+                        {...props}
+                        isAlwaysOn={true}
+                        isSelected={isSelected}
+                        textAlign="center"
+                        onRowChange={(newRow: any) => handleSingleRowChangeDirectRef.current(newRow)}
+                        onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
+                    />
+                );
+            }
+        },
         {
             key: "name",
             name: "예약자명",
-            // Always-Edit Mode - renderEditCell removed to prevent conflict
+            renderEditCell: CustomTextEditor,
             width: 90,
             cellClass: "p-0 text-center",
             headerCellClass: "text-center",
@@ -1606,31 +1645,23 @@ function AllReservationsContent() {
             name: "예약일",
             renderEditCell: CustomTextEditor,
             width: 100,
-            cellClass: "select-none p-0 text-center",
+            cellClass: "p-0 text-center",
             headerCellClass: "text-center",
             renderCell: (props: any) => {
-                const isSelected = selectedCell?.rowIdx === props.row.id && selectedCell?.idx === props.column.idx; // Use row.id or row index depending on logic
-                // Actually rowKeyGetter uses _grid_id or id. We need to match current row index.
-                // grid props.rowIdx is available in modern RDG, but here props might be just { row, column, onRowChange... }
-                // Let's check if we can get rowIdx. In RDG v7 renderCell props usually include rowIdx?
-                // Wait, in the 'name' column we access `props.rowIdx` or we rely on `isSelected` passed from parent? 
-                // Ah, 'name' column loop in previous code (Line 1145) uses `const isSelected = selectedCell?.rowIdx === i ...` 
-                // but here we are in `columns` array definition. accurately getting rowIdx in renderCell can be tricky if not passed.
-                // However, `renderCell` props in RDG usually have `rowIdx`.
-                // Let's assume `props.rowIdx` is valid.
-
-                // Wait, `columns` is defined *inside* the component in this file?
-                // Yes, `const columns = useMemo(...)`.
-                // So we can access `selectedCell` from closure.
-
-                // Wait, `columns` is defined *inside* the component in this file?
-                // Yes, `const columns = useMemo(...)`.
-                // So we can access `selectedCell` from closure.
-
-                const displayValue = formatDateDisplay(props.row.tour_date);
-                return hoverTooltipRenderer({ ...props, row: { ...props.row, tour_date: displayValue } }, true, true);
-            },
-            editorOptions: { commitOnOutsideClick: true }
+                const idx = rows.indexOf(props.row);
+                const isSelected = selectedCell?.rowIdx === idx && selectedCell?.idx === props.column.idx;
+                return (
+                    <CustomTextEditor
+                        {...props}
+                        isAlwaysOn={true}
+                        isSelected={isSelected}
+                        textAlign="center"
+                        formatDisplay={formatDateDisplay}
+                        onRowChange={(newRow: any) => handleSingleRowChangeDirectRef.current(newRow)}
+                        onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
+                    />
+                );
+            }
         },
         {
             key: "day_of_week", name: "요일", width: 50,
@@ -1645,7 +1676,28 @@ function AllReservationsContent() {
                 );
             }
         },
-        { key: "pax", name: "인원", renderEditCell: CustomTextEditor, width: 60, cellClass: "select-none p-0 text-center", headerCellClass: "text-center", renderCell: (props: any) => hoverTooltipRenderer(props, true), editorOptions: { commitOnOutsideClick: true } },
+        { 
+            key: "pax", 
+            name: "인원", 
+            renderEditCell: CustomTextEditor,
+            width: 60, 
+            cellClass: "p-0 text-center", 
+            headerCellClass: "text-center", 
+            renderCell: (props: any) => {
+                const idx = rows.indexOf(props.row);
+                const isSelected = selectedCell?.rowIdx === idx && selectedCell?.idx === props.column.idx;
+                return (
+                    <CustomTextEditor
+                        {...props}
+                        isAlwaysOn={true}
+                        isSelected={isSelected}
+                        textAlign="center"
+                        onRowChange={(newRow: any) => handleSingleRowChangeDirectRef.current(newRow)}
+                        onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
+                    />
+                );
+            }
+        },
         {
             key: "option", name: "옵션", renderEditCell: CustomTextEditor, width: 90, // Widened slightly for badges
             cellClass: "select-none p-0 text-center", headerCellClass: "text-center",
@@ -1701,12 +1753,19 @@ function AllReservationsContent() {
             cellClass: "p-0",
             headerCellClass: "text-center",
             renderCell: (props: any) => {
-                // Always-Edit might be overkill for contact numbers, but consistent UX is better.
-                // User asked for Pickup and Note. I'll omit Contact for now to be safe, or just do it?
-                // User said "Pickup Location and Note". I'll stick to those to be precise.
-                return hoverTooltipRenderer(props, false);
-            },
-            editorOptions: { commitOnOutsideClick: true }
+                const idx = rows.indexOf(props.row);
+                const isSelected = selectedCell?.rowIdx === idx && selectedCell?.idx === props.column.idx;
+                return (
+                    <CustomTextEditor
+                        {...props}
+                        isAlwaysOn={true}
+                        isSelected={isSelected}
+                        textAlign="center"
+                        onRowChange={(newRow: any) => handleSingleRowChangeDirectRef.current(newRow)}
+                        onNavigate={(action) => handleEditorNavigation(action, idx, props.column.idx)}
+                    />
+                );
+            }
         },
         {
             key: "booker_email",
@@ -1732,7 +1791,7 @@ function AllReservationsContent() {
         {
             key: "note",
             name: "기타사항",
-            // renderEditCell removed for Always-Edit
+            renderEditCell: CustomTextEditor,
             width: noteColWidth,
             cellClass: "p-0",
             headerCellClass: "text-center",
@@ -2051,7 +2110,7 @@ function AllReservationsContent() {
                         </div>
 
                         <button
-                            onClick={handleSave}
+                            onClick={() => handleSave()}
                             disabled={saving}
                             className="flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-bold text-white hover:bg-blue-700 disabled:bg-blue-300 shadow-sm transition-colors"
                         >
