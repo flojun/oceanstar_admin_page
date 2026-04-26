@@ -168,6 +168,7 @@ export async function createAgencyReservation(reservation: ReservationInsert) {
             .insert({
                 ...reservation,
                 agency_id: session.id,
+                is_admin_checked: false, // Force it to show in Admin Notification Center
             })
             .select()
             .single();
@@ -226,7 +227,10 @@ export async function updateAgencyReservation(id: string, updates: ReservationUp
 
         const { data, error } = await supabase
             .from("reservations")
-            .update(updates)
+            .update({
+                ...updates,
+                is_admin_checked: false // Uncheck it so Admin reviews the modification
+            })
             .eq("id", id)
             .select()
             .single();

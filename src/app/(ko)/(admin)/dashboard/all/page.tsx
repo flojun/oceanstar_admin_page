@@ -28,7 +28,7 @@ interface RangeSelection {
 const createEmptyRow = (): Partial<Reservation> & { isNew?: boolean, _grid_id: string, _capacityStatus?: string, _capacityMsg?: string } => ({
     id: `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
     _grid_id: crypto.randomUUID(),
-    status: "",
+    status: "예약확정",
     receipt_date: "",
     source: "",
     name: "",
@@ -129,6 +129,18 @@ function AllReservationsContent() {
     const gridRef = useRef<DataGridHandle>(null);
     const [saving, setSaving] = useState(false);
     const isSubmitting = useRef(false);
+    const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const handleSaveRef = useRef<(isAutoSave?: boolean) => Promise<void>>(undefined);
+
+    const triggerAutoSave = useCallback(() => {
+        if (autoSaveTimeoutRef.current) {
+            clearTimeout(autoSaveTimeoutRef.current);
+        }
+        autoSaveTimeoutRef.current = setTimeout(() => {
+            handleSaveRef.current?.(true);
+        }, 500);
+    }, []);
+
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(0);
 
@@ -220,6 +232,11 @@ function AllReservationsContent() {
         rowsRef.current = newRows;
         setChangedRowIds(newChangedIds);
         changedRowIdsRef.current = newChangedIds;
+
+        const hasValidNewRows = newRows.some(r => r.isNew && (r.name || r.tour_date || r.contact || r.receipt_date));
+        if (newChangedIds.size > 0 || hasValidNewRows) {
+            triggerAutoSave();
+        }
     };
 
     // Initialize history when data is first loaded (only if history is empty)
@@ -325,8 +342,19 @@ function AllReservationsContent() {
             idx = updatedGlobalRows.findIndex(r => r.id === updatedRow.id);
         }
         if (idx !== -1) {
+            const currentLatest = updatedGlobalRows[idx];
+            const mergedRow = { ...currentLatest, ...updatedRow };
+
+            // Prevent Stale Editor Props from reverting a background-saved row back to "isNew"
+            if ((currentLatest as any).id && !(currentLatest as any).isNew && updatedRow.isNew) {
+                delete mergedRow.isNew;
+                mergedRow.id = currentLatest.id; // Restore DB ID
+                mergedRow.receipt_date = currentLatest.receipt_date;
+                mergedRow.created_at = currentLatest.created_at;
+            }
+
             // Preserve the global row's _grid_id to avoid breaking grid key tracking
-            updatedGlobalRows[idx] = { ...updatedRow, _grid_id: (updatedGlobalRows[idx] as any)._grid_id };
+            updatedGlobalRows[idx] = { ...mergedRow, _grid_id: (currentLatest as any)._grid_id };
             found = true;
         }
 
@@ -334,7 +362,17 @@ function AllReservationsContent() {
         if (updatedSearchResults) {
             const searchIdx = updatedSearchResults.findIndex(r => (r as any)._grid_id === (updatedRow as any)._grid_id);
             if (searchIdx !== -1) {
-                updatedSearchResults[searchIdx] = updatedRow;
+                const currentLatestSearch = updatedSearchResults[searchIdx];
+                const mergedSearch = { ...currentLatestSearch, ...updatedRow };
+
+                if ((currentLatestSearch as any).id && !(currentLatestSearch as any).isNew && updatedRow.isNew) {
+                    delete mergedSearch.isNew;
+                    mergedSearch.id = currentLatestSearch.id;
+                    mergedSearch.receipt_date = currentLatestSearch.receipt_date;
+                    mergedSearch.created_at = currentLatestSearch.created_at;
+                }
+
+                updatedSearchResults[searchIdx] = { ...mergedSearch, _grid_id: (currentLatestSearch as any)._grid_id };
                 found = true;
             }
         }
@@ -764,21 +802,30 @@ function AllReservationsContent() {
 
             // Sync with searchResults if active
             if (updatedSearchResults) {
+                const currentLatestSearch = updatedSearchResults[index];
+                if ((currentLatestSearch as any).id && !(currentLatestSearch as any).isNew && newRow.isNew) {
+                    delete newRow.isNew;
+                    newRow.id = currentLatestSearch.id;
+                    newRow.receipt_date = currentLatestSearch.receipt_date;
+                    newRow.created_at = currentLatestSearch.created_at;
+                }
                 updatedSearchResults[index] = newRow;
             }
 
             // Sync with global rows
-            if (newRow.id && !newRow.isNew) {
-                const globalIdx = updatedGlobalRows.findIndex(r => r.id === newRow.id);
-                if (globalIdx >= 0) {
-                    // Preserve the global row's _grid_id to avoid breaking grid key tracking
-                    updatedGlobalRows[globalIdx] = { ...newRow, _grid_id: (updatedGlobalRows[globalIdx] as any)._grid_id };
+            let globalIdx = updatedGlobalRows.findIndex(r => (r as any)._grid_id === newRow._grid_id);
+            if (globalIdx === -1 && newRow.id && !newRow.isNew) {
+                globalIdx = updatedGlobalRows.findIndex(r => r.id === newRow.id);
+            }
+            if (globalIdx >= 0) {
+                const currentLatest = updatedGlobalRows[globalIdx];
+                if ((currentLatest as any).id && !(currentLatest as any).isNew && newRow.isNew) {
+                    delete newRow.isNew;
+                    newRow.id = currentLatest.id;
+                    newRow.receipt_date = currentLatest.receipt_date;
+                    newRow.created_at = currentLatest.created_at;
                 }
-            } else if (newRow.isNew) {
-                const globalIdx = updatedGlobalRows.findIndex(r => r._grid_id === newRow._grid_id);
-                if (globalIdx >= 0) {
-                    updatedGlobalRows[globalIdx] = newRow;
-                }
+                updatedGlobalRows[globalIdx] = { ...newRow, _grid_id: (currentLatest as any)._grid_id };
             }
         });
 
@@ -790,9 +837,10 @@ function AllReservationsContent() {
     };
 
     useEffect(() => {
-        const hasNew = rows.some((r: any) => r.isNew);
+        // Empty rows (that will be skipped by save anyway) should not trigger the unsaved changes warning.
+        const hasValidNew = rows.some((r: any) => r.isNew && (r.name || r.tour_date || r.contact || r.receipt_date));
         const hasChanges = changedRowIds.size > 0;
-        const isCurrentlyDirty = hasNew || hasChanges;
+        const isCurrentlyDirty = hasValidNew || hasChanges;
         setIsDirty(isCurrentlyDirty);
 
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -806,16 +854,22 @@ function AllReservationsContent() {
         return () => window.removeEventListener("beforeunload", handleBeforeUnload);
     }, [rows, changedRowIds, setIsDirty]);
 
-    const handleSaveRef = useRef<() => Promise<void>>(undefined);
+    // Reset global dirty state when leaving the page to prevent popups on other pages
+    useEffect(() => {
+        return () => {
+            setIsDirty(false);
+        };
+    }, [setIsDirty]);
+
     useEffect(() => {
         registerSaveHandler(async () => {
-            await handleSaveRef.current?.();
+            await handleSaveRef.current?.(false);
         });
     }, [registerSaveHandler]);
 
     useEffect(() => {
-        handleSaveRef.current = async () => {
-            await handleSave();
+        handleSaveRef.current = async (isAutoSave = false) => {
+            await handleSave(isAutoSave);
         };
     });
 
@@ -1193,9 +1247,13 @@ function AllReservationsContent() {
         setShowCopyModal(true);
     };
 
-    const handleSave = async () => {
-        if (isSubmitting.current) return;
+    const handleSave = async (isAutoSave = false) => {
+        if (isSubmitting.current) {
+            if (isAutoSave) triggerAutoSave();
+            return;
+        }
         isSubmitting.current = true;
+        setSaving(true);
 
         // Read from refs to avoid stale closure (blur + click batching race)
         const latestRows = rowsRef.current;
@@ -1209,17 +1267,35 @@ function AllReservationsContent() {
             latestSearchResults.forEach(r => availableRowsMap.set(r.id || (r as any)._grid_id, r));
         }
 
-        const toSave = Array.from(availableRowsMap.values()).filter(r => (r as any).isNew || latestChangedIds.has(r.id!));
+        const isValidDateStr = (d: any) => {
+            if (!d) return true;
+            const str = String(d).trim();
+            return /^\d{2,4}[-./]\d{1,2}[-./]\d{1,2}$/.test(str);
+        };
+
+        const skippedIds = new Set<string>();
+        const toSave = Array.from(availableRowsMap.values()).filter(r => {
+            const isChanged = (r as any).isNew || latestChangedIds.has(r.id!);
+            if (!isChanged) return false;
+
+            if (!isValidDateStr(r.tour_date) || !isValidDateStr(r.receipt_date)) {
+                if (r.id) skippedIds.add(r.id);
+                return false;
+            }
+            return true;
+        });
 
         if (toSave.length === 0) {
-            alert("저장할 변경사항이 없습니다.");
+            if (!isAutoSave) alert("저장할 변경사항이 없습니다.");
+            setSaving(false);
+            isSubmitting.current = false;
             return;
         }
 
-        setSaving(true);
         try {
             const inserts: any[] = [];
             const updates: any[] = [];
+            const actualInsertedLocalRows: any[] = [];
 
             const newRowsToSave = toSave.filter(r => (r as any).isNew);
             const needsDefaultDate = newRowsToSave.some(r => !r.receipt_date);
@@ -1250,7 +1326,7 @@ function AllReservationsContent() {
 
             toSave.forEach(r => {
                 const row = r as any;
-                if (!row.name && !row.tour_date && !row.receipt_date) return;
+                if (!row.name && !row.tour_date && !row.contact && !row.receipt_date) return;
 
                 if (row.isNew) {
                     const { id, isNew, created_at, _grid_id, _capacityMsg, _capacityStatus, ...rest } = row;
@@ -1265,43 +1341,45 @@ function AllReservationsContent() {
                     const receiptDate = rest.receipt_date || defaultDateToUse;
                     const status = rest.status || "예약확정";
 
-                    // created_at은 2차 패스에서 부여 (순서 방향 결정 후)
+                    actualInsertedLocalRows.push(row);
                     inserts.push({
                         ...rest,
+                        tour_date: rest.tour_date || null,
+                        pax: rest.pax || null,
                         receipt_date: receiptDate,
                         status: status,
                         is_reconfirmed: isReconfirmed,
-                        is_admin_checked: true, // 어드민 직접 입력 예약은 알림센터에 안뜨도록
+                        is_admin_checked: true,
                         option: rest.option || "",
-                        pax: rest.pax || "",
                         pickup_location: rest.pickup_location || "",
                         contact: rest.contact || "",
                         note: rest.note || "",
                         source: rest.source || "",
                     });
                 } else {
-                    // 업데이트할 때도 _grid_id 및 UI 상태 제거
                     const { _grid_id, _capacityMsg, _capacityStatus, ...cleanRow } = row;
-
-                    // 접수일 미입력 시 하와이 날짜 자동 입력
                     if (!cleanRow.receipt_date) {
                         cleanRow.receipt_date = getHawaiiDateStr();
                     }
-
+                    if (cleanRow.tour_date === "") cleanRow.tour_date = null;
+                    if (cleanRow.pax === "") cleanRow.pax = null;
+                    
+                    // Admin explicitly modified this row, so mark it as checked
+                    cleanRow.is_admin_checked = true;
+                    
                     updates.push(cleanRow);
                 }
             });
 
-            // 2차 패스: 그리드 위치를 보존하기 위해 created_at 부여
-            // inserts[0] = 그리드 상단 → 가장 최신 타임스탬프 → DESC 정렬에서 상단 유지
-            // inserts[n-1] = 그리드 하단 → 가장 오래된 타임스탬프 → DESC 정렬에서 하단 유지
             inserts.forEach((item, idx) => {
                 item.created_at = new Date(insertBaseTime - idx * 1000).toISOString();
             });
 
+            let insertedData: any[] | null = null;
             if (inserts.length > 0) {
-                const { error: insertError } = await supabase.from("reservations").insert(inserts);
+                const { data, error: insertError } = await supabase.from("reservations").insert(inserts).select();
                 if (insertError) throw insertError;
+                insertedData = data;
             }
 
             if (updates.length > 0) {
@@ -1309,14 +1387,17 @@ function AllReservationsContent() {
                 if (updateError) throw updateError;
             }
 
-            // Immediately clear isNew locally to prevent double saves during fetch latency
             const cleanRows = (arr: any[]) => {
                 let modified = false;
                 const newArr = arr.map(r => {
                     if (r.isNew) {
-                        modified = true;
-                        const { isNew, ...rest } = r;
-                        return rest;
+                        const insertIdx = actualInsertedLocalRows.findIndex(ir => ir._grid_id === r._grid_id);
+                        if (insertIdx !== -1 && insertedData && insertedData[insertIdx]) {
+                            modified = true;
+                            const dbRow = insertedData[insertIdx];
+                            const { isNew, ...rest } = r;
+                            return { ...rest, id: dbRow.id, receipt_date: dbRow.receipt_date, created_at: dbRow.created_at };
+                        }
                     }
                     return r;
                 });
@@ -1337,20 +1418,17 @@ function AllReservationsContent() {
                 }
             }
 
-            alert(`저장 완료 (추가: ${inserts.length}건, 수정: ${updates.length}건)`);
-            setChangedRowIds(new Set());
-            changedRowIdsRef.current = new Set();
-            await fetchReservations(0, true);
+            setChangedRowIds(skippedIds);
+            changedRowIdsRef.current = skippedIds;
+
+            if (!isAutoSave) {
+                alert(`저장 완료 (추가: ${inserts.length}건, 수정: ${updates.length}건)`);
+                // fetchReservations를 호출하지 않음으로써, 아직 저장되지 않은 빈 행이나 유효하지 않은 행이
+                // 그리드에서 갑자기 사라져 아래쪽 행이 위로 당겨져 보이는(데이터가 덮어씌워진 것처럼 보이는) 버그를 방지합니다.
+            }
         } catch (error: any) {
-            console.error("Save error:", error);
-            console.error("Error details:", {
-                message: error?.message,
-                code: error?.code,
-                details: error?.details,
-                hint: error?.hint,
-                full: JSON.stringify(error, null, 2)
-            });
-            alert(`저장 중 오류가 발생했습니다.\n${error?.message || '알 수 없는 오류'}`);
+            console.error("Save error details:", JSON.stringify(error, null, 2), error);
+            alert(`저장 중 오류가 발생했습니다.\n${error?.message || JSON.stringify(error) || '알 수 없는 오류'}`);
         } finally {
             setSaving(false);
             isSubmitting.current = false;
