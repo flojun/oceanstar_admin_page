@@ -225,6 +225,16 @@ export function ReservationModal({
                     <div className="p-4 sm:p-6 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto">
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
+                            {/* Receipt Date - Custom DatePicker */}
+                            <div>
+                                <DatePicker
+                                    label="접수일"
+                                    required
+                                    value={formData.receipt_date}
+                                    onChange={(val) => handleChange("receipt_date", val)}
+                                />
+                            </div>
+
                             {/* Status */}
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-gray-700">진행상태</label>
@@ -257,16 +267,6 @@ export function ReservationModal({
                                 <SmartInput
                                     value={formData.name}
                                     onValueChange={(val) => handleChange("name", val)}
-                                />
-                            </div>
-
-                            {/* Receipt Date - Custom DatePicker */}
-                            <div>
-                                <DatePicker
-                                    label="접수일"
-                                    required
-                                    value={formData.receipt_date}
-                                    onChange={(val) => handleChange("receipt_date", val)}
                                 />
                             </div>
 
