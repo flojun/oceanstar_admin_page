@@ -373,22 +373,22 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
                         {viewMode === 'custom' && `선택하신 날짜 (${formatDateDisplay(selectedDate)})의 예약 명단입니다.`}
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                     <button
                         onClick={() => handleModeChange('today')}
-                        className="hidden sm:flex items-center justify-center gap-1.5 rounded-lg bg-white border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-700 shadow-sm hover:bg-gray-50 transition-all active:scale-95"
+                        className="flex items-center justify-center gap-1.5 rounded-lg bg-white border border-gray-200 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-gray-700 shadow-sm hover:bg-gray-50 transition-all active:scale-95"
                     >
                         오늘명단
                     </button>
                     <button
                         onClick={() => handleModeChange('reconfirm')}
-                        className="hidden sm:flex items-center justify-center gap-1.5 rounded-lg bg-white border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-700 shadow-sm hover:bg-gray-50 transition-all active:scale-95"
+                        className="flex items-center justify-center gap-1.5 rounded-lg bg-white border border-gray-200 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-gray-700 shadow-sm hover:bg-gray-50 transition-all active:scale-95"
                     >
                         내일명단
                     </button>
                     <button
                         onClick={handleCreate}
-                        className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-blue-700 transition-all active:scale-95"
+                        className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold text-white shadow-md hover:bg-blue-700 transition-all active:scale-95"
                     >
                         <Plus className="h-4 w-4" />
                         새 예약 등록
