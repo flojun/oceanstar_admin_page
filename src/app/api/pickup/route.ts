@@ -40,7 +40,7 @@ export async function GET() {
             console.error('Database fetch error or no data for pickup locations:', error);
             locationsToReturn = [
                 { id: '1', name: '프린스', lat: 21.286394930815042, lng: -157.84013103745616, time_1: '07:50', time_2: '10:50' },
-                { id: '2', name: '아이홉', lat: 21.284900771263654, lng: -157.83654774943167, time_1: '07:45', time_2: '10:45' },
+                { id: '2', name: 'IHOP', lat: 21.284900771263654, lng: -157.83654774943167, time_1: '07:45', time_2: '10:45' },
                 { id: '3', name: '카라이', lat: 21.279812168534036, lng: -157.83228314561782, time_1: '07:45', time_2: '10:45' },
                 { id: '4', name: 'HIE', lat: 21.284147785475607, lng: -157.83108674397712, time_1: '07:40', time_2: '10:40' },
                 { id: '5', name: 'HM', lat: 21.278930557010227, lng: -157.8282909823861, time_1: '07:40', time_2: '10:40' },

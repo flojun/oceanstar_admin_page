@@ -86,6 +86,28 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
             return value.includes(query);
         });
     }, [tabFilteredData, searchQuery, searchCriteria]);
+    
+    // Calculate summary stats
+    const summaryStats = useMemo(() => {
+        const stats = {
+            part1: 0,
+            part2: 0,
+            part3: 0,
+            total: 0
+        };
+
+        reservations.forEach(res => {
+            const pax = calculateTotalPax([res]);
+            stats.total += pax;
+            
+            const option = res.option || "";
+            if (option.includes("1부")) stats.part1 += pax;
+            else if (option.includes("2부")) stats.part2 += pax;
+            else if (option.includes("3부") || option.includes("선셋 거북이")) stats.part3 += pax;
+        });
+
+        return stats;
+    }, [reservations]);
 
     // Mode Switching Logic
     const handleModeChange = (mode: ViewMode) => {
@@ -351,13 +373,27 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
                         {viewMode === 'custom' && `선택하신 날짜 (${formatDateDisplay(selectedDate)})의 예약 명단입니다.`}
                     </p>
                 </div>
-                <button
-                    onClick={handleCreate}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-blue-700 transition-all active:scale-95"
-                >
-                    <Plus className="h-4 w-4" />
-                    새 예약 등록
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => handleModeChange('today')}
+                        className="hidden sm:flex items-center justify-center gap-1.5 rounded-lg bg-white border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-700 shadow-sm hover:bg-gray-50 transition-all active:scale-95"
+                    >
+                        오늘명단
+                    </button>
+                    <button
+                        onClick={() => handleModeChange('reconfirm')}
+                        className="hidden sm:flex items-center justify-center gap-1.5 rounded-lg bg-white border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-700 shadow-sm hover:bg-gray-50 transition-all active:scale-95"
+                    >
+                        내일명단
+                    </button>
+                    <button
+                        onClick={handleCreate}
+                        className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-blue-700 transition-all active:scale-95"
+                    >
+                        <Plus className="h-4 w-4" />
+                        새 예약 등록
+                    </button>
+                </div>
             </div>
 
             {/* Search Bar */}
@@ -471,6 +507,32 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
                                 <X className="w-6 h-6" />
                             </button>
                         </div>
+                        
+                        {/* Summary Stats Section Inside Overlay */}
+                        <div className="bg-blue-50 border-b border-blue-100 p-4 shadow-sm">
+                            <div className="max-w-[1600px] 2xl:max-w-[2200px] mx-auto flex flex-wrap items-center justify-around gap-4">
+                                <div className="flex flex-col items-center">
+                                    <span className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">1부 총원</span>
+                                    <span className="text-2xl font-black text-blue-900">{summaryStats.part1}<span className="text-sm font-bold ml-1">명</span></span>
+                                </div>
+                                <div className="w-px h-10 bg-blue-200 hidden md:block"></div>
+                                <div className="flex flex-col items-center">
+                                    <span className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">2부 총원</span>
+                                    <span className="text-2xl font-black text-blue-900">{summaryStats.part2}<span className="text-sm font-bold ml-1">명</span></span>
+                                </div>
+                                <div className="w-px h-10 bg-blue-200 hidden md:block"></div>
+                                <div className="flex flex-col items-center">
+                                    <span className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">3부 총원</span>
+                                    <span className="text-2xl font-black text-blue-900">{summaryStats.part3}<span className="text-sm font-bold ml-1">명</span></span>
+                                </div>
+                                <div className="w-px h-10 bg-blue-200 hidden md:block"></div>
+                                <div className="flex flex-col items-center">
+                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">전체 총원</span>
+                                    <span className="text-2xl font-black text-gray-900">{summaryStats.total}<span className="text-sm font-bold ml-1">명</span></span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="flex-1 overflow-auto p-2 bg-gray-50">
                             {/* Wrap table in a container for larger screens if needed, or keeping full width */}
                             <div className="max-w-[1600px] 2xl:max-w-[2200px] mx-auto">

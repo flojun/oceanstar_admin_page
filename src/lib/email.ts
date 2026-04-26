@@ -53,7 +53,7 @@ export async function sendVoucherEmail({
   let locFilePrefix = pickup_location;
   if (pickup_location === 'HM' || pickup_location === 'H&M') locFilePrefix = 'H&M';
   else if (pickup_location === '녹색천막') locFilePrefix = '소화전';
-  else if (pickup_location === '아이홉' || pickup_location === 'IHOP') locFilePrefix = 'IHOP';
+  else if (pickup_location === 'IHOP') locFilePrefix = 'IHOP';
   else if (pickup_location === '알라모아나') locFilePrefix = '알모';
   else if (pickup_location === 'HP') locFilePrefix = 'HP';
   else if (pickup_location === 'HGI') locFilePrefix = 'HGI';
