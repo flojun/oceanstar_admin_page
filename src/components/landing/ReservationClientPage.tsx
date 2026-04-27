@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Check, MapPin, Calendar, Users, CreditCard, Loader2, ChevronRight, Info, X, ShieldCheck, Star, Anchor, UsersRound, Award, MessageSquare, User, ClipboardList, AlertTriangle, Mail, Instagram, Youtube } from "lucide-react";
+import { Check, MapPin, Calendar, Users, CreditCard, Loader2, ChevronRight, Info, X, ShieldCheck, Star, Anchor, UsersRound, Award, MessageSquare, User, ClipboardList, AlertTriangle, Mail, Instagram, Youtube, Sparkles } from "lucide-react";
 import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 import { calculateDistance, findClosestPickup, PickupLocation, getWalkingMinutes } from '@/lib/utils';
 import { DayPicker } from "react-day-picker";
@@ -59,11 +59,10 @@ const libraries: "places"[] = ["places"];
 // Helper function to calculate Tiered Pricing for Private Tour
 const calculateTieredPrivatePrice = (totalPax: number, exchangeRate: number): number => {
     let usdPrice = 0;
-    if (totalPax <= 4) usdPrice = 1800;
-    else if (totalPax <= 10) usdPrice = 2200;
-    else if (totalPax <= 20) usdPrice = 2800;
-    else if (totalPax <= 30) usdPrice = 3500;
-    else usdPrice = 4500; // max 40
+    if (totalPax <= 10) usdPrice = 1200;
+    else if (totalPax <= 20) usdPrice = 1800;
+    else if (totalPax <= 30) usdPrice = 2400;
+    else usdPrice = 3000; // max 40
 
     // Do not round or use Math.round, use exact multiplied value
     return Math.floor(usdPrice * exchangeRate); 
@@ -520,37 +519,37 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     const isPrivate = tour.is_flat_rate && tour.tour_id === 'private';
                     const isSunset = tour.tour_id?.toLowerCase().includes('sunset');
                     
-                    const themes: { bg: string, gradient: string, text: string, badge: string, btn: string, specialLabel?: string, isDark?: boolean }[] = [
+                    const themes: { bg: string, gradient: string, text: string, badge: string, btn: string, specialLabel?: React.ReactNode, specialLabelBg?: string, isDark?: boolean }[] = [
                       { bg: 'bg-cyan-100', gradient: 'from-cyan-500 to-blue-400', text: 'text-blue-900', badge: t('tour.badges.popular'), btn: 'bg-slate-900 hover:bg-slate-800', isDark: false },
                       { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: t('tour.badges.morning'), btn: 'bg-orange-500 hover:bg-orange-600', isDark: false },
                       { bg: 'bg-indigo-100', gradient: 'from-indigo-500 to-purple-500', text: 'text-indigo-900', badge: t('tour.badges.premium'), btn: 'bg-indigo-600 hover:bg-indigo-700', isDark: false }
                     ];
                     
                     let theme = themes[idx % themes.length];
-                    if (isPrivate) theme = { bg: 'bg-slate-800', gradient: 'from-slate-800 to-indigo-900', text: 'text-white', badge: t('tour.badges.private'), btn: 'bg-indigo-500 hover:bg-indigo-400', isDark: true };
-                    else if (isSunset) theme = { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: t('tour.badges.sunset'), btn: 'bg-orange-500 hover:bg-orange-600', specialLabel: t('tour.badges.couple'), isDark: false };
+                    if (isPrivate) theme = { bg: 'bg-slate-900', gradient: 'from-slate-800 to-indigo-900', text: 'text-white', badge: t('tour.badges.private'), btn: 'bg-indigo-500 hover:bg-indigo-400', specialLabel: <span className="flex items-center gap-1"><Sparkles size={14} className="text-yellow-300 fill-yellow-300" /> {lang === 'en' ? 'Opening Special' : '오픈특가'} <Sparkles size={14} className="text-yellow-300 fill-yellow-300" /></span>, specialLabelBg: 'bg-gradient-to-r from-fuchsia-600 to-purple-600', isDark: true };
+                    else if (isSunset) theme = { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: t('tour.badges.sunset'), btn: 'bg-orange-500 hover:bg-orange-600', specialLabel: t('tour.badges.couple'), specialLabelBg: 'bg-gradient-to-r from-orange-400 to-red-500', isDark: false };
 
                       const tourImages = (() => {
                         if (isSunset) {
                           return [
                             { src: '/images_option_card/sunset.jpg' },
-                            { src: '/images_option_card/snorkeling_turtle2.jpg', style: { objectPosition: 'center 20%', transform: 'rotate(-0.68deg) scale(1.03)' } },
-                            { src: '/images_option_card/kayak_sunset.jpg', style: { transform: 'rotate(1.64deg) scale(1.05)' } },
-                            { src: '/images_option_card/sunset_people.jpg', style: { objectPosition: 'right center', transform: 'rotate(0.91deg) scale(1.03)' } }
+                            { src: '/images_option_card/snorkeling_turtle2.jpg', style: { objectPosition: 'center 20%', transform: 'rotate(-0.68deg) scale(1.08)' } },
+                            { src: '/images_option_card/kayak_sunset.jpg', style: { transform: 'rotate(1.64deg) scale(1.1)' } },
+                            { src: '/images_option_card/sunset_people.jpg', style: { objectPosition: 'right center', transform: 'rotate(0.91deg) scale(1.08)' } }
                           ];
                         } else {
                           return [
-                            { src: '/images_option_card/snorkeling_turtle.jpg', style: { transform: 'rotate(-6deg) scale(1.15)' } },
-                            { src: '/images_option_card/paddleboad_people.jpg', style: { objectPosition: 'center 80%', transform: 'rotate(-1.12deg) scale(1.04)' } },
-                            { src: '/images_option_card/snorkeling_turtle2.jpg', style: { objectPosition: 'center 20%', transform: 'rotate(-0.68deg) scale(1.03)' } },
+                            { src: '/images_option_card/snorkeling_turtle.jpg', style: { transform: 'rotate(-6deg) scale(1.3)' } },
+                            { src: '/images_option_card/paddleboad_people.jpg', style: { objectPosition: 'center 80%', transform: 'rotate(-1.12deg) scale(1.1)' } },
+                            { src: '/images_option_card/snorkeling_turtle2.jpg', style: { objectPosition: 'center 20%', transform: 'rotate(-0.68deg) scale(1.08)' } },
                           ];
                         }
                       })();
 
                     return (
-                      <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900 text-white' : 'bg-white'} flex-col rounded-3xl shadow-lg border ${theme.isDark ? 'border-slate-800' : 'border-slate-100'} overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 flex group relative`}>
+                      <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900 text-white' : 'bg-white border border-slate-100'} flex-col rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 flex group relative`}>
                         {theme.specialLabel && (
-                          <div className="absolute top-0 right-10 bg-gradient-to-r from-orange-400 to-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-b-xl z-10 shadow-md">
+                          <div className={`absolute top-0 right-10 ${theme.specialLabelBg || 'bg-gradient-to-r from-orange-400 to-red-500'} text-white text-xs font-bold px-4 py-1.5 rounded-b-xl z-10 shadow-md`}>
                             {theme.specialLabel}
                           </div>
                         )}
@@ -955,12 +954,11 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         {isFlatRate && selectedTour === 'private' && (
                             <div className="mb-4 bg-indigo-50 text-indigo-900 p-4 rounded-xl text-sm border border-indigo-100 shadow-sm">
                                 <strong className="flex items-center gap-2 mb-1"><Info size={16} className="text-indigo-600" /> {lang === 'en' ? 'Private Trip Pricing' : '프라이빗 차터 요금 안내'}</strong>
-                                <p className="text-xs mb-2 opacity-80">{lang === 'en' ? '(Based on total passengers, single booking)' : '(총 인원, 단일 예약 기준)'}</p>
+                                <p className="text-xs mb-2 opacity-80">{lang === 'en' ? '(Based on total pax, single booking, 2 Hours Tour)' : '(총 인원, 단일 예약 기준, 투어시간 2시간)'}</p>
                                 <ul className="space-y-1 ml-6 list-disc opacity-90 font-medium">
-                                    <li>1~4{lang === 'en' ? ' pax' : '명'}: $1,800</li>
-                                    <li>5~10{lang === 'en' ? ' pax' : '명'}: $2,200</li>
-                                    <li>11~20{lang === 'en' ? ' pax' : '명'}: $2,800</li>
-                                    <li>21~30{lang === 'en' ? ' pax' : '명'}: $3,500</li>
+                                    <li>1~10{lang === 'en' ? ' pax' : '명'}: $1,200</li>
+                                    <li>11~20{lang === 'en' ? ' pax' : '명'}: $1,800</li>
+                                    <li>21~30{lang === 'en' ? ' pax' : '명'}: $2,400</li>
                                 </ul>
                             </div>
                         )}
