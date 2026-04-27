@@ -60,7 +60,8 @@ export default function MonthlyPage() {
                     .from("reservations")
                     .select("*")
                     .gte("tour_date", startStr)
-                    .lte("tour_date", endStr);
+                    .lte("tour_date", endStr)
+                    .neq("status", "취소");
 
                 if (error) throw error;
                 setReservations(data || []);
