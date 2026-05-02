@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-    apiVersion: '2023-10-16' as any, // Using compatible API version format
-});
+const stripe = process.env.STRIPE_SECRET_KEY 
+    ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' as any })
+    : null;
 
 // Hawaii time helper
 function getHawaiiDateStrServer(): string {
@@ -19,6 +19,9 @@ function getHawaiiDateStrServer(): string {
 }
 
 export async function POST(req: Request) {
+    if (!stripe) {
+        return NextResponse.json({ error: 'Stripe secret key is not configured' }, { status: 500 });
+    }
     try {
         const body = await req.json();
         const headers = new Headers(req.headers);
