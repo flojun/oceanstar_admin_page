@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
+import { sendVoucherEmail } from '@/lib/email';
 import Stripe from 'stripe';
 
 const stripe = process.env.STRIPE_SECRET_KEY 
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
 
         // 3. 결제가 성공적으로 완료된 경우 DB에 저장 (없을 경우에만)
         if (session.payment_status === 'paid' && !existingData) {
-            const { error: insertError } = await supabaseServer
+            const { data: insertedData, error: insertError } = await supabaseServer
                 .from('reservations')
                 .insert([
                     {
@@ -62,11 +63,31 @@ export async function POST(req: Request) {
                         currency: metadata.currency,
                         receipt_date: metadata.receipt_date,
                     }
-                ]);
+                ])
+                .select();
 
             if (insertError) {
                 console.error('Supabase Insert Error after payment:', insertError);
                 return NextResponse.json({ error: 'DB 저장 중 오류 발생' }, { status: 500 });
+            }
+
+            // 바우처 이메일 자동 발송
+            if (insertedData && insertedData.length > 0) {
+                const reservation = insertedData[0];
+                if (reservation.booker_email) {
+                    sendVoucherEmail({
+                        to: reservation.booker_email,
+                        name: reservation.name,
+                        order_id: reservation.order_id,
+                        tour_name: 'OceanStar Hawaii Turtle Snorkeling',
+                        tour_date: reservation.tour_date,
+                        pax: reservation.pax,
+                        option: reservation.option,
+                        pickup_location: reservation.pickup_location,
+                    }).catch(err => {
+                        console.error('Failed to send voucher email via Stripe verify:', err);
+                    });
+                }
             }
         } else if (existingData && session.payment_status === 'paid') {
             // 이미 존재하는데 예약확정 상태가 아닐 경우 업데이트 할 수도 있습니다 (웹훅 등 중복 호출 대비)
