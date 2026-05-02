@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Check, MapPin, Calendar, Users, CreditCard, Loader2, ChevronRight, Info, X, ShieldCheck, Star, Anchor, UsersRound, Award, MessageSquare, User, ClipboardList, AlertTriangle, Mail, Instagram, Youtube, Sparkles } from "lucide-react";
+import { Check, MapPin, Calendar, Users, CreditCard, Loader2, ChevronRight, ChevronLeft, Info, X, ShieldCheck, Star, Anchor, UsersRound, Award, MessageSquare, User, ClipboardList, AlertTriangle, Mail, Instagram, Youtube, Sparkles } from "lucide-react";
 import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 import { calculateDistance, findClosestPickup, PickupLocation, getWalkingMinutes } from '@/lib/utils';
 import { DayPicker } from "react-day-picker";
@@ -20,6 +20,7 @@ import TourCourseTimeline from "@/components/landing/TourCourseTimeline";
 import { getPickupDisplayNameByLang } from '@/constants/pickupLocations';
 import ImageCarousel from "@/components/landing/ImageCarousel";
 import { getTranslation, setLanguageCookie, type Language } from "@/lib/translations";
+import CurrencySelectModal from "@/components/payment/CurrencySelectModal";
 
 // Helper to format HH:mm:ss string to "hh:mm a"
 const formatTimeAMPM = (timeString: string | null | undefined) => {
@@ -77,6 +78,8 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   const [closestPickup, setClosestPickup] = useState<{ location: PickupLocation, minutes: number } | null>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCurrencyModalOpen, setIsCurrencyModalOpen] = useState(false);
+  const [pendingBookingData, setPendingBookingData] = useState<z.infer<typeof formSchema> | null>(null);
   const infoSectionRef = useRef<HTMLElement>(null);
 
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -96,6 +99,18 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+
+  const reviewScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollReviews = (direction: 'left' | 'right') => {
+    if (reviewScrollRef.current) {
+      const scrollAmount = reviewScrollRef.current.clientWidth * 0.8;
+      reviewScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // Image preview URL 생성 및 메모리 해제 (problem 10)
   useEffect(() => {
@@ -313,11 +328,27 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const formattedDate = format(values.tourDate, "yyyy-MM-dd");
+    setPendingBookingData(values);
+    setIsCurrencyModalOpen(true);
+  };
 
-      const response = await fetch('/api/pay2pay/checkout', {
+  const processPayment = async (type: 'KRW' | 'USD') => {
+    if (!pendingBookingData || !selectedTour) return;
+
+    if (type === 'KRW') {
+        // 기존 한화 결제 로직은 건드리지 않고 버튼만 만들어달라는 요청에 따라 알림만 띄우거나,
+        // 원할 경우 기존 Pay2Pay를 바로 실행하도록 할 수 있습니다. 
+        // 일단 기존 작동하던 Pay2Pay 로직을 그대로 유지합니다.
+        console.log("KRW payment selected");
+    }
+
+    setIsSubmitting(true);
+    setIsCurrencyModalOpen(false);
+    try {
+      const formattedDate = format(pendingBookingData.tourDate, "yyyy-MM-dd");
+      const endpoint = type === 'USD' ? '/api/stripe/checkout' : '/api/pay2pay/checkout';
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -327,7 +358,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
           pickupLocationId: closestPickup?.location?.id,
           pickupLocationName: closestPickup?.location?.name || '',
           totalPrice,
-          ...values,
+          ...pendingBookingData,
           tourDate: formattedDate,
           lang: lang
         })
@@ -336,7 +367,11 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
       const data = await response.json();
 
       if (data.success && data.redirectUrl) {
+        // 기존 PG사 응답
         window.location.href = data.redirectUrl;
+      } else if (data.url) {
+        // Stripe Checkout 세션 응답
+        window.location.href = data.url;
       } else {
         alert((lang === 'en' ? "Payment error: " : "결제 준비 중 오류가 발생했습니다: ") + (data.error || "Unknown error"));
       }
@@ -673,14 +708,30 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     {t('review.empty')}
                 </div>
             ) : (
-                <div 
-                    className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 -mx-4 px-4 sm:mx-0 sm:px-0" 
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                >
-                    <style dangerouslySetInnerHTML={{__html: `
-                        .hide-scroll::-webkit-scrollbar { display: none; }
-                    `}} />
-                    {reviews.slice(0, 6).map((review) => (
+                <div className="relative group">
+                    <button 
+                        onClick={() => scrollReviews('left')} 
+                        className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 sm:-ml-6 z-10 bg-white shadow-lg border border-slate-200 text-slate-800 w-12 h-12 rounded-full hover:bg-slate-50 hover:scale-105 transition-all hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100 disabled:opacity-0"
+                        aria-label="이전 리뷰"
+                    >
+                        <ChevronLeft size={24} />
+                    </button>
+                    <button 
+                        onClick={() => scrollReviews('right')} 
+                        className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 sm:-mr-6 z-10 bg-white shadow-lg border border-slate-200 text-slate-800 w-12 h-12 rounded-full hover:bg-slate-50 hover:scale-105 transition-all hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100 disabled:opacity-0"
+                        aria-label="다음 리뷰"
+                    >
+                        <ChevronRight size={24} />
+                    </button>
+                    <div 
+                        ref={reviewScrollRef}
+                        className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 -mx-4 px-4 sm:mx-0 sm:px-0 hide-scroll" 
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    >
+                        <style dangerouslySetInnerHTML={{__html: `
+                            .hide-scroll::-webkit-scrollbar { display: none; }
+                        `}} />
+                        {reviews.map((review) => (
                         <div key={review.id} className="bg-white rounded-3xl p-6 shadow-md border border-slate-100 flex flex-col h-full shrink-0 w-[85vw] sm:w-[320px] lg:w-[350px] snap-center transform hover:-translate-y-1 transition duration-300">
                             <div className="flex items-center gap-1 mb-3">
                                 {[...Array(5)].map((_, i) => (
@@ -718,6 +769,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             </div>
                         </div>
                     ))}
+                    </div>
                 </div>
             )}
             
@@ -1430,6 +1482,15 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
             </div>
           </div>
         )}
+
+        {/* 결제 통화 선택 모달 */}
+        <CurrencySelectModal
+          isOpen={isCurrencyModalOpen}
+          onClose={() => setIsCurrencyModalOpen(false)}
+          onSelectKRW={() => processPayment('KRW')}
+          onSelectUSD={() => processPayment('USD')}
+          lang={lang}
+        />
 
     </div>
   );

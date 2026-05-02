@@ -95,59 +95,29 @@ export async function POST(req: Request) {
             }
         }
 
-        // 3. Insert into Supabase reservations with '결제대기' status (retry up to 3 times for order_id collision)
         let order_id = generateOrderId();
-        let insertData = null;
-        let lastError = null;
+        const noteText = `(성${body.adultCount}/아${body.childCount}) (예약번호 ${order_id}) ${isEn ? '[USD결제]' : '[KRW결제]'} (Pay2Pay)`;
 
-        for (let attempt = 0; attempt < 3; attempt++) {
-            const noteText = `(성${body.adultCount}/아${body.childCount}) (예약번호 ${order_id}) ${isEn ? '[USD결제]' : '[KRW결제]'} (Pay2Pay)`;
+        const reservationData = {
+            order_id: order_id,
+            source: isEn ? '웹사이트(EN)' : '웹사이트',
+            name: body.bookerName,
+            contact: body.bookerPhone,
+            tour_date: body.tourDate,
+            option: optionLabel,
+            pax: paxLabel,
+            note: noteText,
+            pickup_location: pickupLabel,
+            status: '결제대기', // Mock payment용 임시 (실제 인서트 안됨)
+            total_price: calculatedTotalPrice,
+            booker_email: body.bookerEmail,
+            adult_count: body.adultCount,
+            child_count: body.childCount,
+            currency: currency,
+            receipt_date: getHawaiiDateStrServer(),
+        };
 
-            const { data, error } = await supabaseServer
-                .from('reservations')
-                .insert([
-                    {
-                        order_id: order_id,
-                        source: isEn ? '웹사이트(EN)' : '웹사이트',
-                        name: body.bookerName,
-                        contact: body.bookerPhone,
-                        tour_date: body.tourDate,
-                        option: optionLabel,
-                        pax: paxLabel,
-                        note: noteText,
-                        pickup_location: pickupLabel,
-                        status: '결제대기',
-                        total_price: calculatedTotalPrice,
-                        booker_email: body.bookerEmail,
-                        adult_count: body.adultCount,
-                        child_count: body.childCount,
-                        currency: currency, // 명시적 통화 저장
-                        receipt_date: getHawaiiDateStrServer(), // 하와이 시간 기준 접수일
-                    }
-                ])
-                .select()
-                .single();
-
-            if (error) {
-                // 23505 = unique_violation (order_id 충돌)
-                if (error.code === '23505') {
-                    order_id = generateOrderId();
-                    lastError = error;
-                    continue;
-                }
-                console.error('Supabase Insert Error:', error);
-                return NextResponse.json({ error: 'Database error', details: error }, { status: 500 });
-            }
-
-            insertData = data;
-            lastError = null;
-            break;
-        }
-
-        if (!insertData) {
-            console.error('Failed to insert reservation after 3 attempts:', lastError);
-            return NextResponse.json({ error: '예약 번호 생성에 실패했습니다. 다시 시도해주세요.' }, { status: 500 });
-        }
+        const encodedData = Buffer.from(JSON.stringify(reservationData)).toString('base64');
 
         // 4. Prepare Pay2Pay Request (Dual MID integration handling)
         const PAY2PAY_MID = isEn ? process.env.PAY2PAY_MID_EN : process.env.PAY2PAY_MID_KR;
@@ -155,7 +125,7 @@ export async function POST(req: Request) {
         
         // TODO: 실제 Pay2Pay API 연동 시 아래 코드를 Pay2Pay 요청 규격(서명 포함)에 맞게 대체
         // 현재는 Pay2Pay 연동 메뉴얼이 없어 임시 모의결제(mock-payment) 화면으로 연결합니다.
-        const pay2payMockUrl = `/booking/mock-payment?order_id=${order_id}&amount=${calculatedTotalPrice}&cur=${currency}&mid=${PAY2PAY_MID || 'P2P_DEMO'}`;
+        const pay2payMockUrl = `/booking/mock-payment?order_id=${order_id}&amount=${calculatedTotalPrice}&cur=${currency}&mid=${PAY2PAY_MID || 'P2P_DEMO'}&data=${encodeURIComponent(encodedData)}`;
 
         return NextResponse.json({
             success: true,

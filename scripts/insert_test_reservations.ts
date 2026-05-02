@@ -12,9 +12,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function createReservations() {
   const reservations = [];
   for (let i = 1; i <= 10; i++) {
-    const id = i.toString().padStart(3, '0');
+    const id = i.toString().padStart(2, '0');
     reservations.push({
-      order_id: `TEST-REV-${id}`,
+      order_id: `T00${id}`,
       name: `리뷰 테스트 고객 ${i}`,
       status: '예약확정',
       source: '테스트',

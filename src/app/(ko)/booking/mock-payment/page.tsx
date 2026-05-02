@@ -13,6 +13,7 @@ function MockPaymentContent() {
     const amount = searchParams.get('amount');
     const cur = searchParams.get('cur');
     const mid = searchParams.get('mid') || 'MID_TEST_001';
+    const dataParam = searchParams.get('data');
 
     const handleSimulatePayment = async () => {
         setIsProcessing(true);
@@ -23,6 +24,7 @@ function MockPaymentContent() {
                 order_id: order_id,
                 rescode: '0000',
                 amount: amount,
+                data: dataParam,
             };
 
             const response = await fetch(webhookUrl, {
