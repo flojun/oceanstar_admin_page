@@ -114,6 +114,7 @@ export async function POST(req: Request) {
             mode: 'payment',
             client_reference_id: order_id,
             adaptive_pricing: { enabled: false },
+            locale: isEn ? 'en' : 'ko',
             metadata: {
                 order_id: order_id,
                 source: isEn ? '웹사이트(EN)' : '웹사이트',
