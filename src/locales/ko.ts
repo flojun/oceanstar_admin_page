@@ -122,7 +122,7 @@ const ko = {
     total_payment: "총 결제 금액",
     pay_currency: "KRW",
     usd_currency: "USD",
-    checkout_btn: "Pay2Pay 결제하기",
+    checkout_btn: "결제하기",
     waiting: "응답 대기 중...",
     safe_notice: "안전하게 온라인 예약이 완료되며 현장 결제는 지원하지 않습니다.",
   },

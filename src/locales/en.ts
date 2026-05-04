@@ -122,7 +122,7 @@ const en = {
     total_payment: "Total Payment",
     pay_currency: "KRW",
     usd_currency: "USD",
-    checkout_btn: "Checkout with Pay2Pay",
+    checkout_btn: "Checkout",
     waiting: "Awaiting response...",
     safe_notice: "Safe online booking is completed; on-site payments are not supported.",
   },
