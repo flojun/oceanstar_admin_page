@@ -87,7 +87,13 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Invalid price calculation.' }, { status: 400 });
         }
 
-        // 4. Create Stripe Checkout Session
+        // 4. Calculate Booking Fee (2.95% + $0.30) to make the merchant whole
+        // Formula: Total = (Base + 0.30) / (1 - 0.0295)
+        const totalAmount = (usdPrice + 0.30) / (1 - 0.0295);
+        const feeAmount = totalAmount - usdPrice;
+        const totalRounded = Math.round(totalAmount * 100) / 100; // Total rounded to 2 decimal places
+
+        // 5. Create Stripe Checkout Session
         const isEn = body.lang === 'en';
         const productName = isEn ? 
             (tourSetting.name_en || `OceanStar ${optionLabel}`) : 
@@ -106,10 +112,21 @@ export async function POST(req: Request) {
                             name: productName,
                             description: `Booking ID: ${order_id}`,
                         },
-                        unit_amount: Math.round(usdPrice * 100), // Convert to cents
+                        unit_amount: Math.round(usdPrice * 100), // Original price in cents
                     },
                     quantity: 1,
                 },
+                {
+                    price_data: {
+                        currency: 'usd',
+                        product_data: {
+                            name: isEn ? 'Online Booking Fee' : '온라인 예약 수수료',
+                            description: `Payment Processing Fee`,
+                        },
+                        unit_amount: Math.round(feeAmount * 100), // Fee in cents
+                    },
+                    quantity: 1,
+                }
             ],
             mode: 'payment',
             client_reference_id: order_id,
@@ -124,7 +141,7 @@ export async function POST(req: Request) {
                 pax: paxLabel,
                 note: noteText,
                 pickup_location: pickupLabel,
-                total_price: usdPrice.toString(),
+                total_price: totalRounded.toString(), // Save the new total price including fee
                 booker_email: body.bookerEmail,
                 adult_count: body.adultCount.toString(),
                 child_count: body.childCount.toString(),
