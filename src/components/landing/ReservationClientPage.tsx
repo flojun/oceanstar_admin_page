@@ -21,6 +21,7 @@ import { getPickupDisplayNameByLang } from '@/constants/pickupLocations';
 import ImageCarousel from "@/components/landing/ImageCarousel";
 import { getTranslation, setLanguageCookie, type Language } from "@/lib/translations";
 import CurrencySelectModal from "@/components/payment/CurrencySelectModal";
+import VideoPopupModal from "@/components/landing/VideoPopupModal";
 
 // Helper to format HH:mm:ss string to "hh:mm a"
 const formatTimeAMPM = (timeString: string | null | undefined) => {
@@ -405,6 +406,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
           })
         }}
       />
+      <VideoPopupModal lang={lang} />
       <header className={`w-full z-40 transition-all duration-300 bg-white/80 backdrop-blur-md shrink-0 ${isScrolled ? 'shadow-sm border-b border-slate-200' : 'border-b border-transparent'}`}>
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5 sm:py-4 flex items-center justify-between">
           <div className="flex flex-col items-center shrink-0">
