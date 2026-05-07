@@ -21,8 +21,7 @@ export default function WebsiteSettingsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
-    // 환율 상태
-    const [exchangeRate, setExchangeRate] = useState<number>(1350);
+    const [exchangeRate, setExchangeRate] = useState<number | ''>('');
 
     // 캘린더 상태
     const [selectedBlockedDates, setSelectedBlockedDates] = useState<Date[]>([]);
@@ -48,20 +47,23 @@ export default function WebsiteSettingsPage() {
     });
 
     useEffect(() => {
-        fetchData();
+        initData();
     }, []);
 
-    const fetchData = async () => {
+    const initData = async () => {
         setIsLoading(true);
         try {
+            // 1. 투어 상품 데이터 로딩
+            let currentSettings: TourSetting[] = [];
             const { data: tourData, error: tourError } = await supabase
                 .from('tour_settings')
                 .select('*')
                 .order('display_order', { ascending: true });
 
             if (tourError) throw tourError;
-            if (tourData) setSettings(tourData);
+            if (tourData) currentSettings = tourData;
 
+            // 2. 차단 날짜 로딩
             const { data: blockData, error: blockError } = await supabase
                 .from('blocked_dates')
                 .select('*')
@@ -70,11 +72,64 @@ export default function WebsiteSettingsPage() {
             if (blockError) throw blockError;
             if (blockData) setBlockedDates(blockData);
 
+            // 3. 실시간 환율 로딩
+            let currentRate = 1350;
+            try {
+                const res = await fetch(`/api/exchange-rate?t=${Date.now()}`, { cache: 'no-store' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.rate) {
+                        currentRate = Math.round(data.rate * 100) / 100;
+                    }
+                } else {
+                    console.error("환율 API 응답 오류:", await res.text());
+                    alert("환율 정보를 불러오는 데 실패하여 기본값(1350)이 적용됩니다.");
+                }
+            } catch (e) {
+                console.error("환율 로딩 네트워크 오류:", e);
+                alert("환율 네트워크 오류로 인해 기본값(1350)이 적용됩니다.");
+            }
+            setExchangeRate(currentRate);
+
+            // 4. 환율을 적용하여 한화 가격 자동 계산 후 상태 저장
+            const appliedSettings = currentSettings.map(setting => ({
+                ...setting,
+                adult_price_krw: Math.round(((setting.adult_price_usd || 0) * currentRate) / 10) * 10,
+                child_price_krw: Math.round(((setting.child_price_usd || 0) * currentRate) / 10) * 10,
+            }));
+            
+            setSettings(appliedSettings);
+
         } catch (e) {
             console.error("데이터 로딩 실패:", e);
             alert("데이터를 불러오는데 실패했습니다.");
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const fetchData = async () => {
+        // 모달에서 상품 추가/삭제 후 목록을 다시 불러올 때 사용
+        try {
+            const { data: tourData } = await supabase
+                .from('tour_settings')
+                .select('*')
+                .order('display_order', { ascending: true });
+            
+            if (tourData) {
+                const rate = Number(exchangeRate) || 1350;
+                const appliedSettings = tourData.map(setting => ({
+                    ...setting,
+                    adult_price_krw: Math.round(((setting.adult_price_usd || 0) * rate) / 10) * 10,
+                    child_price_krw: Math.round(((setting.child_price_usd || 0) * rate) / 10) * 10,
+                }));
+                setSettings(appliedSettings);
+            }
+
+            const { data: blockData } = await supabase.from('blocked_dates').select('*').order('date');
+            if (blockData) setBlockedDates(blockData);
+        } catch (e) {
+            console.error("재로딩 실패:", e);
         }
     };
 
@@ -85,7 +140,19 @@ export default function WebsiteSettingsPage() {
     };
 
     const handlePriceChange = (index: number, field: string, value: string) => {
-        handleFieldChange(index, field, value === '' ? 0 : Number(value));
+        const numValue = value === '' ? 0 : Number(value);
+        const newSettings = [...settings];
+        newSettings[index] = { ...newSettings[index], [field]: numValue };
+        
+        // USD 수정 시 KRW 자동 계산
+        const rate = Number(exchangeRate) || 1350;
+        if (field === 'adult_price_usd') {
+            newSettings[index].adult_price_krw = Math.round((numValue * rate) / 10) * 10;
+        } else if (field === 'child_price_usd') {
+            newSettings[index].child_price_krw = Math.round((numValue * rate) / 10) * 10;
+        }
+        
+        setSettings(newSettings);
     };
 
     const handleBlockedDaysChange = (index: number, day: number) => {
@@ -124,11 +191,12 @@ export default function WebsiteSettingsPage() {
 
     // 환율 일괄 적용
     const applyGlobalExchangeRate = () => {
+        if (!exchangeRate) return;
         const newSettings = settings.map(setting => {
             return {
                 ...setting,
-                adult_price_krw: Math.round(((setting.adult_price_usd || 0) * exchangeRate) / 100) * 100,
-                child_price_krw: Math.round(((setting.child_price_usd || 0) * exchangeRate) / 100) * 100,
+                adult_price_krw: Math.round(((setting.adult_price_usd || 0) * Number(exchangeRate)) / 10) * 10,
+                child_price_krw: Math.round(((setting.child_price_usd || 0) * Number(exchangeRate)) / 10) * 10,
             };
         });
         setSettings(newSettings);
@@ -298,23 +366,32 @@ export default function WebsiteSettingsPage() {
                     </button>
 
                     {/* 환율 설정 */}
-                    <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
-                        <label className="text-sm text-gray-700 font-bold whitespace-nowrap">$1 =</label>
-                        <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₩</span>
-                            <input
-                                type="number"
-                                value={exchangeRate}
-                                onChange={(e) => setExchangeRate(Number(e.target.value))}
-                                className="pl-7 pr-3 py-2 w-28 text-base border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-extrabold text-blue-900 bg-blue-50/50 outline-none"
-                            />
+                    <div className="flex flex-col items-end gap-1">
+                        <span className="text-xs text-blue-600 font-semibold flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            </span>
+                            실시간 환율 적용 중 (매주 자동 갱신)
+                        </span>
+                        <div className="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-gray-200 shadow-sm">
+                            <label className="text-sm text-gray-700 font-bold whitespace-nowrap">$1 =</label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₩</span>
+                                <input
+                                    type="number"
+                                    value={exchangeRate}
+                                    onChange={(e) => setExchangeRate(e.target.value === '' ? '' : Number(e.target.value))}
+                                    className="pl-7 pr-3 py-2 w-28 text-base border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-extrabold text-blue-900 bg-blue-50/50 outline-none"
+                                />
+                            </div>
+                            <button
+                                onClick={applyGlobalExchangeRate}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors whitespace-nowrap"
+                            >
+                                수동 갱신
+                            </button>
                         </div>
-                        <button
-                            onClick={applyGlobalExchangeRate}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors whitespace-nowrap"
-                        >
-                            환율 적용
-                        </button>
                     </div>
                 </div>
             </div>
