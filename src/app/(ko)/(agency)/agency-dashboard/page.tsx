@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Reservation, ReservationStatus } from "@/types/reservation";
 import { createAgencyReservation, updateAgencyReservation, cancelAgencyReservation, getAgencyAvailabilityWeekly } from "@/actions/agency";
 import { Loader2, Plus, Calendar as CalIcon, Edit2, Trash2, Search, X, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { PICKUP_LOCATIONS } from "@/constants/pickupLocations";
 
 export default function AgencyDashboardPage() {
     const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -365,8 +366,8 @@ export default function AgencyDashboardPage() {
                                 <th className="px-5 py-3 w-24">상태</th>
                                 <th className="px-5 py-3 w-32">투어 날짜</th>
                                 <th className="px-5 py-3 w-28">옵션</th>
-                                <th className="px-5 py-3">예약자명</th>
-                                <th className="px-5 py-3 w-24">인원 (성/아/유)</th>
+                                <th className="px-5 py-3 text-center">예약자명</th>
+                                <th className="px-5 py-3 text-center w-24">인원</th>
                                 <th className="px-5 py-3 truncate max-w-[150px]">픽업장소</th>
                                 <th className="px-5 py-3">담당자 연락처</th>
                                 <th className="px-5 py-3 text-center w-24">수정/취소</th>
@@ -380,8 +381,8 @@ export default function AgencyDashboardPage() {
                                         <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-12"></div></td>
                                         <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-20"></div></td>
                                         <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-10"></div></td>
-                                        <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-16"></div></td>
-                                        <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-14"></div></td>
+                                        <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-16 mx-auto"></div></td>
+                                        <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-14 mx-auto"></div></td>
                                         <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-32"></div></td>
                                         <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-24"></div></td>
                                         <td className="px-5 py-3.5"><div className="h-6 bg-gray-200 rounded w-16 mx-auto"></div></td>
@@ -409,8 +410,8 @@ export default function AgencyDashboardPage() {
                                             </td>
                                             <td className="px-5 py-3 font-bold text-gray-800 tracking-tight">{res.tour_date.replace(/-/g, '.')}</td>
                                             <td className="px-5 py-3 font-bold text-indigo-700">{res.option}</td>
-                                            <td className="px-5 py-3 font-bold text-gray-900">{res.name}</td>
-                                            <td className="px-5 py-3 text-gray-600 text-xs font-medium">{res.pax}</td>
+                                            <td className="px-5 py-3 text-center font-bold text-gray-900">{res.name}</td>
+                                            <td className="px-5 py-3 text-center text-gray-600 text-xs font-medium">{res.pax}</td>
                                             <td className="px-5 py-3 text-gray-600 truncate max-w-[200px]" title={res.pickup_location}>{res.pickup_location}</td>
                                             <td className="px-5 py-3 text-gray-600 text-xs font-medium font-mono">{res.contact}</td>
                                             <td className="px-5 py-2 text-center flex items-center justify-center gap-1.5 min-w-[100px]">
@@ -508,9 +509,12 @@ export default function AgencyDashboardPage() {
 
                                 <div className="space-y-1">
                                     <label className="block text-sm font-bold text-gray-700">픽업 위치 <span className="text-red-500">*</span></label>
-                                    <input required value={formData.pickup_location} onChange={e => setFormData({ ...formData, pickup_location: e.target.value })}
-                                        placeholder="정확한 호텔명 입력"
+                                    <input required list="pickup-locations" value={formData.pickup_location} onChange={e => setFormData({ ...formData, pickup_location: e.target.value })}
+                                        placeholder="정확한 호텔명 선택 또는 직접 입력"
                                         className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" />
+                                    <datalist id="pickup-locations">
+                                        {PICKUP_LOCATIONS.map(loc => <option key={loc} value={loc} />)}
+                                    </datalist>
                                 </div>
                                 <div className="space-y-1">
                                     <label className="block text-sm font-bold text-gray-700">담당자 인솔(연락처) <span className="text-red-500">*</span></label>
