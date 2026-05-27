@@ -569,10 +569,10 @@ export default function VehiclePage() {
             allItems.forEach(item => {
                 const cId = (item as any)._current_cId;
                 const idx = (item as any)._current_idx;
-                const isSplit = item.id.includes('__split__');
+                const isSplit = String(item.id).includes('__split__');
                 
                 if (isSplit) {
-                    const [baseId, splitIndex] = item.id.split('__split__');
+                    const [baseId, splitIndex] = String(item.id).split('__split__');
                     if (!splitMap.has(baseId)) splitMap.set(baseId, {});
                     splitMap.get(baseId)![splitIndex] = { v: cId === 'unassigned' ? null : cId, o: idx } as any;
                 } else {
@@ -599,7 +599,7 @@ export default function VehiclePage() {
             
             containersToUpdate.forEach(cId => {
                 newState[cId].items.forEach(item => {
-                    const baseId = item.id.split('__split__')[0];
+                    const baseId = String(item.id).split('__split__')[0];
                     baseIdsToUpdate.add(baseId);
                 });
             });
