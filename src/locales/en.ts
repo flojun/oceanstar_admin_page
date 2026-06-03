@@ -107,7 +107,7 @@ const en = {
     normalRate_sub: "{start} - {end}",
     totalPax: "Total Passengers",
     adultPax: "Adult Number",
-    childPax: "Child (Age 3-11)",
+    childPax: "Child (Age 3-6)",
     maxPax_notice: "※ Maximum capacity is {max} passengers.",
     avail_pax: "Available Seats: {max}",
     pax_notice: "Only dates with available capacity for your {pax} passengers are activated.",

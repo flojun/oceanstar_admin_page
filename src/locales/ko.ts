@@ -106,7 +106,7 @@ const ko = {
     normalRate_sub: "{start} - {end}",
     totalPax: "총 탑승 인원",
     adultPax: "성인",
-    childPax: "아동 (만3-11세)",
+    childPax: "아동 (만3-6세)",
     maxPax_notice: "※ 탑승 정원은 최대 {max}명입니다.",
     avail_pax: "예약가능 정원: {max}명",
     pax_notice: "선택하신 {pax}명 인원에 맞춰 예약 가능한 날짜만 활성화됩니다.",
