@@ -95,6 +95,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   // ==== 리뷰 상태 ====
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
+  const [expandedReviews, setExpandedReviews] = useState<Record<string, boolean>>({});
   const [reviewForm, setReviewForm] = useState<{ order_id: string; author_name: string; rating: number; content: string; images: File[] }>({ order_id: '', author_name: '', rating: 5, content: '', images: [] });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
@@ -740,9 +741,19 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     <Star key={i} size={16} className={i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-slate-200"} />
                                 ))}
                             </div>
-                            <p className="text-slate-700 italic whitespace-pre-wrap leading-relaxed text-sm mb-4 font-medium flex-1">
-                                "{lang === 'en' && review.content_en ? review.content_en : review.content}"
-                            </p>
+                            <div className="flex-1 flex flex-col mb-4">
+                                <p className={`text-slate-700 italic whitespace-pre-wrap leading-relaxed text-sm font-medium ${!expandedReviews[review.id] ? 'line-clamp-4' : ''}`}>
+                                    "{lang === 'en' && review.content_en ? review.content_en : review.content}"
+                                </p>
+                                {((lang === 'en' && review.content_en ? review.content_en : review.content)?.length || 0) > 120 && (
+                                    <button 
+                                        onClick={() => setExpandedReviews(prev => ({ ...prev, [review.id]: !prev[review.id] }))}
+                                        className="text-blue-500 hover:text-blue-600 text-[13px] font-bold self-start mt-2 flex items-center gap-1 transition-colors"
+                                    >
+                                        {expandedReviews[review.id] ? (lang === 'en' ? 'Show less' : '접기') : (lang === 'en' ? 'Read more' : '더보기')}
+                                    </button>
+                                )}
+                            </div>
                             {review.image_urls && review.image_urls.length > 0 && (
                                 <div className={`grid gap-2 mb-4 ${review.image_urls.length === 1 ? 'grid-cols-1' : review.image_urls.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
                                     {review.image_urls.slice(0, 5).map((url: string, index: number) => (
