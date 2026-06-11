@@ -91,9 +91,9 @@ const en = {
     company_name: "OceanStar (Waikiki Turtle Snorkeling)",
     company_desc: "First Korean-owned Turtle Snorkeling in Hawaii\nTravel Platform 8,000+ Reviews · Google 5,000+ Reviews",
     biz_name: "Company:",
-    biz_rep: "Representative:",
     biz_no: "Business Registration:",
-    biz_addr: "Address:"
+    biz_addr: "Address:",
+    biz_phone: "Phone:"
   },
   bookingModal: {
     title: "Tour Booking",

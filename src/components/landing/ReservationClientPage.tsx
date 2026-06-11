@@ -907,8 +907,9 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                      <p className="text-slate-500 text-sm whitespace-pre-wrap">{t('footer.company_desc')}</p>
                  </div>
                  <div className="text-slate-500 text-sm md:text-right space-y-1">
-                     <p><span className="text-slate-400 font-medium">{t('footer.biz_name')}</span> Oceanview Activity LLC <span className="mx-2 hidden md:inline">|</span><br className="md:hidden" /> <span className="text-slate-400 font-medium">{t('footer.biz_rep')}</span> 정칠성</p>
-                     <p><span className="text-slate-400 font-medium">{t('footer.biz_addr')}</span> 경기도 안양시 만안구 양화로135번길 29, 3층 일부호(박달동)</p>
+                     <p><span className="text-slate-400 font-medium">{t('footer.biz_name')}</span> Oceanview Activity LLC</p>
+                     <p><span className="text-slate-400 font-medium">{t('footer.biz_addr')}</span> 615 PIKOI ST. STE 811</p>
+                     <p><span className="text-slate-400 font-medium">{t('footer.biz_phone')}</span> 8083081792</p>
                  </div>
              </div>
           </div>

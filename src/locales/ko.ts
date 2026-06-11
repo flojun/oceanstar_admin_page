@@ -90,9 +90,9 @@ const ko = {
     company_name: "오션스타 (Waikiki Turtle Snorkeling)",
     company_desc: "하와이 한인 최초 거북이 스노클링 원조\n여행 플랫폼 8,000 리뷰 · 구글 5,000 리뷰",
     biz_name: "상호명:",
-    biz_rep: "대표자명:",
     biz_no: "사업자등록번호:",
-    biz_addr: "사업장 소재지:"
+    biz_addr: "사업장 소재지:",
+    biz_phone: "사업자 전화번호:"
   },
   bookingModal: {
     title: "투어 예약",
