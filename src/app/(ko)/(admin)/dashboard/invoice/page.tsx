@@ -103,6 +103,7 @@ export default function InvoiceManager() {
         '줌줌': ['줌줌', 'Z'],
         '트리플': ['트리플', 'T'],
         '와그': ['와그', 'W'],
+        '클록': ['클록', '클룩', 'KLOOK', 'klook', '클'],
     };
 
     const getSourceVariants = (source: string): string[] => {

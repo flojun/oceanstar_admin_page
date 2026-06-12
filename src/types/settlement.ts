@@ -2,24 +2,17 @@
 
 // ---- Platform Config ----
 
-export type PlatformKey = 'myRealTrip' | 'zoomZoom' | 'triple' | 'waug';
-
-export interface PlatformConfig {
-    key: PlatformKey;
-    label: string;
-    sourceCode: string;   // DB source column value
-    color: string;
-    enabled: boolean;     // parser implemented?
-}
+export type PlatformKey = 'myRealTrip' | 'zoomZoom' | 'triple' | 'waug' | 'klook';
 
 export const PLATFORMS: Record<PlatformKey, PlatformConfig> = {
     myRealTrip: { key: 'myRealTrip', label: '마이리얼트립', sourceCode: 'M', color: 'blue', enabled: true },
     zoomZoom: { key: 'zoomZoom', label: '줌줌투어', sourceCode: 'Z', color: 'green', enabled: false },
     triple: { key: 'triple', label: '트리플', sourceCode: 'T', color: 'purple', enabled: false },
     waug: { key: 'waug', label: '와그', sourceCode: 'W', color: 'orange', enabled: false },
+    klook: { key: 'klook', label: '클록', sourceCode: 'KLOOK', color: 'orange', enabled: false },
 };
 
-export const PLATFORM_KEYS: PlatformKey[] = ['myRealTrip', 'zoomZoom', 'triple', 'waug'];
+export const PLATFORM_KEYS: PlatformKey[] = ['myRealTrip', 'zoomZoom', 'triple', 'waug', 'klook'];
 
 // ---- Excel Parsed Row ----
 

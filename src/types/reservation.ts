@@ -45,4 +45,5 @@ export const SOURCE_MAPPING: Record<string, string> = {
   'v': 'Viator',
   '팜': '팜투어',
   '탐': '타미스',
+  '클': '클록',
 };

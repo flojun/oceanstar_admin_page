@@ -145,7 +145,7 @@ function SuccessContent() {
                                         <div className="flex items-center gap-4">
                                             <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg text-sm font-bold text-slate-700 shadow-sm whitespace-nowrap">
                                                 <Calendar size={16} className="text-blue-500 shrink-0" /> 
-                                                {reservation.tour_date ? `${reservation.tour_date} (${['일', '월', '화', '수', '목', '금', '토'][new Date(reservation.tour_date).getDay()]})` : ''}
+                                                {reservation.tour_date ? `${reservation.tour_date} (${['일', '월', '화', '수', '목', '금', '토'][new Date(reservation.tour_date.split('-')[0], parseInt(reservation.tour_date.split('-')[1])-1, reservation.tour_date.split('-')[2]).getDay()]})` : ''}
                                             </div>
                                             <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg text-sm font-bold text-slate-700 shadow-sm whitespace-nowrap">
                                                 <Clock size={16} className="text-blue-500 shrink-0" /> 
