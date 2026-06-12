@@ -4,6 +4,14 @@
 
 export type PlatformKey = 'myRealTrip' | 'zoomZoom' | 'triple' | 'waug' | 'klook';
 
+export interface PlatformConfig {
+    key: PlatformKey;
+    label: string;
+    sourceCode: string;   // DB source column value
+    color: string;
+    enabled: boolean;     // parser implemented?
+}
+
 export const PLATFORMS: Record<PlatformKey, PlatformConfig> = {
     myRealTrip: { key: 'myRealTrip', label: '마이리얼트립', sourceCode: 'M', color: 'blue', enabled: true },
     zoomZoom: { key: 'zoomZoom', label: '줌줌투어', sourceCode: 'Z', color: 'green', enabled: false },
