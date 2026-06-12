@@ -698,8 +698,8 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                 </div>
                 <button 
                    onClick={() => setIsReviewOpen(true)}
-                   className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 whitespace-nowrap">
-                   <MessageSquare size={18} />
+                   className="bg-blue-600 hover:bg-blue-700 text-white w-full md:w-auto px-8 py-4 md:py-3 rounded-2xl font-black text-base md:text-lg shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+                   <MessageSquare size={20} />
                    {t('review.writeBtn')}
                 </button>
             </div>
