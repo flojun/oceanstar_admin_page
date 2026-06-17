@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 
+export const dynamic = 'force-dynamic';
+
 // Helper function to add a time offset (in minutes) to a "HH:MM" string
 function addMinutesToTimeString(timeStr: string | null, minutesToAdd: number): string | null {
     if (!timeStr) return null;
@@ -42,14 +44,14 @@ export async function GET() {
                 { id: '1', name: '프린스', lat: 21.286394930815042, lng: -157.84013103745616, time_1: '07:50', time_2: '10:50' },
                 { id: '2', name: 'IHOP', lat: 21.284900771263654, lng: -157.83654774943167, time_1: '07:45', time_2: '10:45' },
                 { id: '3', name: '카라이', lat: 21.279812168534036, lng: -157.83228314561782, time_1: '07:45', time_2: '10:45' },
-                { id: '4', name: 'HIE', lat: 21.284147785475607, lng: -157.83108674397712, time_1: '07:40', time_2: '10:40' },
                 { id: '5', name: 'HM', lat: 21.278930557010227, lng: -157.8282909823861, time_1: '07:40', time_2: '10:40' },
                 { id: '6', name: '녹색천막', lat: 21.276591861646406, lng: -157.8252010425622, time_1: '07:30', time_2: '10:30' },
                 { id: '7', name: 'WR', lat: 21.274962417406943, lng: -157.82361860242585, time_1: '07:30', time_2: '10:30' },
                 { id: '8', name: 'HP', lat: 21.273767278150714, lng: -157.82144256153722, time_1: '07:20', time_2: '10:20' },
                 { id: '9', name: 'HGI', lat: 21.278843149662812, lng: -157.82473424197582, time_1: '07:30', time_2: '10:30' },
                 { id: '10', name: '르네상스', lat: 21.29398877312097, lng: -157.84349955741655, time_1: '07:50', time_2: '10:50' },
-                { id: '11', name: '알라모아나', lat: 21.290125388256488, lng: -157.8398561235403, time_1: '07:50', time_2: '10:50' }
+                { id: '11', name: '알라모아나', lat: 21.290125388256488, lng: -157.8398561235403, time_1: '07:50', time_2: '10:50' },
+                { id: '12', name: '리츠칼튼', lat: 21.28305167972542, lng: -157.83014726811294, time_1: '07:45', time_2: '10:45' }
             ];
         }
 

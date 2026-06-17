@@ -2,7 +2,6 @@ export const PICKUP_LOCATIONS = [
     "프린스",
     "IHOP",
     "카라이",
-    "HIE",
     "HM",
     "녹색천막",
     "소화전",
@@ -11,6 +10,7 @@ export const PICKUP_LOCATIONS = [
     "HGI",
     "르네상스",
     "알라모아나",
+    "리츠칼튼",
     "직접"
 ] as const;
 
@@ -22,13 +22,13 @@ export const PICKUP_MAPPINGS: Record<string, string> = {
     '소화전': '소화전',
     'WR': 'Waikiki Resort',
     'HGI': 'Hilton Garden Inn',
-    'HIE': 'Holiday Inn Express',
     'HM': 'H&M',
     'IHOP': 'IHOP',
     '카라이': "Ka La'i Waikiki Hotel",
     '프린스': 'Prince Hotel',
     '르네상스': 'Renaissance Hotel',
     '알라모아나': 'Ala Moana Hotel',
+    '리츠칼튼': 'Ritz Carlton Hotel',
     '직접': '개별 이동 (항구 직접 도착)'
 };
 
@@ -38,13 +38,13 @@ export const PICKUP_MAPPINGS_EN: Record<string, string> = {
     '소화전': 'Sohwajeon (Fire Hydrant)',
     'WR': 'Waikiki Resort',
     'HGI': 'Hilton Garden Inn',
-    'HIE': 'Holiday Inn Express',
     'HM': 'H&M',
     'IHOP': 'IHOP',
     '카라이': "Ka La'i Waikiki Hotel",
     '프린스': 'Prince Hotel',
     '르네상스': 'Renaissance Hotel',
     '알라모아나': 'Ala Moana Hotel',
+    '리츠칼튼': 'Ritz Carlton Hotel',
     '직접': 'Self Arrival'
 };
 

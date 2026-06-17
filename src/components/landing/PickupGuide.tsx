@@ -14,7 +14,11 @@ export default function PickupGuide({ lang }: { lang: Language }) {
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data) && data.length > 0) {
-                    const sorted = data.sort((a: any, b: any) => (a.time_1 || '').localeCompare(b.time_1 || ''));
+                    const sorted = data.sort((a: any, b: any) => {
+                        if (a.name === '직접') return 1;
+                        if (b.name === '직접') return -1;
+                        return (a.time_1 || '').localeCompare(b.time_1 || '');
+                    });
                     setLocations(sorted);
                 }
                 setIsLoading(false);

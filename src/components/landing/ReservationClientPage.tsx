@@ -144,7 +144,14 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
     fetch('/api/pickup')
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data)) setPickupLocations(data);
+        if (Array.isArray(data)) {
+          const sorted = data.sort((a: any, b: any) => {
+            if (a.name === '직접') return 1;
+            if (b.name === '직접') return -1;
+            return (a.time_1 || '').localeCompare(b.time_1 || '');
+          });
+          setPickupLocations(sorted);
+        }
       })
       .catch(err => console.error("Failed to fetch pickup locations", err));
 

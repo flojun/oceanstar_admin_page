@@ -57,11 +57,11 @@ export async function sendVoucherEmail({
   else if (pickup_location === '알라모아나') locFilePrefix = '알모';
   else if (pickup_location === 'HP') locFilePrefix = 'HP';
   else if (pickup_location === 'HGI') locFilePrefix = 'HGI';
-  else if (pickup_location === 'HIE') locFilePrefix = 'HIE';
   else if (pickup_location === 'WR') locFilePrefix = 'WR';
   else if (pickup_location === '카라이') locFilePrefix = '카라이';
   else if (pickup_location === '르네상스') locFilePrefix = '르네상스';
   else if (pickup_location === '프린스') locFilePrefix = '프린스';
+  else if (pickup_location === '리츠칼튼') locFilePrefix = '리츠칼튼';
   else if (pickup_location === '직접') locFilePrefix = '직접';
   else if (pickup_location.includes('카할라')) locFilePrefix = '카할라';
 
