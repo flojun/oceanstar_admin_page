@@ -1,23 +1,35 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
+@import url("https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/static/woff2/SUIT.css");
 @import "tailwindcss";
 
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 :root {
-  --background: #ffffff; /* 강제로 노치 영역(body)을 흰색으로 만들기 위해 수정 */
+  --background: #ffffff;
   --foreground: #171717;
 }
 
+html[lang="ko"] {
+  --font-sans: "Pretendard", sans-serif;
+  --font-heading: "SUIT", sans-serif;
+}
 
+html[lang="en"] {
+  --font-sans: var(--font-inter, "Inter", sans-serif);
+  --font-heading: var(--font-poppins, "Poppins", sans-serif);
+}
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
 }
 
 /* =========================================
