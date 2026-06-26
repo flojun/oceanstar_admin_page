@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle, MapPin, Calendar, Clock, Download, ArrowRight, Loader2 } from "lucide-react";
+import { CheckCircle, MapPin, Calendar, Clock, Download, ArrowRight, Loader2, MessageCircle } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Suspense, useEffect, useState, useRef } from "react";
@@ -99,20 +99,39 @@ function SuccessContent() {
                                     {orderId}
                                 </span>
                             </div>
-                            <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm font-medium flex flex-col gap-2 border border-blue-100 shadow-inner">
-                                <p className="flex items-start gap-2">
-                                    <CheckCircle size={16} className="shrink-0 mt-0.5" />
-                                    위 <strong>예약 번호(6자리)</strong>로 오션스타 메인 홈페이지에서 생생한 후기를 남기실 수 있습니다!
-                                </p>
-                                <p className="flex items-start gap-2">
-                                    <CheckCircle size={16} className="shrink-0 mt-0.5" />
-                                    6자리 예약번호로 예약일 변경 및 취소가 가능합니다!
-                                </p>
-                                <p className="flex items-start gap-2">
-                                    <CheckCircle size={16} className="shrink-0 mt-0.5" />
-                                    아래에 바우처를 캡쳐 및 저장해주세요!
-                                </p>
-                            </div>
+                            {reservation?.currency === 'KRW' ? (
+                                <div className="bg-[#FFFCE0] border border-[#FEE500] p-6 rounded-2xl text-[15px] font-medium text-[#3A1D1D] shadow-sm flex flex-col gap-4">
+                                    <h3 className="font-extrabold text-lg flex items-center gap-2">
+                                        결제 및 예약 확인 안내
+                                    </h3>
+                                    <div className="leading-relaxed whitespace-pre-wrap">
+                                        안녕하세요! 😊{"\n"}오션스타 거북이 스노클링을 예약해 주셔서 감사합니다.{"\n"}현재 한화 결제는 계좌이체 또는 현장결제 중 선택하실 수 있습니다. 예약 확인 및 결제 안내는 24시간 이내 오션스타 카카오톡 채널을 통해 순차적으로 안내드리겠습니다.{"\n"}궁금하신 사항이 있으시면 언제든 편하게 문의해 주세요.{"\n"}감사합니다.
+                                    </div>
+                                    <a 
+                                        href={`http://pf.kakao.com/${process.env.NEXT_PUBLIC_KAKAO_CHANNEL_ID || '_hzxeEn'}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className="mt-2 bg-[#FEE500] hover:bg-[#F4DC00] text-[#3A1D1D] font-black py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(254,229,0,0.3)] active:scale-[0.98]"
+                                    >
+                                        <MessageCircle size={20} /> 카카오톡 채널 바로가기
+                                    </a>
+                                </div>
+                            ) : (
+                                <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm font-medium flex flex-col gap-2 border border-blue-100 shadow-inner">
+                                    <p className="flex items-start gap-2">
+                                        <CheckCircle size={16} className="shrink-0 mt-0.5" />
+                                        위 <strong>예약 번호(6자리)</strong>로 오션스타 메인 홈페이지에서 생생한 후기를 남기실 수 있습니다!
+                                    </p>
+                                    <p className="flex items-start gap-2">
+                                        <CheckCircle size={16} className="shrink-0 mt-0.5" />
+                                        6자리 예약번호로 예약일 변경 및 취소가 가능합니다!
+                                    </p>
+                                    <p className="flex items-start gap-2">
+                                        <CheckCircle size={16} className="shrink-0 mt-0.5" />
+                                        아래에 바우처를 캡쳐 및 저장해주세요!
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
