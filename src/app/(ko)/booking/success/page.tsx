@@ -102,7 +102,7 @@ function SuccessContent() {
                             {reservation?.currency === 'KRW' ? (
                                 <div className="bg-[#FFFCE0] border border-[#FEE500] p-6 rounded-2xl text-[15px] font-medium text-[#3A1D1D] shadow-sm flex flex-col gap-4">
                                     <h3 className="font-extrabold text-lg flex items-center gap-2">
-                                        결제 및 예약 확인 안내
+                                        🚨 결제 및 예약 확인 안내 🚨
                                     </h3>
                                     <div className="leading-relaxed whitespace-pre-wrap">
                                         안녕하세요! 😊{"\n"}오션스타 거북이 스노클링을 예약해 주셔서 감사합니다.{"\n"}현재 한화 결제는 계좌이체 또는 현장결제 중 선택하실 수 있습니다. 예약 확인 및 결제 안내는 24시간 이내 오션스타 카카오톡 채널을 통해 순차적으로 안내드리겠습니다.{"\n"}궁금하신 사항이 있으시면 언제든 편하게 문의해 주세요.{"\n"}감사합니다.
