@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import KakaoChatWidget from "@/components/common/KakaoChatWidget";
+import Script from "next/script";
 import "../globals.css";
 
 export const metadata: Metadata = {
@@ -40,6 +41,15 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="antialiased">
+        <Script src="https://www.googletagmanager.com/gtag/js?id=AW-17755406251" strategy="afterInteractive" />
+        <Script id="google-ads-tag" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17755406251');
+          `}
+        </Script>
         {children}
         <KakaoChatWidget />
       </body>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Script from "next/script";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -923,6 +924,14 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
           </div>
         </section>
 
+        {/* Google Ads Phone Tracking */}
+        <Script id="google-ads-phone" strategy="afterInteractive">
+          {`
+            gtag('config', 'AW-17755406251/EJ-PCOS-28UcEKv_t5JC', { 
+              'phone_conversion_number': '1 8083081792' 
+            }); 
+          `}
+        </Script>
       </main>
 
       {/* 플로팅 예약 버튼 - main 바깥에 위치하여 iOS 스크롤 점프 방지 */}
