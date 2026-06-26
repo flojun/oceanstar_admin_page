@@ -579,7 +579,6 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         if (isSunset) {
                           return [
                             { src: '/images_option_card/sunset.jpg' },
-                            { src: '/images_option_card/snorkeling_turtle2.jpg', style: { objectPosition: 'center 20%', transform: 'rotate(-0.68deg) scale(1.08)' } },
                             { src: '/images_option_card/kayak_sunset.jpg', style: { transform: 'rotate(1.64deg) scale(1.1)' } },
                             { src: '/images_option_card/sunset_people.png', style: { objectPosition: 'right center', transform: 'rotate(0.91deg) scale(1.08)' } },
                             { src: '/images_option_card/sunset_cheeseboard.jpg' }
@@ -587,8 +586,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         } else {
                           return [
                             { src: '/images_option_card/snorkeling_turtle.jpg', style: { transform: 'rotate(-6deg) scale(1.3)' } },
-                            { src: '/images_option_card/paddleboad_people.jpg', style: { objectPosition: 'center 80%', transform: 'rotate(-1.12deg) scale(1.1)' } },
-                            { src: '/images_option_card/snorkeling_turtle2.jpg', style: { objectPosition: 'center 20%', transform: 'rotate(-0.68deg) scale(1.08)' } },
+                            { src: '/images_option_card/paddleboad_people.jpg', style: { objectPosition: 'center 80%', transform: 'rotate(-1.12deg) scale(1.1)' } }
                           ];
                         }
                       })();
