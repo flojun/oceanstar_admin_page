@@ -37,7 +37,6 @@ import { getDisplayOrder, getOptionGroupKey } from '@/lib/tourUtils';
 import { DriverManager } from '@/components/vehicle/DriverManager';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { toPng } from 'html-to-image';
-import html2canvas from 'html2canvas';
 import { Download, Copy, Share2 } from 'lucide-react';
 
 const dropAnimation: DropAnimation = {
@@ -751,20 +750,20 @@ export default function VehiclePage() {
                 const element = document.getElementById(`export-container-${opt}`);
                 if (element) {
                     try {
-                        const canvas = await html2canvas(element, { 
+                        const dataUrl = await toPng(element, { 
+                            cacheBust: true, 
                             backgroundColor: '#000000',
-                            scale: 1 
+                            pixelRatio: 1.5 
                         });
-                        const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/png'));
-                        if (!blob) throw new Error("Canvas toBlob failed");
-                        
+                        const blob = await (await fetch(dataUrl)).blob();
                         const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
                         files.push(file);
 
-                        // Yield to browser to allow canvas garbage collection on mobile
+                        // Yield to browser
                         await new Promise(r => setTimeout(r, 300));
-                    } catch (e) {
+                    } catch (e: any) {
                         console.error(`Failed to generate image for ${opt}`, e);
+                        alert(`[${opt}] 이미지 생성 에러: ` + (e?.message || String(e)));
                     }
                 }
             }
@@ -855,20 +854,20 @@ export default function VehiclePage() {
                 const element = document.getElementById(`export-driver-container-${opt}`);
                 if (element) {
                     try {
-                        const canvas = await html2canvas(element, { 
+                        const dataUrl = await toPng(element, { 
+                            cacheBust: true, 
                             backgroundColor: '#000000',
-                            scale: 1
+                            pixelRatio: 1.5
                         });
-                        const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/png'));
-                        if (!blob) throw new Error("Canvas toBlob failed");
-
+                        const blob = await (await fetch(dataUrl)).blob();
                         const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
                         files.push(file);
 
-                        // Yield to browser to allow canvas garbage collection on mobile
+                        // Yield to browser
                         await new Promise(r => setTimeout(r, 300));
-                    } catch (e) {
+                    } catch (e: any) {
                         console.error(`Failed to generate driver image for ${opt}`, e);
+                        alert(`[${opt}] 기사 이미지 생성 에러: ` + (e?.message || String(e)));
                     }
                 }
             }
