@@ -360,6 +360,14 @@ export default function VehiclePage() {
 
             // 3. Build Data
             targetOptions.forEach(opt => {
+                // IMPORTANT: For the currently selected option, use the local React state directly 
+                // so we don't miss any drag-and-drop changes that haven't been saved to the DB yet.
+                if (opt === selectedOption) {
+                    // Deep clone the current state to avoid reference issues
+                    newBulkData[opt] = JSON.parse(JSON.stringify(vehicles));
+                    return;
+                }
+
                 const state = createFreshVehicleState();
 
                 // Drivers
@@ -684,25 +692,19 @@ export default function VehiclePage() {
         if (unassigned.items.length > 0) {
             text += `Please Note: 미배정 ${unassigned.items.length}팀 있음\n`;
         }
-
-        try {
-            await navigator.clipboard.writeText(text);
-            alert("클립보드에 복사되었습니다. (카카오톡 붙여넣기)");
-        } catch (err) {
-            alert("복사 실패");
-        }
     };
 
     const handleKakaoShare = async () => {
-        const data = await fetchAllOptionsData();
-        // Wait for state update and render
-        await new Promise(resolve => setTimeout(resolve, 500));
+        const rawData = await fetchAllOptionsData();
+        const data = { ...rawData, [selectedOption]: vehicles };
+
+        // Wait slightly for React to render the hidden containers with the new bulkData
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         const files: File[] = [];
         const options = dynamicOptions;
 
         for (const opt of options) {
-            // Check if this option has any assigned vehicles
             const vehicleState = data[opt];
             if (!vehicleState) continue;
 
@@ -710,16 +712,12 @@ export default function VehiclePage() {
                 vehicleState[key]?.items.length > 0
             );
 
-            if (!hasAssignments) {
-                console.log(`Skipping ${opt}: No assignments`);
-                continue;
-            }
+            if (!hasAssignments) continue;
 
-            // Target the NEW hidden table container for bulk export
             const element = document.getElementById(`export-container-${opt}`);
             if (element) {
                 try {
-                    const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' }); // Black background
+                    const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' });
                     const blob = await (await fetch(dataUrl)).blob();
                     const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
                     files.push(file);
@@ -728,6 +726,7 @@ export default function VehiclePage() {
                 }
             }
         }
+        
         if (files.length === 0) {
             alert("배정된 명단이 없어 공유할 파일이 없습니다.");
             return;
@@ -779,11 +778,9 @@ export default function VehiclePage() {
         setDriverDropdownOpen(false);
         setSelectedDriverForShare(driverId);
         
-        // Wait a tick for the DOM to render the new selectedDriverForShare containers
         setTimeout(async () => {
             const files: File[] = [];
             for (const opt of dynamicOptions) {
-                // Only generate if the driver is actually assigned in this option
                 const isAssignedInOpt = Object.values(bulkData[opt] || {}).some(v => v.driverId === driverId && v.items.length > 0);
                 if (!isAssignedInOpt) continue;
 
