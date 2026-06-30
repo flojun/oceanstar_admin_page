@@ -174,7 +174,7 @@ function AllReservationsContent() {
     const [copyEndRow, setCopyEndRow] = useState('');
 
     // Search State
-    const [searchCriteria, setSearchCriteria] = useState<'name' | 'source' | 'tour_date' | 'contact'>('name');
+    const [searchCriteria, setSearchCriteria] = useState<'name' | 'source' | 'tour_date' | 'contact' | 'note'>('name');
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<any[] | null>(null); // null = no active search
     const [isSearching, setIsSearching] = useState(false);
@@ -2028,6 +2028,7 @@ function AllReservationsContent() {
                             <option value="source">경로</option>
                             <option value="tour_date">예약일</option>
                             <option value="contact">연락처</option>
+                            <option value="note">예약번호/기타</option>
                         </select>
                         <input
                             type="text"
