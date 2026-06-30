@@ -753,7 +753,7 @@ export default function VehiclePage() {
                         const dataUrl = await toPng(element, { 
                             cacheBust: true, 
                             backgroundColor: '#000000',
-                            pixelRatio: 1.5,
+                            pixelRatio: 2,
                             skipFonts: true
                         });
                         const blob = await (await fetch(dataUrl)).blob();
@@ -858,7 +858,7 @@ export default function VehiclePage() {
                         const dataUrl = await toPng(element, { 
                             cacheBust: true, 
                             backgroundColor: '#000000',
-                            pixelRatio: 1.5,
+                            pixelRatio: 2,
                             skipFonts: true
                         });
                         const blob = await (await fetch(dataUrl)).blob();

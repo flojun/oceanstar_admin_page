@@ -72,9 +72,9 @@ export function VehicleManifestTable({ vehicles, drivers, optionName, date, targ
                                 <div className={`px-3 py-1 w-20 flex items-center justify-center shrink-0 text-white ${getColorForOption(optionName)}`}>
                                     {shortName}
                                 </div>
-                                <div className="bg-black text-white px-3 py-1 flex-1 flex items-center justify-between">
-                                    <span>{vehicle.name}</span>
-                                    <span>{driverName}</span>
+                                <div className="bg-black text-white px-3 py-1 flex-1 flex items-center justify-between overflow-hidden">
+                                    <span className="whitespace-nowrap shrink-0">{vehicle.name}</span>
+                                    <span className="whitespace-nowrap shrink-0 ml-2 truncate">{driverName}</span>
                                 </div>
                             </div>
 
