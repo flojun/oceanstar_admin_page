@@ -727,33 +727,35 @@ export default function VehiclePage() {
                 return;
             }
 
-            // Wait for elements to be present in DOM (max 20 retries / 1 sec)
+            // Wait for elements to be present in DOM (max 10 retries / 0.5 sec)
             for (const opt of elementsToCapture) {
-                let el = document.getElementById(`export-container-${opt}`);
                 let retries = 0;
-                while (!el && retries < 20) {
+                while (!document.getElementById(`export-container-${opt}`) && retries < 10) {
                     await new Promise(r => setTimeout(r, 50));
-                    el = document.getElementById(`export-container-${opt}`);
                     retries++;
                 }
             }
 
             // Extra wait to ensure styles and images are fully applied
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => requestAnimationFrame(r));
+            await new Promise(r => setTimeout(r, 100));
 
-            for (const opt of elementsToCapture) {
+            const filePromises = elementsToCapture.map(async (opt) => {
                 const element = document.getElementById(`export-container-${opt}`);
-                if (element) {
-                    try {
-                        const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' });
-                        const blob = await (await fetch(dataUrl)).blob();
-                        const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
-                        files.push(file);
-                    } catch (e) {
-                        console.error(`Failed to generate image for ${opt}`, e);
-                    }
+                if (!element) return null;
+                try {
+                    const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' });
+                    const blob = await (await fetch(dataUrl)).blob();
+                    return new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
+                } catch (e) {
+                    console.error(`Failed to generate image for ${opt}`, e);
+                    return null;
                 }
-            }
+            });
+
+            const generatedFiles = await Promise.all(filePromises);
+            const validFiles = generatedFiles.filter(f => f !== null) as File[];
+            files.push(...validFiles);
             
             if (files.length === 0) {
                 alert("이미지 생성에 실패했습니다.");
@@ -830,31 +832,33 @@ export default function VehiclePage() {
 
             // Wait for React to render the driver-specific export containers
             for (const opt of elementsToCapture) {
-                let el = document.getElementById(`export-driver-container-${opt}`);
                 let retries = 0;
-                while (!el && retries < 20) {
+                while (!document.getElementById(`export-driver-container-${opt}`) && retries < 10) {
                     await new Promise(r => setTimeout(r, 50));
-                    el = document.getElementById(`export-driver-container-${opt}`);
                     retries++;
                 }
             }
 
             // Extra wait to ensure styles and images are fully applied
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => requestAnimationFrame(r));
+            await new Promise(r => setTimeout(r, 100));
 
-            for (const opt of elementsToCapture) {
+            const filePromises = elementsToCapture.map(async (opt) => {
                 const element = document.getElementById(`export-driver-container-${opt}`);
-                if (element) {
-                    try {
-                        const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' });
-                        const blob = await (await fetch(dataUrl)).blob();
-                        const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
-                        files.push(file);
-                    } catch (e) {
-                        console.error(`Failed to generate driver image for ${opt}`, e);
-                    }
+                if (!element) return null;
+                try {
+                    const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' });
+                    const blob = await (await fetch(dataUrl)).blob();
+                    return new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
+                } catch (e) {
+                    console.error(`Failed to generate driver image for ${opt}`, e);
+                    return null;
                 }
-            }
+            });
+
+            const generatedFiles = await Promise.all(filePromises);
+            const validFiles = generatedFiles.filter(f => f !== null) as File[];
+            files.push(...validFiles);
 
             if (files.length === 0) {
                 alert("해당 기사님에게 배정된 명단 생성에 실패했습니다.");
