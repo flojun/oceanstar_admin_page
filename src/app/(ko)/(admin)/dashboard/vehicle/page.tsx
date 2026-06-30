@@ -152,6 +152,7 @@ export default function VehiclePage() {
     const [activeId, setActiveId] = useState<string | null>(null);
 
     const [isSharing, setIsSharing] = useState(false);
+    const [readyShareFiles, setReadyShareFiles] = useState<{files: File[], title: string, text: string} | null>(null);
 
     const [driverDropdownOpen, setDriverDropdownOpen] = useState(false);
     const [selectedDriverForShare, setSelectedDriverForShare] = useState<string | null>(null);
@@ -765,18 +766,13 @@ export default function VehiclePage() {
             // Detect Mobile Device
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-            if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files })) {
-                // Mobile: Try system share
-                try {
-                    await navigator.share({
-                        files: files,
-                        title: `${selectedDate} 차량 배차 명단`,
-                        text: `${selectedDate} 차량 배차 명단입니다.`
-                    });
-                } catch (err) {
-                    console.warn("Mobile share failed", err);
-                    alert("공유하기가 취소되었거나 지원되지 않습니다.");
-                }
+            if (isMobile) {
+                // To bypass user gesture expiry on mobile, we show a button for the user to click synchronously
+                setReadyShareFiles({
+                    files,
+                    title: `${selectedDate} 차량 배차 명단`,
+                    text: `${selectedDate} 차량 배차 명단입니다.`
+                });
             } else {
                 // Desktop: Force Download immediately
                 if (confirm(`총 ${files.length}개의 배정된 명단 이미지를 다운로드합니다.\n(다운로드 후 카톡으로 드래그 하세요)`)) {
@@ -871,17 +867,12 @@ export default function VehiclePage() {
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             const driverName = drivers.find(d => d.id === driverId)?.name || '기사님';
 
-            if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files })) {
-                try {
-                    await navigator.share({
-                        files: files,
-                        title: `${selectedDate} ${driverName} 기사님 배차 명단`,
-                        text: `${selectedDate} ${driverName} 기사님 배차 명단입니다.`
-                    });
-                } catch (err) {
-                    console.warn("Mobile share failed", err);
-                    alert("공유하기가 취소되었거나 지원되지 않습니다.");
-                }
+            if (isMobile) {
+                setReadyShareFiles({
+                    files,
+                    title: `${selectedDate} ${driverName} 기사님 배차 명단`,
+                    text: `${selectedDate} ${driverName} 기사님 배차 명단입니다.`
+                });
             } else {
                 if (confirm(`${driverName} 기사님의 배차 명단 이미지 ${files.length}장을 다운로드합니다.`)) {
                     files.forEach(file => {
@@ -1108,12 +1099,72 @@ export default function VehiclePage() {
             </DndContext>
 
             {/* Sharing Loading Overlay */}
-            {isSharing && (
+            {isSharing && !readyShareFiles && (
                 <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center">
                     <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-4">
                         <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
                         <p className="text-lg font-bold text-gray-800">명단 이미지를 생성하여 공유를 준비중입니다...</p>
-                        <p className="text-sm text-gray-500">잠시만 기다려주세요 (최대 10초 소요)</p>
+                        <p className="text-sm text-gray-500">잠시만 기다려주세요</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Ready to Share Modal (Bypasses mobile user gesture expiry) */}
+            {readyShareFiles && (
+                <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center">
+                    <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-4 max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-200">
+                        <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-2">
+                            <Share2 size={32} />
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-800 text-center">공유 준비 완료!</h2>
+                        <p className="text-sm text-gray-600 text-center mb-4">
+                            총 {readyShareFiles.files.length}장의 이미지가 성공적으로 생성되었습니다. 아래 버튼을 눌러 카카오톡이나 메시지로 전송하세요.
+                        </p>
+                        
+                        <div className="flex flex-col w-full gap-2">
+                            <button 
+                                onClick={async () => {
+                                    try {
+                                        if (navigator.share && navigator.canShare && navigator.canShare({ files: readyShareFiles.files })) {
+                                            await navigator.share({
+                                                files: readyShareFiles.files,
+                                                title: readyShareFiles.title,
+                                                text: readyShareFiles.text
+                                            });
+                                            setReadyShareFiles(null);
+                                        } else {
+                                            alert("현재 환경에서는 카카오톡 직접 공유를 지원하지 않습니다. 이미지를 다운로드합니다.");
+                                            readyShareFiles.files.forEach(file => {
+                                                const link = document.createElement('a');
+                                                link.href = URL.createObjectURL(file);
+                                                link.download = file.name;
+                                                document.body.appendChild(link);
+                                                link.click();
+                                                document.body.removeChild(link);
+                                            });
+                                            setReadyShareFiles(null);
+                                        }
+                                    } catch (err: any) {
+                                        if (err.name !== 'AbortError') {
+                                            console.warn("Share failed", err);
+                                        }
+                                        // Usually AbortError means user cancelled the share dialog. 
+                                        // We close the modal to let them proceed.
+                                        setReadyShareFiles(null);
+                                    }
+                                }}
+                                className="w-full py-3 bg-[#FEE500] text-[#000000] font-bold rounded-lg flex items-center justify-center gap-2 shadow-sm hover:bg-[#FADA0A] transition-colors"
+                            >
+                                <Share2 size={18} />
+                                바로 공유하기
+                            </button>
+                            <button 
+                                onClick={() => setReadyShareFiles(null)}
+                                className="w-full py-3 bg-gray-100 text-gray-600 font-bold rounded-lg hover:bg-gray-200 transition-colors"
+                            >
+                                닫기
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
