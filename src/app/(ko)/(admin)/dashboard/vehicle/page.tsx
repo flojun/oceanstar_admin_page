@@ -753,11 +753,14 @@ export default function VehiclePage() {
                         const dataUrl = await toPng(element, { 
                             cacheBust: true, 
                             backgroundColor: '#000000',
-                            pixelRatio: 1.5 
+                            pixelRatio: 1 
                         });
                         const blob = await (await fetch(dataUrl)).blob();
                         const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
                         files.push(file);
+
+                        // Yield to browser to allow canvas garbage collection on mobile
+                        await new Promise(r => setTimeout(r, 300));
                     } catch (e) {
                         console.error(`Failed to generate image for ${opt}`, e);
                     }
@@ -853,11 +856,14 @@ export default function VehiclePage() {
                         const dataUrl = await toPng(element, { 
                             cacheBust: true, 
                             backgroundColor: '#000000',
-                            pixelRatio: 1.5
+                            pixelRatio: 1
                         });
                         const blob = await (await fetch(dataUrl)).blob();
                         const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
                         files.push(file);
+
+                        // Yield to browser to allow canvas garbage collection on mobile
+                        await new Promise(r => setTimeout(r, 300));
                     } catch (e) {
                         console.error(`Failed to generate driver image for ${opt}`, e);
                     }
