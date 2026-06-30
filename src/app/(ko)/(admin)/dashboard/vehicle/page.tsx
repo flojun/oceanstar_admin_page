@@ -151,6 +151,8 @@ export default function VehiclePage() {
     const [selectedDate, setSelectedDate] = useState<string>(getHawaiiTomorrowStr());
     const [activeId, setActiveId] = useState<string | null>(null);
 
+    const [isSharing, setIsSharing] = useState(false);
+
     const [driverDropdownOpen, setDriverDropdownOpen] = useState(false);
     const [selectedDriverForShare, setSelectedDriverForShare] = useState<string | null>(null);
 
@@ -695,73 +697,102 @@ export default function VehiclePage() {
     };
 
     const handleKakaoShare = async () => {
-        const rawData = await fetchAllOptionsData();
-        const data = { ...rawData, [selectedOption]: vehicles };
+        setIsSharing(true);
+        try {
+            const rawData = await fetchAllOptionsData();
+            const data = { ...rawData, [selectedOption]: vehicles };
 
-        // Wait slightly for React to render the hidden containers with the new bulkData
-        await new Promise(resolve => setTimeout(resolve, 300));
+            // Wait slightly for React to render the hidden containers with the new bulkData
+            await new Promise(resolve => setTimeout(resolve, 100));
 
-        const files: File[] = [];
-        const options = dynamicOptions;
+            const files: File[] = [];
+            const options = dynamicOptions;
 
-        for (const opt of options) {
-            const vehicleState = data[opt];
-            if (!vehicleState) continue;
+            const elementsToCapture = [];
+            for (const opt of options) {
+                const vehicleState = data[opt];
+                if (!vehicleState) continue;
 
-            const hasAssignments = ['vehicle-1', 'vehicle-2', 'vehicle-3', 'personal-1'].some(key =>
-                vehicleState[key]?.items.length > 0
-            );
+                const hasAssignments = ['vehicle-1', 'vehicle-2', 'vehicle-3', 'personal-1'].some(key =>
+                    vehicleState[key]?.items.length > 0
+                );
 
-            if (!hasAssignments) continue;
-
-            const element = document.getElementById(`export-container-${opt}`);
-            if (element) {
-                try {
-                    const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' });
-                    const blob = await (await fetch(dataUrl)).blob();
-                    const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
-                    files.push(file);
-                } catch (e) {
-                    console.error(`Failed to generate image for ${opt}`, e);
+                if (hasAssignments) {
+                    elementsToCapture.push(opt);
                 }
             }
-        }
-        
-        if (files.length === 0) {
-            alert("배정된 명단이 없어 공유할 파일이 없습니다.");
-            return;
-        }
-
-        // Detect Mobile Device
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-        if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files })) {
-            // Mobile: Try system share
-            try {
-                await navigator.share({
-                    files: files,
-                    title: `${selectedDate} 차량 배차 명단`,
-                    text: `${selectedDate} 차량 배차 명단입니다.`
-                });
-            } catch (err) {
-                console.warn("Mobile share failed", err);
-                // Optional: fall back to download or just alert
-                alert("공유하기가 취소되었거나 지원되지 않습니다.");
+            
+            if (elementsToCapture.length === 0) {
+                alert("배정된 명단이 없어 공유할 파일이 없습니다.");
+                return;
             }
-        } else {
-            // Desktop: Force Download immediately
-            // No alert needed if it's obvious, or a non-blocking notification is better.
-            // But user might expect an alert explaining why it's downloading.
-            if (confirm(`총 ${files.length}개의 배정된 명단 이미지를 다운로드합니다.\n(다운로드 후 카톡으로 드래그 하세요)`)) {
-                files.forEach(file => {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(file);
-                    link.download = file.name;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                });
+
+            // Wait for elements to be present in DOM (max 20 retries / 1 sec)
+            for (const opt of elementsToCapture) {
+                let el = document.getElementById(`export-container-${opt}`);
+                let retries = 0;
+                while (!el && retries < 20) {
+                    await new Promise(r => setTimeout(r, 50));
+                    el = document.getElementById(`export-container-${opt}`);
+                    retries++;
+                }
             }
+
+            // Extra wait to ensure styles and images are fully applied
+            await new Promise(r => setTimeout(r, 500));
+
+            for (const opt of elementsToCapture) {
+                const element = document.getElementById(`export-container-${opt}`);
+                if (element) {
+                    try {
+                        const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' });
+                        const blob = await (await fetch(dataUrl)).blob();
+                        const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
+                        files.push(file);
+                    } catch (e) {
+                        console.error(`Failed to generate image for ${opt}`, e);
+                    }
+                }
+            }
+            
+            if (files.length === 0) {
+                alert("이미지 생성에 실패했습니다.");
+                return;
+            }
+
+            // Detect Mobile Device
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+            if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files })) {
+                // Mobile: Try system share
+                try {
+                    await navigator.share({
+                        files: files,
+                        title: `${selectedDate} 차량 배차 명단`,
+                        text: `${selectedDate} 차량 배차 명단입니다.`
+                    });
+                } catch (err) {
+                    console.warn("Mobile share failed", err);
+                    alert("공유하기가 취소되었거나 지원되지 않습니다.");
+                }
+            } else {
+                // Desktop: Force Download immediately
+                if (confirm(`총 ${files.length}개의 배정된 명단 이미지를 다운로드합니다.\n(다운로드 후 카톡으로 드래그 하세요)`)) {
+                    files.forEach(file => {
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(file);
+                        link.download = file.name;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
+                }
+            }
+        } catch (err) {
+            console.error("Kakao share error", err);
+            alert("공유 처리 중 오류가 발생했습니다.");
+        } finally {
+            setIsSharing(false);
         }
     };
 
@@ -776,14 +807,42 @@ export default function VehiclePage() {
 
     const handleShareDriver = async (driverId: string) => {
         setDriverDropdownOpen(false);
+        setIsSharing(true);
         setSelectedDriverForShare(driverId);
         
-        setTimeout(async () => {
+        try {
             const files: File[] = [];
+            const elementsToCapture = [];
+
             for (const opt of dynamicOptions) {
                 const isAssignedInOpt = Object.values(bulkData[opt] || {}).some(v => v.driverId === driverId && v.items.length > 0);
-                if (!isAssignedInOpt) continue;
+                if (isAssignedInOpt) {
+                    elementsToCapture.push(opt);
+                }
+            }
 
+            if (elementsToCapture.length === 0) {
+                alert("해당 기사님에게 배정된 명단이 없습니다.");
+                setSelectedDriverForShare(null);
+                setIsSharing(false);
+                return;
+            }
+
+            // Wait for React to render the driver-specific export containers
+            for (const opt of elementsToCapture) {
+                let el = document.getElementById(`export-driver-container-${opt}`);
+                let retries = 0;
+                while (!el && retries < 20) {
+                    await new Promise(r => setTimeout(r, 50));
+                    el = document.getElementById(`export-driver-container-${opt}`);
+                    retries++;
+                }
+            }
+
+            // Extra wait to ensure styles and images are fully applied
+            await new Promise(r => setTimeout(r, 500));
+
+            for (const opt of elementsToCapture) {
                 const element = document.getElementById(`export-driver-container-${opt}`);
                 if (element) {
                     try {
@@ -798,8 +857,9 @@ export default function VehiclePage() {
             }
 
             if (files.length === 0) {
-                alert("해당 기사님에게 배정된 명단이 없습니다.");
+                alert("해당 기사님에게 배정된 명단 생성에 실패했습니다.");
                 setSelectedDriverForShare(null);
+                setIsSharing(false);
                 return;
             }
 
@@ -831,7 +891,13 @@ export default function VehiclePage() {
                 }
             }
             setSelectedDriverForShare(null); // Clean up
-        }, 100);
+        } catch(err) {
+            console.error("Driver share error", err);
+            alert("기사 공유 처리 중 오류가 발생했습니다.");
+            setSelectedDriverForShare(null);
+        } finally {
+            setIsSharing(false);
+        }
     };
 
     return (
@@ -1036,6 +1102,17 @@ export default function VehiclePage() {
                 </DragOverlay>
 
             </DndContext>
+
+            {/* Sharing Loading Overlay */}
+            {isSharing && (
+                <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center">
+                    <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-4">
+                        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+                        <p className="text-lg font-bold text-gray-800">명단 이미지를 생성하여 공유를 준비중입니다...</p>
+                        <p className="text-sm text-gray-500">잠시만 기다려주세요 (최대 10초 소요)</p>
+                    </div>
+                </div>
+            )}
         </div >
     );
 }
