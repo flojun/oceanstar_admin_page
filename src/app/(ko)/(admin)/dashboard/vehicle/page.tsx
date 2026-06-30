@@ -745,26 +745,24 @@ export default function VehiclePage() {
             await new Promise(r => requestAnimationFrame(r));
             await new Promise(r => setTimeout(r, 100));
 
-            const filePromises = elementsToCapture.map(async (opt) => {
+            const files: File[] = [];
+            for (const opt of elementsToCapture) {
                 const element = document.getElementById(`export-container-${opt}`);
-                if (!element) return null;
-                try {
-                    const dataUrl = await toPng(element, { 
-                        cacheBust: true, 
-                        backgroundColor: '#000000',
-                        pixelRatio: 1.5 
-                    });
-                    const blob = await (await fetch(dataUrl)).blob();
-                    return new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
-                } catch (e) {
-                    console.error(`Failed to generate image for ${opt}`, e);
-                    return null;
+                if (element) {
+                    try {
+                        const dataUrl = await toPng(element, { 
+                            cacheBust: true, 
+                            backgroundColor: '#000000',
+                            pixelRatio: 1.5 
+                        });
+                        const blob = await (await fetch(dataUrl)).blob();
+                        const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
+                        files.push(file);
+                    } catch (e) {
+                        console.error(`Failed to generate image for ${opt}`, e);
+                    }
                 }
-            });
-
-            const generatedFiles = await Promise.all(filePromises);
-            const validFiles = generatedFiles.filter(f => f !== null) as File[];
-            files.push(...validFiles);
+            }
             
             if (files.length === 0) {
                 alert("이미지 생성에 실패했습니다.");
@@ -847,26 +845,24 @@ export default function VehiclePage() {
             await new Promise(r => requestAnimationFrame(r));
             await new Promise(r => setTimeout(r, 100));
 
-            const filePromises = elementsToCapture.map(async (opt) => {
+            const files: File[] = [];
+            for (const opt of elementsToCapture) {
                 const element = document.getElementById(`export-driver-container-${opt}`);
-                if (!element) return null;
-                try {
-                    const dataUrl = await toPng(element, { 
-                        cacheBust: true, 
-                        backgroundColor: '#000000',
-                        pixelRatio: 1.5
-                    });
-                    const blob = await (await fetch(dataUrl)).blob();
-                    return new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
-                } catch (e) {
-                    console.error(`Failed to generate driver image for ${opt}`, e);
-                    return null;
+                if (element) {
+                    try {
+                        const dataUrl = await toPng(element, { 
+                            cacheBust: true, 
+                            backgroundColor: '#000000',
+                            pixelRatio: 1.5
+                        });
+                        const blob = await (await fetch(dataUrl)).blob();
+                        const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
+                        files.push(file);
+                    } catch (e) {
+                        console.error(`Failed to generate driver image for ${opt}`, e);
+                    }
                 }
-            });
-
-            const generatedFiles = await Promise.all(filePromises);
-            const validFiles = generatedFiles.filter(f => f !== null) as File[];
-            files.push(...validFiles);
+            }
 
             if (files.length === 0) {
                 alert("해당 기사님에게 배정된 명단 생성에 실패했습니다.");
