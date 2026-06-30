@@ -753,7 +753,8 @@ export default function VehiclePage() {
                         const dataUrl = await toPng(element, { 
                             cacheBust: true, 
                             backgroundColor: '#000000',
-                            pixelRatio: 1.5 
+                            pixelRatio: 1.5,
+                            skipFonts: true
                         });
                         const blob = await (await fetch(dataUrl)).blob();
                         const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
@@ -857,7 +858,8 @@ export default function VehiclePage() {
                         const dataUrl = await toPng(element, { 
                             cacheBust: true, 
                             backgroundColor: '#000000',
-                            pixelRatio: 1.5
+                            pixelRatio: 1.5,
+                            skipFonts: true
                         });
                         const blob = await (await fetch(dataUrl)).blob();
                         const file = new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
