@@ -661,7 +661,11 @@ export default function VehiclePage() {
         if (!element) return;
 
         try {
-            const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' }); // Black background
+            const dataUrl = await toPng(element, { 
+                cacheBust: true, 
+                backgroundColor: '#000000',
+                pixelRatio: 1.5 // Optimize resolution for faster rendering
+            }); 
             const link = document.createElement('a');
             link.href = dataUrl;
             link.download = `vehicle-list-${selectedOption}.png`;
@@ -745,7 +749,11 @@ export default function VehiclePage() {
                 const element = document.getElementById(`export-container-${opt}`);
                 if (!element) return null;
                 try {
-                    const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' });
+                    const dataUrl = await toPng(element, { 
+                        cacheBust: true, 
+                        backgroundColor: '#000000',
+                        pixelRatio: 1.5 
+                    });
                     const blob = await (await fetch(dataUrl)).blob();
                     return new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
                 } catch (e) {
@@ -843,7 +851,11 @@ export default function VehiclePage() {
                 const element = document.getElementById(`export-driver-container-${opt}`);
                 if (!element) return null;
                 try {
-                    const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#000000' });
+                    const dataUrl = await toPng(element, { 
+                        cacheBust: true, 
+                        backgroundColor: '#000000',
+                        pixelRatio: 1.5
+                    });
                     const blob = await (await fetch(dataUrl)).blob();
                     return new File([blob], `${selectedDate}_${opt}_배차명단.png`, { type: 'image/png' });
                 } catch (e) {
