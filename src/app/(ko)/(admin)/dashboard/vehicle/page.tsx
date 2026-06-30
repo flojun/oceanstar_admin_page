@@ -745,7 +745,7 @@ export default function VehiclePage() {
             await new Promise(r => requestAnimationFrame(r));
             await new Promise(r => setTimeout(r, 100));
 
-            const files: File[] = [];
+            // files array is already declared at the top of the function
             for (const opt of elementsToCapture) {
                 const element = document.getElementById(`export-container-${opt}`);
                 if (element) {
@@ -845,7 +845,7 @@ export default function VehiclePage() {
             await new Promise(r => requestAnimationFrame(r));
             await new Promise(r => setTimeout(r, 100));
 
-            const files: File[] = [];
+            // files array is already declared at the top of the function
             for (const opt of elementsToCapture) {
                 const element = document.getElementById(`export-driver-container-${opt}`);
                 if (element) {
