@@ -92,7 +92,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
   const [tourSettings, setTourSettings] = useState<TourSetting[]>([]);
   const [blockedDates, setBlockedDates] = useState<{ date: string; tour_id: string; reason: string | null }[]>([]);
-  const [imageVersions, setImageVersions] = useState<Record<string, number>>({});
+  const [imageVersions, setImageVersions] = useState<Record<string, any>>({});
   const PUBLIC_URL_BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/website-assets`;
 
   // ==== 리뷰 상태 ====
@@ -583,17 +583,24 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     else if (isSunset) theme = { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: t('tour.badges.sunset'), btn: 'bg-orange-500 hover:bg-orange-600', specialLabel: t('tour.badges.couple'), specialLabelBg: 'bg-gradient-to-r from-orange-400 to-red-500', isDark: false };
 
                       const tourImages = (() => {
-                        // Use Supabase image if it exists in versions.json
-                        if (tour.tour_id && imageVersions[`option_${tour.tour_id}`]) {
-                          return [{ src: `${PUBLIC_URL_BASE}/option_${tour.tour_id}.jpg?v=${imageVersions[`option_${tour.tour_id}`]}` }];
+                        // Use Supabase image if it exists in versions.json (multi image list)
+                        const listKey = `option_${tour.tour_id}_list`;
+                        if (tour.tour_id && Array.isArray(imageVersions[listKey]) && imageVersions[listKey].length > 0) {
+                          return imageVersions[listKey].map((img: any) => ({
+                              src: `${PUBLIC_URL_BASE}/${listKey.replace('_list', '')}_${img.id}.jpg?v=${img.version}`
+                          }));
                         }
+                        
+                        // Combined morning virtual ID handling
                         if (tour.tour_id === 'combined_morning') {
-                           if (imageVersions[`option_morning1`]) {
-                              return [{ src: `${PUBLIC_URL_BASE}/option_morning1.jpg?v=${imageVersions[`option_morning1`]}` }];
+                           if (Array.isArray(imageVersions[`option_morning1_list`]) && imageVersions[`option_morning1_list`].length > 0) {
+                              return imageVersions[`option_morning1_list`].map((img: any) => ({
+                                  src: `${PUBLIC_URL_BASE}/option_morning1_${img.id}.jpg?v=${img.version}`
+                              }));
                            }
                         }
 
-                        // Fallback to static local images
+                        // Fallback to static local images if lists are completely empty or not found
                         if (isSunset) {
                           return [
                             { src: '/images_option_card/sunset.jpg' },
