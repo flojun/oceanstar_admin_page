@@ -92,6 +92,8 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
   const [tourSettings, setTourSettings] = useState<TourSetting[]>([]);
   const [blockedDates, setBlockedDates] = useState<{ date: string; tour_id: string; reason: string | null }[]>([]);
+  const [imageVersions, setImageVersions] = useState<Record<string, number>>({});
+  const PUBLIC_URL_BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/website-assets`;
 
   // ==== 리뷰 상태 ====
   const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -165,6 +167,11 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         }
       })
       .catch(err => console.error("Failed to fetch tour settings", err));
+
+    fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/website-assets/versions.json?t=${Date.now()}`, { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => setImageVersions(data))
+      .catch(() => {});
 
     fetchReviews();
   }, []);
@@ -460,7 +467,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
           
           {/* Background Image */}
           <div className="absolute inset-0 bg-blue-500">
-             <Image src="/turtle-hero.jpg" alt="하와이 거북이 스노클링 오션스타" fill className="object-cover object-center sm:object-bottom" priority />
+             <Image src={imageVersions['main_photo'] ? `${PUBLIC_URL_BASE}/main_photo.jpg?v=${imageVersions['main_photo']}` : "/turtle-hero.jpg"} alt="하와이 거북이 스노클링 오션스타" fill className="object-cover object-center sm:object-bottom" priority unoptimized={!!imageVersions['main_photo']} />
           </div>
           
           {/* Top Text Content */}
@@ -576,6 +583,17 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     else if (isSunset) theme = { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: t('tour.badges.sunset'), btn: 'bg-orange-500 hover:bg-orange-600', specialLabel: t('tour.badges.couple'), specialLabelBg: 'bg-gradient-to-r from-orange-400 to-red-500', isDark: false };
 
                       const tourImages = (() => {
+                        // Use Supabase image if it exists in versions.json
+                        if (tour.tour_id && imageVersions[`option_${tour.tour_id}`]) {
+                          return [{ src: `${PUBLIC_URL_BASE}/option_${tour.tour_id}.jpg?v=${imageVersions[`option_${tour.tour_id}`]}` }];
+                        }
+                        if (tour.tour_id === 'combined_morning') {
+                           if (imageVersions[`option_morning1`]) {
+                              return [{ src: `${PUBLIC_URL_BASE}/option_morning1.jpg?v=${imageVersions[`option_morning1`]}` }];
+                           }
+                        }
+
+                        // Fallback to static local images
                         if (isSunset) {
                           return [
                             { src: '/images_option_card/sunset.jpg' },
