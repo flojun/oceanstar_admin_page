@@ -82,7 +82,8 @@ export default function WebsiteImagesTable() {
             // Bypass cache to prevent Race Conditions or stale data
             const res = await fetch(`${PUBLIC_URL_BASE}/versions.json?t=${Date.now()}`, { cache: "no-store" });
             if (!res.ok) {
-                if (res.status === 404) return {}; // File not created yet
+                // Supabase sometimes returns 400 with a 404 body for missing files
+                if (res.status === 404 || res.status === 400) return {}; 
                 throw new Error("Failed to fetch versions.json");
             }
             return await res.json();
