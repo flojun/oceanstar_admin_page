@@ -64,7 +64,8 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
         icon: Settings,
         children: [
             { name: "가격 및 날짜 관리", href: "/dashboard/website-settings/dates" },
-            { name: "픽업시간 관리", href: "/dashboard/website-settings/pickup" }
+            { name: "픽업시간 관리", href: "/dashboard/website-settings/pickup" },
+            { name: "사진 및 배너 관리", href: "/dashboard/website-settings/images" }
         ]
     },
     { name: "여행사 관리", href: "/dashboard/agencies", icon: Building2 },
