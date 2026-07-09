@@ -326,22 +326,41 @@ export function ReservationModal({
                             {/* Pickup Location */}
                             <div className="md:col-span-2">
                                 <label className="mb-1 block text-sm font-medium text-gray-700">픽업장소</label>
-                                <select
-                                    className="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none"
-                                    value={formData.pickup_location}
-                                    onChange={(e) => handleChange("pickup_location", e.target.value)}
-                                >
-                                    <option value="">(선택안함)</option>
-                                    {PICKUP_LOCATIONS.map((loc) => (
-                                        <option key={loc} value={loc}>
-                                            {loc}
-                                        </option>
-                                    ))}
-                                    {/* Keep existing value if not in list (for backward compatibility) */}
-                                    {formData.pickup_location && !PICKUP_LOCATIONS.includes(formData.pickup_location as any) && (
-                                        <option value={formData.pickup_location}>{formData.pickup_location}</option>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <select
+                                        className="w-full sm:flex-1 rounded-md border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none"
+                                        value={
+                                            PICKUP_LOCATIONS.includes(formData.pickup_location as any)
+                                                ? formData.pickup_location
+                                                : formData.pickup_location === '' ? '' : '직접입력'
+                                        }
+                                        onChange={(e) => {
+                                            if (e.target.value === '직접입력') {
+                                                handleChange("pickup_location", "[직접입력]");
+                                            } else {
+                                                handleChange("pickup_location", e.target.value);
+                                            }
+                                        }}
+                                    >
+                                        <option value="">(선택안함)</option>
+                                        {PICKUP_LOCATIONS.map((loc) => (
+                                            <option key={loc} value={loc}>
+                                                {loc}
+                                            </option>
+                                        ))}
+                                        <option value="직접입력">직접 입력...</option>
+                                    </select>
+                                    {(!PICKUP_LOCATIONS.includes(formData.pickup_location as any) && formData.pickup_location !== '') && (
+                                        <input
+                                            type="text"
+                                            className="w-full sm:flex-1 rounded-md border border-blue-300 p-2 text-sm focus:border-blue-500 focus:outline-none bg-blue-50"
+                                            placeholder="장소명을 직접 입력하세요"
+                                            value={formData.pickup_location === '[직접입력]' ? '' : formData.pickup_location}
+                                            onChange={(e) => handleChange("pickup_location", e.target.value || '[직접입력]')}
+                                            autoFocus
+                                        />
                                     )}
-                                </select>
+                                </div>
                             </div>
 
                             {/* Contact */}

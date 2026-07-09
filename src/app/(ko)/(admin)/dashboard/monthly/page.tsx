@@ -10,6 +10,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMont
 import { ko } from "date-fns/locale";
 import type { TourSetting } from "@/lib/tourUtils";
 import { resolveOptionToTourSetting, getDisplayOrder, getTrafficLightStatus, getShortLabel } from "@/lib/tourUtils";
+import { ReservationModal } from "@/components/reservations/ReservationModal";
 
 // ---------- Types ----------
 interface DailyStats {
@@ -33,6 +34,8 @@ export default function MonthlyPage() {
 
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     // Dynamic display order from DB
     const displayOrder = useMemo(() => getDisplayOrder(tourSettings), [tourSettings]);
@@ -72,7 +75,7 @@ export default function MonthlyPage() {
             }
         };
         fetchMonthData();
-    }, [currentDate]);
+    }, [currentDate, refreshTrigger]);
 
     // Aggregate Data by Date using dynamic grouping
     const statsByDate = useMemo(() => {
@@ -123,10 +126,20 @@ export default function MonthlyPage() {
     return (
         <div className="h-full flex flex-col space-y-4">
             {/* Header */}
-            <div className="flex items-center justify-between shrink-0">
+            <div className="flex items-center justify-between shrink-0 relative">
                 <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
                     {format(currentDate, 'yyyy년 M월', { locale: ko })}
                 </h2>
+                
+                <div className="absolute left-1/2 -translate-x-1/2">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-bold shadow-sm transition-all text-sm flex items-center gap-1"
+                    >
+                        <span>+</span> 새 예약 추가
+                    </button>
+                </div>
+
                 <div className="flex gap-2 items-center relative">
                     <button onClick={handlePrevMonth} className="p-2 rounded hover:bg-blue-50 text-blue-600 transition-colors">
                         <ChevronLeft className="h-6 w-6" />
@@ -255,6 +268,15 @@ export default function MonthlyPage() {
                 <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-red-500 to-red-700 border border-red-400 shadow-sm"></span>초과</div>
                 <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-pink-400 to-pink-600 border border-pink-300 shadow-sm"></span>기타</div>
             </div>
+
+            <ReservationModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={() => {
+                    setIsModalOpen(false);
+                    setRefreshTrigger(prev => prev + 1);
+                }}
+            />
         </div>
     );
 }

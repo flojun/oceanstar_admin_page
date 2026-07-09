@@ -461,44 +461,64 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
       <main ref={mainRef} className="w-full flex-1 overflow-y-auto pb-0 bg-white">
         {/* === 1. Hero Section === */}
-        <section className="relative w-full h-[100svh] sm:h-[85vh] min-h-[500px] sm:min-h-[600px] overflow-hidden">
-          {/* Background Overlay - Top and Bottom gradient for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/70 via-transparent to-blue-900/70 z-10"></div>
+        <section className="relative w-full min-h-[100svh] sm:min-h-[85vh] lg:min-h-[800px] flex items-center justify-center overflow-hidden">
+          {/* Background Overlay */}
+          <div className="absolute inset-0 bg-blue-900/30 z-10 mix-blend-multiply"></div>
           
           {/* Background Image */}
           <div className="absolute inset-0 bg-blue-500">
-             <Image src={imageVersions['main_photo'] ? `${PUBLIC_URL_BASE}/main_photo.jpg?v=${imageVersions['main_photo']}` : "/turtle-hero.jpg"} alt="하와이 거북이 스노클링 오션스타" fill className="object-cover object-center sm:object-bottom" priority unoptimized={!!imageVersions['main_photo']} />
+             <Image src={imageVersions['main_photo'] ? `${PUBLIC_URL_BASE}/main_photo.jpg?v=${imageVersions['main_photo']}` : "/turtle-hero.jpg"} alt="하와이 거북이 스노클링 오션스타" fill className="object-cover object-center" priority unoptimized={!!imageVersions['main_photo']} />
           </div>
           
-          {/* Top Text Content */}
-          <div className="absolute top-0 left-0 right-0 z-20 text-center px-4 pt-16 sm:pt-20 lg:pt-[5vh] xl:pt-[4vh] 2xl:pt-[3vh] max-w-5xl mx-auto flex flex-col items-center">
-             <span className="inline-block py-1 px-3 sm:py-1.5 sm:px-4 rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 text-xs sm:text-sm md:text-sm font-bold uppercase tracking-widest mb-2 sm:mb-4 animate-fade-in-up">
-               {t('hero.badge')}
-             </span>
-             <h1 className={`font-extrabold text-white leading-tight sm:leading-tight drop-shadow-2xl animate-fade-in-up animation-delay-100 ${lang === 'ko' ? 'text-[2.8rem] break-keep' : 'text-3xl break-words'} sm:text-4xl md:text-5xl lg:text-6xl`}>
+          {/* Content Wrapper */}
+          <div className="relative z-20 w-full max-w-6xl mx-auto px-4 pt-16 flex flex-col items-center justify-center mt-10">
+             
+             <h1 className="text-center animate-fade-in-up animation-delay-100 drop-shadow-2xl mb-6">
                 {lang === 'ko' ? (
-                  <>{t('hero.title1')}<br/>{t('hero.title2')}<br className="sm:hidden" /><span className="hidden sm:inline"> </span>{t('hero.title3')}</>
+                  <>
+                    <span className="block font-medium text-white/95 text-[1.4rem] sm:text-3xl md:text-4xl mb-2 sm:mb-3 tracking-tight">{t('hero.title1')}</span>
+                    <span className="block font-black text-white text-[2.8rem] sm:text-5xl md:text-6xl lg:text-7xl tracking-tight leading-tight">{t('hero.title2')}</span>
+                  </>
                 ) : (
-                  <>{t('hero.title1')}{t('hero.title1') ? <br/> : null}{t('hero.title2')}{t('hero.title3')}</>
+                  <span className={`font-extrabold text-white leading-tight drop-shadow-2xl text-3xl break-words sm:text-4xl md:text-5xl lg:text-6xl`}>
+                    {t('hero.title1')}{t('hero.title1') ? <br/> : null}{t('hero.title2')}{t('hero.title3')}
+                  </span>
                 )}
              </h1>
-          </div>
 
-          {/* Bottom Text Content & Button */}
-          <div className="absolute bottom-0 left-0 right-0 z-20 text-center px-4 pb-24 sm:pb-28 lg:pb-32 max-w-4xl mx-auto flex flex-col items-center">
-             <p className={`text-sm sm:text-base md:text-xl text-white font-medium mb-4 sm:mb-8 drop-shadow-lg leading-relaxed animate-fade-in-up animation-delay-200 max-w-[90%] sm:max-w-none ${lang === 'en' ? 'break-words' : 'break-keep'}`}>
-                {lang === 'ko' ? (
-                  <>{t('hero.desc1')}<br />{t('hero.desc2')}</>
-                ) : (
-                  <>{t('hero.desc1')} {t('hero.desc2')}</>
-                )}
+             <p className={`text-sm sm:text-base md:text-lg lg:text-xl text-white/90 font-medium mb-10 text-center drop-shadow-lg leading-relaxed animate-fade-in-up animation-delay-200 max-w-[95%] sm:max-w-2xl ${lang === 'en' ? 'break-words' : 'break-keep'}`}>
+                {t('hero.desc1')}
              </p>
+
              <button 
                 onClick={() => setIsBookingOpen(true)}
-                className="bg-white text-blue-800 hover:bg-blue-50 hover:scale-105 transition-all px-5 py-2.5 sm:px-8 sm:py-4 rounded-full font-bold tracking-tight text-[15px] sm:text-lg shadow-[0_0_40px_rgba(255,255,255,0.3)] animate-fade-in-up animation-delay-300"
+                className="bg-transparent border border-white/60 hover:bg-white/10 text-white transition-all px-10 py-3.5 sm:px-14 sm:py-4 rounded font-bold tracking-tight text-[15px] sm:text-lg shadow-lg backdrop-blur-sm animate-fade-in-up animation-delay-300 mb-16 sm:mb-24"
                 style={{ fontFamily: "'Inter', 'Pretendard', -apple-system, sans-serif" }}>
                 {t('hero.mainBtn')}
              </button>
+
+             {/* Stats Bar */}
+             <div className="w-full max-w-4xl bg-[#03152C]/35 backdrop-blur-xl border border-white/5 rounded-3xl flex flex-row items-center justify-between py-6 sm:py-10 px-2 sm:px-10 animate-fade-in-up animation-delay-400 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]">
+               <div className="flex flex-col items-center flex-1">
+                 <span className="text-xl sm:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2 drop-shadow-sm tracking-tight">20,000+</span>
+                 <span className="text-[11px] sm:text-sm lg:text-base text-slate-300 font-medium">누적 고객수</span>
+               </div>
+               <div className="w-px h-10 sm:h-14 bg-white/10"></div>
+               <div className="flex flex-col items-center flex-1">
+                 <span className="text-xl sm:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2 drop-shadow-sm tracking-tight">13,000+</span>
+                 <span className="text-[11px] sm:text-sm lg:text-base text-slate-300 font-medium">누적 후기</span>
+               </div>
+               <div className="w-px h-10 sm:h-14 bg-white/10"></div>
+               <div className="flex flex-col items-center flex-1">
+                 <span className="text-xl sm:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2 drop-shadow-sm tracking-tight">98%+</span>
+                 <span className="text-[11px] sm:text-sm lg:text-base text-slate-300 font-medium">만족도</span>
+               </div>
+               <div className="w-px h-10 sm:h-14 bg-white/10"></div>
+               <div className="flex flex-col items-center flex-1">
+                 <span className="text-xl sm:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2 drop-shadow-sm tracking-tight">80%+</span>
+                 <span className="text-[11px] sm:text-sm lg:text-base text-slate-300 font-medium">지인 추천율</span>
+               </div>
+             </div>
           </div>
         </section>
 
