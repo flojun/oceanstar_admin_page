@@ -103,7 +103,9 @@ export default function InvoiceManager() {
         '줌줌': ['줌줌', 'Z'],
         '트리플': ['트리플', 'T'],
         '와그': ['와그', 'W'],
-        '클록': ['클록', '클룩', 'KLOOK', 'klook', '클'],
+        '클록': ['클록', '클룩', 'KLOOK', 'klook', 'Klock', 'klock', 'K', 'k', '클'],
+        'Viator': ['Viator', 'viator', '비아터', '바이터', 'V', 'v'],
+        'Get Your Guide': ['Get Your Guide', 'get your guide', 'GYG', 'gyg', 'G', 'g', 'GY', 'gy', '겟유어가이드'],
     };
 
     const getSourceVariants = (source: string): string[] => {

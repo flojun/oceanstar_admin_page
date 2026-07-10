@@ -498,7 +498,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
              </button>
 
              {/* Stats Bar */}
-             <div className="w-full max-w-4xl bg-[#03152C]/35 backdrop-blur-xl border border-white/5 rounded-3xl flex flex-row items-center justify-between py-6 sm:py-10 px-2 sm:px-10 animate-fade-in-up animation-delay-400 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]">
+             <div className="w-full max-w-4xl bg-blue-900/30 backdrop-blur-xl border border-white/5 rounded-3xl flex flex-row items-center justify-between py-6 sm:py-10 px-2 sm:px-10 animate-fade-in-up animation-delay-400 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]">
                <div className="flex flex-col items-center flex-1">
                  <span className="text-xl sm:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2 drop-shadow-sm tracking-tight">20,000+</span>
                  <span className="text-[11px] sm:text-sm lg:text-base text-slate-300 font-medium">누적 고객수</span>
