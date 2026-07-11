@@ -6,7 +6,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Check, MapPin, Calendar, Users, CreditCard, Loader2, ChevronRight, ChevronLeft, Info, X, ShieldCheck, Star, Anchor, UsersRound, Award, MessageSquare, User, ClipboardList, AlertTriangle, Mail, Instagram, Youtube, Sparkles } from "lucide-react";
+import { Check, MapPin, Calendar, Users, CreditCard, Loader2, ChevronRight, ChevronLeft, Info, X, ShieldCheck, Star, Anchor, UsersRound, Award, MessageSquare, User, ClipboardList, AlertTriangle, Mail, Instagram, Youtube, Sparkles, Menu } from "lucide-react";
 import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 import { calculateDistance, findClosestPickup, PickupLocation, getWalkingMinutes } from '@/lib/utils';
 import { DayPicker } from "react-day-picker";
@@ -95,7 +95,15 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   const [imageVersions, setImageVersions] = useState<Record<string, any>>({});
   const PUBLIC_URL_BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/website-assets`;
 
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   // ==== 리뷰 상태 ====
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
   const [expandedReviews, setExpandedReviews] = useState<Record<string, boolean>>({});
@@ -425,11 +433,27 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
       <VideoPopupModal lang={lang} />
       <header className={`w-full z-40 transition-all duration-300 bg-white/80 backdrop-blur-md shrink-0 ${isScrolled ? 'shadow-sm border-b border-slate-200' : 'border-b border-transparent'}`}>
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5 sm:py-4 flex items-center justify-between">
-          <div className="flex flex-col items-center shrink-0">
+          <div className="flex flex-col items-center shrink-0 cursor-pointer" onClick={() => scrollToSection('home')}>
             <span className="text-[10px] sm:text-[11.5px] font-bold text-blue-500/90 tracking-widest leading-none mb-1">{t('header.subtitle')}</span>
             <h1 className="text-[22px] sm:text-2xl font-black text-blue-600 tracking-tighter uppercase drop-shadow-sm leading-none">OceanStar</h1>
           </div>
+
+          <nav className="hidden lg:flex items-center gap-6 xl:gap-10 font-bold text-[15px] text-slate-700">
+            <button onClick={() => scrollToSection('home')} className="hover:text-blue-600 transition">Home</button>
+            <button onClick={() => scrollToSection('tours')} className="hover:text-blue-600 transition">투어</button>
+            <button onClick={() => scrollToSection('reviews')} className="hover:text-blue-600 transition">고객후기</button>
+            <button onClick={() => scrollToSection('faq')} className="hover:text-blue-600 transition">FAQ</button>
+            <button onClick={() => scrollToSection('about')} className="hover:text-blue-600 transition">회사소개</button>
+          </nav>
+
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+             <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="lg:hidden bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-lg transition-all"
+                aria-label="Toggle Menu"
+             >
+                {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+             </button>
              <button
                 onClick={() => {
                    const targetLang = lang === 'ko' ? 'en' : 'ko';
@@ -457,11 +481,22 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
              </button>
           </div>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden absolute top-[100%] left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xl py-4 px-6 flex flex-col gap-2 font-bold text-[15px] text-slate-800 animate-in slide-in-from-top-2">
+            <button onClick={() => { scrollToSection('home'); setIsMobileMenuOpen(false); }} className="text-left py-3 border-b border-slate-100 hover:text-blue-600 transition">Home</button>
+            <button onClick={() => { scrollToSection('tours'); setIsMobileMenuOpen(false); }} className="text-left py-3 border-b border-slate-100 hover:text-blue-600 transition">투어</button>
+            <button onClick={() => { scrollToSection('reviews'); setIsMobileMenuOpen(false); }} className="text-left py-3 border-b border-slate-100 hover:text-blue-600 transition">고객후기</button>
+            <button onClick={() => { scrollToSection('faq'); setIsMobileMenuOpen(false); }} className="text-left py-3 border-b border-slate-100 hover:text-blue-600 transition">FAQ</button>
+            <button onClick={() => { scrollToSection('about'); setIsMobileMenuOpen(false); }} className="text-left py-3 hover:text-blue-600 transition">회사소개</button>
+          </div>
+        )}
       </header>
 
       <main ref={mainRef} className="w-full flex-1 overflow-y-auto pb-0 bg-white">
         {/* === 1. Hero Section === */}
-        <section className="relative w-full min-h-[100svh] sm:min-h-[85vh] lg:min-h-[800px] flex items-center justify-center overflow-hidden">
+        <section id="home" className="relative w-full min-h-[100svh] sm:min-h-[85vh] lg:min-h-[800px] flex items-center justify-center overflow-hidden">
           {/* Background Overlay */}
           <div className="absolute inset-0 bg-blue-900/30 z-10 mix-blend-multiply"></div>
           
@@ -492,72 +527,50 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
              <button 
                 onClick={() => setIsBookingOpen(true)}
-                className="bg-transparent border border-white/60 hover:bg-white/10 text-white transition-all px-10 py-3.5 sm:px-14 sm:py-4 rounded font-bold tracking-tight text-[15px] sm:text-lg shadow-lg backdrop-blur-sm animate-fade-in-up animation-delay-300 mb-16 sm:mb-24"
+                className="bg-transparent border-2 border-white hover:bg-white/20 text-white transition-all px-10 py-3.5 sm:px-14 sm:py-4 rounded font-bold tracking-tight text-[15px] sm:text-lg animate-fade-in-up animation-delay-300 mb-16 sm:mb-24"
                 style={{ fontFamily: "'Inter', 'Pretendard', -apple-system, sans-serif" }}>
                 {t('hero.mainBtn')}
              </button>
-
-             {/* Stats Bar */}
-             <div className="w-full max-w-4xl bg-blue-900/30 backdrop-blur-xl border border-white/5 rounded-3xl flex flex-row items-center justify-between py-6 sm:py-10 px-2 sm:px-10 animate-fade-in-up animation-delay-400 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]">
-               <div className="flex flex-col items-center flex-1">
-                 <span className="text-xl sm:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2 drop-shadow-sm tracking-tight">20,000+</span>
-                 <span className="text-[11px] sm:text-sm lg:text-base text-slate-300 font-medium">누적 고객수</span>
-               </div>
-               <div className="w-px h-10 sm:h-14 bg-white/10"></div>
-               <div className="flex flex-col items-center flex-1">
-                 <span className="text-xl sm:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2 drop-shadow-sm tracking-tight">13,000+</span>
-                 <span className="text-[11px] sm:text-sm lg:text-base text-slate-300 font-medium">누적 후기</span>
-               </div>
-               <div className="w-px h-10 sm:h-14 bg-white/10"></div>
-               <div className="flex flex-col items-center flex-1">
-                 <span className="text-xl sm:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2 drop-shadow-sm tracking-tight">98%+</span>
-                 <span className="text-[11px] sm:text-sm lg:text-base text-slate-300 font-medium">만족도</span>
-               </div>
-               <div className="w-px h-10 sm:h-14 bg-white/10"></div>
-               <div className="flex flex-col items-center flex-1">
-                 <span className="text-xl sm:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2 drop-shadow-sm tracking-tight">80%+</span>
-                 <span className="text-[11px] sm:text-sm lg:text-base text-slate-300 font-medium">지인 추천율</span>
-               </div>
-             </div>
           </div>
         </section>
 
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 -mt-10 sm:-mt-20 relative z-30">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 mt-16 sm:mt-24 relative z-30">
         
           {/* === 2. Bento Box Introduction === */}
           <section className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-12 sm:mb-20">
-            <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
-              <Award className="w-10 h-10 text-amber-500 mb-4 shrink-0" />
+            <div className="bg-white rounded-md p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+              <Award className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc1_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc1_text')}</p>
             </div>
-            <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-6 lg:p-7 shadow-xl text-white flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
-              <Star className="w-10 h-10 text-yellow-300 mb-4 fill-yellow-300 shrink-0" />
-              <h3 className="text-lg lg:text-xl font-bold text-white mb-2 break-keep">{t('bento.desc2_title')}</h3>
-              <p className="text-blue-100 font-medium text-base leading-relaxed break-keep">{t('bento.desc2_text')}</p>
+            
+            <div className="bg-white rounded-md p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+              <Star className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
+              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc2_title')}</h3>
+              <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc2_text')}</p>
             </div>
             
-            <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
-              <ShieldCheck className="w-10 h-10 text-emerald-500 mb-4 shrink-0" />
+            <div className="bg-white rounded-md p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+              <ShieldCheck className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc3_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc3_text')}</p>
             </div>
             
-            <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
-              <Anchor className="w-10 h-10 text-blue-500 mb-4 shrink-0" />
+            <div className="bg-white rounded-md p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+              <Anchor className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc4_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc4_text')}</p>
             </div>
             
-            <div className="bg-white rounded-3xl p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
-              <UsersRound className="w-10 h-10 text-purple-500 mb-4 shrink-0" />
+            <div className="bg-white rounded-md p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+              <UsersRound className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc5_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc5_text')}</p>
             </div>
           </section>
 
           {/* === 3. Tour Packages (Cards) === */}
-          <section className="mb-10">
+          <section id="tours" className="mb-10">
             <div className="text-center mb-12">
                <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">{t('tour.title')}</h2>
                <p className="text-lg text-slate-500">{t('tour.subtitle')}</p>
@@ -583,7 +596,11 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
                   displayCards = displayCards.map((tItem: any) => {
                     if (tItem.tour_id?.toLowerCase().includes('sunset')) return { ...tItem, name: <span className="block text-center leading-snug whitespace-pre-wrap">{lang === 'ko' ? t('tour.names.sunset').replace('와이키키 ', '와이키키\n') : t('tour.names.sunset')}</span> };
-                    if (tItem.tour_id === 'private') return { ...tItem, name: <span className="block text-center leading-snug whitespace-pre-wrap">{lang === 'ko' ? t('tour.names.private').replace('] ', ']\n').replace('거북이 ', '거북이\n') : t('tour.names.private').replace('] ', ']\n')}</span> };
+                    if (tItem.tour_id === 'private') return { 
+                        ...tItem, 
+                        name: <span className="block text-center leading-snug whitespace-pre-wrap">{lang === 'ko' ? "[단독 대관]\n프라이빗 VIP 와이키키 거북이 스노클링" : t('tour.names.private').replace('] ', ']\n')}</span>,
+                        description: lang === 'ko' ? "배를 통째로 대여하여 프라이빗 하게 즐기는 스노클링 투어, 우리끼리 즐기는 여유로운 시간과 특별한 추억." : tItem.description
+                    };
                     if (tItem.is_combined || tItem.tour_id?.toLowerCase().includes('morning')) return { ...tItem, name: t('tour.names.combined') };
                     return tItem;
                   });
@@ -599,8 +616,9 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     ];
                     
                     let theme = themes[idx % themes.length];
-                    if (isPrivate) theme = { bg: 'bg-slate-900', gradient: 'from-slate-800 to-indigo-900', text: 'text-white', badge: t('tour.badges.private'), btn: 'bg-indigo-500 hover:bg-indigo-400', specialLabel: <span className="flex items-center gap-1"><Sparkles size={14} className="text-yellow-300 fill-yellow-300" /> {lang === 'en' ? 'Opening Special' : '오픈특가'} <Sparkles size={14} className="text-yellow-300 fill-yellow-300" /></span>, specialLabelBg: 'bg-gradient-to-r from-fuchsia-600 to-purple-600', isDark: true };
-                    else if (isSunset) theme = { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: t('tour.badges.sunset'), btn: 'bg-orange-500 hover:bg-orange-600', specialLabel: t('tour.badges.couple'), specialLabelBg: 'bg-gradient-to-r from-orange-400 to-red-500', isDark: false };
+                    if (isPrivate) theme = { bg: 'bg-slate-900', gradient: 'from-slate-800 to-indigo-900', text: 'text-white', badge: '', btn: '', specialLabel: <span className="flex items-center gap-1"><Sparkles size={14} className="text-yellow-300 fill-yellow-300" /> {lang === 'en' ? 'Opening Special' : '오픈특가'} <Sparkles size={14} className="text-yellow-300 fill-yellow-300" /></span>, specialLabelBg: 'bg-gradient-to-r from-fuchsia-600 to-purple-600', isDark: true };
+                    else if (isSunset) theme = { bg: 'bg-orange-100', gradient: 'from-orange-400 to-rose-400', text: 'text-orange-900', badge: '', btn: '', specialLabel: lang === 'ko' ? '커플/ 신혼 추천!' : t('tour.badges.couple'), specialLabelBg: 'bg-gradient-to-r from-orange-400 to-red-500', isDark: false };
+                    else theme = { ...theme, badge: '', btn: '', specialLabel: lang === 'ko' ? '베스트 셀러' : 'Best Seller', specialLabelBg: 'bg-blue-600 text-white' };
 
                       const tourImages = (() => {
                         // Use Supabase image if it exists in versions.json (multi image list)
@@ -644,10 +662,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                           </div>
                         )}
                         <div className={`h-48 ${theme.bg} relative overflow-hidden shrink-0`}>
-                          <ImageCarousel images={tourImages} interval={2000} />
-                          <div className={`absolute bottom-4 left-4 ${theme.isDark ? 'bg-white/10 text-white border border-white/20' : 'bg-white/90 text-' + theme.text} backdrop-blur text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 w-max z-10`}>
-                            {theme.badge}
-                          </div>
+                          <ImageCarousel images={tourImages} interval={4000} />
                         </div>
                         <div className={`p-6 sm:p-8 flex-1 flex flex-col`}>
                           <h3 className={`text-2xl font-bold text-center ${theme.isDark ? 'text-white' : 'text-slate-800'} mb-3`}>{tour.name}</h3>
@@ -706,7 +721,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                               <p className="text-xs text-slate-400 font-medium">
                                 {tour.is_flat_rate ? (tour.tour_id === 'private' ? t('tour.details.privatePax') : t('tour.details.maxPax').replace('{max}', tour.max_capacity)) : t('tour.details.adultPrice')}
                               </p>
-                              <p className={`text-xl sm:text-2xl font-black truncate pr-2 ${theme.isDark ? 'text-indigo-400' : (isSunset ? 'text-orange-600' : 'text-blue-600')}`}>
+                              <p className={`text-xl sm:text-2xl font-black truncate pr-2 text-blue-600`}>
                                 {lang === 'en' ? (
                                   tour.is_flat_rate && tour.tour_id === 'private' ? (
                                     <>${Math.floor(calculateTieredPrivatePrice(1, 1)).toLocaleString()} ~</>
@@ -729,7 +744,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                 >
                                   {t('tour.seeDetails')}
                                 </button>
-                                <button onClick={() => { if(tour.tour_id !== 'combined_morning' && tour.tour_id) { setSelectedTour(tour.tour_id); } else { setSelectedTour(null); } if(tour.is_flat_rate) form.setValue("childCount", 0); setIsBookingOpen(true); }} className={`flex-1 sm:flex-none ${theme.btn} text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-transform active:scale-95 whitespace-nowrap shadow-[0_4px_14px_0_rgba(0,118,255,0.39)]`}>{t('tour.bookBtn')}</button>
+                                <button onClick={() => { if(tour.tour_id !== 'combined_morning' && tour.tour_id) { setSelectedTour(tour.tour_id); } else { setSelectedTour(null); } if(tour.is_flat_rate) form.setValue("childCount", 0); setIsBookingOpen(true); }} className={`flex-1 sm:flex-none bg-blue-900 hover:bg-blue-950 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-transform active:scale-95 whitespace-nowrap shadow-[0_4px_14px_0_rgba(0,118,255,0.39)]`}>{t('tour.bookBtn')}</button>
                             </div>
                           </div>
                         </div>
@@ -742,7 +757,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         </div>
 
         {/* === 4. Customer Reviews Section === */}
-        <section className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-20 relative z-30">
+        <section id="reviews" className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-20 relative z-30">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
                 <div>
                    <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">{t('review.title')}</h2>
@@ -892,10 +907,12 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         </div>
 
         {/* === FAQ Section === */}
-        <FAQSection lang={lang} />
+        <div id="faq">
+           <FAQSection lang={lang} />
+        </div>
 
         {/* === 6. Business Hours and Company Info (Footer) === */}
-        <section className="bg-slate-900 text-slate-300 py-16 mt-20 relative z-30 pb-32">
+        <section id="about" className="bg-slate-900 text-slate-300 py-16 mt-20 relative z-30 pb-32">
           <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
                  <div>
