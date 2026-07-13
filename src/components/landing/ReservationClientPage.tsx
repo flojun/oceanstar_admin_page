@@ -434,7 +434,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
       <header className={`w-full z-40 transition-all duration-300 bg-white/80 backdrop-blur-md shrink-0 ${isScrolled ? 'shadow-sm border-b border-slate-200' : 'border-b border-transparent'}`}>
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5 sm:py-4 flex items-center justify-between">
           <div className="flex items-center shrink-0 cursor-pointer" onClick={() => scrollToSection('home')}>
-            <img src="/logo.png" alt="OceanStar Logo" className="h-12 sm:h-14 w-auto object-contain scale-110 sm:scale-125 origin-left" />
+            <img src="/logo.png" alt="OceanStar Logo" className="h-14 sm:h-16 w-auto object-contain" />
           </div>
 
           <nav className="hidden lg:flex items-center gap-6 xl:gap-10 font-bold text-[15px] text-slate-700">
