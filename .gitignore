@@ -47,3 +47,8 @@ lint_log.txt
 rotations.txt
 verify_*
 test-tz.mjs
+
+# generated reports
+generate_report.js
+public/*.pptx
+*.pptx
