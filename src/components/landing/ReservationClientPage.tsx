@@ -51,7 +51,7 @@ const formSchema = z.object({
   tourDate: z.date(),
   adultCount: z.number().min(1, "최소 1명 이상 선택해주세요"),
   childCount: z.number().min(0),
-  hotelName: z.string().min(1, "숙소를 입력해주세요"),
+  hotelName: z.string().optional(),
   bookerName: z.string().min(1, "예약자 성함을 입력해주세요"),
   bookerEmail: z.string().email("정확한 이메일을 입력해주세요"),
   bookerPhone: z.string().min(10, "연락처를 입력해주세요"),
@@ -83,6 +83,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   const [isCurrencyModalOpen, setIsCurrencyModalOpen] = useState(false);
   const [pendingBookingData, setPendingBookingData] = useState<z.infer<typeof formSchema> | null>(null);
   const infoSectionRef = useRef<HTMLElement>(null);
+  const paxSectionRef = useRef<HTMLElement>(null);
 
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
@@ -350,6 +351,15 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!selectedTour) {
       alert(t('bookingModal.alert_selectTour'));
+      return;
+    }
+
+    if (!closestPickup?.location?.id && (!values.hotelName || values.hotelName.trim() === '')) {
+      form.setError('hotelName', { 
+        type: 'manual', 
+        message: lang === 'en' ? 'Please enter your hotel or select a pickup location' : '숙소를 입력하거나 픽업 장소를 선택해주세요' 
+      });
+      form.setFocus('hotelName');
       return;
     }
 
@@ -1041,6 +1051,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                               if (tour.is_flat_rate) {
                                 form.setValue("childCount", 0);
                               }
+                              setTimeout(() => {
+                                paxSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                form.setFocus("adultCount");
+                              }, 150);
                             }}
                             className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all ${selectedTour === tour.tour_id
                               ? "border-blue-600 bg-blue-50/50 shadow-md scale-[1.02] transform"
@@ -1087,7 +1101,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
                     {/* 2. Pax Selection */}
                     {selectedTour && (
-                      <section className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                      <section ref={paxSectionRef} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
                           <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">2</span>
                           {t('bookingModal.step2')}
