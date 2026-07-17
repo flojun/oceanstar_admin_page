@@ -9,6 +9,7 @@ declare global {
   interface Window {
     HubSpotConversations?: {
       widget: {
+        load: () => void;
         open: () => void;
         close: () => void;
         status: () => { loaded: boolean };
