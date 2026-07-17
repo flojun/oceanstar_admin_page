@@ -63,6 +63,11 @@ export default function RootLayout({
             gtag('config', 'AW-17755406251');
           `}
         </Script>
+        {/* HubSpot Chat Widget - 기본 런처 숨기고 API로 제어 */}
+        <Script id="hs-chat-settings" strategy="beforeInteractive">
+          {`window.hsConversationsSettings = { loadImmediately: false };`}
+        </Script>
+        <Script id="hs-script-loader" src="//js-na2.hs-scripts.com/246714984.js" strategy="afterInteractive" />
         {children}
       </body>
     </html>
