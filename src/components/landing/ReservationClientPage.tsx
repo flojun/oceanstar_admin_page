@@ -449,10 +449,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
           <nav className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-6 xl:gap-10 font-bold text-[15px] text-slate-700">
             <button onClick={() => scrollToSection('home')} className="hover:text-blue-600 transition">Home</button>
-            <button onClick={() => scrollToSection('tours')} className="hover:text-blue-600 transition">투어</button>
-            <button onClick={() => scrollToSection('reviews')} className="hover:text-blue-600 transition">고객후기</button>
+            <button onClick={() => scrollToSection('tours')} className="hover:text-blue-600 transition">{lang === 'en' ? 'Tours' : '투어'}</button>
+            <button onClick={() => scrollToSection('reviews')} className="hover:text-blue-600 transition">{lang === 'en' ? 'Reviews' : '고객후기'}</button>
             <button onClick={() => scrollToSection('faq')} className="hover:text-blue-600 transition">FAQ</button>
-            <button onClick={() => scrollToSection('about')} className="hover:text-blue-600 transition">회사소개</button>
+            <button onClick={() => scrollToSection('about')} className="hover:text-blue-600 transition">{lang === 'en' ? 'About Us' : '회사소개'}</button>
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -495,10 +495,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         {isMobileMenuOpen && (
           <div className="lg:hidden absolute top-[100%] left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xl py-4 px-6 flex flex-col gap-2 font-bold text-[15px] text-slate-800 animate-in slide-in-from-top-2">
             <button onClick={() => { scrollToSection('home'); setIsMobileMenuOpen(false); }} className="text-left py-3 border-b border-slate-100 hover:text-blue-600 transition">Home</button>
-            <button onClick={() => { scrollToSection('tours'); setIsMobileMenuOpen(false); }} className="text-left py-3 border-b border-slate-100 hover:text-blue-600 transition">투어</button>
-            <button onClick={() => { scrollToSection('reviews'); setIsMobileMenuOpen(false); }} className="text-left py-3 border-b border-slate-100 hover:text-blue-600 transition">고객후기</button>
+            <button onClick={() => { scrollToSection('tours'); setIsMobileMenuOpen(false); }} className="text-left py-3 border-b border-slate-100 hover:text-blue-600 transition">{lang === 'en' ? 'Tours' : '투어'}</button>
+            <button onClick={() => { scrollToSection('reviews'); setIsMobileMenuOpen(false); }} className="text-left py-3 border-b border-slate-100 hover:text-blue-600 transition">{lang === 'en' ? 'Reviews' : '고객후기'}</button>
             <button onClick={() => { scrollToSection('faq'); setIsMobileMenuOpen(false); }} className="text-left py-3 border-b border-slate-100 hover:text-blue-600 transition">FAQ</button>
-            <button onClick={() => { scrollToSection('about'); setIsMobileMenuOpen(false); }} className="text-left py-3 hover:text-blue-600 transition">회사소개</button>
+            <button onClick={() => { scrollToSection('about'); setIsMobileMenuOpen(false); }} className="text-left py-3 hover:text-blue-600 transition">{lang === 'en' ? 'About Us' : '회사소개'}</button>
           </div>
         )}
       </header>
