@@ -58,8 +58,10 @@ export default function KakaoChatWidget() {
     // 컨테이너를 다시 보이게 한 뒤 로드 및 열기
     const container = document.getElementById('hubspot-messages-iframe-container');
     if (container) {
-      container.style.setProperty('display', 'initial', 'important');
+      container.style.setProperty('display', 'block', 'important');
+      container.style.setProperty('pointer-events', 'auto', 'important');
       container.style.setProperty('bottom', '80px', 'important');
+      container.style.setProperty('z-index', '99999', 'important');
     }
 
     if (window.HubSpotConversations) {
