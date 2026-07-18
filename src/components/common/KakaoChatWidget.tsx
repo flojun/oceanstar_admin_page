@@ -5,20 +5,6 @@ import Link from 'next/link';
 import { MessageCircle, Instagram } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
-declare global {
-  interface Window {
-    HubSpotConversations?: {
-      widget: {
-        load: () => void;
-        open: () => void;
-        close: () => void;
-        status: () => { loaded: boolean };
-      };
-    };
-    hsConversationsOnReady?: Array<() => void>;
-  }
-}
-
 export default function KakaoChatWidget() {
   const pathname = usePathname();
 
@@ -28,14 +14,6 @@ export default function KakaoChatWidget() {
   }
 
   const kakaoChannelId = process.env.NEXT_PUBLIC_KAKAO_CHANNEL_ID || '_hzxeEn';
-
-  // HubSpot 위젯은 정상적으로 로드되며, CSS로 런처를 화면 밖에 숨깁니다.
-  // 버튼 클릭 시 widget.open()만 호출하면 됩니다.
-  const handleHubspotChat = () => {
-    if (window.HubSpotConversations) {
-      window.HubSpotConversations.widget.open();
-    }
-  };
 
   if (!kakaoChannelId) {
     return null;
@@ -92,23 +70,6 @@ export default function KakaoChatWidget() {
           </div>
         </div>
       </Link>
-
-      {/* HubSpot Chat Button (커스텀) */}
-      <button
-        onClick={handleHubspotChat}
-        aria-label="라이브 채팅 문의하기"
-        className="group relative flex items-center justify-center w-[60px] h-[60px] bg-[#0a9ddd] hover:bg-[#0889c4] rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all hover:scale-105 hover:-translate-y-1 active:scale-95 cursor-pointer"
-      >
-        <MessageCircle size={28} className="text-white" />
-
-        {/* Hover Tooltip */}
-        <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300">
-          <div className="bg-slate-900 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-lg whitespace-nowrap flex items-center gap-2">
-            <MessageCircle size={16} /> 라이브 채팅 문의
-            <div className="absolute top-1/2 -translate-y-1/2 -right-1 w-2 h-2 bg-slate-900 rotate-45"></div>
-          </div>
-        </div>
-      </button>
     </div>
   );
 }
