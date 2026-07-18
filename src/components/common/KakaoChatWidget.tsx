@@ -29,43 +29,11 @@ export default function KakaoChatWidget() {
 
   const kakaoChannelId = process.env.NEXT_PUBLIC_KAKAO_CHANNEL_ID || '_hzxeEn';
 
-  const chatOpenedRef = React.useRef(false);
-
-  // HubSpot 기본 런처 아이콘 숨기기
-  // loadImmediately: false로 설정했으므로 기본 런처가 표시되지 않지만,
-  // 혹시 모를 잔여 컨테이너도 숨깁니다.
-  React.useEffect(() => {
-    // loadImmediately: false로 인해 기본 런처는 처음부터 로드되지 않습니다.
-    // 기존의 강제 숨김(setInterval) 로직은 HubSpot의 정상적인 상태를 방해할 수 있으므로 제거합니다.
-  }, []);
-
+  // HubSpot 위젯은 정상적으로 로드되며, CSS로 런처를 화면 밖에 숨깁니다.
+  // 버튼 클릭 시 widget.open()만 호출하면 됩니다.
   const handleHubspotChat = () => {
-    chatOpenedRef.current = true;
-
-    const showAndOpenWidget = () => {
-      const container = document.getElementById('hubspot-messages-iframe-container');
-      if (container) {
-        container.style.setProperty('display', 'block', 'important');
-        container.style.setProperty('pointer-events', 'auto', 'important');
-        container.style.setProperty('bottom', '80px', 'important');
-        container.style.setProperty('z-index', '99999', 'important');
-      }
-      if (window.HubSpotConversations) {
-        window.HubSpotConversations.widget.open();
-      }
-    };
-
     if (window.HubSpotConversations) {
-      const status = window.HubSpotConversations.widget.status();
-      if (status && status.loaded) {
-        // 이미 로드된 경우 바로 엽니다.
-        showAndOpenWidget();
-      } else {
-        // 로드되지 않은 경우, 로드 완료 콜백을 등록하고 로드를 시작합니다.
-        window.hsConversationsOnReady = window.hsConversationsOnReady || [];
-        window.hsConversationsOnReady.push(showAndOpenWidget);
-        window.HubSpotConversations.widget.load();
-      }
+      window.HubSpotConversations.widget.open();
     }
   };
 
