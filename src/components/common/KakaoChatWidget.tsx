@@ -35,38 +35,37 @@ export default function KakaoChatWidget() {
   // loadImmediately: false로 설정했으므로 기본 런처가 표시되지 않지만,
   // 혹시 모를 잔여 컨테이너도 숨깁니다.
   React.useEffect(() => {
-    const hideHubspotLauncher = () => {
-      // 채팅이 열린 상태면 숨기지 않음
-      if (chatOpenedRef.current) return;
-
-      const container = document.getElementById('hubspot-messages-iframe-container');
-      if (container) {
-        container.style.setProperty('display', 'none', 'important');
-      }
-    };
-
-    const intervalId = setInterval(hideHubspotLauncher, 300);
-    setTimeout(() => clearInterval(intervalId), 15000);
-
-    return () => clearInterval(intervalId);
+    // loadImmediately: false로 인해 기본 런처는 처음부터 로드되지 않습니다.
+    // 기존의 강제 숨김(setInterval) 로직은 HubSpot의 정상적인 상태를 방해할 수 있으므로 제거합니다.
   }, []);
 
   const handleHubspotChat = () => {
-    // 채팅 열림 상태 표시 → interval이 더 이상 숨기지 않음
     chatOpenedRef.current = true;
 
-    // 컨테이너를 다시 보이게 한 뒤 로드 및 열기
-    const container = document.getElementById('hubspot-messages-iframe-container');
-    if (container) {
-      container.style.setProperty('display', 'block', 'important');
-      container.style.setProperty('pointer-events', 'auto', 'important');
-      container.style.setProperty('bottom', '80px', 'important');
-      container.style.setProperty('z-index', '99999', 'important');
-    }
+    const showAndOpenWidget = () => {
+      const container = document.getElementById('hubspot-messages-iframe-container');
+      if (container) {
+        container.style.setProperty('display', 'block', 'important');
+        container.style.setProperty('pointer-events', 'auto', 'important');
+        container.style.setProperty('bottom', '80px', 'important');
+        container.style.setProperty('z-index', '99999', 'important');
+      }
+      if (window.HubSpotConversations) {
+        window.HubSpotConversations.widget.open();
+      }
+    };
 
     if (window.HubSpotConversations) {
-      window.HubSpotConversations.widget.load();
-      window.HubSpotConversations.widget.open();
+      const status = window.HubSpotConversations.widget.status();
+      if (status && status.loaded) {
+        // 이미 로드된 경우 바로 엽니다.
+        showAndOpenWidget();
+      } else {
+        // 로드되지 않은 경우, 로드 완료 콜백을 등록하고 로드를 시작합니다.
+        window.hsConversationsOnReady = window.hsConversationsOnReady || [];
+        window.hsConversationsOnReady.push(showAndOpenWidget);
+        window.HubSpotConversations.widget.load();
+      }
     }
   };
 
