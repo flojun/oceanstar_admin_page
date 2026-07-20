@@ -344,7 +344,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
       const lng = place.geometry?.location?.lng();
 
       if (lat && lng) {
-        form.setValue("secondaryHotelName", place.name || "");
+        form.setValue("secondaryPickupLocationName", place.name || "");
         const result = findClosestPickup(lat, lng, pickupLocations);
         if (result) {
           setSecondaryClosestPickup({
@@ -407,7 +407,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
          alert(lang === 'en' ? 'Please select a date for the second activity.' : '패러세일링/제트스키 날짜를 선택해주세요.');
          return;
       }
-      if (!secondaryClosestPickup?.location?.id && (!values.secondaryHotelName || values.secondaryHotelName.trim() === '')) {
+      if (!secondaryClosestPickup?.location?.id && (!values.secondaryPickupLocationName || values.secondaryPickupLocationName.trim() === '')) {
          alert(lang === 'en' ? 'Please enter pickup location for the second activity.' : '패러세일링/제트스키 픽업 장소를 입력해주세요.');
          return;
       }
@@ -1542,7 +1542,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     >
                                         <input
                                         type="text"
-                                        {...form.register("secondaryHotelName")}
+                                        {...form.register("secondaryPickupLocationName")}
                                         placeholder={t('bookingModal.hotel_placeholder')}
                                         className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
                                         />
@@ -1550,7 +1550,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     ) : (
                                     <input
                                         type="text"
-                                        {...form.register("secondaryHotelName")}
+                                        {...form.register("secondaryPickupLocationName")}
                                         placeholder={t('bookingModal.hotel_placeholder')}
                                         className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
                                     />
