@@ -1514,6 +1514,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                    if (day === 0 || day === 6) return true; // Disable weekends
                                    
                                    const dateStr = format(date, 'yyyy-MM-dd');
+                                   
+                                   // Prevent selecting the same date as the primary tour (Turtle Snorkeling)
+                                   if (selectedDate && dateStr === format(selectedDate, 'yyyy-MM-dd')) return true;
+
                                    const isBlocked = blockedDates.some(bd =>
                                      bd.date === dateStr && (bd.tour_id === 'all' || bd.tour_id === 'combo_marine')
                                    );
