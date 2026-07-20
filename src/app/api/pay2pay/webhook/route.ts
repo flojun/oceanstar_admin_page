@@ -27,50 +27,18 @@ export async function POST(req: Request) {
         }
 
         if (rescode === '0000' || rescode === 'SUCCESS') {
-            // 결제 성공 -> Supabase 예약 상태 '예약확정'으로 인서트
-            // TODO: 실제 Pay2Pay 연동 시, Pay2Pay 서버에서 전달해주는 커스텀 데이터(메타데이터) 필드를 파싱하거나,
-            // 별도의 임시 테이블에서 order_id로 예약 정보를 불러와야 할 수 있습니다.
-            let reservationData = null;
-            if (encodedData) {
-                try {
-                    const decodedStr = Buffer.from(encodedData, 'base64').toString('utf8');
-                    reservationData = JSON.parse(decodedStr);
-                } catch (e) {
-                    console.error("Failed to parse encoded data", e);
-                }
-            }
-
-            if (!reservationData) {
-                 return NextResponse.json({ error: 'Missing reservation metadata' }, { status: 400 });
-            }
-
             const { data, error } = await supabaseServer
                 .from('reservations')
-                .insert([
-                    {
-                        order_id: order_id,
-                        source: reservationData.source,
-                        name: reservationData.name,
-                        contact: reservationData.contact,
-                        tour_date: reservationData.tour_date,
-                        option: reservationData.option,
-                        pax: reservationData.pax,
-                        note: reservationData.note,
-                        pickup_location: reservationData.pickup_location,
-                        status: '예약확정',
-                        total_price: reservationData.total_price,
-                        booker_email: reservationData.booker_email,
-                        adult_count: reservationData.adult_count,
-                        child_count: reservationData.child_count,
-                        currency: reservationData.currency,
-                        receipt_date: reservationData.receipt_date,
-                    }
-                ])
+                .update({
+                    status: '예약확정',
+                    receipt_date: getHawaiiDateStrServer(),
+                })
+                .eq('order_id', order_id)
                 .select();
 
             if (error) {
-                console.error('Failed to insert reservation status for Pay2Pay id', order_id, error);
-                return NextResponse.json({ error: 'DB Insert Failed' }, { status: 500 });
+                console.error('Failed to update reservation status for Pay2Pay id', order_id, error);
+                return NextResponse.json({ error: 'DB Update Failed' }, { status: 500 });
             }
 
             console.log(`[Pay2Pay] Payment confirmed for order: ${order_id}`);
@@ -96,7 +64,12 @@ export async function POST(req: Request) {
 
             return NextResponse.json({ success: true, message: 'Pay2Pay Payment confirmed and verified' });
         } else {
-            // 결제 실패 처리 (기존에 인서트된게 없으므로 별도 업데이트 불필요, 로그만 남김)
+            // 결제 실패 처리
+            await supabaseServer
+                .from('reservations')
+                .update({ status: '결제실패' })
+                .eq('order_id', order_id);
+
             console.error(`Pay2Pay Payment failed for order: ${order_id}`);
             return NextResponse.json({ success: false, message: 'Pay2Pay Payment failed' });
         }

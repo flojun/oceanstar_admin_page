@@ -55,6 +55,10 @@ const formSchema = z.object({
   bookerName: z.string().min(1, "예약자 성함을 입력해주세요"),
   bookerEmail: z.string().email("정확한 이메일을 입력해주세요"),
   bookerPhone: z.string().min(10, "연락처를 입력해주세요"),
+  comboOption: z.string().optional(), // '1', '2', '3'
+  secondaryDate: z.date().optional(),
+  secondaryPickupLocationName: z.string().optional(),
+  comboTimeOption: z.string().optional(),
 });
 
 const libraries: "places"[] = ["places"];
@@ -84,6 +88,14 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   const [pendingBookingData, setPendingBookingData] = useState<z.infer<typeof formSchema> | null>(null);
   const infoSectionRef = useRef<HTMLElement>(null);
   const paxSectionRef = useRef<HTMLElement>(null);
+
+  const [comboOption, setComboOption] = useState<string | null>(null);
+  const [comboTimeOption, setComboTimeOption] = useState<string | null>(null);
+  const [secondaryDate, setSecondaryDate] = useState<Date | undefined>();
+  const [secondaryClosestPickup, setSecondaryClosestPickup] = useState<{ location: PickupLocation, minutes: number } | null>(null);
+  const secondaryAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const [secondaryCurrentMonth, setSecondaryCurrentMonth] = useState<Date>(new Date());
+
 
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
@@ -321,6 +333,30 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
     }
   };
 
+  const onSecondaryLoad = (autocomplete: google.maps.places.Autocomplete) => {
+    secondaryAutocompleteRef.current = autocomplete;
+  };
+
+  const onSecondaryPlaceChanged = () => {
+    if (secondaryAutocompleteRef.current !== null) {
+      const place = secondaryAutocompleteRef.current.getPlace();
+      const lat = place.geometry?.location?.lat();
+      const lng = place.geometry?.location?.lng();
+
+      if (lat && lng) {
+        form.setValue("secondaryHotelName", place.name || "");
+        const result = findClosestPickup(lat, lng, pickupLocations);
+        if (result) {
+          setSecondaryClosestPickup({
+            location: result.closestLocation,
+            minutes: getWalkingMinutes(result.distanceMeters)
+          });
+        }
+      }
+    }
+  };
+
+
   const getSelectedTourSetting = () => tourSettings.find((s: any) => s.tour_id === selectedTour);
   const selectedTourSetting = getSelectedTourSetting();
   const isFlatRate = selectedTourSetting?.is_flat_rate || false;
@@ -339,7 +375,15 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
   // Calculate Total Price dynamically
   let totalPrice = 0;
-  if (isFlatRate && selectedTour === 'private') {
+  if (selectedTour === 'combo_marine') {
+     const comboPrice = comboOption === '3' ? 310 : 210;
+     const exchangeRate = selectedTourSetting?.adult_price_usd ? ((selectedTourSetting.adult_price_krw || 0) / selectedTourSetting.adult_price_usd) : 1350;
+     if (lang === 'en') {
+       totalPrice = (adultCount * comboPrice) + (childCount * comboPrice);
+     } else {
+       totalPrice = (adultCount * (comboPrice * exchangeRate)) + (childCount * (comboPrice * exchangeRate));
+     }
+  } else if (isFlatRate && selectedTour === 'private') {
      const exchangeRate = lang === 'en' ? 1 : (selectedTourSetting?.adult_price_usd ? ((selectedTourSetting.adult_price_krw || 0) / selectedTourSetting.adult_price_usd) : 1350);
      totalPrice = calculateTieredPrivatePrice(totalSelectedPax, exchangeRate);
   } else if (isFlatRate) {
@@ -352,6 +396,21 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
     if (!selectedTour) {
       alert(t('bookingModal.alert_selectTour'));
       return;
+    }
+
+    if (selectedTour === 'combo_marine') {
+      if (!comboOption) {
+        alert(lang === 'en' ? 'Please select a combo option.' : '패러세일링/제트스키 옵션을 선택해주세요.');
+        return;
+      }
+      if (!values.secondaryDate) {
+         alert(lang === 'en' ? 'Please select a date for the second activity.' : '패러세일링/제트스키 날짜를 선택해주세요.');
+         return;
+      }
+      if (!secondaryClosestPickup?.location?.id && (!values.secondaryHotelName || values.secondaryHotelName.trim() === '')) {
+         alert(lang === 'en' ? 'Please enter pickup location for the second activity.' : '패러세일링/제트스키 픽업 장소를 입력해주세요.');
+         return;
+      }
     }
 
     if (!closestPickup?.location?.id && (!values.hotelName || values.hotelName.trim() === '')) {
@@ -392,9 +451,13 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
           selectedTour,
           pickupLocationId: closestPickup?.location?.id,
           pickupLocationName: closestPickup?.location?.name || '',
-          totalPrice,
+          secondaryPickupLocationId: secondaryClosestPickup?.location?.id,
+          secondaryPickupLocationName: secondaryClosestPickup?.location.name || undefined,
+          comboTimeOption: comboTimeOption,
           ...pendingBookingData,
           tourDate: formattedDate,
+          secondaryDate: pendingBookingData.secondaryDate ? format(pendingBookingData.secondaryDate, "yyyy-MM-dd") : null,
+          comboOption,
           lang: lang
         })
       });
@@ -609,6 +672,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         ...tItem, 
                         name: <span className="block text-center leading-snug whitespace-pre-wrap">{lang === 'ko' ? "[단독 대관]\n프라이빗 VIP 와이키키 거북이 스노클링" : t('tour.names.private').replace('] ', ']\n')}</span>,
                         description: lang === 'ko' ? "배를 통째로 대여하여 프라이빗 하게 즐기는 스노클링 투어, 우리끼리 즐기는 여유로운 시간과 특별한 추억." : tItem.description
+                    };
+                    if (tItem.tour_id === 'combo_marine') return {
+                        ...tItem,
+                        name: <span className="block text-center leading-snug whitespace-pre-wrap">{lang === 'en' ? "Turtle Snorkeling +\nParasailing / Jet Ski" : tItem.name.replace(' + ', ' +\n')}</span>
                     };
                     if (tItem.is_combined || tItem.tour_id?.toLowerCase().includes('morning')) return { ...tItem, name: t('tour.names.combined') };
                     return tItem;
@@ -1072,6 +1139,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                 tour.tour_id === 'morning2' ? '2nd Trip Waikiki Turtle Snorkeling' :
                                 tour.tour_id?.toLowerCase().includes('sunset') ? 'Sunset Wine & Waikiki Turtle Snorkeling' :
                                 tour.tour_id === 'private' ? '[Private] Waikiki Turtle Snorkeling Trip' :
+                                tour.tour_id === 'combo_marine' ? 'Turtle Snorkeling + Parasailing / Jet Ski' :
                                 tour.name
                               ) : tour.name}
                             </h3>
@@ -1099,8 +1167,76 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                       </div>
                     </section>
 
+                    {/* 1.5. Combo Option Selection */}
+                    {selectedTour === 'combo_marine' && (
+                      <section className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
+                          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">1.5</span>
+                          {lang === 'en' ? 'Select Combo Option' : '콤보 세부 옵션 선택'}
+                        </h2>
+                        <div className="flex flex-col gap-3">
+                          {[
+                            { id: '1', label: lang === 'en' ? 'Turtle Snorkeling + Parasailing ($210)' : '거북이 스노클링 + 패러세일링 ($210)' },
+                            { id: '2', label: lang === 'en' ? 'Turtle Snorkeling + Jet Ski ($210)' : '거북이 스노클링 + 제트 스키 ($210)' },
+                            { id: '3', label: lang === 'en' ? 'Turtle Snorkeling + Parasailing + Jet Ski ($310)' : '거북이 스노클링 + 패러세일링 + 제트스키 ($310)' }
+                          ].map(opt => (
+                            <div 
+                               key={opt.id}
+                               onClick={() => {
+                                 setComboOption(opt.id);
+                                 form.setValue("comboOption", opt.id);
+                               }}
+                               className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${comboOption === opt.id ? "border-blue-600 bg-blue-50/50 shadow-sm" : "border-slate-100 bg-white hover:border-blue-200"}`}
+                            >
+                               {comboOption === opt.id && (
+                                  <div className="absolute top-1/2 -translate-y-1/2 right-4 text-blue-600">
+                                    <Check size={20} strokeWidth={3} />
+                                  </div>
+                               )}
+                               <p className="font-bold text-slate-800">{opt.label}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+
+                    {/* 1.6 Combo Time Option Selection */}
+                    {selectedTour === 'combo_marine' && comboOption && (
+                      <section className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
+                          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">1.6</span>
+                          {lang === 'en' ? 'Select Snorkeling Trip Time' : '거북이 스노클링 시간 선택'}
+                        </h2>
+                        <div className="flex flex-col gap-3">
+                          {[
+                            { id: 'morning1', label: lang === 'en' ? '1st Trip (08:00 AM)' : '1부 (08:00 AM)' },
+                            { id: 'morning2', label: lang === 'en' ? '2nd Trip (11:00 AM)' : '2부 (11:00 AM)' }
+                          ].map(opt => (
+                            <div 
+                               key={opt.id}
+                               onClick={() => {
+                                 setComboTimeOption(opt.id);
+                                 form.setValue("comboTimeOption", opt.id);
+                                 setTimeout(() => {
+                                    paxSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                 }, 150);
+                               }}
+                               className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${comboTimeOption === opt.id ? "border-blue-600 bg-blue-50/50 shadow-sm" : "border-slate-100 bg-white hover:border-blue-200"}`}
+                            >
+                               {comboTimeOption === opt.id && (
+                                  <div className="absolute top-1/2 -translate-y-1/2 right-4 text-blue-600">
+                                    <Check size={20} strokeWidth={3} />
+                                  </div>
+                               )}
+                               <p className="font-bold text-slate-800">{opt.label}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+
                     {/* 2. Pax Selection */}
-                    {selectedTour && (
+                    {(selectedTour !== 'combo_marine' || (selectedTour === 'combo_marine' && comboTimeOption)) && (
                       <section ref={paxSectionRef} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
                           <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">2</span>
@@ -1346,6 +1482,105 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                               {form.formState.errors.bookerPhone && <p className="text-red-500 text-xs mt-1 font-bold">{form.formState.errors.bookerPhone.message}</p>}
                             </div>
                           </div>
+                        </div>
+                      </section>
+                    )}
+
+                    {/* 5. Secondary Tour Date & Pickup (Combo only) */}
+                    {selectedTour === 'combo_marine' && selectedDate && comboOption && (
+                      <section className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+                        <h2 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-900">
+                          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">5</span>
+                          {lang === 'en' ? 'Second Activity Booking Info' : '패러세일링/제트스키 예약 정보'}
+                        </h2>
+
+                        <div className="space-y-6">
+                           <div>
+                             <label className="block text-sm font-bold text-slate-700 mb-2">{lang === 'en' ? 'Select Date (Excluding Weekends/Holidays)' : '이용 날짜 선택 (주말 및 공휴일 불가)'}</label>
+                             <div className="flex justify-center border-2 border-slate-100 rounded-2xl p-4 bg-slate-50/50 shadow-inner">
+                               <DayPicker
+                                 mode="single"
+                                 selected={secondaryDate}
+                                 onMonthChange={setSecondaryCurrentMonth}
+                                 onSelect={(date) => {
+                                   setSecondaryDate(date);
+                                   if (date) {
+                                     form.setValue("secondaryDate", date, { shouldValidate: true });
+                                   }
+                                 }}
+                                 disabled={(date) => {
+                                   if (date < new Date(new Date().setHours(0, 0, 0, 0))) return true;
+                                   const day = date.getDay();
+                                   if (day === 0 || day === 6) return true; // Disable weekends
+                                   
+                                   const dateStr = format(date, 'yyyy-MM-dd');
+                                   const isBlocked = blockedDates.some(bd =>
+                                     bd.date === dateStr && (bd.tour_id === 'all' || bd.tour_id === 'combo_marine')
+                                   );
+                                   if (isBlocked) return true;
+
+                                   return false;
+                                 }}
+                                 className="bg-white p-2 sm:p-4 rounded-xl shadow-sm"
+                                 classNames={{
+                                   today: "font-black text-blue-600 bg-blue-50 rounded-lg",
+                                   selected: "bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-md",
+                                 }}
+                               />
+                             </div>
+                           </div>
+
+                           <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-4 mt-6">
+                                <div>
+                                    <label className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                                        <MapPin size={16} className="text-blue-500" /> {lang === 'en' ? 'Pickup Hotel/Location' : '픽업 받을 호텔/장소 입력'}
+                                    </label>
+                                    {isLoaded ? (
+                                    <Autocomplete
+                                        onLoad={onSecondaryLoad}
+                                        onPlaceChanged={onSecondaryPlaceChanged}
+                                    >
+                                        <input
+                                        type="text"
+                                        {...form.register("secondaryHotelName")}
+                                        placeholder={t('bookingModal.hotel_placeholder')}
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
+                                        />
+                                    </Autocomplete>
+                                    ) : (
+                                    <input
+                                        type="text"
+                                        {...form.register("secondaryHotelName")}
+                                        placeholder={t('bookingModal.hotel_placeholder')}
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
+                                    />
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">{t('bookingModal.pickup_label')}</label>
+                                    <select
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white cursor-pointer font-medium"
+                                    value={secondaryClosestPickup?.location?.id || ""}
+                                    onChange={(e) => {
+                                        const selectedLoc = pickupLocations.find(loc => loc.id === e.target.value);
+                                        if (selectedLoc) {
+                                          setSecondaryClosestPickup({
+                                              location: selectedLoc,
+                                              minutes: 0
+                                          });
+                                        }
+                                    }}
+                                    >
+                                    <option value="" disabled>{t('bookingModal.pickup_placeholder')}</option>
+                                    {pickupLocations.map(loc => (
+                                        <option key={loc.id} value={loc.id}>
+                                        {getPickupDisplayNameByLang(loc.name, lang)}
+                                        </option>
+                                    ))}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                       </section>
                     )}

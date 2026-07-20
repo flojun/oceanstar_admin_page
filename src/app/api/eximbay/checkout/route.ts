@@ -55,7 +55,15 @@ export async function POST(req: Request) {
         let calculatedTotalPrice = 0;
         let currency = isEn ? 'USD' : 'KRW';
 
-        if (tourSetting.is_flat_rate && tourSetting.tour_id === 'private') {
+        if (tourSetting.tour_id === 'combo_marine') {
+            const comboPrice = body.comboOption === '3' ? 310 : 210;
+            if (isEn) {
+                calculatedTotalPrice = (body.adultCount * comboPrice) + (body.childCount * comboPrice);
+            } else {
+                const exchangeRate = tourSetting.adult_price_usd ? (tourSetting.adult_price_krw / tourSetting.adult_price_usd) : 1350;
+                calculatedTotalPrice = Math.floor(((body.adultCount * comboPrice) + (body.childCount * comboPrice)) * exchangeRate);
+            }
+        } else if (tourSetting.is_flat_rate && tourSetting.tour_id === 'private') {
             // 프라이빗 차터 계단식 요금 (동적 환율 적용)
             let usdPrice = 0;
             if (totalCount <= 4) usdPrice = 1800;
@@ -90,28 +98,47 @@ export async function POST(req: Request) {
         for (let attempt = 0; attempt < 3; attempt++) {
             const noteText = `(성${body.adultCount}/아${body.childCount}) (예약번호 ${order_id}) ${isEn ? '[USD결제]' : ''}`;
 
+            let insertRows = [];
+            const baseRow = {
+                order_id: order_id,
+                source: isEn ? '웹사이트(EN)' : '웹사이트',
+                name: body.bookerName,
+                contact: body.bookerPhone,
+                tour_date: body.tourDate,
+                option: optionLabel,
+                pax: paxLabel,
+                note: noteText,
+                pickup_location: pickupLabel,
+                status: '결제대기',
+                total_price: calculatedTotalPrice,
+                booker_email: body.bookerEmail,
+                adult_count: body.adultCount,
+                child_count: body.childCount,
+            };
+
+            if (body.selectedTour === 'combo_marine' && body.comboOption) {
+                const comboSuffix = body.comboOption === '1' ? '패러' : body.comboOption === '2' ? '제트' : '패러및제트';
+                const timeOptionLabel = body.comboTimeOption === 'morning1' ? '1부' : body.comboTimeOption === 'morning2' ? '2부' : '거북이 스노클링';
+                insertRows.push({
+                    ...baseRow,
+                    option: timeOptionLabel,
+                    note: `${noteText} [거북이+${comboSuffix} 콤보]`
+                });
+                insertRows.push({
+                    ...baseRow,
+                    tour_date: body.secondaryDate,
+                    option: comboSuffix,
+                    pickup_location: body.secondaryPickupLocationName || pickupLabel,
+                    note: `${noteText} [거북이+${comboSuffix} 콤보]`
+                });
+            } else {
+                insertRows.push(baseRow);
+            }
+
             const { data, error } = await supabaseServer
                 .from('reservations')
-                .insert([
-                    {
-                        order_id: order_id,
-                        source: isEn ? '웹사이트(EN)' : '웹사이트',
-                        name: body.bookerName,
-                        contact: body.bookerPhone,
-                        tour_date: body.tourDate,
-                        option: optionLabel,
-                        pax: paxLabel,
-                        note: noteText,
-                        pickup_location: pickupLabel,
-                        status: '결제대기',
-                        total_price: calculatedTotalPrice,
-                        booker_email: body.bookerEmail,
-                        adult_count: body.adultCount,
-                        child_count: body.childCount,
-                    }
-                ])
-                .select()
-                .single();
+                .insert(insertRows)
+                .select();
 
             if (error) {
                 // 23505 = unique_violation (order_id 충돌)

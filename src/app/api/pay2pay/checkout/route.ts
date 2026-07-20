@@ -102,30 +102,49 @@ export async function POST(req: Request) {
         for (let attempt = 0; attempt < 3; attempt++) {
             const noteText = `(성${body.adultCount}/아${body.childCount}) (예약번호 ${order_id}) ${isEn ? '[USD결제]' : '[KRW결제]'} (Pay2Pay)`;
 
+            let insertRows = [];
+            const baseRow = {
+                order_id: order_id,
+                source: isEn ? '웹사이트(EN)' : '웹사이트',
+                name: body.bookerName,
+                contact: body.bookerPhone,
+                tour_date: body.tourDate,
+                option: optionLabel,
+                pax: paxLabel,
+                note: noteText,
+                pickup_location: pickupLabel,
+                status: '결제대기',
+                total_price: calculatedTotalPrice,
+                booker_email: body.bookerEmail,
+                adult_count: body.adultCount,
+                child_count: body.childCount,
+                currency: currency,
+                receipt_date: getHawaiiDateStrServer(),
+            };
+
+            if (body.selectedTour === 'combo_marine' && body.comboOption) {
+                const comboSuffix = body.comboOption === '1' ? '패러' : body.comboOption === '2' ? '제트' : '패러및제트';
+                const timeOptionLabel = body.comboTimeOption === 'morning1' ? '1부' : body.comboTimeOption === 'morning2' ? '2부' : '거북이 스노클링';
+                insertRows.push({
+                    ...baseRow,
+                    option: timeOptionLabel,
+                    note: `${noteText} [거북이+${comboSuffix} 콤보]`
+                });
+                insertRows.push({
+                    ...baseRow,
+                    tour_date: body.secondaryDate,
+                    option: comboSuffix,
+                    pickup_location: body.secondaryPickupLocationName || pickupLabel,
+                    note: `${noteText} [거북이+${comboSuffix} 콤보]`
+                });
+            } else {
+                insertRows.push(baseRow);
+            }
+
             const { data, error } = await supabaseServer
                 .from('reservations')
-                .insert([
-                    {
-                        order_id: order_id,
-                        source: isEn ? '웹사이트(EN)' : '웹사이트',
-                        name: body.bookerName,
-                        contact: body.bookerPhone,
-                        tour_date: body.tourDate,
-                        option: optionLabel,
-                        pax: paxLabel,
-                        note: noteText,
-                        pickup_location: pickupLabel,
-                        status: '결제대기',
-                        total_price: calculatedTotalPrice,
-                        booker_email: body.bookerEmail,
-                        adult_count: body.adultCount,
-                        child_count: body.childCount,
-                        currency: currency,
-                        receipt_date: getHawaiiDateStrServer(),
-                    }
-                ])
-                .select()
-                .single();
+                .insert(insertRows)
+                .select();
 
             if (error) {
                 if (error.code === '23505') {

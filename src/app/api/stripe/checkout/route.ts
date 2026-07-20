@@ -71,7 +71,10 @@ export async function POST(req: Request) {
         // 3. Calculate USD Price
         let usdPrice = 0;
 
-        if (tourSetting.is_flat_rate && tourSetting.tour_id === 'private') {
+        if (tourSetting.tour_id === 'combo_marine') {
+            const comboPrice = body.comboOption === '3' ? 310 : 210;
+            usdPrice = (body.adultCount * comboPrice) + (body.childCount * comboPrice);
+        } else if (tourSetting.is_flat_rate && tourSetting.tour_id === 'private') {
             if (totalCount <= 4) usdPrice = 1800;
             else if (totalCount <= 10) usdPrice = 2200;
             else if (totalCount <= 20) usdPrice = 2800;
@@ -148,6 +151,11 @@ export async function POST(req: Request) {
                 child_count: body.childCount.toString(),
                 currency: 'USD',
                 receipt_date: getHawaiiDateStrServer(),
+                // Combo specific metadata
+                combo_option: body.comboOption || '',
+                combo_time_option: body.comboTimeOption || '',
+                secondary_date: body.secondaryDate || '',
+                secondary_pickup: body.secondaryPickupLocationName || ''
             },
             success_url: `${origin}/${isEn ? 'en/' : ''}booking/payment-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/${isEn ? 'en/' : ''}booking/payment-cancel?order_id=${order_id}`,

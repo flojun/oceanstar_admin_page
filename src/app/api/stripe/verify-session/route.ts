@@ -42,28 +42,48 @@ export async function POST(req: Request) {
 
         // 3. 결제가 성공적으로 완료된 경우 DB에 저장 (없을 경우에만)
         if (session.payment_status === 'paid' && !existingData) {
+            let insertRows = [];
+            const baseRow = {
+                order_id: order_id,
+                source: metadata.source,
+                name: metadata.name,
+                contact: metadata.contact,
+                tour_date: metadata.tour_date,
+                option: metadata.option,
+                pax: metadata.pax,
+                note: metadata.note,
+                pickup_location: metadata.pickup_location,
+                status: '예약확정', // 결제가 완료되었으므로 바로 예약확정 처리
+                total_price: Number(metadata.total_price),
+                booker_email: metadata.booker_email,
+                adult_count: Number(metadata.adult_count),
+                child_count: Number(metadata.child_count),
+                currency: metadata.currency,
+                receipt_date: metadata.receipt_date,
+            };
+
+            if (metadata.combo_option) {
+                const comboSuffix = metadata.combo_option === '1' ? '패러' : metadata.combo_option === '2' ? '제트' : '패러및제트';
+                const timeOptionLabel = metadata.combo_time_option === 'morning1' ? '1부' : metadata.combo_time_option === 'morning2' ? '2부' : '거북이 스노클링';
+                insertRows.push({
+                    ...baseRow,
+                    option: timeOptionLabel,
+                    note: `${metadata.note} [거북이+${comboSuffix} 콤보]`,
+                });
+                insertRows.push({
+                    ...baseRow,
+                    tour_date: metadata.secondary_date,
+                    option: comboSuffix,
+                    pickup_location: metadata.secondary_pickup || metadata.pickup_location,
+                    note: `${metadata.note} [거북이+${comboSuffix} 콤보]`,
+                });
+            } else {
+                insertRows.push(baseRow);
+            }
+
             const { data: insertedData, error: insertError } = await supabaseServer
                 .from('reservations')
-                .insert([
-                    {
-                        order_id: order_id,
-                        source: metadata.source,
-                        name: metadata.name,
-                        contact: metadata.contact,
-                        tour_date: metadata.tour_date,
-                        option: metadata.option,
-                        pax: metadata.pax,
-                        note: metadata.note,
-                        pickup_location: metadata.pickup_location,
-                        status: '예약확정', // 결제가 완료되었으므로 바로 예약확정 처리
-                        total_price: Number(metadata.total_price),
-                        booker_email: metadata.booker_email,
-                        adult_count: Number(metadata.adult_count),
-                        child_count: Number(metadata.child_count),
-                        currency: metadata.currency,
-                        receipt_date: metadata.receipt_date,
-                    }
-                ])
+                .insert(insertRows)
                 .select();
 
             if (insertError) {
