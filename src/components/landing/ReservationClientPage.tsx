@@ -1057,6 +1057,9 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                      <p><span className="text-slate-400 font-medium">{t('footer.biz_phone')}</span> 8083081792</p>
                  </div>
              </div>
+             <div className="mt-8 pt-4 border-t border-slate-800/50 text-center">
+                 <p className="text-slate-500 text-xs">© 2026 Ocean Star. All Rights Reserved.</p>
+             </div>
           </div>
         </section>
 
