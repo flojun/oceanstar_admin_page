@@ -44,7 +44,7 @@ export default function CurrencySelectModal({
   }[lang];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="flex justify-between items-center p-5 border-b border-gray-100">
           <h3 className="text-xl font-bold text-gray-800">{t.title}</h3>

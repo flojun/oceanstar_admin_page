@@ -98,6 +98,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
 
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [availabilities, setAvailabilities] = useState<Record<string, { booked: number, remaining: number, isAvailable: boolean }>>({});
   const [maxCapacity, setMaxCapacity] = useState(45);
@@ -392,6 +393,33 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
      totalPrice = (adultCount * (currentAdultPrice || 0)) + (childCount * (currentChildPrice || 0));
   }
 
+  const handleNextStep = async () => {
+    let isValid = false;
+    if (currentStep === 1) {
+      if (!selectedTour) {
+        alert(lang === 'en' ? 'Please select a tour.' : '투어를 선택해주세요.');
+        return;
+      }
+      if (selectedTour === 'combo_marine') {
+        if (!comboOption) { alert(lang === 'en' ? 'Please select a combo option.' : '콤보 세부 옵션을 선택해주세요.'); return; }
+        if (!comboTimeOption) { alert(lang === 'en' ? 'Please select a time.' : '거북이 스노클링 시간을 선택해주세요.'); return; }
+      }
+      isValid = true;
+    } else if (currentStep === 2) {
+      isValid = await form.trigger(["adultCount", "childCount", "tourDate"]);
+      if (!selectedDate) {
+        alert(lang === 'en' ? 'Please select a date.' : '날짜를 선택해주세요.');
+        isValid = false;
+      }
+    } else if (currentStep === 3) {
+      isValid = await form.trigger(["hotelName", "bookerName", "bookerEmail", "bookerPhone"]);
+    }
+    
+    if (isValid) setCurrentStep(prev => prev + 1);
+  };
+
+  const handlePrevStep = () => setCurrentStep(prev => prev - 1);
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!selectedTour) {
       alert(t('bookingModal.alert_selectTour'));
@@ -482,7 +510,12 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-white text-slate-800 font-sans selection:bg-blue-200 selection:text-blue-900">
+    <div className="fixed inset-0 flex flex-col text-slate-800 font-sans selection:bg-sky-200 selection:text-sky-900">
+      {/* Global Background Image */}
+      <div className="absolute inset-0 -z-50 bg-sky-50">
+        <Image src="/images/turtle_bg_lineart.png" alt="Background" fill className="object-cover object-center opacity-50" unoptimized={true} />
+        <div className="absolute inset-0 bg-white/40 z-10 pointer-events-none"></div>
+      </div>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -504,7 +537,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         }}
       />
       <VideoPopupModal lang={lang} />
-      <header className={`w-full z-40 transition-all duration-300 bg-white/80 backdrop-blur-md shrink-0 ${isScrolled ? 'shadow-sm border-b border-slate-200' : 'border-b border-transparent'}`}>
+      <header className={`w-full z-40 transition-all duration-300 bg-white/40 backdrop-blur-xl shrink-0 border-b ${isScrolled ? 'border-white/50 shadow-sm' : 'border-transparent'}`}>
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5 sm:py-4 flex items-center justify-between relative">
           <div className="flex items-center shrink-0 cursor-pointer" onClick={() => scrollToSection('home')}>
             <img src="/logo.png" alt="OceanStar Logo" className="h-14 sm:h-16 w-auto object-contain" />
@@ -566,43 +599,39 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         )}
       </header>
 
-      <main ref={mainRef} className="w-full flex-1 overflow-y-auto pb-0 bg-white">
+      <main ref={mainRef} className="w-full flex-1 overflow-y-auto pb-0 bg-transparent">
         {/* === 1. Hero Section === */}
         <section id="home" className="relative w-full min-h-[100svh] sm:min-h-[85vh] lg:min-h-[800px] flex items-center justify-center overflow-hidden">
-          {/* Background Overlay */}
-          <div className="absolute inset-0 bg-blue-900/30 z-10 mix-blend-multiply"></div>
-          
-          {/* Background Image */}
-          <div className="absolute inset-0 bg-blue-500">
-             <Image src={imageVersions['main_photo'] ? `${PUBLIC_URL_BASE}/main_photo.jpg?v=${imageVersions['main_photo']}` : "/turtle-hero.jpg"} alt="하와이 거북이 스노클링 오션스타" fill className="object-cover object-center" priority unoptimized={!!imageVersions['main_photo']} />
-          </div>
+          {/* Background Overlay Removed for Seamless Global Background */}
           
           {/* Content Wrapper */}
-          <div className="relative z-20 w-full max-w-6xl mx-auto px-4 pt-16 flex flex-col items-center justify-center mt-10">
+          <div className="relative z-20 w-full max-w-4xl mx-auto px-4 flex flex-col items-center justify-center">
              
-             <h1 className="text-center animate-fade-in-up animation-delay-100 drop-shadow-2xl mb-6">
-                {lang === 'ko' ? (
-                  <>
-                    <span className="block font-medium text-white/95 text-[1.4rem] sm:text-3xl md:text-4xl mb-2 sm:mb-3 tracking-tight">{t('hero.title1')}</span>
-                    <span className="block font-black text-white text-[2.8rem] sm:text-5xl md:text-6xl lg:text-7xl tracking-tight leading-tight">{t('hero.title2')}</span>
-                  </>
-                ) : (
-                  <span className={`font-extrabold text-white leading-tight drop-shadow-2xl text-3xl break-words sm:text-4xl md:text-5xl lg:text-6xl`}>
-                    {t('hero.title1')}{t('hero.title1') ? <br/> : null}{t('hero.title2')}{t('hero.title3')}
-                  </span>
-                )}
-             </h1>
+             <div className="bg-white/30 backdrop-blur-md border border-white/50 p-8 sm:p-16 rounded-[3rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.05)] flex flex-col items-center animate-fade-in-up">
+                 <h1 className="text-center drop-shadow-md mb-6">
+                    {lang === 'ko' ? (
+                      <>
+                        <span className="block font-medium text-slate-800 text-[1.4rem] sm:text-3xl md:text-4xl mb-2 sm:mb-3 tracking-tight">{t('hero.title1')}</span>
+                        <span className="block font-black text-sky-600 text-[2.8rem] sm:text-5xl md:text-6xl lg:text-7xl tracking-tight leading-tight">{t('hero.title2')}</span>
+                      </>
+                    ) : (
+                      <span className={`font-extrabold text-sky-600 leading-tight drop-shadow-md text-3xl break-words sm:text-4xl md:text-5xl lg:text-6xl`}>
+                        {t('hero.title1')}{t('hero.title1') ? <br/> : null}{t('hero.title2')}{t('hero.title3')}
+                      </span>
+                    )}
+                 </h1>
 
-             <p className={`text-sm sm:text-base md:text-lg lg:text-xl text-white/90 font-medium mb-10 text-center drop-shadow-lg leading-relaxed animate-fade-in-up animation-delay-200 max-w-[95%] sm:max-w-2xl ${lang === 'en' ? 'break-words' : 'break-keep'}`}>
-                {t('hero.desc1')}
-             </p>
+                 <p className={`text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 font-medium mb-10 text-center leading-relaxed max-w-[95%] sm:max-w-2xl ${lang === 'en' ? 'break-words' : 'break-keep'}`}>
+                    {t('hero.desc1')}
+                 </p>
 
-             <button 
-                onClick={() => setIsBookingOpen(true)}
-                className="bg-transparent border-2 border-white hover:bg-white/20 text-white transition-all px-10 py-3.5 sm:px-14 sm:py-4 rounded font-bold tracking-tight text-[15px] sm:text-lg animate-fade-in-up animation-delay-300 mb-16 sm:mb-24"
-                style={{ fontFamily: "'Inter', 'Pretendard', -apple-system, sans-serif" }}>
-                {t('hero.mainBtn')}
-             </button>
+                 <button 
+                    onClick={() => setIsBookingOpen(true)}
+                    className="bg-sky-500/90 backdrop-blur-sm border border-sky-400 hover:bg-sky-600 hover:scale-105 text-white shadow-xl shadow-sky-500/30 transition-all px-10 py-3.5 sm:px-14 sm:py-4 rounded-full font-bold tracking-tight text-[15px] sm:text-lg mb-4"
+                    style={{ fontFamily: "'Inter', 'Pretendard', -apple-system, sans-serif" }}>
+                    {t('hero.mainBtn')}
+                 </button>
+             </div>
           </div>
         </section>
 
@@ -610,31 +639,31 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         
           {/* === 2. Bento Box Introduction === */}
           <section className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-12 sm:mb-20">
-            <div className="bg-white rounded-md p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 lg:p-7 shadow-xl border border-white/50 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <Award className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc1_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc1_text')}</p>
             </div>
             
-            <div className="bg-white rounded-md p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 lg:p-7 shadow-xl border border-white/50 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <Star className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc2_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc2_text')}</p>
             </div>
             
-            <div className="bg-white rounded-md p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 lg:p-7 shadow-xl border border-white/50 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <ShieldCheck className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc3_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc3_text')}</p>
             </div>
             
-            <div className="bg-white rounded-md p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 lg:p-7 shadow-xl border border-white/50 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <Anchor className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc4_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc4_text')}</p>
             </div>
             
-            <div className="bg-white rounded-md p-6 lg:p-7 shadow-xl border border-slate-100 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
+            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 lg:p-7 shadow-xl border border-white/50 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
               <UsersRound className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
               <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc5_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc5_text')}</p>
@@ -731,7 +760,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                       })();
 
                     return (
-                      <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900 text-white' : 'bg-white border border-slate-100'} flex-col rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 flex group relative`}>
+                      <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900/80 backdrop-blur-xl text-white border border-white/20' : 'bg-white/50 backdrop-blur-xl border border-white/50'} flex-col rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 flex group relative`}>
                         {theme.specialLabel && (
                           <div className={`absolute top-0 right-10 ${theme.specialLabelBg || 'bg-gradient-to-r from-orange-400 to-red-500'} text-white text-xs font-bold px-4 py-1.5 rounded-b-xl z-10 shadow-md`}>
                             {theme.specialLabel}
@@ -850,21 +879,21 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
             {isLoadingReviews ? (
                 <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-blue-500 w-10 h-10" /></div>
             ) : reviews.length === 0 ? (
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-12 text-center text-slate-500 font-medium">
+                <div className="bg-white/50 backdrop-blur-xl rounded-3xl shadow-sm border border-white/50 p-12 text-center text-slate-500 font-medium">
                     {t('review.empty')}
                 </div>
             ) : (
                 <div className="relative group">
                     <button 
                         onClick={() => scrollReviews('left')} 
-                        className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 sm:-ml-6 z-10 bg-white shadow-lg border border-slate-200 text-slate-800 w-12 h-12 rounded-full hover:bg-slate-50 hover:scale-105 transition-all hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100 disabled:opacity-0"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 sm:-ml-6 z-10 bg-white/80 backdrop-blur-md shadow-lg border border-white/50 text-slate-800 w-12 h-12 rounded-full hover:bg-white hover:scale-105 transition-all hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100 disabled:opacity-0"
                         aria-label="이전 리뷰"
                     >
                         <ChevronLeft size={24} />
                     </button>
                     <button 
                         onClick={() => scrollReviews('right')} 
-                        className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 sm:-mr-6 z-10 bg-white shadow-lg border border-slate-200 text-slate-800 w-12 h-12 rounded-full hover:bg-slate-50 hover:scale-105 transition-all hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100 disabled:opacity-0"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 sm:-mr-6 z-10 bg-white/80 backdrop-blur-md shadow-lg border border-white/50 text-slate-800 w-12 h-12 rounded-full hover:bg-white hover:scale-105 transition-all hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100 disabled:opacity-0"
                         aria-label="다음 리뷰"
                     >
                         <ChevronRight size={24} />
@@ -878,7 +907,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             .hide-scroll::-webkit-scrollbar { display: none; }
                         `}} />
                         {reviews.map((review) => (
-                        <div key={review.id} className="bg-white rounded-3xl p-6 shadow-md border border-slate-100 flex flex-col h-full shrink-0 w-[85vw] sm:w-[320px] lg:w-[350px] snap-center transform hover:-translate-y-1 transition duration-300">
+                        <div key={review.id} className="bg-white/50 backdrop-blur-xl rounded-3xl p-6 shadow-md border border-white/50 flex flex-col h-full shrink-0 w-[85vw] sm:w-[320px] lg:w-[350px] snap-center transform hover:-translate-y-1 transition duration-300">
                             <div className="flex items-center gap-1 mb-3">
                                 {[...Array(5)].map((_, i) => (
                                     <Star key={i} size={16} className={i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-slate-200"} />
@@ -900,7 +929,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             {review.image_urls && review.image_urls.length > 0 && (
                                 <div className={`grid gap-2 mb-4 ${review.image_urls.length === 1 ? 'grid-cols-1' : review.image_urls.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
                                     {review.image_urls.slice(0, 5).map((url: string, index: number) => (
-                                        <div key={index} className="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-100 border border-slate-50 shadow-sm flex items-center justify-center group">
+                                        <div key={index} className="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-100/50 border border-white/50 shadow-sm flex items-center justify-center group">
                                             <Image 
                                               src={url} 
                                               alt={`스노클링 리뷰 이미지 ${index + 1}`} 
@@ -914,8 +943,8 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     ))}
                                 </div>
                             )}
-                            <div className="border-t border-slate-100 pt-4 flex items-center gap-3 mt-auto">
-                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                            <div className="border-t border-white/50 pt-4 flex items-center gap-3 mt-auto">
+                                <div className="w-8 h-8 rounded-full bg-blue-100/50 flex items-center justify-center text-blue-600 font-bold">
                                     <User size={16} />
                                 </div>
                                 <div>
@@ -930,10 +959,9 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
             )}
             
             {/* Google Reviews Banner */}
-            <div className="mt-12 bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-md transition-shadow">
+            <div className="mt-12 bg-white/50 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0">
-                        {/* Using a simple G text as placeholder for Google logo if SVG is unavailable */}
+                    <div className="w-16 h-16 bg-blue-50/50 rounded-2xl flex items-center justify-center shrink-0">
                         <span className="text-3xl font-black text-blue-600">G</span>
                     </div>
                     <div>
@@ -1075,8 +1103,8 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
       {/* 플로팅 예약 버튼 - main 바깥에 위치하여 iOS 스크롤 점프 방지 */}
       {!isBookingOpen && !isReviewOpen && (
-        <div className="w-full shrink-0 p-3 sm:p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex justify-center">
-          <div className="max-w-[1600px] w-full flex justify-between items-center gap-3 px-2 sm:px-4">
+        <div className="w-full shrink-0 pl-2 pr-[90px] py-3 sm:pl-4 sm:pr-[100px] sm:py-4 bg-white/40 backdrop-blur-xl border-t border-white/50 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex justify-center">
+          <div className="max-w-[1600px] w-full flex justify-between items-center gap-3">
             <div className="min-w-0 flex-1 pr-2">
               <p className="text-xs sm:text-sm text-slate-500 font-medium truncate">{t('floater.subtitle')}</p>
               <p className="text-sm sm:text-xl font-extrabold text-blue-600 leading-tight line-clamp-2">{t('floater.title')}</p>
@@ -1093,25 +1121,34 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
       {/* === 예약 플로팅 모달 (Booking Drawer/Modal) === */}
       {isBookingOpen && (
-          <div className="fixed inset-0 z-50 flex justify-end">
-            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setIsBookingOpen(false)}></div>
-            <div className="relative w-full max-w-[550px] h-full bg-slate-50 shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-300">
-              <div className="sticky top-0 bg-white/90 backdrop-blur-md px-6 py-4 border-b border-slate-200 flex justify-between items-center z-10 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-900">{t('bookingModal.title')}</h2>
-                <button onClick={() => setIsBookingOpen(false)} className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 transition-colors">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 pb-safe animate-in fade-in duration-300">
+            <div className="absolute inset-0 bg-sky-950/40 backdrop-blur-md transition-opacity" onClick={() => setIsBookingOpen(false)}></div>
+            <div className="relative w-full max-w-3xl max-h-[90vh] bg-white/70 backdrop-blur-2xl border border-white/60 shadow-2xl rounded-3xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
+              <div className="bg-white/40 backdrop-blur-md px-6 py-5 border-b border-white/50 flex justify-between items-center z-10 shrink-0">
+                <div className="flex flex-col">
+                  <h2 className="text-xl font-black text-sky-950">{t('bookingModal.title')}</h2>
+                  <div className="flex items-center gap-2 mt-2">
+                     {[1, 2, 3].map(step => (
+                        <div key={step} className={`w-12 h-1.5 rounded-full transition-all duration-300 ${currentStep >= step ? 'bg-sky-500' : 'bg-white/50'}`}></div>
+                     ))}
+                  </div>
+                </div>
+                <button type="button" onClick={() => setIsBookingOpen(false)} className="p-2 bg-white/50 hover:bg-white/80 rounded-full text-slate-600 transition-colors">
                   <X size={20} />
                 </button>
               </div>
 
-              <div className="p-6 pb-48">
-                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
-                  <div className="space-y-6">
-                    {/* 1. Tour Selection */}
-                    <section className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                      <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
-                        <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">1</span>
-                        {t('bookingModal.step1')}
-                      </h2>
+              <div className="p-6 pb-32 overflow-y-auto flex-1 custom-scrollbar">
+                <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit(onSubmit)(); }} className="flex flex-col h-full">
+                  
+                    {/* Step 1: Tour Selection */}
+                    {currentStep === 1 && (
+                      <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
+                        <section className="bg-white/60 p-6 rounded-3xl shadow-sm border border-white/50">
+                          <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-sky-950">
+                            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-sky-500 text-white text-sm font-black">1</span>
+                            {t('bookingModal.step1')}
+                          </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {tourSettings.filter((t: any) => t.is_active !== false).sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)).map((tour: any) => (
                           <div
@@ -1127,8 +1164,8 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                               }, 150);
                             }}
                             className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all ${selectedTour === tour.tour_id
-                              ? "border-blue-600 bg-blue-50/50 shadow-md scale-[1.02] transform"
-                              : "border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50"
+                              ? "border-sky-500 bg-white/70 backdrop-blur-md shadow-md scale-[1.02] transform"
+                              : "border-white/50 bg-white/40 backdrop-blur-sm hover:border-sky-300 hover:bg-white/60"
                               }`}
                           >
                             {selectedTour === tour.tour_id && (
@@ -1189,7 +1226,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                  setComboOption(opt.id);
                                  form.setValue("comboOption", opt.id);
                                }}
-                               className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${comboOption === opt.id ? "border-blue-600 bg-blue-50/50 shadow-sm" : "border-slate-100 bg-white hover:border-blue-200"}`}
+                               className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${comboOption === opt.id ? "border-sky-500 bg-white/70 backdrop-blur-md shadow-sm" : "border-white/50 bg-white/40 backdrop-blur-sm hover:border-sky-300"}`}
                             >
                                {comboOption === opt.id && (
                                   <div className="absolute top-1/2 -translate-y-1/2 right-4 text-blue-600">
@@ -1224,7 +1261,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     paxSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                  }, 150);
                                }}
-                               className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${comboTimeOption === opt.id ? "border-blue-600 bg-blue-50/50 shadow-sm" : "border-slate-100 bg-white hover:border-blue-200"}`}
+                               className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${comboTimeOption === opt.id ? "border-sky-500 bg-white/70 backdrop-blur-md shadow-sm" : "border-white/50 bg-white/40 backdrop-blur-sm hover:border-sky-300"}`}
                             >
                                {comboTimeOption === opt.id && (
                                   <div className="absolute top-1/2 -translate-y-1/2 right-4 text-blue-600">
@@ -1237,12 +1274,18 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         </div>
                       </section>
                     )}
-
-                    {/* 2. Pax Selection */}
-                    {(selectedTour !== 'combo_marine' || (selectedTour === 'combo_marine' && comboTimeOption)) && (
-                      <section ref={paxSectionRef} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
-                          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">2</span>
+                      </div>
+                    )}
+                    
+                    {/* Step 2: Pax Selection */}
+                    {currentStep === 2 && (
+                      <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
+                      
+                      {/* 2. Pax Selection */}
+                      {(selectedTour !== 'combo_marine' || (selectedTour === 'combo_marine' && comboTimeOption)) && (
+                        <section ref={paxSectionRef} className="bg-white/60 p-6 rounded-3xl shadow-sm border border-white/50">
+                        <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-sky-950">
+                          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-sky-500 text-white text-sm font-black">2</span>
                           {t('bookingModal.step2')}
                         </h2>
                         {isFlatRate && selectedTour === 'private' && (
@@ -1380,14 +1423,20 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         </p>
                       </section>
                     )}
+                      </div>
+                    )}
 
 
 
-                    {/* 4. Hotel Pick-up & Info */}
-                    {selectedTour && selectedDate && (
-                      <section ref={infoSectionRef} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
-                        <h2 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-900">
-                          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">4</span>
+                    {/* Step 3: Hotel Pick-up & Info */}
+                    {currentStep === 3 && (
+                      <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
+                      
+                      {/* 4. Hotel Pick-up & Info */}
+                      {selectedTour && selectedDate && (
+                        <section ref={infoSectionRef} className="bg-white/60 p-6 rounded-3xl shadow-sm border border-white/50">
+                        <h2 className="text-lg font-bold mb-6 flex items-center gap-2 text-sky-950">
+                          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-sky-500 text-white text-sm font-black">3</span>
                           {t('bookingModal.step4')}
                         </h2>
 
@@ -1591,40 +1640,42 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         </div>
                       </section>
                     )}
-                  </div>
-
-                  {/* Submit Float Info */}
-                  {selectedTour && selectedDate && (
-                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-[0_-20px_40px_rgba(0,0,0,0.1)] z-50 animate-in slide-in-from-bottom duration-300">
-                        <div className="max-w-[500px] mx-auto">
-                            <div className="flex justify-between items-end mb-4">
-                                <div className="flex flex-col">
-                                    <span className="text-slate-500 font-bold text-sm">{t('bookingModal.total_payment')} <span className="text-xs bg-slate-100 px-1.5 py-0.5 rounded ml-1 text-slate-600">{lang === 'en' ? t('bookingModal.usd_currency') : t('bookingModal.pay_currency')}</span></span>
-                                    <span className="text-xs text-slate-400 mt-1 font-medium bg-slate-100 px-2 py-1 rounded w-fit">
-                                      {(isFlatRate && selectedTour === 'private') 
-                                        ? (lang === 'en' ? `Private Trip (Total ${totalSelectedPax})` : `프라이빗 차터 (총 ${totalSelectedPax}명)`) 
-                                        : (lang === 'en' ? `Adult ${adultCount} / Child ${childCount}` : `성인 ${adultCount}명 / 아동 ${childCount}명`)}
-                                    </span>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-3xl font-black text-blue-600 tracking-tight">{lang === 'en' ? '$' : '₩'}{totalPrice.toLocaleString()}</span>
-                                </div>
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-black text-lg py-4 rounded-2xl transition-all active:scale-95 flex justify-center items-center gap-2 shadow-xl shadow-blue-600/30"
-                            >
-                                {isSubmitting ? <Loader2 className="animate-spin" size={24} /> : <CreditCard size={24} />}
-                                {isSubmitting ? t('bookingModal.waiting') : t('bookingModal.checkout_btn')}
-                            </button>
-                        </div>
-                    </div>
-                  )}
-                  
-                  {/* Space for the floated button overlay above */}
+                      </div>
+                    )}
                 </form>
+              </div>
+
+              {/* Wizard Navigation Footer */}
+              <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/40 backdrop-blur-xl border-t border-white/50 shadow-[0_-20px_40px_rgba(0,0,0,0.1)] z-[110] animate-in slide-in-from-bottom duration-300">
+                  <div className="max-w-[700px] mx-auto flex justify-between items-center">
+                    {currentStep > 1 ? (
+                       <button type="button" onClick={handlePrevStep} className="px-6 py-3 rounded-xl font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">
+                          {lang === 'en' ? 'Back' : '이전'}
+                       </button>
+                    ) : <div></div>}
+                    
+                    {currentStep < 3 ? (
+                       <button type="button" onClick={handleNextStep} className="px-8 py-3 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all active:scale-95">
+                          {lang === 'en' ? 'Next' : '다음 단계로'}
+                       </button>
+                    ) : (
+                       <div className="flex items-center gap-4">
+                          <div className="flex flex-col text-right hidden sm:flex">
+                             <span className="text-xs font-bold text-slate-500">{t('bookingModal.total_payment')}</span>
+                             <span className="text-xl font-black text-blue-600">{lang === 'en' ? '$' : '₩'}{totalPrice.toLocaleString()}</span>
+                          </div>
+                          <button
+                              type="button"
+                              onClick={() => form.handleSubmit(onSubmit)()}
+                              disabled={isSubmitting}
+                              className="px-6 py-3 sm:px-8 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 flex justify-center items-center gap-2"
+                          >
+                              {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <CreditCard size={20} />}
+                              {isSubmitting ? t('bookingModal.waiting') : t('bookingModal.checkout_btn')}
+                          </button>
+                       </div>
+                    )}
+                  </div>
               </div>
             </div>
           </div>
