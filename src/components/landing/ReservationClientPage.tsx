@@ -1138,11 +1138,6 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
               <div className="bg-white/30 backdrop-blur-md px-6 py-5 border-b border-white/60 shadow-sm flex justify-between items-center z-10 shrink-0">
                 <div className="flex flex-col">
                   <h2 className="text-xl font-black text-sky-900 drop-shadow-sm">{t('bookingModal.title')}</h2>
-                  <div className="flex items-center gap-2 mt-2">
-                     {[1, 2, 3].map(step => (
-                        <div key={step} className={`w-12 h-1.5 rounded-full transition-all duration-300 ${currentStep >= step ? 'bg-sky-500' : 'bg-white/50'}`}></div>
-                     ))}
-                  </div>
                 </div>
                 <button type="button" onClick={() => setIsBookingOpen(false)} className="p-2 bg-white/50 hover:bg-white/80 rounded-full text-slate-600 transition-colors">
                   <X size={20} />
@@ -1152,9 +1147,8 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
               <div className="p-6 pb-32 overflow-y-auto flex-1 custom-scrollbar">
                 <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit(onSubmit)(); }} className="flex flex-col h-full">
                   
-                    {/* Step 1: Tour Selection */}
-                    {currentStep === 1 && (
-                      <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
+                    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
+                      {/* Step 1: Tour Selection */}
                         <section className="bg-white/30 backdrop-blur-[20px] p-6 rounded-[2rem] shadow-[inset_0_0_15px_rgba(255,255,255,0.6)] border border-white/60">
                           <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-sky-900 drop-shadow-sm">
                             <span className="flex items-center justify-center w-7 h-7 rounded-full bg-sky-600 text-white text-sm font-black shadow-md">1</span>
@@ -1285,13 +1279,6 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         </div>
                       </section>
                     )}
-                      </div>
-                    )}
-                    
-                    {/* Step 2: Pax Selection */}
-                    {currentStep === 2 && (
-                      <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
-                      
                       {/* 2. Pax Selection */}
                       {(selectedTour !== 'combo_marine' || (selectedTour === 'combo_marine' && comboTimeOption)) && (
                         <section ref={paxSectionRef} className="bg-white/60 p-6 rounded-3xl shadow-sm border border-white/50">
@@ -1434,15 +1421,6 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         </p>
                       </section>
                     )}
-                      </div>
-                    )}
-
-
-
-                    {/* Step 3: Hotel Pick-up & Info */}
-                    {currentStep === 3 && (
-                      <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
-                      
                       {/* 4. Hotel Pick-up & Info */}
                       {selectedTour && selectedDate && (
                         <section ref={infoSectionRef} className="bg-white/60 p-6 rounded-3xl shadow-sm border border-white/50">
@@ -1652,40 +1630,28 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                       </section>
                     )}
                       </div>
-                    )}
                 </form>
               </div>
 
               {/* Wizard Navigation Footer */}
               <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/40 backdrop-blur-xl border-t border-white/50 shadow-[0_-20px_40px_rgba(0,0,0,0.1)] z-[110] animate-in slide-in-from-bottom duration-300">
                   <div className="max-w-[700px] mx-auto flex justify-between items-center">
-                    {currentStep > 1 ? (
-                       <button type="button" onClick={handlePrevStep} className="px-6 py-3 rounded-xl font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">
-                          {lang === 'en' ? 'Back' : '이전'}
-                       </button>
-                    ) : <div></div>}
-                    
-                    {currentStep < 3 ? (
-                       <button type="button" onClick={handleNextStep} className="px-8 py-3 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all active:scale-95">
-                          {lang === 'en' ? 'Next' : '다음 단계로'}
-                       </button>
-                    ) : (
-                       <div className="flex items-center gap-4">
-                          <div className="flex flex-col text-right hidden sm:flex">
-                             <span className="text-xs font-bold text-slate-500">{t('bookingModal.total_payment')}</span>
-                             <span className="text-xl font-black text-blue-600">{lang === 'en' ? '$' : '₩'}{totalPrice.toLocaleString()}</span>
-                          </div>
-                          <button
-                              type="button"
-                              onClick={() => form.handleSubmit(onSubmit)()}
-                              disabled={isSubmitting}
-                              className="px-6 py-3 sm:px-8 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 flex justify-center items-center gap-2"
-                          >
-                              {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <CreditCard size={20} />}
-                              {isSubmitting ? t('bookingModal.waiting') : t('bookingModal.checkout_btn')}
-                          </button>
-                       </div>
-                    )}
+                    <div></div>
+                    <div className="flex items-center gap-4">
+                        <div className="flex flex-col text-right hidden sm:flex">
+                            <span className="text-xs font-bold text-slate-500">{t('bookingModal.total_payment')}</span>
+                            <span className="text-xl font-black text-blue-600">{lang === 'en' ? '$' : '₩'}{totalPrice.toLocaleString()}</span>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => form.handleSubmit(onSubmit)()}
+                            disabled={isSubmitting}
+                            className="px-6 py-3 sm:px-8 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 flex justify-center items-center gap-2"
+                        >
+                            {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <CreditCard size={20} />}
+                            {isSubmitting ? t('bookingModal.waiting') : t('bookingModal.checkout_btn')}
+                        </button>
+                    </div>
                   </div>
               </div>
             </div>
