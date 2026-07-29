@@ -29,13 +29,13 @@ export default function PickupGuide({ lang }: { lang: Language }) {
     if (isLoading || locations.length === 0) return null;
 
     return (
-        <section className="mb-20 bg-white p-6 sm:p-10 lg:p-12 rounded-3xl shadow-sm border border-slate-200 relative overflow-hidden">
+        <section className="mb-20 bg-gradient-to-br from-white/40 to-white/10 backdrop-blur-[40px] p-6 sm:p-10 lg:p-12 rounded-[2.5rem] shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 relative overflow-hidden">
             {/* Header Section */}
             <div className="text-center mb-16 relative z-10">
-                <div className="inline-flex items-center justify-center bg-blue-100 text-blue-600 p-4 rounded-2xl mb-5 shadow-inner">
+                <div className="inline-flex items-center justify-center bg-white/40 text-sky-700 border border-white/60 p-4 rounded-2xl mb-5 shadow-[inset_0_0_10px_rgba(255,255,255,0.8)] backdrop-blur-sm">
                     <Bus size={32} />
                 </div>
-                <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mb-4 tracking-tight">
+                <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mb-4 tracking-tight drop-shadow-sm">
                     {lang === 'en' ? 'Official Pickup Route' : '오션스타 공식 픽업 노선도'}
                 </h2>
                 <p className="text-base text-slate-500 font-medium">
@@ -46,7 +46,7 @@ export default function PickupGuide({ lang }: { lang: Language }) {
                     )}
                 </p>
                 <div className="mt-6 flex justify-center">
-                    <p className="text-xs sm:text-sm text-slate-600 bg-slate-50 font-bold px-4 py-2 border border-slate-200 rounded-full">
+                    <p className="text-xs sm:text-sm text-slate-600 bg-white/40 font-bold px-4 py-2 border border-white/60 rounded-full shadow-sm backdrop-blur-sm">
                         {lang === 'en' ? '※ Actual times may vary by ~5 mins due to traffic.' : '※ 실제 도로 사정에 따라 5분 정도 차이가 발생할 수 있습니다.'}
                     </p>
                 </div>
@@ -55,7 +55,7 @@ export default function PickupGuide({ lang }: { lang: Language }) {
             {/* Vertical Timeline Section */}
             <div className="max-w-3xl mx-auto relative z-10 mt-8 mb-4">
                 {/* 1. The Vertical Background Line */}
-                <div className="absolute left-[20px] md:left-1/2 top-4 bottom-4 w-1 bg-slate-100 md:-translate-x-1/2 rounded-full"></div>
+                <div className="absolute left-[20px] md:left-1/2 top-4 bottom-4 w-1 bg-white/50 backdrop-blur-sm border-x border-white/30 md:-translate-x-1/2 rounded-full"></div>
 
                 <div className="pt-2 pb-2">
                     {locations.map((loc, index) => {
@@ -68,12 +68,12 @@ export default function PickupGuide({ lang }: { lang: Language }) {
                                 className={`relative flex flex-col md:flex-row items-start md:items-center ${isEven ? 'md:justify-start' : 'md:justify-end'} ${index > 0 ? 'mt-4 md:-mt-10' : ''}`}
                             >
                                 {/* Timeline Dot */}
-                                <div className="absolute left-[20px] md:left-1/2 w-6 h-6 rounded-full border-[3px] border-white bg-blue-600 shadow-sm transform -translate-x-1/2 top-1/2 -translate-y-1/2 md:translate-y-0 md:top-auto flex items-center justify-center text-white text-[10px] sm:text-xs font-black z-20">
+                                <div className="absolute left-[20px] md:left-1/2 w-6 h-6 rounded-full border-[3px] border-white/80 bg-sky-500 shadow-md backdrop-blur-sm transform -translate-x-1/2 top-1/2 -translate-y-1/2 md:translate-y-0 md:top-auto flex items-center justify-center text-white text-[10px] sm:text-xs font-black z-20">
                                     {index + 1}
                                 </div>
 
                                 {/* Content Box */}
-                                <div className={`ml-12 md:ml-0 w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] bg-white border border-slate-200 p-3 sm:p-4 rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-lg hover:border-blue-400 transition-all duration-300 group`}>
+                                <div className={`ml-12 md:ml-0 w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] bg-white/30 backdrop-blur-md border border-white/60 p-3 sm:p-4 rounded-[1.5rem] shadow-[inset_0_0_10px_rgba(255,255,255,0.5),0_5px_15px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-white/80 hover:-translate-y-1 transition-all duration-300 group`}>
                                     <div className="flex justify-between items-center mb-3">
                                         <h3 className="text-base sm:text-lg font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">
                                             {getPickupDisplayNameByLang(loc.name, lang)}
@@ -83,7 +83,7 @@ export default function PickupGuide({ lang }: { lang: Language }) {
                                                 href={`https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`} 
                                                 target="_blank" 
                                                 rel="noreferrer"
-                                                className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-900 hover:text-white transition-all shrink-0 ml-2 border border-slate-100"
+                                                className="w-8 h-8 rounded-full bg-white/50 backdrop-blur-sm flex items-center justify-center text-slate-500 hover:bg-sky-600 hover:text-white transition-all shrink-0 ml-2 border border-white/80 shadow-sm"
                                                 title="구글 지도 열기"
                                             >
                                                 <Navigation size={14} className="transform hover:rotate-12 transition-transform" />
@@ -93,15 +93,15 @@ export default function PickupGuide({ lang }: { lang: Language }) {
                                     
                                     <div className="flex items-center gap-2">
                                         {/* Time 1 */}
-                                        <div className="flex-1 bg-slate-50 rounded-lg py-1.5 px-2 border border-slate-100 flex items-center justify-between group-hover:bg-blue-50/50 transition-colors">
-                                            <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1"><Clock size={10} className="text-blue-500" /> {lang === 'en' ? 'AM1' : '1부'}</span>
-                                            <span className="text-sm font-black text-blue-700">
+                                        <div className="flex-1 bg-white/40 backdrop-blur-sm rounded-xl py-1.5 px-2 border border-white/60 shadow-inner flex items-center justify-between group-hover:bg-white/60 transition-colors">
+                                            <span className="text-[10px] font-bold text-slate-500 flex items-center gap-1"><Clock size={10} className="text-sky-600" /> {lang === 'en' ? 'AM1' : '1부'}</span>
+                                            <span className="text-sm font-black text-sky-800">
                                                 {loc.time_1 ? loc.time_1.substring(0, 5) : '-'}
                                             </span>
                                         </div>
 
                                         {/* Time 2 */}
-                                        <div className="flex-1 bg-slate-50 rounded-lg py-1.5 px-2 border border-slate-100 flex items-center justify-between group-hover:bg-rose-50/50 transition-colors">
+                                        <div className="flex-1 bg-white/40 backdrop-blur-sm rounded-xl py-1.5 px-2 border border-white/60 shadow-inner flex items-center justify-between group-hover:bg-white/60 transition-colors">
                                             <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1"><Clock size={10} className="text-rose-500" /> {lang === 'en' ? 'AM2' : '2부'}</span>
                                             <span className="text-sm font-black text-rose-600">
                                                 {loc.time_2 ? loc.time_2.substring(0, 5) : '-'}
