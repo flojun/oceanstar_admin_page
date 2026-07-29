@@ -251,11 +251,11 @@ export default function FAQSection({ lang }: { lang: Language }) {
         </p>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+      <div className="bg-gradient-to-br from-white/40 to-white/10 backdrop-blur-[40px] rounded-[2.5rem] shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 overflow-hidden flex flex-col md:flex-row min-h-[500px]">
         
         {/* Sidebar / Tabs */}
-        <div className="w-full md:w-1/3 bg-slate-50 p-4 sm:p-6 border-b md:border-b-0 md:border-r border-slate-200">
-          <h3 className="font-bold text-slate-800 mb-4 px-2 tracking-tight">{lang === 'en' ? 'Categories' : '카테고리 분류'}</h3>
+        <div className="w-full md:w-1/3 bg-white/10 backdrop-blur-md p-4 sm:p-6 border-b md:border-b-0 md:border-r border-white/30">
+          <h3 className="font-bold text-slate-800 mb-4 px-2 tracking-tight drop-shadow-sm">{lang === 'en' ? 'Categories' : '카테고리 분류'}</h3>
           <div className="flex flex-row md:flex-col gap-2 overflow-x-auto pb-3 md:pb-0 mobile-scrollbar">
             {activeFaqData.map((category, index) => (
               <button
@@ -264,15 +264,15 @@ export default function FAQSection({ lang }: { lang: Language }) {
                   setActiveTab(index);
                   setOpenItems({}); // Reset open items when switching tabs
                 }}
-                className={`whitespace-nowrap px-4 py-3 rounded-xl text-left font-bold transition-all ${
+                className={`whitespace-nowrap px-4 py-3 rounded-xl text-left font-bold transition-all duration-300 ${
                   activeTab === index 
-                    ? 'bg-blue-600 text-white shadow-md transform scale-[1.02]' 
-                    : 'text-slate-600 hover:bg-slate-200/50 hover:text-slate-900'
+                    ? 'bg-white/40 border border-white/80 text-sky-700 shadow-md transform scale-[1.02]' 
+                    : 'text-slate-600 hover:bg-white/30 hover:text-slate-900 border border-transparent'
                 }`}
               >
                 {category.category}
-                <span className={`ml-2 text-xs py-0.5 px-2 rounded-full ${
-                  activeTab === index ? 'bg-white/20' : 'bg-slate-200 text-slate-500'
+                <span className={`ml-2 text-xs py-0.5 px-2 rounded-full shadow-inner ${
+                  activeTab === index ? 'bg-white/80 text-sky-800' : 'bg-white/40 text-slate-500 border border-white/30'
                 }`}>
                   {category.items.length}
                 </span>
@@ -282,22 +282,22 @@ export default function FAQSection({ lang }: { lang: Language }) {
         </div>
 
         {/* Content Area */}
-        <div className="w-full md:w-2/3 p-4 sm:p-8 bg-white">
-          <h3 className="text-2xl font-extrabold text-slate-800 mb-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="w-full md:w-2/3 p-4 sm:p-8 bg-white/20 backdrop-blur-lg">
+          <h3 className="text-2xl font-extrabold text-slate-800 mb-6 pb-4 border-b border-white/40 flex items-center justify-between drop-shadow-sm">
             {activeFaqData[activeTab].category}
-            <span className="text-sm font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full">{lang === 'en' ? 'Total' : '총'} {activeFaqData[activeTab].items.length}{lang === 'en' ? '' : '개'}</span>
+            <span className="text-sm font-medium text-slate-600 bg-white/40 border border-white/60 shadow-sm px-3 py-1 rounded-full">{lang === 'en' ? 'Total' : '총'} {activeFaqData[activeTab].items.length}{lang === 'en' ? '' : '개'}</span>
           </h3>
           
           <div className="space-y-4">
             {activeFaqData[activeTab].items.map((item, index) => {
               const isOpen = !!openItems[index];
               return (
-                <div 
-                  key={index} 
-                  className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
-                    isOpen ? 'border-blue-400 shadow-md bg-blue-50/10' : 'border-slate-200 hover:border-blue-200'
-                  }`}
-                >
+                  <div 
+                    key={index} 
+                    className={`border rounded-2xl overflow-hidden transition-all duration-300 backdrop-blur-md ${
+                      isOpen ? 'border-white/80 shadow-[0_8px_30px_rgba(0,0,0,0.05)] bg-white/50' : 'border-white/40 bg-white/20 hover:border-white/60 hover:bg-white/30'
+                    }`}
+                  >
                   <button
                     onClick={() => toggleItem(index)}
                     className="w-full flex items-center justify-between p-5 sm:p-6 text-left focus:outline-none"
@@ -314,9 +314,9 @@ export default function FAQSection({ lang }: { lang: Language }) {
                       isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
                     }`}
                   >
-                    <div className="p-5 sm:p-6 pt-0 text-slate-600 leading-relaxed border-t border-slate-100/50 bg-slate-50/50 flex gap-4">
-                       <span className="font-black text-xl leading-none mt-0.5 text-blue-500 opacity-60">A.</span>
-                       <p className="flex-1 whitespace-pre-wrap text-[15px]">{item.a}</p>
+                    <div className="p-5 sm:p-6 pt-0 text-slate-700 leading-relaxed border-t border-white/40 bg-white/30 flex gap-4">
+                       <span className="font-black text-xl leading-none mt-0.5 text-sky-600 opacity-80 drop-shadow-sm">A.</span>
+                       <p className="flex-1 whitespace-pre-wrap text-[15px] font-medium">{item.a}</p>
                     </div>
                   </div>
                 </div>

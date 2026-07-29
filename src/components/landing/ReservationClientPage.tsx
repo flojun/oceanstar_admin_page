@@ -537,10 +537,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         }}
       />
       <VideoPopupModal lang={lang} />
-      <header className={`w-full z-40 transition-all duration-300 bg-white/40 backdrop-blur-xl shrink-0 border-b ${isScrolled ? 'border-white/50 shadow-sm' : 'border-transparent'}`}>
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5 sm:py-4 flex items-center justify-between relative">
+      <header className="w-full z-40 shrink-0 pt-4 px-4 sm:px-8 mb-[-80px] sm:mb-[-100px] pointer-events-none relative">
+        <div className={`pointer-events-auto max-w-6xl mx-auto px-6 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between relative transition-all duration-500 rounded-[2.5rem] ${isScrolled ? 'bg-white/30 backdrop-blur-[40px] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] border border-white/50' : 'bg-white/10 backdrop-blur-md border border-white/20 shadow-lg'}`}>
           <div className="flex items-center shrink-0 cursor-pointer" onClick={() => scrollToSection('home')}>
-            <img src="/logo.png" alt="OceanStar Logo" className="h-14 sm:h-16 w-auto object-contain" />
+            <img src="/logo.png" alt="OceanStar Logo" className="h-10 sm:h-12 w-auto object-contain" />
           </div>
 
           <nav className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-6 xl:gap-10 font-bold text-[15px] text-slate-700">
@@ -605,29 +605,29 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
           {/* Background Overlay Removed for Seamless Global Background */}
           
           {/* Content Wrapper */}
-          <div className="relative z-20 w-full max-w-4xl mx-auto px-4 flex flex-col items-center justify-center">
+          <div className="relative z-20 w-full max-w-4xl mx-auto px-4 flex flex-col items-center justify-center pt-20">
              
-             <div className="bg-white/30 backdrop-blur-md border border-white/50 p-8 sm:p-16 rounded-[3rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.05)] flex flex-col items-center animate-fade-in-up">
-                 <h1 className="text-center drop-shadow-md mb-6">
+             <div className="bg-gradient-to-b from-white/40 to-white/10 backdrop-blur-[40px] border border-white/60 p-8 sm:p-20 rounded-[3rem] shadow-[inset_0_0_40px_rgba(255,255,255,0.8),0_15px_35px_rgba(0,0,0,0.08)] flex flex-col items-center animate-fade-in-up">
+                 <h1 className="text-center drop-shadow-sm mb-6">
                     {lang === 'ko' ? (
                       <>
-                        <span className="block font-medium text-slate-800 text-[1.4rem] sm:text-3xl md:text-4xl mb-2 sm:mb-3 tracking-tight">{t('hero.title1')}</span>
-                        <span className="block font-black text-sky-600 text-[2.8rem] sm:text-5xl md:text-6xl lg:text-7xl tracking-tight leading-tight">{t('hero.title2')}</span>
+                        <span className="block font-semibold text-slate-700 text-[1.4rem] sm:text-3xl md:text-4xl mb-2 sm:mb-4 tracking-tight">{t('hero.title1')}</span>
+                        <span className="block font-black text-sky-600 text-[2.8rem] sm:text-5xl md:text-6xl lg:text-7xl tracking-tighter leading-tight drop-shadow-[0_2px_10px_rgba(255,255,255,0.8)]">{t('hero.title2')}</span>
                       </>
                     ) : (
-                      <span className={`font-extrabold text-sky-600 leading-tight drop-shadow-md text-3xl break-words sm:text-4xl md:text-5xl lg:text-6xl`}>
+                      <span className={`font-black text-sky-600 leading-tight drop-shadow-sm text-3xl break-words sm:text-4xl md:text-5xl lg:text-6xl`}>
                         {t('hero.title1')}{t('hero.title1') ? <br/> : null}{t('hero.title2')}{t('hero.title3')}
                       </span>
                     )}
                  </h1>
 
-                 <p className={`text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 font-medium mb-10 text-center leading-relaxed max-w-[95%] sm:max-w-2xl ${lang === 'en' ? 'break-words' : 'break-keep'}`}>
+                 <p className={`text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 font-medium mb-12 text-center leading-relaxed max-w-[95%] sm:max-w-2xl ${lang === 'en' ? 'break-words' : 'break-keep'}`}>
                     {t('hero.desc1')}
                  </p>
 
                  <button 
                     onClick={() => setIsBookingOpen(true)}
-                    className="bg-sky-500/90 backdrop-blur-sm border border-sky-400 hover:bg-sky-600 hover:scale-105 text-white shadow-xl shadow-sky-500/30 transition-all px-10 py-3.5 sm:px-14 sm:py-4 rounded-full font-bold tracking-tight text-[15px] sm:text-lg mb-4"
+                    className="bg-white/50 backdrop-blur-md border border-white/80 hover:bg-white/70 hover:scale-105 text-sky-700 shadow-[inset_0_0_20px_rgba(255,255,255,1),0_10px_30px_rgba(0,0,0,0.05)] transition-all px-12 py-4 sm:px-16 sm:py-5 rounded-full font-black tracking-tight text-[16px] sm:text-xl mb-2"
                     style={{ fontFamily: "'Inter', 'Pretendard', -apple-system, sans-serif" }}>
                     {t('hero.mainBtn')}
                  </button>
@@ -638,34 +638,44 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 mt-16 sm:mt-24 relative z-30">
         
           {/* === 2. Bento Box Introduction === */}
-          <section className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-12 sm:mb-20">
-            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 lg:p-7 shadow-xl border border-white/50 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
-              <Award className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
-              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc1_title')}</h3>
+          <section className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4 sm:gap-6 mb-16 sm:mb-24">
+            <div className="md:col-span-3 lg:col-span-4 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
+              <div className="w-16 h-16 bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-white/80 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                <Award className="w-8 h-8 text-sky-600" strokeWidth={2.5} />
+              </div>
+              <h3 className="text-xl lg:text-2xl font-black text-slate-800 mb-3 break-keep">{t('bento.desc1_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc1_text')}</p>
             </div>
             
-            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 lg:p-7 shadow-xl border border-white/50 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
-              <Star className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
-              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc2_title')}</h3>
+            <div className="md:col-span-3 lg:col-span-4 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
+              <div className="w-16 h-16 bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-white/80 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500">
+                <Star className="w-8 h-8 text-sky-600" strokeWidth={2.5} />
+              </div>
+              <h3 className="text-xl lg:text-2xl font-black text-slate-800 mb-3 break-keep">{t('bento.desc2_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc2_text')}</p>
             </div>
             
-            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 lg:p-7 shadow-xl border border-white/50 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
-              <ShieldCheck className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
-              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc3_title')}</h3>
+            <div className="md:col-span-6 lg:col-span-4 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
+              <div className="w-16 h-16 bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-white/80 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                <ShieldCheck className="w-8 h-8 text-sky-600" strokeWidth={2.5} />
+              </div>
+              <h3 className="text-xl lg:text-2xl font-black text-slate-800 mb-3 break-keep">{t('bento.desc3_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc3_text')}</p>
             </div>
             
-            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 lg:p-7 shadow-xl border border-white/50 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
-              <Anchor className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
-              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc4_title')}</h3>
+            <div className="md:col-span-3 lg:col-span-6 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
+              <div className="w-16 h-16 bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-white/80 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500">
+                <Anchor className="w-8 h-8 text-sky-600" strokeWidth={2.5} />
+              </div>
+              <h3 className="text-xl lg:text-2xl font-black text-slate-800 mb-3 break-keep">{t('bento.desc4_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc4_text')}</p>
             </div>
             
-            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 lg:p-7 shadow-xl border border-white/50 flex flex-col justify-start transform hover:-translate-y-1 transition duration-500">
-              <UsersRound className="w-10 h-10 text-blue-600 mb-4 shrink-0" />
-              <h3 className="text-lg lg:text-xl font-bold text-slate-800 mb-2 break-keep">{t('bento.desc5_title')}</h3>
+            <div className="md:col-span-3 lg:col-span-6 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
+              <div className="w-16 h-16 bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-white/80 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                <UsersRound className="w-8 h-8 text-sky-600" strokeWidth={2.5} />
+              </div>
+              <h3 className="text-xl lg:text-2xl font-black text-slate-800 mb-3 break-keep">{t('bento.desc5_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc5_text')}</p>
             </div>
           </section>
@@ -760,21 +770,22 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                       })();
 
                     return (
-                      <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900/80 backdrop-blur-xl text-white border border-white/20' : 'bg-white/50 backdrop-blur-xl border border-white/50'} flex-col rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 flex group relative`}>
+                      <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900/80 backdrop-blur-[40px] text-white border border-white/20 shadow-[inset_0_0_20px_rgba(255,255,255,0.1),0_15px_35px_rgba(0,0,0,0.2)]' : 'bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] border border-white/60 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)]'} flex-col rounded-[2.5rem] overflow-hidden hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 hover:-translate-y-2 flex group relative`}>
                         {theme.specialLabel && (
                           <div className={`absolute top-0 right-10 ${theme.specialLabelBg || 'bg-gradient-to-r from-orange-400 to-red-500'} text-white text-xs font-bold px-4 py-1.5 rounded-b-xl z-10 shadow-md`}>
                             {theme.specialLabel}
                           </div>
                         )}
-                        <div className={`h-48 ${theme.bg} relative overflow-hidden shrink-0`}>
+                        <div className={`h-56 relative overflow-hidden shrink-0`}>
                           <ImageCarousel images={tourImages} interval={4000} />
+                          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/40 to-transparent z-10 pointer-events-none"></div>
                         </div>
-                        <div className={`p-6 sm:p-8 flex-1 flex flex-col`}>
-                          <h3 className={`text-2xl font-bold text-center ${theme.isDark ? 'text-white' : 'text-slate-800'} mb-3`}>{tour.name}</h3>
+                        <div className={`p-6 sm:p-8 flex-1 flex flex-col relative z-20`}>
+                          <h3 className={`text-2xl font-bold text-center ${theme.isDark ? 'text-white drop-shadow-md' : 'text-slate-800 drop-shadow-sm'} mb-3`}>{tour.name}</h3>
                           <p className={`${theme.isDark ? 'text-slate-300' : 'text-slate-600'} mb-6 text-sm leading-relaxed flex-1`}>
                             {lang === 'en' ? (tour.description_en || "Enjoy the best snorkeling tour in Waikiki with OceanStar. Guaranteed safe and fun time with professional guides.") : (tour.description || "와이키키 최고의 투어를 오션스타와 함께하세요. 전문가의 안내로 안전하고 즐거운 시간을 보장합니다.")}
                           </p>
-                          <div className={`${theme.isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-100'} p-4 rounded-2xl mb-6 border`}>
+                          <div className={`${theme.isDark ? 'bg-white/10 border-white/20' : 'bg-white/40 border-white/60 backdrop-blur-md shadow-[inset_0_0_10px_rgba(255,255,255,0.5)]'} p-4 rounded-2xl mb-6 border`}>
                             <ul className={`space-y-2 text-sm ${theme.isDark ? 'text-slate-300' : 'text-slate-700'} font-medium`}>
                                 <li className="flex items-start gap-2">
                                   <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
@@ -879,7 +890,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
             {isLoadingReviews ? (
                 <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-blue-500 w-10 h-10" /></div>
             ) : reviews.length === 0 ? (
-                <div className="bg-white/50 backdrop-blur-xl rounded-3xl shadow-sm border border-white/50 p-12 text-center text-slate-500 font-medium">
+                <div className="bg-white/20 backdrop-blur-[40px] shadow-inner rounded-[2rem] border border-white/50 p-12 text-center text-slate-500 font-medium">
                     {t('review.empty')}
                 </div>
             ) : (
@@ -907,7 +918,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             .hide-scroll::-webkit-scrollbar { display: none; }
                         `}} />
                         {reviews.map((review) => (
-                        <div key={review.id} className="bg-white/50 backdrop-blur-xl rounded-3xl p-6 shadow-md border border-white/50 flex flex-col h-full shrink-0 w-[85vw] sm:w-[320px] lg:w-[350px] snap-center transform hover:-translate-y-1 transition duration-300">
+                        <div key={review.id} className="bg-gradient-to-br from-white/40 to-white/10 backdrop-blur-[40px] rounded-[2rem] p-6 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_10px_20px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col h-full shrink-0 w-[85vw] sm:w-[320px] lg:w-[350px] snap-center transform hover:-translate-y-2 transition-all duration-500 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.8),0_20px_40px_rgba(0,0,0,0.1)]">
                             <div className="flex items-center gap-1 mb-3">
                                 {[...Array(5)].map((_, i) => (
                                     <Star key={i} size={16} className={i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-slate-200"} />
@@ -959,7 +970,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
             )}
             
             {/* Google Reviews Banner */}
-            <div className="mt-12 bg-white/50 backdrop-blur-xl rounded-3xl p-8 border border-white/50 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-md transition-shadow">
+            <div className="mt-12 bg-gradient-to-r from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 border border-white/60 shadow-[inset_0_0_20px_rgba(255,255,255,0.5),0_15px_35px_rgba(0,0,0,0.05)] flex flex-col md:flex-row items-center justify-between gap-6 hover:-translate-y-1 transition-all duration-500 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.8),0_20px_40px_rgba(0,0,0,0.1)]">
                 <div className="flex items-center gap-6">
                     <div className="w-16 h-16 bg-blue-50/50 rounded-2xl flex items-center justify-center shrink-0">
                         <span className="text-3xl font-black text-blue-600">G</span>
@@ -1016,15 +1027,15 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         </div>
 
         {/* === 6. Business Hours and Company Info (Footer) === */}
-        <section id="about" className="bg-slate-900 text-slate-300 py-16 mt-20 relative z-30 pb-32">
+        <section id="about" className="bg-gradient-to-t from-sky-900/40 to-transparent backdrop-blur-[40px] text-slate-800 py-16 mt-20 relative z-30 pb-32 border-t border-white/60 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
           <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
                  <div>
-                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Mail size={20} className="text-blue-400" /> {t('footer.hours_title')}</h3>
-                    <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 max-w-sm flex flex-col gap-4">
-                        <div className="text-slate-300 font-medium flex items-center gap-3">
-                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0">{t('footer.hours_badge')}</span>
-                            <span className="text-sm">{t('footer.hours_text')}</span>
+                    <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2"><Mail size={20} className="text-sky-600 drop-shadow-sm" /> {t('footer.hours_title')}</h3>
+                    <div className="bg-white/40 p-5 rounded-2xl border border-white/60 max-w-sm flex flex-col gap-4 shadow-inner backdrop-blur-md hover:bg-white/50 transition-colors">
+                        <div className="text-slate-700 font-medium flex items-center gap-3">
+                            <span className="bg-white/60 border border-white/80 shadow-sm px-2 py-1.5 rounded text-xs shrink-0">{t('footer.hours_badge')}</span>
+                            <span className="text-sm font-semibold">{t('footer.hours_text')}</span>
                         </div>
                         <div className="flex items-center gap-6 pt-5 mt-2">
                             <a 
@@ -1050,21 +1061,21 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                  </div>
                  
                  <div>
-                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><MapPin size={20} className="text-blue-400" /> {t('footer.address_title')}</h3>
-                    <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 max-w-sm flex flex-col gap-3">
-                        <div className="text-slate-300 font-medium flex items-center gap-3">
-                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0">{t('footer.email_badge')}</span>
-                            <span className="text-sm">hioceanstar@gmail.com</span>
+                    <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2"><MapPin size={20} className="text-sky-600 drop-shadow-sm" /> {t('footer.address_title')}</h3>
+                    <div className="bg-white/40 p-5 rounded-2xl border border-white/60 max-w-sm flex flex-col gap-3 shadow-inner backdrop-blur-md hover:bg-white/50 transition-colors">
+                        <div className="text-slate-700 font-medium flex items-center gap-3">
+                            <span className="bg-white/60 border border-white/80 shadow-sm px-2 py-1.5 rounded text-xs shrink-0">{t('footer.email_badge')}</span>
+                            <span className="text-sm font-semibold">hioceanstar@gmail.com</span>
                         </div>
-                        <div className="text-slate-300 font-medium flex items-start gap-3">
-                            <span className="bg-slate-700 px-2 py-1.5 rounded text-xs shrink-0 mt-0.5">{t('footer.addr_badge')}</span>
+                        <div className="text-slate-700 font-medium flex items-start gap-3">
+                            <span className="bg-white/60 border border-white/80 shadow-sm px-2 py-1.5 rounded text-xs shrink-0 mt-0.5">{t('footer.addr_badge')}</span>
                             <div className="flex flex-col gap-1.5 pt-0.5">
-                                <span className="text-sm leading-relaxed">1125 Kewalo Basin Harbor, Gate D #110, Honolulu, HI 96814</span>
+                                <span className="text-sm leading-relaxed font-semibold">1125 Kewalo Basin Harbor, Gate D #110, Honolulu, HI 96814</span>
                                 <a 
                                     href="https://www.google.com/maps/place/%EC%98%A4%EC%85%98%EC%8A%A4%ED%83%80/@21.2909527,-157.8596751,17.95z/data=!4m6!3m5!1s0x7c006e0714500001:0x42c44e799ee07eac!8m2!3d21.2913542!4d-157.8586971!16s%2Fg%2F11t2p_627w?authuser=0&entry=ttu&g_ep=EgoyMDI2MDMyMy4xIKXMDSoASAFQAw%3D%3D" 
                                     target="_blank" 
                                     rel="noreferrer"
-                                    className="text-xs text-blue-400 hover:text-blue-300 underline underline-offset-2 flex items-center gap-1 w-fit transition-colors mt-0.5"
+                                    className="text-xs text-sky-700 hover:text-sky-800 underline underline-offset-2 flex items-center gap-1 w-fit transition-colors mt-0.5"
                                 >
                                     {t('footer.google_map')} <ChevronRight size={12} />
                                 </a>
@@ -1074,19 +1085,19 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                  </div>
              </div>
 
-             <div className="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-left">
+             <div className="border-t border-white/40 mt-12 pt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-left">
                  <div>
-                     <h4 className="text-white font-bold mb-2">{t('footer.company_name')}</h4>
-                     <p className="text-slate-500 text-sm whitespace-pre-wrap">{t('footer.company_desc')}</p>
+                     <h4 className="text-slate-800 font-black mb-2">{t('footer.company_name')}</h4>
+                     <p className="text-slate-600 text-sm whitespace-pre-wrap font-medium">{t('footer.company_desc')}</p>
                  </div>
-                 <div className="text-slate-500 text-sm md:text-right space-y-1">
-                     <p><span className="text-slate-400 font-medium">{t('footer.biz_name')}</span> Oceanview Activity LLC</p>
-                     <p><span className="text-slate-400 font-medium">{t('footer.biz_addr')}</span> 615 PIKOI ST. STE 811</p>
-                     <p><span className="text-slate-400 font-medium">{t('footer.biz_phone')}</span> 8083081792</p>
+                 <div className="text-slate-600 text-sm md:text-right space-y-1 font-medium">
+                     <p><span className="text-slate-500 font-bold">{t('footer.biz_name')}</span> Oceanview Activity LLC</p>
+                     <p><span className="text-slate-500 font-bold">{t('footer.biz_addr')}</span> 615 PIKOI ST. STE 811</p>
+                     <p><span className="text-slate-500 font-bold">{t('footer.biz_phone')}</span> 8083081792</p>
                  </div>
              </div>
-             <div className="mt-8 pt-4 border-t border-slate-800/50 text-center">
-                 <p className="text-slate-500 text-xs">© 2026 Ocean Star. All Rights Reserved.</p>
+             <div className="mt-8 pt-4 border-t border-white/40 text-center">
+                 <p className="text-slate-500 font-medium text-xs">© 2026 Ocean Star. All Rights Reserved.</p>
              </div>
           </div>
         </section>
@@ -1122,11 +1133,11 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
       {/* === 예약 플로팅 모달 (Booking Drawer/Modal) === */}
       {isBookingOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 pb-safe animate-in fade-in duration-300">
-            <div className="absolute inset-0 bg-sky-950/40 backdrop-blur-md transition-opacity" onClick={() => setIsBookingOpen(false)}></div>
-            <div className="relative w-full max-w-3xl max-h-[90vh] bg-white/70 backdrop-blur-2xl border border-white/60 shadow-2xl rounded-3xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
-              <div className="bg-white/40 backdrop-blur-md px-6 py-5 border-b border-white/50 flex justify-between items-center z-10 shrink-0">
+            <div className="absolute inset-0 bg-white/20 backdrop-blur-sm transition-opacity" onClick={() => setIsBookingOpen(false)}></div>
+            <div className="relative w-full max-w-3xl max-h-[90vh] bg-gradient-to-br from-white/60 to-white/30 backdrop-blur-[60px] border border-white/70 shadow-[inset_0_0_30px_rgba(255,255,255,0.8),0_20px_60px_rgba(0,0,0,0.1)] rounded-[2.5rem] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
+              <div className="bg-white/30 backdrop-blur-md px-6 py-5 border-b border-white/60 shadow-sm flex justify-between items-center z-10 shrink-0">
                 <div className="flex flex-col">
-                  <h2 className="text-xl font-black text-sky-950">{t('bookingModal.title')}</h2>
+                  <h2 className="text-xl font-black text-sky-900 drop-shadow-sm">{t('bookingModal.title')}</h2>
                   <div className="flex items-center gap-2 mt-2">
                      {[1, 2, 3].map(step => (
                         <div key={step} className={`w-12 h-1.5 rounded-full transition-all duration-300 ${currentStep >= step ? 'bg-sky-500' : 'bg-white/50'}`}></div>
@@ -1144,9 +1155,9 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     {/* Step 1: Tour Selection */}
                     {currentStep === 1 && (
                       <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
-                        <section className="bg-white/60 p-6 rounded-3xl shadow-sm border border-white/50">
-                          <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-sky-950">
-                            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-sky-500 text-white text-sm font-black">1</span>
+                        <section className="bg-white/30 backdrop-blur-[20px] p-6 rounded-[2rem] shadow-[inset_0_0_15px_rgba(255,255,255,0.6)] border border-white/60">
+                          <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-sky-900 drop-shadow-sm">
+                            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-sky-600 text-white text-sm font-black shadow-md">1</span>
                             {t('bookingModal.step1')}
                           </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
