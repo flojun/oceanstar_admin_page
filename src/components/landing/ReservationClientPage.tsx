@@ -770,7 +770,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                       })();
 
                     return (
-                      <div key={tour.tour_id} className={`${theme.isDark ? 'bg-slate-900/80 backdrop-blur-[40px] text-white border border-white/20 shadow-[inset_0_0_20px_rgba(255,255,255,0.1),0_15px_35px_rgba(0,0,0,0.2)]' : 'bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] border border-white/60 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)]'} flex-col rounded-[2.5rem] overflow-hidden hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 hover:-translate-y-2 flex group relative`}>
+                      <div key={tour.tour_id} className={`${theme.isDark ? 'bg-gradient-to-br from-sky-900/60 to-indigo-900/60 backdrop-blur-[40px] text-white border border-white/40 shadow-[inset_0_0_30px_rgba(255,255,255,0.2),0_15px_35px_rgba(0,0,0,0.2)]' : 'bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] border border-white/60 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)]'} flex-col rounded-[2.5rem] overflow-hidden hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 flex group relative`}>
                         {theme.specialLabel && (
                           <div className={`absolute top-0 right-10 ${theme.specialLabelBg || 'bg-gradient-to-r from-orange-400 to-red-500'} text-white text-xs font-bold px-4 py-1.5 rounded-b-xl z-10 shadow-md`}>
                             {theme.specialLabel}
@@ -778,14 +778,14 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         )}
                         <div className={`h-56 relative overflow-hidden shrink-0`}>
                           <ImageCarousel images={tourImages} interval={4000} />
-                          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/40 to-transparent z-10 pointer-events-none"></div>
+                          <div className={`absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t ${theme.isDark ? 'from-indigo-900/60' : 'from-white/40'} to-transparent z-10 pointer-events-none`}></div>
                         </div>
                         <div className={`p-6 sm:p-8 flex-1 flex flex-col relative z-20`}>
                           <h3 className={`text-2xl font-bold text-center ${theme.isDark ? 'text-white drop-shadow-md' : 'text-slate-800 drop-shadow-sm'} mb-3`}>{tour.name}</h3>
                           <p className={`${theme.isDark ? 'text-slate-300' : 'text-slate-600'} mb-6 text-sm leading-relaxed flex-1`}>
                             {lang === 'en' ? (tour.description_en || "Enjoy the best snorkeling tour in Waikiki with OceanStar. Guaranteed safe and fun time with professional guides.") : (tour.description || "와이키키 최고의 투어를 오션스타와 함께하세요. 전문가의 안내로 안전하고 즐거운 시간을 보장합니다.")}
                           </p>
-                          <div className={`${theme.isDark ? 'bg-white/10 border-white/20' : 'bg-white/40 border-white/60 backdrop-blur-md shadow-[inset_0_0_10px_rgba(255,255,255,0.5)]'} p-4 rounded-2xl mb-6 border`}>
+                          <div className={`${theme.isDark ? 'bg-white/10 border-white/30 backdrop-blur-md shadow-[inset_0_0_15px_rgba(255,255,255,0.1)]' : 'bg-white/40 border-white/60 backdrop-blur-md shadow-[inset_0_0_10px_rgba(255,255,255,0.5)]'} p-4 rounded-2xl mb-6 border`}>
                             <ul className={`space-y-2 text-sm ${theme.isDark ? 'text-slate-300' : 'text-slate-700'} font-medium`}>
                                 <li className="flex items-start gap-2">
                                   <Check className={`${theme.isDark ? 'text-indigo-400' : 'text-emerald-500'} w-4 h-4 mt-0.5 shrink-0`} /> 
