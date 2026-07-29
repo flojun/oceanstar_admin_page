@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Bus, Clock, Navigation } from 'lucide-react';
+import { Bus, Clock, Navigation, ChevronDown } from 'lucide-react';
 import { getPickupDisplayNameByLang } from '@/constants/pickupLocations';
 import type { Language } from '@/lib/translations';
 
 export default function PickupGuide({ lang }: { lang: Language }) {
     const [locations, setLocations] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         fetch('/api/pickup')
@@ -31,29 +32,37 @@ export default function PickupGuide({ lang }: { lang: Language }) {
     return (
         <section className="mb-20 bg-gradient-to-br from-white/40 to-white/10 backdrop-blur-[40px] p-6 sm:p-10 lg:p-12 rounded-[2.5rem] shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 relative overflow-hidden">
             {/* Header Section */}
-            <div className="text-center mb-16 relative z-10">
-                <div className="inline-flex items-center justify-center bg-white/40 text-sky-700 border border-white/60 p-4 rounded-2xl mb-5 shadow-[inset_0_0_10px_rgba(255,255,255,0.8)] backdrop-blur-sm">
+            {/* Header Section */}
+            <div 
+                className={`text-center relative z-10 cursor-pointer group transition-all duration-300 ${isOpen ? 'mb-16' : 'mb-0'}`}
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <div className="inline-flex items-center justify-center bg-white/40 text-sky-700 border border-white/60 p-4 rounded-2xl mb-5 shadow-[inset_0_0_10px_rgba(255,255,255,0.8)] backdrop-blur-sm group-hover:bg-white/60 group-hover:scale-105 transition-all">
                     <Bus size={32} />
                 </div>
-                <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mb-4 tracking-tight drop-shadow-sm">
+                <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mb-4 tracking-tight drop-shadow-sm flex items-center justify-center gap-2">
                     {lang === 'en' ? 'Official Pickup Route' : '오션스타 공식 픽업 노선도'}
+                    <ChevronDown className={`w-6 h-6 sm:w-8 sm:h-8 text-sky-600 transition-transform duration-500 ${isOpen ? 'rotate-180' : ''}`} />
                 </h2>
-                <p className="text-base text-slate-500 font-medium">
+                <p className="text-base text-slate-500 font-medium group-hover:text-slate-700 transition-colors">
                     {lang === 'en' ? (
                         <>Enter your hotel address when booking to get the <br className="sm:hidden" /> closest pickup spot</>
                     ) : (
                         <>투어 예약시 호텔주소를 입력하시면<br className="sm:hidden" /> 가장 가까운 픽업 장소로 배정해드립니다</>
                     )}
                 </p>
-                <div className="mt-6 flex justify-center">
-                    <p className="text-xs sm:text-sm text-slate-600 bg-white/40 font-bold px-4 py-2 border border-white/60 rounded-full shadow-sm backdrop-blur-sm">
-                        {lang === 'en' ? '※ Actual times may vary by ~5 mins due to traffic.' : '※ 실제 도로 사정에 따라 5분 정도 차이가 발생할 수 있습니다.'}
-                    </p>
-                </div>
+                {isOpen && (
+                    <div className="mt-6 flex justify-center animate-in fade-in zoom-in duration-300">
+                        <p className="text-xs sm:text-sm text-slate-600 bg-white/40 font-bold px-4 py-2 border border-white/60 rounded-full shadow-sm backdrop-blur-sm">
+                            {lang === 'en' ? '※ Actual times may vary by ~5 mins due to traffic.' : '※ 실제 도로 사정에 따라 5분 정도 차이가 발생할 수 있습니다.'}
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* Vertical Timeline Section */}
-            <div className="max-w-3xl mx-auto relative z-10 mt-8 mb-4">
+            {isOpen && (
+            <div className="max-w-3xl mx-auto relative z-10 mt-8 mb-4 animate-in slide-in-from-top-8 fade-in duration-500">
                 {/* 1. The Vertical Background Line */}
                 <div className="absolute left-[20px] md:left-1/2 top-4 bottom-4 w-1 bg-white/50 backdrop-blur-sm border-x border-white/30 md:-translate-x-1/2 rounded-full"></div>
 
@@ -114,6 +123,7 @@ export default function PickupGuide({ lang }: { lang: Language }) {
                     })}
                 </div>
             </div>
+            )}
         </section>
     );
 }
