@@ -1,10 +1,11 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, Info, Utensils, Palmtree, MapPin, Fish, IceCream, Star, MessageSquare } from 'lucide-react';
+import { ChevronLeft, Info, Utensils, Palmtree, MapPin, Fish, IceCream, Star, MessageSquare, QrCode, X, Download } from 'lucide-react';
 
 export default function RestaurantsPage() {
+    const [isQrOpen, setIsQrOpen] = useState(false);
     return (
         <main className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-blue-200 relative overflow-hidden">
             {/* Background Image Setup (same as landing page) */}
@@ -30,7 +31,13 @@ export default function RestaurantsPage() {
                         <h1 className="text-xl sm:text-2xl font-black text-sky-900 drop-shadow-sm flex-1 text-center truncate px-4">
                             오션스타 하와이 맛집 소개🌴🤙🏻
                         </h1>
-                        <div className="w-10 sm:w-24"></div> {/* Spacer for alignment */}
+                        <button 
+                            onClick={() => setIsQrOpen(true)}
+                            className="bg-white/50 hover:bg-white/80 text-sky-700 border border-white/60 p-2.5 sm:px-4 rounded-full font-bold shadow-sm transition-all flex items-center gap-2"
+                        >
+                            <QrCode size={20} />
+                            <span className="hidden sm:inline">QR 보기</span>
+                        </button>
                     </div>
                 </header>
 
@@ -248,6 +255,50 @@ export default function RestaurantsPage() {
 
                 </div>
             </div>
+
+            {/* QR Code Modal */}
+            {isQrOpen && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+                    <div className="bg-white/80 backdrop-blur-xl border border-white/60 p-8 rounded-[2rem] shadow-2xl max-w-sm w-full relative animate-in zoom-in-95 duration-200">
+                        <button 
+                            onClick={() => setIsQrOpen(false)}
+                            className="absolute top-4 right-4 text-slate-500 hover:text-slate-800 bg-white/50 p-2 rounded-full transition-colors"
+                        >
+                            <X size={24} />
+                        </button>
+                        <h3 className="text-xl font-black text-sky-900 mb-6 text-center">맛집 추천 QR 코드</h3>
+                        <div className="bg-white p-4 rounded-2xl shadow-inner mb-6 flex justify-center">
+                            <img 
+                                src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://oceanstarhawaii.com/restaurants" 
+                                alt="QR Code" 
+                                className="w-48 h-48 sm:w-56 sm:h-56 object-contain"
+                            />
+                        </div>
+                        <button 
+                            onClick={async () => {
+                                try {
+                                    const response = await fetch("https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://oceanstarhawaii.com/restaurants");
+                                    const blob = await response.blob();
+                                    const url = window.URL.createObjectURL(blob);
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.download = 'oceanstar-restaurants-qr.png';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    window.URL.revokeObjectURL(url);
+                                } catch (e) {
+                                    window.open("https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://oceanstarhawaii.com/restaurants", "_blank");
+                                }
+                            }}
+                            className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-md"
+                        >
+                            <Download size={20} />
+                            QR 코드 다운로드
+                        </button>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }
