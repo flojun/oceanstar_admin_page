@@ -162,3 +162,18 @@ input[type="date"].date-input-horizontal::-webkit-calendar-picker-indicator {
     transform-origin: bottom right;
   }
 }
+
+/* =========================================
+   [Google Places Autocomplete 모바일 픽스]
+   모바일에서 터치 시 리스트가 클릭되지 않는 문제와 z-index 문제 해결
+   ========================================= */
+.pac-container {
+  z-index: 100000 !important;
+  /* 모바일에서 빠른 클릭을 위해 터치 액션 최적화 */
+  touch-action: manipulation;
+}
+
+.pac-item {
+  cursor: pointer;
+  padding: 10px 12px; /* 모바일에서 터치하기 쉽게 패딩 증가 */
+}

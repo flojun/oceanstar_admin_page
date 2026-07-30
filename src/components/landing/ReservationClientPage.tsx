@@ -330,6 +330,22 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
             minutes: getWalkingMinutes(result.distanceMeters)
           });
         }
+      } else if (place.name) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address: place.name }, (results, status) => {
+          if (status === 'OK' && results && results[0]) {
+            const resultLat = results[0].geometry.location.lat();
+            const resultLng = results[0].geometry.location.lng();
+            form.setValue("hotelName", place.name || results[0].formatted_address);
+            const pickupResult = findClosestPickup(resultLat, resultLng, pickupLocations);
+            if (pickupResult) {
+              setClosestPickup({
+                location: pickupResult.closestLocation,
+                minutes: getWalkingMinutes(pickupResult.distanceMeters)
+              });
+            }
+          }
+        });
       }
     }
   };
@@ -353,6 +369,22 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
             minutes: getWalkingMinutes(result.distanceMeters)
           });
         }
+      } else if (place.name) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address: place.name }, (results, status) => {
+          if (status === 'OK' && results && results[0]) {
+            const resultLat = results[0].geometry.location.lat();
+            const resultLng = results[0].geometry.location.lng();
+            form.setValue("secondaryPickupLocationName", place.name || results[0].formatted_address);
+            const pickupResult = findClosestPickup(resultLat, resultLng, pickupLocations);
+            if (pickupResult) {
+              setSecondaryClosestPickup({
+                location: pickupResult.closestLocation,
+                minutes: getWalkingMinutes(pickupResult.distanceMeters)
+              });
+            }
+          }
+        });
       }
     }
   };
