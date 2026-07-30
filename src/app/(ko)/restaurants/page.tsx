@@ -10,7 +10,7 @@ export default function RestaurantsPage() {
             {/* Background Image Setup (same as landing page) */}
             <div className="fixed inset-0 z-0 bg-slate-100">
                 <img 
-                    src="/images/backgrounds/clean_ocean.jpg" 
+                    src="/clean_ocean_bg.png" 
                     alt="Background" 
                     className="w-full h-full object-cover object-center opacity-70"
                 />
