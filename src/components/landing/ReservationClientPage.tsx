@@ -612,7 +612,11 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     {lang === 'ko' ? (
                       <>
                         <span className="block font-semibold text-slate-700 text-[1.4rem] sm:text-3xl md:text-4xl mb-2 sm:mb-4 tracking-tight">{t('hero.title1')}</span>
-                        <span className="block font-black text-sky-600 text-[2.8rem] sm:text-5xl md:text-6xl lg:text-7xl tracking-tighter leading-tight drop-shadow-[0_2px_10px_rgba(255,255,255,0.8)]">{t('hero.title2')}</span>
+                        <span className="block font-black text-sky-600 text-[2.8rem] sm:text-5xl md:text-6xl lg:text-7xl tracking-tighter leading-tight drop-shadow-[0_2px_10px_rgba(255,255,255,0.8)]">
+                            지금,<br className="sm:hidden" />
+                            <span className="hidden sm:inline"> </span>
+                            오션스타에서
+                        </span>
                       </>
                     ) : (
                       <span className={`font-black text-sky-600 leading-tight drop-shadow-sm text-3xl break-words sm:text-4xl md:text-5xl lg:text-6xl`}>
