@@ -1,0 +1,263 @@
+﻿diff --git a/src/components/landing/ReservationClientPage.tsx b/src/components/landing/ReservationClientPage.tsx
+index 7b76f29..b03dfc3 100644
+--- a/src/components/landing/ReservationClientPage.tsx
++++ b/src/components/landing/ReservationClientPage.tsx
+@@ -98,6 +98,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
+ 
+ 
+   const [isBookingOpen, setIsBookingOpen] = useState(false);
++  const [currentStep, setCurrentStep] = useState(1);
+   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+   const [availabilities, setAvailabilities] = useState<Record<string, { booked: number, remaining: number, isAvailable: boolean }>>({});
+   const [maxCapacity, setMaxCapacity] = useState(45);
+@@ -392,6 +393,33 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
+      totalPrice = (adultCount * (currentAdultPrice || 0)) + (childCount * (currentChildPrice || 0));
+   }
+ 
++  const handleNextStep = async () => {
++    let isValid = false;
++    if (currentStep === 1) {
++      if (!selectedTour) {
++        alert(lang === 'en' ? 'Please select a tour.' : '?ъ뼱瑜??좏깮?댁＜?몄슂.');
++        return;
++      }
++      if (selectedTour === 'combo_marine') {
++        if (!comboOption) { alert(lang === 'en' ? 'Please select a combo option.' : '肄ㅻ낫 ?몃? ?듭뀡???좏깮?댁＜?몄슂.'); return; }
++        if (!comboTimeOption) { alert(lang === 'en' ? 'Please select a time.' : '嫄곕턿???ㅻ끂?대쭅 ?쒓컙???좏깮?댁＜?몄슂.'); return; }
++      }
++      isValid = true;
++    } else if (currentStep === 2) {
++      isValid = await form.trigger(["adultCount", "childCount", "tourDate"]);
++      if (!selectedDate) {
++        alert(lang === 'en' ? 'Please select a date.' : '?좎쭨瑜??좏깮?댁＜?몄슂.');
++        isValid = false;
++      }
++    } else if (currentStep === 3) {
++      isValid = await form.trigger(["hotelName", "bookerName", "bookerEmail", "bookerPhone"]);
++    }
++    
++    if (isValid) setCurrentStep(prev => prev + 1);
++  };
++
++  const handlePrevStep = () => setCurrentStep(prev => prev - 1);
++
+   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+     if (!selectedTour) {
+       alert(t('bookingModal.alert_selectTour'));
+@@ -570,11 +598,11 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
+         {/* === 1. Hero Section === */}
+         <section id="home" className="relative w-full min-h-[100svh] sm:min-h-[85vh] lg:min-h-[800px] flex items-center justify-center overflow-hidden">
+           {/* Background Overlay */}
+-          <div className="absolute inset-0 bg-blue-900/30 z-10 mix-blend-multiply"></div>
++          <div className="absolute inset-0 bg-sky-200/20 z-10 mix-blend-multiply"></div>
+           
+           {/* Background Image */}
+-          <div className="absolute inset-0 bg-blue-500">
+-             <Image src={imageVersions['main_photo'] ? `${PUBLIC_URL_BASE}/main_photo.jpg?v=${imageVersions['main_photo']}` : "/turtle-hero.jpg"} alt="?섏???嫄곕턿???ㅻ끂?대쭅 ?ㅼ뀡?ㅽ?" fill className="object-cover object-center" priority unoptimized={!!imageVersions['main_photo']} />
++          <div className="absolute inset-0 bg-sky-100">
++             <Image src={imageVersions['main_photo'] ? `${PUBLIC_URL_BASE}/main_photo.jpg?v=${imageVersions['main_photo']}` : "/images/turtle_vector_bg.png"} alt="?섏???嫄곕턿???ㅻ끂?대쭅 ?ㅼ뀡?ㅽ?" fill className="object-cover object-center" priority unoptimized={true} />
+           </div>
+           
+           {/* Content Wrapper */}
+@@ -1093,25 +1121,34 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
+ 
+       {/* === ?덉빟 ?뚮줈??紐⑤떖 (Booking Drawer/Modal) === */}
+       {isBookingOpen && (
+-          <div className="fixed inset-0 z-50 flex justify-end">
+-            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setIsBookingOpen(false)}></div>
+-            <div className="relative w-full max-w-[550px] h-full bg-slate-50 shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-300">
+-              <div className="sticky top-0 bg-white/90 backdrop-blur-md px-6 py-4 border-b border-slate-200 flex justify-between items-center z-10 shadow-sm">
+-                <h2 className="text-xl font-bold text-slate-900">{t('bookingModal.title')}</h2>
+-                <button onClick={() => setIsBookingOpen(false)} className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 transition-colors">
++          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 pb-safe animate-in fade-in duration-300">
++            <div className="absolute inset-0 bg-sky-950/40 backdrop-blur-md transition-opacity" onClick={() => setIsBookingOpen(false)}></div>
++            <div className="relative w-full max-w-3xl max-h-[90vh] bg-white/70 backdrop-blur-2xl border border-white/60 shadow-2xl rounded-3xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
++              <div className="bg-white/40 backdrop-blur-md px-6 py-5 border-b border-white/50 flex justify-between items-center z-10 shrink-0">
++                <div className="flex flex-col">
++                  <h2 className="text-xl font-black text-sky-950">{t('bookingModal.title')}</h2>
++                  <div className="flex items-center gap-2 mt-2">
++                     {[1, 2, 3].map(step => (
++                        <div key={step} className={`w-12 h-1.5 rounded-full transition-all duration-300 ${currentStep >= step ? 'bg-sky-500' : 'bg-white/50'}`}></div>
++                     ))}
++                  </div>
++                </div>
++                <button type="button" onClick={() => setIsBookingOpen(false)} className="p-2 bg-white/50 hover:bg-white/80 rounded-full text-slate-600 transition-colors">
+                   <X size={20} />
+                 </button>
+               </div>
+ 
+-              <div className="p-6 pb-48">
+-                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
+-                  <div className="space-y-6">
+-                    {/* 1. Tour Selection */}
+-                    <section className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+-                      <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
+-                        <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">1</span>
+-                        {t('bookingModal.step1')}
+-                      </h2>
++              <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
++                <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit(onSubmit)(); }} className="flex flex-col h-full">
++                  
++                    {/* Step 1: Tour Selection */}
++                    {currentStep === 1 && (
++                      <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
++                        <section className="bg-white/60 p-6 rounded-3xl shadow-sm border border-white/50">
++                          <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-sky-950">
++                            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-sky-500 text-white text-sm font-black">1</span>
++                            {t('bookingModal.step1')}
++                          </h2>
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                         {tourSettings.filter((t: any) => t.is_active !== false).sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)).map((tour: any) => (
+                           <div
+@@ -1127,8 +1164,8 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
+                               }, 150);
+                             }}
+                             className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all ${selectedTour === tour.tour_id
+-                              ? "border-blue-600 bg-blue-50/50 shadow-md scale-[1.02] transform"
+-                              : "border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50"
++                              ? "border-sky-500 bg-white/70 backdrop-blur-md shadow-md scale-[1.02] transform"
++                              : "border-white/50 bg-white/40 backdrop-blur-sm hover:border-sky-300 hover:bg-white/60"
+                               }`}
+                           >
+                             {selectedTour === tour.tour_id && (
+@@ -1189,7 +1226,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
+                                  setComboOption(opt.id);
+                                  form.setValue("comboOption", opt.id);
+                                }}
+-                               className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${comboOption === opt.id ? "border-blue-600 bg-blue-50/50 shadow-sm" : "border-slate-100 bg-white hover:border-blue-200"}`}
++                               className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${comboOption === opt.id ? "border-sky-500 bg-white/70 backdrop-blur-md shadow-sm" : "border-white/50 bg-white/40 backdrop-blur-sm hover:border-sky-300"}`}
+                             >
+                                {comboOption === opt.id && (
+                                   <div className="absolute top-1/2 -translate-y-1/2 right-4 text-blue-600">
+@@ -1224,7 +1261,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
+                                     paxSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                  }, 150);
+                                }}
+-                               className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${comboTimeOption === opt.id ? "border-blue-600 bg-blue-50/50 shadow-sm" : "border-slate-100 bg-white hover:border-blue-200"}`}
++                               className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${comboTimeOption === opt.id ? "border-sky-500 bg-white/70 backdrop-blur-md shadow-sm" : "border-white/50 bg-white/40 backdrop-blur-sm hover:border-sky-300"}`}
+                             >
+                                {comboTimeOption === opt.id && (
+                                   <div className="absolute top-1/2 -translate-y-1/2 right-4 text-blue-600">
+@@ -1237,12 +1274,18 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
+                         </div>
+                       </section>
+                     )}
+-
+-                    {/* 2. Pax Selection */}
+-                    {(selectedTour !== 'combo_marine' || (selectedTour === 'combo_marine' && comboTimeOption)) && (
+-                      <section ref={paxSectionRef} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
+-                        <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900">
+-                          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">2</span>
++                      </div>
++                    )}
++                    
++                    {/* Step 2: Pax Selection */}
++                    {currentStep === 2 && (
++                      <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
++                      
++                      {/* 2. Pax Selection */}
++                      {(selectedTour !== 'combo_marine' || (selectedTour === 'combo_marine' && comboTimeOption)) && (
++                        <section ref={paxSectionRef} className="bg-white/60 p-6 rounded-3xl shadow-sm border border-white/50">
++                        <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-sky-950">
++                          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-sky-500 text-white text-sm font-black">2</span>
+                           {t('bookingModal.step2')}
+                         </h2>
+                         {isFlatRate && selectedTour === 'private' && (
+@@ -1380,14 +1423,20 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
+                         </p>
+                       </section>
+                     )}
++                      </div>
++                    )}
+ 
+ 
+ 
+-                    {/* 4. Hotel Pick-up & Info */}
+-                    {selectedTour && selectedDate && (
+-                      <section ref={infoSectionRef} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
+-                        <h2 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-900">
+-                          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-sm font-black">4</span>
++                    {/* Step 3: Hotel Pick-up & Info */}
++                    {currentStep === 3 && (
++                      <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
++                      
++                      {/* 4. Hotel Pick-up & Info */}
++                      {selectedTour && selectedDate && (
++                        <section ref={infoSectionRef} className="bg-white/60 p-6 rounded-3xl shadow-sm border border-white/50">
++                        <h2 className="text-lg font-bold mb-6 flex items-center gap-2 text-sky-950">
++                          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-sky-500 text-white text-sm font-black">3</span>
+                           {t('bookingModal.step4')}
+                         </h2>
+ 
+@@ -1591,40 +1640,40 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
+                         </div>
+                       </section>
+                     )}
+-                  </div>
+-
+-                  {/* Submit Float Info */}
+-                  {selectedTour && selectedDate && (
+-                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-[0_-20px_40px_rgba(0,0,0,0.1)] z-50 animate-in slide-in-from-bottom duration-300">
+-                        <div className="max-w-[500px] mx-auto">
+-                            <div className="flex justify-between items-end mb-4">
+-                                <div className="flex flex-col">
+-                                    <span className="text-slate-500 font-bold text-sm">{t('bookingModal.total_payment')} <span className="text-xs bg-slate-100 px-1.5 py-0.5 rounded ml-1 text-slate-600">{lang === 'en' ? t('bookingModal.usd_currency') : t('bookingModal.pay_currency')}</span></span>
+-                                    <span className="text-xs text-slate-400 mt-1 font-medium bg-slate-100 px-2 py-1 rounded w-fit">
+-                                      {(isFlatRate && selectedTour === 'private') 
+-                                        ? (lang === 'en' ? `Private Trip (Total ${totalSelectedPax})` : `?꾨씪?대퉿 李⑦꽣 (珥?${totalSelectedPax}紐?`) 
+-                                        : (lang === 'en' ? `Adult ${adultCount} / Child ${childCount}` : `?깆씤 ${adultCount}紐?/ ?꾨룞 ${childCount}紐?)}
+-                                    </span>
+-                                </div>
+-                                <div className="text-right">
+-                                    <span className="text-3xl font-black text-blue-600 tracking-tight">{lang === 'en' ? '$' : '??}{totalPrice.toLocaleString()}</span>
+-                                </div>
+-                            </div>
++                      </div>
++                    )}
++                </form>
++              </div>
+ 
+-                            <button
+-                                type="submit"
+-                                disabled={isSubmitting}
+-                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-black text-lg py-4 rounded-2xl transition-all active:scale-95 flex justify-center items-center gap-2 shadow-xl shadow-blue-600/30"
+-                            >
+-                                {isSubmitting ? <Loader2 className="animate-spin" size={24} /> : <CreditCard size={24} />}
+-                                {isSubmitting ? t('bookingModal.waiting') : t('bookingModal.checkout_btn')}
+-                            </button>
++              {/* Wizard Navigation Footer */}
++              <div className="bg-white/40 backdrop-blur-md px-6 py-4 border-t border-white/50 flex justify-between items-center shrink-0 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
++                  {currentStep > 1 ? (
++                     <button type="button" onClick={handlePrevStep} className="px-6 py-3 rounded-xl font-bold bg-white/50 hover:bg-white/80 text-slate-700 transition-colors">
++                        {lang === 'en' ? 'Back' : '?댁쟾'}
++                     </button>
++                  ) : <div></div>}
++                  
++                  {currentStep < 3 ? (
++                     <button type="button" onClick={handleNextStep} className="px-8 py-3 rounded-xl font-bold bg-sky-500 hover:bg-sky-600 text-white shadow-lg transition-all active:scale-95">
++                        {lang === 'en' ? 'Next' : '?ㅼ쓬 ?④퀎濡?}
++                     </button>
++                  ) : (
++                     <div className="flex items-center gap-4">
++                        <div className="flex flex-col text-right">
++                           <span className="text-xs font-bold text-slate-600">{t('bookingModal.total_payment')}</span>
++                           <span className="text-xl font-black text-sky-700">{lang === 'en' ? '$' : '??}{totalPrice.toLocaleString()}</span>
+                         </div>
+-                    </div>
++                        <button
++                            type="button"
++                            onClick={() => form.handleSubmit(onSubmit)()}
++                            disabled={isSubmitting}
++                            className="px-8 py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 flex justify-center items-center gap-2"
++                        >
++                            {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <CreditCard size={20} />}
++                            {isSubmitting ? t('bookingModal.waiting') : t('bookingModal.checkout_btn')}
++                        </button>
++                     </div>
+                   )}
+-                  
+-                  {/* Space for the floated button overlay above */}
+-                </form>
+               </div>
+             </div>
+           </div>
