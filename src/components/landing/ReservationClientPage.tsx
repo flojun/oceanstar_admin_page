@@ -6,7 +6,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Check, MapPin, Calendar, Users, CreditCard, Loader2, ChevronRight, ChevronLeft, Info, X, ShieldCheck, Star, Anchor, UsersRound, Award, MessageSquare, User, ClipboardList, AlertTriangle, Mail, Instagram, Youtube, Sparkles, Menu } from "lucide-react";
+import { Check, MapPin, Calendar, Users, CreditCard, Loader2, ChevronRight, ChevronLeft, Info, X, ShieldCheck, Star, Anchor, UsersRound, Award, MessageSquare, User, ClipboardList, AlertTriangle, Mail, Instagram, Youtube, Sparkles, Menu, Utensils } from "lucide-react";
 import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 import { calculateDistance, findClosestPickup, PickupLocation, getWalkingMinutes } from '@/lib/utils';
 import { DayPicker } from "react-day-picker";
@@ -1056,6 +1056,13 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             >
                                 <Youtube size={52} className="text-red-600" />
                             </a>
+                            <Link 
+                                href={lang === 'en' ? '/en/restaurants' : '/restaurants'}
+                                className="transform transition-all duration-300 hover:-translate-y-2 hover:scale-105 drop-shadow-sm hover:drop-shadow-xl bg-gradient-to-r from-orange-400 to-rose-400 text-white font-black px-4 py-3 rounded-2xl flex items-center gap-2 shadow-md hover:shadow-lg border border-white/40 ml-2"
+                            >
+                                <Utensils size={24} />
+                                <span className="whitespace-nowrap text-sm sm:text-base">{lang === 'en' ? 'Hawaiian Restaurants' : '맛집 리스트 보기'}</span>
+                            </Link>
                         </div>
                     </div>
                  </div>
