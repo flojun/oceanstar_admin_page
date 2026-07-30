@@ -155,3 +155,10 @@ input[type="date"].date-input-horizontal::-webkit-calendar-picker-indicator {
 #hubspot-messages-iframe-container {
   bottom: 80px !important;
 }
+
+@media (max-width: 639px) {
+  #hubspot-messages-iframe-container {
+    transform: scale(0.8);
+    transform-origin: bottom right;
+  }
+}

@@ -23,7 +23,7 @@ export default function KakaoChatWidget() {
 
   return (
     <div
-      className="fixed z-[60] flex flex-col items-center gap-3 animate-in slide-in-from-bottom-5 duration-500"
+      className="fixed z-[60] flex flex-col items-center gap-3 animate-in slide-in-from-bottom-5 duration-500 scale-80 origin-bottom-right sm:scale-100 sm:origin-center"
       style={{ bottom: '100px', right: '16px' }}
     >
 
