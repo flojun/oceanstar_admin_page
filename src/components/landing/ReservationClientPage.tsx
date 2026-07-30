@@ -389,6 +389,48 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
     }
   };
 
+  const handleHotelBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const address = e.target.value;
+    if (address && window.google) {
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ address }, (results, status) => {
+        if (status === 'OK' && results && results[0]) {
+          const resultLat = results[0].geometry.location.lat();
+          const resultLng = results[0].geometry.location.lng();
+          form.setValue("hotelName", address);
+          const pickupResult = findClosestPickup(resultLat, resultLng, pickupLocations);
+          if (pickupResult) {
+            setClosestPickup({
+              location: pickupResult.closestLocation,
+              minutes: getWalkingMinutes(pickupResult.distanceMeters)
+            });
+          }
+        }
+      });
+    }
+  };
+
+  const handleSecondaryHotelBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const address = e.target.value;
+    if (address && window.google) {
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ address }, (results, status) => {
+        if (status === 'OK' && results && results[0]) {
+          const resultLat = results[0].geometry.location.lat();
+          const resultLng = results[0].geometry.location.lng();
+          form.setValue("secondaryPickupLocationName", address);
+          const pickupResult = findClosestPickup(resultLat, resultLng, pickupLocations);
+          if (pickupResult) {
+            setSecondaryClosestPickup({
+              location: pickupResult.closestLocation,
+              minutes: getWalkingMinutes(pickupResult.distanceMeters)
+            });
+          }
+        }
+      });
+    }
+  };
+
 
   const getSelectedTourSetting = () => tourSettings.find((s: any) => s.tour_id === selectedTour);
   const selectedTourSetting = getSelectedTourSetting();
@@ -1485,7 +1527,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     >
                                         <input
                                         type="text"
-                                        {...form.register("hotelName")}
+                                        {...form.register("hotelName", { onBlur: handleHotelBlur })}
                                         placeholder={t('bookingModal.hotel_placeholder')}
                                         className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
                                         />
@@ -1493,7 +1535,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     ) : (
                                     <input
                                         type="text"
-                                        {...form.register("hotelName")}
+                                        {...form.register("hotelName", { onBlur: handleHotelBlur })}
                                         placeholder={t('bookingModal.hotel_placeholder')}
                                         className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
                                     />
@@ -1630,7 +1672,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     >
                                         <input
                                         type="text"
-                                        {...form.register("secondaryPickupLocationName")}
+                                        {...form.register("secondaryPickupLocationName", { onBlur: handleSecondaryHotelBlur })}
                                         placeholder={t('bookingModal.hotel_placeholder')}
                                         className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
                                         />
@@ -1638,7 +1680,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                     ) : (
                                     <input
                                         type="text"
-                                        {...form.register("secondaryPickupLocationName")}
+                                        {...form.register("secondaryPickupLocationName", { onBlur: handleSecondaryHotelBlur })}
                                         placeholder={t('bookingModal.hotel_placeholder')}
                                         className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
                                     />
