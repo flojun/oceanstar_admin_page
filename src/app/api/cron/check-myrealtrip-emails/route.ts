@@ -22,8 +22,8 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const email = process.env.NODEMAILER_EMAIL;
-        const password = process.env.NODEMAILER_PW;
+        const email = process.env.IMAP_EMAIL;
+        const password = process.env.IMAP_PW;
         if (!email || !password) {
             return NextResponse.json({ error: 'Email credentials not configured' }, { status: 500 });
         }
