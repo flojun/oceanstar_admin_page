@@ -22,7 +22,6 @@ import { getPickupDisplayNameByLang } from '@/constants/pickupLocations';
 import ImageCarousel from "@/components/landing/ImageCarousel";
 import { getTranslation, setLanguageCookie, type Language } from "@/lib/translations";
 import CurrencySelectModal from "@/components/payment/CurrencySelectModal";
-import VideoPopupModal from "@/components/landing/VideoPopupModal";
 
 // Helper to format HH:mm:ss string to "hh:mm a"
 const formatTimeAMPM = (timeString: string | null | undefined) => {
@@ -610,7 +609,6 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
           })
         }}
       />
-      <VideoPopupModal lang={lang} />
       <header className="w-full z-40 shrink-0 pt-4 px-4 sm:px-8 mb-[-80px] sm:mb-[-100px] pointer-events-none relative">
         <div className={`pointer-events-auto max-w-6xl mx-auto px-6 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between relative transition-all duration-500 rounded-[2.5rem] ${isScrolled ? 'bg-white/30 backdrop-blur-[40px] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] border border-white/50' : 'bg-white/10 backdrop-blur-md border border-white/20 shadow-lg'}`}>
           <div className="flex items-center shrink-0 cursor-pointer" onClick={() => scrollToSection('home')}>
