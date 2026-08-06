@@ -10,6 +10,7 @@ import { useNotificationSound } from "@/hooks/useNotificationSound";
 import { useReservationRealtime, ReservationEvent } from "@/hooks/useReservationRealtime";
 import { usePushNotification } from "@/hooks/usePushNotification";
 import { cn } from "@/lib/utils";
+import { isUrgentTourDate } from "@/lib/reservationUrgency";
 
 const ALERT_STATUSES = ["예약대기", "변경요청", "취소요청"];
 
@@ -21,6 +22,7 @@ interface LiveEvent {
     tourDate: string;
     status?: string;
     timestamp: Date;
+    isUrgent?: boolean;
 }
 
 interface Toast {
@@ -31,6 +33,7 @@ interface Toast {
     tourDate: string;
     eventType: "new_reservation" | "status_change";
     status?: string;
+    isUrgent?: boolean;
 }
 
 export default function NotificationBell({ isCollapsed = false }: { isCollapsed?: boolean }) {
@@ -104,6 +107,7 @@ export default function NotificationBell({ isCollapsed = false }: { isCollapsed?
             const option = event.payload?.option || "";
             const tourDate = event.payload?.tour_date || "";
             const status = event.payload?.status || "";
+            const isUrgent = isUrgentTourDate(tourDate);
 
             // Add to live feed
             const liveEvent: LiveEvent = {
@@ -114,6 +118,7 @@ export default function NotificationBell({ isCollapsed = false }: { isCollapsed?
                 tourDate,
                 status,
                 timestamp: event.timestamp,
+                isUrgent,
             };
             setLiveEvents(prev => [liveEvent, ...prev].slice(0, 20));
 
@@ -143,14 +148,15 @@ export default function NotificationBell({ isCollapsed = false }: { isCollapsed?
             const toastId = crypto.randomUUID();
             const toast: Toast = {
                 id: toastId,
-                message: event.type === "new_reservation"
-                    ? "새로운 예약이 들어왔습니다!"
-                    : `상태 변경: ${status}`,
+                message: isUrgent
+                    ? (event.type === "new_reservation" ? "🚨 긴급! 당일/전날 예약!" : `🚨 긴급! 상태 변경: ${status}`)
+                    : (event.type === "new_reservation" ? "새로운 예약이 들어왔습니다!" : `상태 변경: ${status}`),
                 name,
                 option,
                 tourDate,
                 eventType: event.type,
                 status,
+                isUrgent,
             };
             setToasts(prev => [...prev, toast]);
             setTimeout(() => {
@@ -264,11 +270,13 @@ export default function NotificationBell({ isCollapsed = false }: { isCollapsed?
                             className={cn(
                                 "flex flex-col bg-white border-l-4 shadow-xl rounded-xl px-3 py-2.5",
                                 "animate-in slide-in-from-top fade-in duration-300",
-                                toast.eventType === "new_reservation"
-                                    ? "border-blue-500"
-                                    : toast.status === "취소요청"
-                                        ? "border-orange-500"
-                                        : "border-indigo-500"
+                                toast.isUrgent
+                                    ? "border-red-500 ring-2 ring-red-200"
+                                    : toast.eventType === "new_reservation"
+                                        ? "border-blue-500"
+                                        : toast.status === "취소요청"
+                                            ? "border-orange-500"
+                                            : "border-indigo-500"
                             )}
                         >
                             <div className="flex items-start gap-2">
