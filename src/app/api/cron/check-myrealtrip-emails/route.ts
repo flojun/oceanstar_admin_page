@@ -228,20 +228,17 @@ async function searchEmails(
 ): Promise<Array<{ uid: number; subject: string; html: string }>> {
     const results: Array<{ uid: number; subject: string; html: string }> = [];
 
-    // IMAP SEARCH: UNSEEN + FROM myrealtrip + SUBJECT 키워드 + 최근 7일 이내
+    // IMAP SEARCH: UNSEEN + FROM myrealtrip + SUBJECT 키워드 + 최근 2일 이내 (시간대 차이 고려)
     const uids = await client.search({
         seen: false,
         from: 'myrealtrip',
         subject: subjectKeyword,
-        since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 최근 7일
+        since: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 최근 2일
     }, { uid: true });
 
     if (!uids || uids.length === 0) return results;
 
-    // 최신 메일 우선 처리를 위해 뒤에서부터 20개 추출
-    const targetUids = uids.slice(-20);
-
-    for (const uid of targetUids) {
+    for (const uid of uids) {
         try {
             const message = await client.fetchOne(String(uid), {
                 source: true,
