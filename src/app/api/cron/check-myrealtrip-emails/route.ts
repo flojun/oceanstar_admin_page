@@ -257,7 +257,7 @@ async function searchEmails(
                 source: true,
             }, { uid: true });
 
-            if (!message) continue;
+            if (!message || !message.source) continue;
 
             const parsedMail = await simpleParser(message.source);
             const subject = parsedMail.subject || '';
