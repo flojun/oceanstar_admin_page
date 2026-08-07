@@ -5,6 +5,7 @@ import { isUrgentTourDate } from '@/lib/reservationUrgency';
 import { sendDiscordUrgentAlert } from '@/lib/discordWebhook';
 import { getHawaiiDateStr } from '@/lib/timeUtils';
 import { ImapFlow } from 'imapflow';
+import { simpleParser } from 'mailparser';
 
 /**
  * 마이리얼트립 이메일 자동 수집 Cron Job
@@ -240,8 +241,6 @@ async function searchEmails(
     // 최대 20개만 처리 (한 번에 너무 많이 처리하지 않도록)
     const targetUids = uids.slice(0, 20);
 
-    const { simpleParser } = await import('mailparser');
-
     for (const uid of targetUids) {
         try {
             const message = await client.fetchOne(String(uid), {
@@ -250,9 +249,12 @@ async function searchEmails(
 
             if (!message || !message.source) continue;
 
-            const parsedMail = await simpleParser(message.source);
-            const subject = parsedMail.subject || '';
-            const html = parsedMail.html || parsedMail.textAsHtml || '';
+            const subject = message.envelope?.subject || '';
+            const source = message.source.toString();
+
+            // 이메일 소스에서 HTML 본문 추출
+            const parsedMail = await simpleParser(source);
+            const html = parsedMail.html || parsedMail.textAsHtml || source;
 
             results.push({ uid, subject, html });
         } catch (fetchError) {
