@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { Reservation, ReservationInsert } from "@/types/reservation";
 import { smartParseRow } from "@/lib/smartParser";
 import { cn } from "@/lib/utils";
-import { getHawaiiDateStr, formatDateDisplay, getKoreanDay, getKoreanDayShort } from "@/lib/timeUtils";
+import { getHawaiiDateStr, formatDateDisplay, getKoreanDay, getKoreanDayShort , getReceiptDateStr } from '@/lib/timeUtils';
 import { useUnsavedChanges } from "@/components/providers/UnsavedChangesProvider";
 import CustomTextEditor from "@/components/editors/CustomTextEditor";
 import ComboSelectEditor from "@/components/editors/ComboSelectEditor";
@@ -1367,7 +1367,7 @@ function AllReservationsContent() {
                 } else {
                     const { _grid_id, _capacityMsg, _capacityStatus, ...cleanRow } = row;
                     if (!cleanRow.receipt_date) {
-                        cleanRow.receipt_date = getHawaiiDateStr();
+                        cleanRow.receipt_date = getReceiptDateStr();
                     }
                     if (cleanRow.tour_date === "") cleanRow.tour_date = null;
                     if (cleanRow.pax === "") cleanRow.pax = null;

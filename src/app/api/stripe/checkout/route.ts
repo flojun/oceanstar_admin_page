@@ -1,3 +1,4 @@
+import { getReceiptDateStr } from '@/lib/timeUtils';
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 import Stripe from 'stripe';
@@ -150,7 +151,7 @@ export async function POST(req: Request) {
                 adult_count: body.adultCount.toString(),
                 child_count: body.childCount.toString(),
                 currency: 'USD',
-                receipt_date: getHawaiiDateStrServer(),
+                receipt_date: getReceiptDateStr(),
                 // Combo specific metadata
                 combo_option: body.comboOption || '',
                 combo_time_option: body.comboTimeOption || '',

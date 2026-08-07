@@ -1,3 +1,4 @@
+import { getReceiptDateStr } from '@/lib/timeUtils';
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { sendVoucherEmail } from '@/lib/email';
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
                 .from('reservations')
                 .update({
                     status: '예약확정',
-                    receipt_date: getHawaiiDateStrServer(), // 하와이 시간 기준 접수일
+                    receipt_date: getReceiptDateStr(), // 하와이 시간 기준 접수일
                 })
                 .eq('order_id', order_id)
                 .select();

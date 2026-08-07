@@ -71,3 +71,21 @@ export function getKoreanDayShort(dateStr: string): string {
         return "";
     }
 }
+
+/**
+ * Returns the receipt date string in Hawaii (YYYY-MM-DD).
+ * If the current time in Hawaii is 19:00 (7:00 PM) or later, it returns tomorrow's date,
+ * because the daily list is shared around 7 PM and subsequent reservations are considered next day's.
+ */
+export function getReceiptDateStr(): string {
+    const now = new Date();
+    const hawaiiTime = toZonedTime(now, TIMEZONE);
+    
+    if (hawaiiTime.getHours() >= 19) {
+        const tomorrow = new Date(hawaiiTime);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return format(tomorrow, "yyyy-MM-dd");
+    }
+    
+    return format(hawaiiTime, "yyyy-MM-dd");
+}

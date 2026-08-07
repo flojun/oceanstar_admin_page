@@ -3,7 +3,7 @@ import { supabaseServer } from '@/lib/supabaseServer';
 import { parseMyRealTripEmail } from '@/lib/myrealTripEmailParser';
 import { isUrgentTourDate } from '@/lib/reservationUrgency';
 import { sendDiscordUrgentAlert } from '@/lib/discordWebhook';
-import { getHawaiiDateStr } from '@/lib/timeUtils';
+import { getHawaiiDateStr , getReceiptDateStr } from '@/lib/timeUtils';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 
@@ -85,7 +85,7 @@ export async function GET(request: Request) {
                             tour_date: reservation.tourDate,
                             source: 'M',
                             status: '예약대기',
-                            receipt_date: getHawaiiDateStr(),
+                            receipt_date: getReceiptDateStr(),
                             is_admin_checked: false,
                         });
 
@@ -164,7 +164,7 @@ export async function GET(request: Request) {
                                 tour_date: reservation.tourDate,
                                 source: 'M',
                                 status: '예약확정',
-                                receipt_date: getHawaiiDateStr(),
+                                receipt_date: getReceiptDateStr(),
                                 is_admin_checked: false,
                             });
 

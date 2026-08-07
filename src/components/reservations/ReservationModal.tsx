@@ -7,7 +7,7 @@ import { DatePicker } from "@/components/ui/DatePicker";
 import { Reservation, ReservationInsert, ReservationStatus } from "@/types/reservation";
 import { supabase } from "@/lib/supabase";
 
-import { getHawaiiDateStr } from "@/lib/timeUtils";
+import { getHawaiiDateStr , getReceiptDateStr } from '@/lib/timeUtils';
 import { PICKUP_LOCATIONS } from "@/constants/pickupLocations";
 import type { TourSetting } from "@/lib/tourUtils";
 import { resolveOptionToTourSetting } from "@/lib/tourUtils";
@@ -21,7 +21,7 @@ interface ReservationModalProps {
 
 const INITIAL_FORM: ReservationInsert = {
     status: "예약확정",
-    receipt_date: getHawaiiDateStr(), // Default to Hawaii Time
+    receipt_date: getReceiptDateStr(), // Default to Hawaii Time
     source: "",
     name: "",
     tour_date: new Date().toISOString().split("T")[0],
@@ -65,7 +65,7 @@ export function ReservationModal({
             // Fresh Form - Ensure date is recalculated
             setFormData({
                 ...INITIAL_FORM,
-                receipt_date: getHawaiiDateStr(),
+                receipt_date: getReceiptDateStr(),
             });
         }
     }, [reservation, isOpen]);

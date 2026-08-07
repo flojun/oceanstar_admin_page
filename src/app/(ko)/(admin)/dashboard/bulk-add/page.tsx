@@ -7,7 +7,7 @@ import { Save, Plus, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { ReservationInsert } from "@/types/reservation";
 import { smartParseRow } from "@/lib/smartParser";
-import { getHawaiiDateStr } from "@/lib/timeUtils";
+import { getHawaiiDateStr , getReceiptDateStr } from '@/lib/timeUtils';
 import { useUnsavedChanges } from "@/components/providers/UnsavedChangesProvider";
 import type { TourSetting } from "@/lib/tourUtils";
 import { resolveOptionToTourSetting, getVesselBadgeColor, getShortLabel } from "@/lib/tourUtils";
@@ -309,7 +309,7 @@ export default function BulkAddPage() {
 
             return {
                 status: r.status || "예약확정",
-                receipt_date: r.receipt_date || getHawaiiDateStr(),
+                receipt_date: r.receipt_date || getReceiptDateStr(),
                 source: r.source || "",
                 name: r.name,
                 tour_date: r.tour_date,

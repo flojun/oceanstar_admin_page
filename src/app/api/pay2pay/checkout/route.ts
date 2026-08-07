@@ -1,3 +1,4 @@
+import { getReceiptDateStr } from '@/lib/timeUtils';
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 
@@ -119,7 +120,7 @@ export async function POST(req: Request) {
                 adult_count: body.adultCount,
                 child_count: body.childCount,
                 currency: currency,
-                receipt_date: getHawaiiDateStrServer(),
+                receipt_date: getReceiptDateStr(),
             };
 
             if (body.selectedTour === 'combo_marine' && body.comboOption) {
