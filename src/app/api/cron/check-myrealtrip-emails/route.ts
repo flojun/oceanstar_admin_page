@@ -82,14 +82,9 @@ export async function GET(request: Request) {
                             order_id: reservation.orderNumber,
                             name: reservation.travelerName,
                             tour_date: reservation.tourDate,
-                            option: reservation.optionName || '미정',
                             source: 'm',
                             status: '예약대기',
                             receipt_date: getHawaiiDateStr(),
-                            note: `[마리트 자동수집] 상품: ${reservation.productName}`,
-                            pax: extractPaxFromOption(reservation.optionName),
-                            pickup_location: '',
-                            contact: '',
                             is_admin_checked: false,
                         });
 
@@ -166,14 +161,9 @@ export async function GET(request: Request) {
                                 order_id: reservation.orderNumber,
                                 name: reservation.travelerName,
                                 tour_date: reservation.tourDate,
-                                option: reservation.optionName || '미정',
                                 source: 'm',
                                 status: '예약확정',
                                 receipt_date: getHawaiiDateStr(),
-                                note: `[마리트 자동수집] 상품: ${reservation.productName}`,
-                                pax: extractPaxFromOption(reservation.optionName),
-                                pickup_location: '',
-                                contact: '',
                                 is_admin_checked: false,
                             });
 
@@ -237,11 +227,12 @@ async function searchEmails(
 ): Promise<Array<{ uid: number; subject: string; html: string }>> {
     const results: Array<{ uid: number; subject: string; html: string }> = [];
 
-    // IMAP SEARCH: UNSEEN + FROM myrealtrip + SUBJECT 키워드
+    // IMAP SEARCH: UNSEEN + FROM myrealtrip + SUBJECT 키워드 + SINCE 오늘
     const uids = await client.search({
         seen: false,
         from: 'myrealtrip',
         subject: subjectKeyword,
+        since: new Date(),
     }, { uid: true });
 
     if (!uids || uids.length === 0) return results;
