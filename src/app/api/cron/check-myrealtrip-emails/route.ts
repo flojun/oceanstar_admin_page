@@ -249,20 +249,19 @@ async function searchEmails(
     // 최대 20개만 처리 (한 번에 너무 많이 처리하지 않도록)
     const targetUids = uids.slice(0, 20);
 
+    const { simpleParser } = await import('mailparser');
+
     for (const uid of targetUids) {
         try {
             const message = await client.fetchOne(String(uid), {
-                envelope: true,
                 source: true,
             }, { uid: true });
 
             if (!message) continue;
 
-            const subject = message.envelope?.subject || '';
-            const source = message.source?.toString() || '';
-
-            // 이메일 소스에서 HTML 본문 추출
-            const html = extractHtmlFromSource(source);
+            const parsedMail = await simpleParser(message.source);
+            const subject = parsedMail.subject || '';
+            const html = parsedMail.html || parsedMail.textAsHtml || '';
 
             results.push({ uid, subject, html });
         } catch (fetchError) {
@@ -271,45 +270,6 @@ async function searchEmails(
     }
 
     return results;
-}
-
-/**
- * 이메일 원본(raw source)에서 HTML 본문 추출
- */
-function extractHtmlFromSource(source: string): string {
-    // Content-Type: text/html 부분 찾기
-    const htmlMatch = source.match(
-        /Content-Type:\s*text\/html[^]*?(?:\r?\n\r?\n)([\s\S]*?)(?:--[a-zA-Z0-9_-]+|$)/i
-    );
-
-    if (htmlMatch) {
-        let html = htmlMatch[1];
-
-        // Base64 디코딩 처리
-        if (/Content-Transfer-Encoding:\s*base64/i.test(source)) {
-            try {
-                // 줄바꿈 제거 후 base64 디코딩
-                const cleaned = html.replace(/\r?\n/g, '').trim();
-                html = Buffer.from(cleaned, 'base64').toString('utf-8');
-            } catch {
-                // 디코딩 실패 시 원본 사용
-            }
-        }
-
-        // Quoted-printable 디코딩
-        if (/Content-Transfer-Encoding:\s*quoted-printable/i.test(source)) {
-            html = html
-                .replace(/=\r?\n/g, '') // soft line break 제거
-                .replace(/=([0-9A-Fa-f]{2})/g, (_, hex) =>
-                    String.fromCharCode(parseInt(hex, 16))
-                );
-        }
-
-        return html;
-    }
-
-    // HTML 파트를 못 찾으면 전체 소스 반환 (파서가 처리)
-    return source;
 }
 
 /**
