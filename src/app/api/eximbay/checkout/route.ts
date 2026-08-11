@@ -66,11 +66,10 @@ export async function POST(req: Request) {
         } else if (tourSetting.is_flat_rate && tourSetting.tour_id === 'private') {
             // 프라이빗 차터 계단식 요금 (동적 환율 적용)
             let usdPrice = 0;
-            if (totalCount <= 4) usdPrice = 1800;
-            else if (totalCount <= 10) usdPrice = 2200;
-            else if (totalCount <= 20) usdPrice = 2800;
-            else if (totalCount <= 30) usdPrice = 3500;
-            else usdPrice = 4500;
+            if (totalCount <= 10) usdPrice = 1200;
+            else if (totalCount <= 20) usdPrice = 1800;
+            else if (totalCount <= 30) usdPrice = 2400;
+            else usdPrice = 3000;
 
             if (isEn) {
                 calculatedTotalPrice = usdPrice;

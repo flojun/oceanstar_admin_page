@@ -76,11 +76,10 @@ export async function POST(req: Request) {
             const comboPrice = body.comboOption === '3' ? 310 : 210;
             usdPrice = (body.adultCount * comboPrice) + (body.childCount * comboPrice);
         } else if (tourSetting.is_flat_rate && tourSetting.tour_id === 'private') {
-            if (totalCount <= 4) usdPrice = 1800;
-            else if (totalCount <= 10) usdPrice = 2200;
-            else if (totalCount <= 20) usdPrice = 2800;
-            else if (totalCount <= 30) usdPrice = 3500;
-            else usdPrice = 4500;
+            if (totalCount <= 10) usdPrice = 1200;
+            else if (totalCount <= 20) usdPrice = 1800;
+            else if (totalCount <= 30) usdPrice = 2400;
+            else usdPrice = 3000;
         } else if (tourSetting.is_flat_rate) {
             usdPrice = tourSetting.adult_price_usd || 0;
         } else {
