@@ -610,12 +610,12 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         }}
       />
       <header className="w-full z-40 shrink-0 pt-4 px-4 sm:px-8 mb-[-80px] sm:mb-[-100px] pointer-events-none relative">
-        <div className={`pointer-events-auto max-w-6xl mx-auto px-6 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between relative transition-all duration-500 rounded-[2.5rem] ${isScrolled ? 'bg-white/30 backdrop-blur-[40px] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] border border-white/50' : 'bg-white/10 backdrop-blur-md border border-white/20 shadow-lg'}`}>
+        <div className={`pointer-events-auto max-w-[1300px] mx-auto px-6 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between relative transition-all duration-500 rounded-[2.5rem] ${isScrolled ? 'bg-white/30 backdrop-blur-[40px] shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] border border-white/50' : 'bg-white/10 backdrop-blur-md border border-white/20 shadow-lg'}`}>
           <div className="flex items-center shrink-0 cursor-pointer" onClick={() => scrollToSection('home')}>
             <img src="/logo.png" alt="OceanStar Logo" className="h-10 sm:h-12 w-auto object-contain" />
           </div>
 
-          <nav className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-6 xl:gap-10 font-bold text-[15px] text-slate-700">
+          <nav className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-4 xl:gap-8 font-bold text-[15px] text-slate-700">
             <button onClick={() => scrollToSection('home')} className="hover:text-blue-600 transition">Home</button>
             <button onClick={() => scrollToSection('tours')} className="hover:text-blue-600 transition">{lang === 'en' ? 'Tours' : '투어'}</button>
             <button onClick={() => scrollToSection('reviews')} className="hover:text-blue-600 transition">{lang === 'en' ? 'Reviews' : '고객후기'}</button>
