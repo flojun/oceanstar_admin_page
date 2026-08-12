@@ -635,7 +635,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                 onClick={() => {
                    const targetLang = lang === 'ko' ? 'en' : 'ko';
                    setLanguageCookie(targetLang);
-                   window.location.href = targetLang === 'en' ? '/en' : '/';
+                   window.location.href = targetLang === 'en' ? '/' : '/kr';
                 }}
                 className="bg-white hover:bg-slate-50 text-blue-600 border border-blue-200 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-bold text-[11.5px] sm:text-sm shadow-sm transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap"
              >
@@ -647,7 +647,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                 <span>{lang === 'ko' ? 'EN' : 'KR'}</span>
              </button>
              <Link 
-                href={lang === 'en' ? '/en/manage-booking' : '/manage-booking'}
+                href={lang === 'en' ? '/manage-booking' : '/kr/manage-booking'}
                 className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-full font-bold text-[11.5px] sm:text-sm shadow-sm transition-all whitespace-nowrap shrink-0">
                 {t('header.manageBooking')}
              </Link>
@@ -1133,7 +1133,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                 <Youtube size={52} className="text-red-600" />
                             </a>
                             <Link 
-                                href={lang === 'en' ? '/en/restaurants' : '/restaurants'}
+                                href={lang === 'en' ? '/restaurants' : '/kr/restaurants'}
                                 className="transform transition-all duration-300 hover:-translate-y-2 hover:scale-105 drop-shadow-sm hover:drop-shadow-xl bg-gradient-to-r from-orange-400 to-rose-400 text-white font-black px-4 py-3 rounded-2xl flex items-center gap-2 shadow-md hover:shadow-lg border border-white/40 ml-2"
                             >
                                 <Utensils size={24} />

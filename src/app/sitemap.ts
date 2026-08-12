@@ -5,25 +5,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     {
-      url: baseUrl,
+      url: baseUrl, // English root
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
     },
     {
-      url: `${baseUrl}/manage-booking`,
+      url: `${baseUrl}/manage-booking`, // English manage booking
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/en`,
+      url: `${baseUrl}/kr`, // Korean root
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
     },
     {
-      url: `${baseUrl}/en/manage-booking`,
+      url: `${baseUrl}/kr/manage-booking`, // Korean manage booking
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,

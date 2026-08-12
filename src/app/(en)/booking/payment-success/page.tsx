@@ -20,7 +20,7 @@ function PaymentSuccessContent() {
                 if (data.success && data.order_id) {
                     router.replace(`/booking/success?order_id=${data.order_id}`);
                 } else {
-                    alert("결제 검증에 실패했습니다.");
+                    alert("Payment verification failed.");
                     router.replace("/");
                 }
             } catch (err) {
@@ -41,8 +41,8 @@ function PaymentSuccessContent() {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
             <Loader2 className="animate-spin text-blue-600 mb-4" size={48} />
-            <h2 className="text-xl font-bold text-slate-700">결제 내역을 확인하고 있습니다...</h2>
-            <p className="text-slate-500 mt-2">잠시만 기다려주세요.</p>
+            <h2 className="text-xl font-bold text-slate-700">Verifying payment...</h2>
+            <p className="text-slate-500 mt-2">Please wait a moment.</p>
         </div>
     );
 }

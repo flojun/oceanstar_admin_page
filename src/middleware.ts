@@ -40,8 +40,8 @@ export async function middleware(request: NextRequest) {
     // 0. Language Redirect for Root
     if (path === '/') {
         const localeCookie = request.cookies.get('NEXT_LOCALE')?.value;
-        if (localeCookie === 'en') {
-            return NextResponse.redirect(new URL('/en', request.url));
+        if (localeCookie === 'ko') {
+            return NextResponse.redirect(new URL('/kr', request.url));
         }
     }
 
