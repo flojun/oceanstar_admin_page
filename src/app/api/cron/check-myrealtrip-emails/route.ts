@@ -4,6 +4,7 @@ import { parseMyRealTripEmail } from '@/lib/myrealTripEmailParser';
 import { isUrgentTourDate } from '@/lib/reservationUrgency';
 import { sendSlackUrgentAlert } from '@/lib/slackWebhook';
 import { getHawaiiDateStr , getReceiptDateStr } from '@/lib/timeUtils';
+import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 
@@ -85,7 +86,7 @@ export async function GET(request: Request) {
                             tour_date: reservation.tourDate,
                             source: 'M',
                             status: '예약대기',
-                            receipt_date: getReceiptDateStr(),
+                            receipt_date: await getDynamicReceiptDateStr(),
                             is_admin_checked: false,
                         });
 
@@ -164,7 +165,7 @@ export async function GET(request: Request) {
                                 tour_date: reservation.tourDate,
                                 source: 'M',
                                 status: '예약확정',
-                                receipt_date: getReceiptDateStr(),
+                                receipt_date: await getDynamicReceiptDateStr(),
                                 is_admin_checked: false,
                             });
 

@@ -1,4 +1,5 @@
 import { getReceiptDateStr } from '@/lib/timeUtils';
+import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { sendVoucherEmail } from '@/lib/email';
@@ -32,7 +33,7 @@ export async function POST(req: Request) {
                 .from('reservations')
                 .update({
                     status: '예약확정',
-                    receipt_date: getReceiptDateStr(),
+                    receipt_date: await getDynamicReceiptDateStr(),
                 })
                 .eq('order_id', order_id)
                 .select();
