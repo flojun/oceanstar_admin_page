@@ -1113,7 +1113,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             <span className="bg-white/60 border border-white/80 shadow-sm px-2 py-1.5 rounded text-xs shrink-0">{t('footer.hours_badge')}</span>
                             <span className="text-sm font-semibold">{t('footer.hours_text')}</span>
                         </div>
-                        <div className="flex items-center gap-6 pt-5 mt-2">
+                        <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-5 mt-2">
                             <a 
                                 href="https://www.instagram.com/oceanstar_turtlesnorkelling?igsh=dG8zMDZxczF2Z2t1" 
                                 target="_blank" 
@@ -1134,10 +1134,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             </a>
                             <Link 
                                 href={lang === 'en' ? '/restaurants' : '/kr/restaurants'}
-                                className="transform transition-all duration-300 hover:-translate-y-2 hover:scale-105 drop-shadow-sm hover:drop-shadow-xl bg-gradient-to-r from-orange-400 to-rose-400 text-white font-black px-4 py-3 rounded-2xl flex items-center gap-2 shadow-md hover:shadow-lg border border-white/40 ml-2"
+                                className="transform transition-all duration-300 hover:-translate-y-2 hover:scale-105 drop-shadow-sm hover:drop-shadow-xl bg-gradient-to-r from-orange-400 to-rose-400 text-white font-black px-4 py-3 rounded-2xl flex items-center gap-2 shadow-md hover:shadow-lg border border-white/40"
                             >
                                 <Utensils size={24} />
-                                <span className="whitespace-nowrap text-sm sm:text-base">{lang === 'en' ? 'Hawaiian Restaurants' : '맛집 리스트 보기'}</span>
+                                <span className="text-sm sm:text-base leading-tight text-center">{lang === 'en' ? 'Hawaiian Restaurants' : '맛집 리스트 보기'}</span>
                             </Link>
                         </div>
                     </div>
