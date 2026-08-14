@@ -1016,7 +1016,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             {review.image_urls && review.image_urls.length > 0 && (
                                 <div className={`grid gap-2 mb-4 ${review.image_urls.length === 1 ? 'grid-cols-1' : review.image_urls.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
                                     {review.image_urls.slice(0, 5).map((url: string, index: number) => (
-                                        <div key={index} className={`relative w-full ${review.image_urls.length === 1 ? 'aspect-[3/2] sm:aspect-video' : 'aspect-square'} rounded-xl overflow-hidden bg-slate-100/50 border border-white/50 shadow-sm flex items-center justify-center group`}>
+                                        <div key={index} className={`relative w-full aspect-square rounded-xl overflow-hidden bg-slate-100/50 border border-white/50 shadow-sm flex items-center justify-center group`}>
                                             <Image 
                                               src={url} 
                                               alt={`스노클링 리뷰 이미지 ${index + 1}`} 
