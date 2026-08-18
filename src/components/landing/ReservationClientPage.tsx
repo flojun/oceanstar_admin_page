@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Check, MapPin, Calendar, Users, CreditCard, Loader2, ChevronRight, ChevronLeft, Info, X, ShieldCheck, Star, Anchor, UsersRound, Award, MessageSquare, User, ClipboardList, AlertTriangle, Mail, Instagram, Youtube, Sparkles, Menu, Utensils } from "lucide-react";
 import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
-import { calculateDistance, findClosestPickup, PickupLocation, getWalkingMinutes } from '@/lib/utils';
+import { calculateDistance, findClosestPickup, PickupLocation, getWalkingMinutes, maskName } from '@/lib/utils';
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { format, parse } from "date-fns";
@@ -37,14 +37,6 @@ const formatTimeAMPM = (timeString: string | null | undefined) => {
   } catch (e) {
     return timeString;
   }
-};
-
-// Helper to mask middle characters of a name
-const maskName = (name: string | null | undefined) => {
-  if (!name) return '';
-  if (name.length <= 1) return name;
-  if (name.length === 2) return name.charAt(0) + '*';
-  return name.charAt(0) + '*'.repeat(name.length - 2) + name.charAt(name.length - 1);
 };
 
 const formSchema = z.object({

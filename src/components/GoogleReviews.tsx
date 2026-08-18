@@ -3,30 +3,21 @@
 import { useEffect, useState, useRef } from "react";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { maskName } from "@/lib/utils";
 
 interface GoogleReview {
   id: string;
   author_name: string;
-  profile_photo: string | null;
   rating: number;
   content: string;
   review_photos: string[];
   created_at: string;
 }
 
-const maskName = (name: string) => {
-  if (!name) return "";
-  if (name.length <= 1) return name;
-  if (name.length === 2) return name.charAt(0) + "*";
-  return name.charAt(0) + "*".repeat(name.length - 2) + name.charAt(name.length - 1);
-};
-
 export default function GoogleReviews() {
   const [reviews, setReviews] = useState<GoogleReview[]>([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
 
   useEffect(() => {
     fetch("/api/google-reviews")
@@ -37,25 +28,6 @@ export default function GoogleReviews() {
       .catch((err) => console.error("Failed to fetch google reviews", err))
       .finally(() => setLoading(false));
   }, []);
-
-  const updateScrollButtons = () => {
-    if (!scrollRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-    setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 4);
-  };
-
-  useEffect(() => {
-    updateScrollButtons();
-    const el = scrollRef.current;
-    if (!el) return;
-    el.addEventListener("scroll", updateScrollButtons, { passive: true });
-    window.addEventListener("resize", updateScrollButtons);
-    return () => {
-      el.removeEventListener("scroll", updateScrollButtons);
-      window.removeEventListener("resize", updateScrollButtons);
-    };
-  }, [reviews]);
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
@@ -123,24 +95,20 @@ export default function GoogleReviews() {
       {/* Carousel */}
       <div className="relative group">
         {/* Left Arrow */}
-        {canScrollLeft && (
-          <button
-            onClick={() => scroll("left")}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 w-10 h-10 bg-white border border-slate-200 rounded-full shadow-lg flex items-center justify-center hover:bg-slate-50 transition-all opacity-0 group-hover:opacity-100 hidden md:flex"
-          >
-            <ChevronLeft size={20} className="text-slate-600" />
-          </button>
-        )}
+        <button
+          onClick={() => scroll("left")}
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 w-10 h-10 bg-white border border-slate-200 rounded-full shadow-lg flex items-center justify-center hover:bg-slate-50 transition-all opacity-0 group-hover:opacity-100 hidden md:flex"
+        >
+          <ChevronLeft size={20} className="text-slate-600" />
+        </button>
 
         {/* Right Arrow */}
-        {canScrollRight && (
-          <button
-            onClick={() => scroll("right")}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 w-10 h-10 bg-white border border-slate-200 rounded-full shadow-lg flex items-center justify-center hover:bg-slate-50 transition-all opacity-0 group-hover:opacity-100 hidden md:flex"
-          >
-            <ChevronRight size={20} className="text-slate-600" />
-          </button>
-        )}
+        <button
+          onClick={() => scroll("right")}
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 w-10 h-10 bg-white border border-slate-200 rounded-full shadow-lg flex items-center justify-center hover:bg-slate-50 transition-all opacity-0 group-hover:opacity-100 hidden md:flex"
+        >
+          <ChevronRight size={20} className="text-slate-600" />
+        </button>
 
         <div
           ref={scrollRef}
