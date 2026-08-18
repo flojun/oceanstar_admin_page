@@ -37,14 +37,6 @@ export async function middleware(request: NextRequest) {
 
     const path = request.nextUrl.pathname
 
-    // 0. Language Redirect for Root
-    if (path === '/') {
-        const localeCookie = request.cookies.get('NEXT_LOCALE')?.value;
-        if (localeCookie === 'ko') {
-            return NextResponse.redirect(new URL('/kr', request.url));
-        }
-    }
-
     // 0.5 Public routes - no auth required
     if (path.startsWith('/checkin')) {
         return response
