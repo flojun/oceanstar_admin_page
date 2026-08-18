@@ -24,7 +24,6 @@ export const metadata: Metadata = {
     title: "Hawaii Turtle Snorkeling & Sunset Cruise | Ocean Star",
     description: "Highest rated in Waikiki! Hawaii turtle snorkeling, marine activities, sunset cruise, and private boat trips. Book now with Waikiki pickup included.",
     type: "website",
-    url: "/",
     images: [
       {
         url: "/og-image.jpg", // 임시 이미지 URL
