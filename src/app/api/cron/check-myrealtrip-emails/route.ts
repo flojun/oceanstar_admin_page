@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { parseMyRealTripEmail } from '@/lib/myrealTripEmailParser';
 import { isUrgentTourDate } from '@/lib/reservationUrgency';
-import { sendSlackUrgentAlert } from '@/lib/slackWebhook';
+import { sendDiscordUrgentAlert } from '@/lib/discordWebhook';
 import { getHawaiiDateStr , getReceiptDateStr } from '@/lib/timeUtils';
 import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
 import { ImapFlow } from 'imapflow';
@@ -13,7 +13,7 @@ import { simpleParser } from 'mailparser';
  * - 5분마다 Gmail IMAP에 접속하여 UNSEEN 이메일 검색
  * - [확정대기] → reservations INSERT (예약대기)
  * - [확정완료] → reservations UPDATE (예약확정)
- * - 당일/전날 투어이면 Slack 긴급 알림 발송
+ * - 당일/전날 투어이면 Discord 긴급 알림 발송
  */
 export async function GET(request: Request) {
     try {
@@ -100,7 +100,7 @@ export async function GET(request: Request) {
 
                     // 긴급 판단 → Slack 알림
                     if (isUrgentTourDate(reservation.tourDate)) {
-                        const sent = await sendSlackUrgentAlert({
+                        const sent = await sendDiscordUrgentAlert({
                             title: '🚨 [확정대기] 마이리얼트립 긴급 예약!',
                             customerName: reservation.travelerName,
                             tourDate: reservation.tourDate,
@@ -180,7 +180,7 @@ export async function GET(request: Request) {
 
                     // 긴급 판단 → Slack 알림
                     if (isUrgentTourDate(reservation.tourDate)) {
-                        const sent = await sendSlackUrgentAlert({
+                        const sent = await sendDiscordUrgentAlert({
                             title: '🚨 [확정완료] 마이리얼트립 예약 확정!',
                             customerName: reservation.travelerName,
                             tourDate: reservation.tourDate,

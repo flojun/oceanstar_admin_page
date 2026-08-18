@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { isUrgentTourDate } from '@/lib/reservationUrgency';
-import { sendSlackUrgentAlert } from '@/lib/slackWebhook';
+import { sendDiscordUrgentAlert } from '@/lib/discordWebhook';
 
 /**
  * Supabase Database Webhook에서 호출되는 API 라우트 (Track 1)
- * reservations INSERT/UPDATE 시 긴급 예약(당일/전날 투어)이면 Slack 알림 발송
+ * reservations INSERT/UPDATE 시 긴급 예약(당일/전날 투어)이면 Discord 알림 발송
  *
  * Supabase DB Webhook payload 형식:
  * { type: "INSERT" | "UPDATE", record: {...}, old_record: {...} | null }
@@ -47,9 +47,9 @@ export async function POST(request: Request) {
             return NextResponse.json({ skipped: true, reason: 'alert already sent' });
         }
 
-        // Slack 긴급 알림 발송
+        // Discord 긴급 알림 발송
         const sourceLabel = getSourceLabel(record.source);
-        const sent = await sendSlackUrgentAlert({
+        const sent = await sendDiscordUrgentAlert({
             title: '🚨 긴급 예약 확정! (당일/전날)',
             customerName: record.name || '미확인',
             tourDate: record.tour_date || '미확인',
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
 
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        console.error('[Slack Webhook API] 오류:', message);
+        console.error('[Discord Webhook API] 오류:', message);
         return NextResponse.json({ error: message }, { status: 500 });
     }
 }
