@@ -8,6 +8,7 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { format } from "date-fns";
 import { getTranslation, type Language } from '@/lib/translations';
+import { getTourNameByLang } from '@/lib/tourUtils';
 
 const libraries: "places"[] = ["places"];
 
@@ -173,7 +174,7 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
         const data = await res.json();
 
         if (!res.ok || !data.reservation) {
-            alert(data.error || '일치하는 예약 정보가 없습니다. 예약 번호와 이메일을 확인해주세요.');
+            alert(data.error || t('manage.err_not_found'));
             setIsVerifying(false);
             return;
         }
@@ -206,11 +207,10 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
             tourId,
             tourDate: correctLocalDate, // Keeps exact local date
             tourDateStr: reservation.tour_date, // Raw string 'YYYY-MM-DD' for accurate math
-            tourName: tourName,
+            tourName: getTourNameByLang(tourId, tourName, lang),
             guests: parsedGuests,
             hotelName: pickupLoc,
             pickupLocation: pickupLoc,
-            pickupTime: "안내됨",
             status: reservation.status,
             name: reservation.name
         });
@@ -227,7 +227,7 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
         setIsVerified(true);
     } catch (e) {
         console.error(e);
-        alert('조회 중 오류가 발생했습니다.');
+        alert(t('manage.err_lookup'));
     } finally {
         setIsVerifying(false);
     }
@@ -235,7 +235,7 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
 
   const handleFinalCancel = async () => {
     if (!tourData?.name) {
-        alert("예약자명 정보가 누락되었습니다. 새로고침 후 다시 시도해주세요.");
+        alert(t('manage.err_name_missing'));
         return;
     }
     
@@ -254,16 +254,16 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
         const data = await res.json();
         
         if (!res.ok) {
-            alert(`취소 요청 실패: ${data.error}`);
+            alert(t('manage.err_cancel_failed') + data.error);
         } else {
-            alert("취소 요청이 접수되었습니다. 관리자 확인 후 처리됩니다.");
+            alert(t('manage.ok_cancel_requested'));
             setShowFinalConfirmModal(false);
             setShowCancelModal(false);
             setTourData((prev: any) => prev ? { ...prev, status: '취소요청' } : prev);
         }
     } catch (e) {
         console.error(e);
-        alert("통신 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        alert(t('manage.err_network'));
     } finally {
         setIsCancelling(false);
     }
@@ -362,10 +362,10 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
               <h2 className="text-lg font-bold text-gray-800 border-b pb-2 mb-4">{t('manage.details_title')}</h2>
               
               <div className="space-y-3 text-sm text-gray-600 mb-6">
-                <p><span className="font-semibold text-gray-800">{t('manage.status')}</span> {tourData?.status === '예약확정' ? t('manage.status_confirmed') : tourData?.status}</p>
+                <p><span className="font-semibold text-gray-800">{t('manage.status')}</span> {tourData?.status === '예약확정' ? t('manage.status_confirmed') : tourData?.status === '취소요청' ? t('manage.status_cancel_requested') : tourData?.status}</p>
                 <p><span className="font-semibold text-gray-800">{t('manage.tour_name')}</span> {tourData?.tourName}</p>
                 <p><span className="font-semibold text-gray-800">{t('manage.tour_date')}</span> {tourData?.tourDate?.toLocaleDateString()} ({t('manage.days_left').replace('{days}', daysUntilTour)})</p>
-                <p><span className="font-semibold text-gray-800">{t('manage.pax')}</span> {tourData?.guests}{lang === 'ko' ? '명' : ''}</p>
+                <p><span className="font-semibold text-gray-800">{t('manage.pax')}</span> {tourData?.guests}{t('manage.pax_unit')}</p>
                 {/* CRITICAL UI TEXT 1 */}
                 <p><span className="font-semibold text-gray-800">{t('manage.pickup')}</span><br/> {tourData?.pickupLocation}</p>
               </div>
@@ -405,13 +405,13 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
               ) : (
                 /* Reschedule Form with Calendar & Google Maps */
                 <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-8 animate-in slide-in-from-bottom-2 duration-300">
-                  <h3 className="text-lg font-bold text-gray-800 border-b border-gray-200 pb-3">일정 및 픽업 장소 변경</h3>
+                  <h3 className="text-lg font-bold text-gray-800 border-b border-gray-200 pb-3">{t('manage.resched_title')}</h3>
                   
                   {/* Calendar Widget */}
                   <div className="space-y-3">
                     <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
                         <Calendar size={18} className="text-blue-500" />
-                        새로운 투어 날짜 선택
+                        {t('manage.resched_date_label')}
                     </label>
                     <div className="flex justify-center border-2 border-slate-200 rounded-2xl p-4 bg-white relative shadow-inner">
                         {isLoadingAvailability && (
@@ -467,11 +467,11 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                   <div className="space-y-4 pt-2">
                     <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
                         <MapPin size={18} className="text-blue-500" />
-                        새로운 픽업 장소 선택
+                        {t('manage.resched_pickup_label')}
                     </label>
                     
                     <div>
-                        <p className="text-xs text-slate-500 mb-1">기존 숙소명 (변경 가능)</p>
+                        <p className="text-xs text-slate-500 mb-1">{t('manage.resched_hotel_label')}</p>
                         {isLoaded ? (
                             <Autocomplete
                             onLoad={onLoad}
@@ -479,7 +479,7 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                             >
                             <input
                                 type="text"
-                                placeholder="머무시는 숙소/호텔 주소 입력"
+                                placeholder={t('manage.hotel_placeholder')}
                                 value={customHotelName}
                                 onChange={(e) => setCustomHotelName(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
@@ -488,13 +488,13 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                         ) : (
                             <input
                                 type="text"
-                                placeholder="머무시는 숙소/호텔 주소 입력"
+                                placeholder={t('manage.hotel_placeholder')}
                                 value={customHotelName}
                                 onChange={(e) => setCustomHotelName(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
                             />
                         )}
-                        <p className="text-xs text-blue-600 font-medium mt-1 bg-blue-50 p-1.5 rounded inline-block">※ 구글 자동완성으로 숙소를 치시면 가장 가까운 장소를 추천해 드립니다.</p>
+                        <p className="text-xs text-blue-600 font-medium mt-1 bg-blue-50 p-1.5 rounded inline-block">{t('manage.hotel_helper')}</p>
                     </div>
 
                     <div>
@@ -506,7 +506,7 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                                 if (selectedLoc) setClosestPickup({ location: selectedLoc, minutes: 0 });
                             }}
                         >
-                            <option value="" disabled>가까운 장소가 추천되거나 직접 골라주세요</option>
+                            <option value="" disabled>{t('manage.pickup_placeholder')}</option>
                             {pickupLocations.map(loc => (
                                 <option key={loc.id} value={loc.id}>
                                 {loc.name}
@@ -517,7 +517,7 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                         </select>
                         {closestPickup && closestPickup.minutes > 0 && (
                             <p className="text-sm text-green-600 mt-2 font-bold bg-green-50 p-2 rounded-lg">
-                                ✅ 추천됨: 걸어서 약 {closestPickup.minutes}분 거리입니다.
+                                {t('manage.pickup_recommended').replace('{min}', String(closestPickup.minutes))}
                             </p>
                         )}
                     </div>
@@ -528,12 +528,12 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                       onClick={() => setIsRescheduling(false)}
                       className="w-1/3 bg-white border border-gray-300 text-gray-700 font-bold py-3.5 rounded-xl hover:bg-gray-100 transition"
                     >
-                      취소
+                      {t('manage.back_btn')}
                     </button>
                     <button 
                       onClick={async () => {
                         const dateStr = newTourDate ? format(newTourDate, 'yyyy-MM-dd') : '';
-                        if (!dateStr) return alert("새로운 날짜를 선택해주세요.");
+                        if (!dateStr) return alert(t('manage.err_pick_date'));
                         // Use the selected location name (if from dropdown) or the custom hotel name typed by user
                         let locStr = closestPickup?.location?.name || "";
                         if (!locStr && customHotelName) locStr = customHotelName;
@@ -553,13 +553,13 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                             });
                             const data = await res.json();
                             if (!res.ok) {
-                                alert(`오류가 발생했습니다:\n${data.error}`);
+                                alert(`${t('manage.err_generic')}\n${data.error}`);
                             } else {
-                                alert(`선택하신 날짜(${dateStr})와 픽업 장소(${locStr})로 변경 접수되었습니다! 관리자 승인 후 최종 확정됩니다.`);
+                                alert(t('manage.ok_rescheduled').replace('{date}', dateStr).replace('{loc}', locStr));
                                 setIsRescheduling(false);
                             }
                         } catch (e) {
-                            alert("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+                            alert(t('manage.err_network'));
                         } finally {
                             setIsSubmittingReschedule(false);
                         }
@@ -567,7 +567,7 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                       disabled={isSubmittingReschedule}
                       className="w-2/3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] transition transform hover:-translate-y-0.5 active:translate-y-0 flex justify-center items-center gap-2"
                     >
-                      {isSubmittingReschedule ? <Loader2 className="w-5 h-5 animate-spin" /> : "변경 완료"}
+                      {isSubmittingReschedule ? <Loader2 className="w-5 h-5 animate-spin" /> : t('manage.resched_submit')}
                     </button>
                   </div>
                 </div>
@@ -582,18 +582,18 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in slide-in-from-bottom-5">
             <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">예약 취소 요청</h3>
-              <p className="text-sm text-gray-500 mb-4">취소 전 하단의 취소 및 환불 규정을 반드시 확인해 주세요.</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{t('manage.cancel_title')}</h3>
+              <p className="text-sm text-gray-500 mb-4">{t('manage.cancel_desc')}</p>
               
               <div className="bg-gray-100 p-4 rounded-xl h-48 overflow-y-auto text-xs text-gray-600 leading-relaxed mb-5 border border-gray-200">
-                <p className="font-bold text-gray-800 mb-2">[취소 및 환불 특약 규정]</p>
+                <p className="font-bold text-gray-800 mb-2">{t('manage.policy_title')}</p>
                 <div className="space-y-2">
-                    <p className="font-bold text-blue-800 bg-blue-50 p-2 rounded">본 상품은 국외여행 표준약관 제6조(특약)에 따라 일반 소비자분쟁해결기준과 다른 취소수수료가 적용됩니다. 예약 전 취소 규정을 반드시 확인해 주세요.</p>
+                    <p className="font-bold text-blue-800 bg-blue-50 p-2 rounded">{t('manage.policy_intro')}</p>
                     <ul className="list-disc pl-4 space-y-1">
-                      <li className={refundStatus === 0 ? "text-red-500 font-bold" : ""}>여행시작 7일 전까지(~7): 여행 요금 전액 환불</li>
-                      <li className={refundStatus === 1 ? "text-red-500 font-bold" : ""}>여행시작 3일 전까지(6~3): 상품 요금의 50% 공제</li>
-                      <li className={refundStatus === 2 ? "text-red-500 font-bold" : ""}>여행시작 당일까지(2~당일): 취소/환불 불가</li>
-                      <li>※ 여행일은 현지 시각 기준입니다.</li>
+                      <li className={refundStatus === 0 ? "text-red-500 font-bold" : ""}>{t('manage.policy_r0')}</li>
+                      <li className={refundStatus === 1 ? "text-red-500 font-bold" : ""}>{t('manage.policy_r1')}</li>
+                      <li className={refundStatus === 2 ? "text-red-500 font-bold" : ""}>{t('manage.policy_r2')}</li>
+                      <li>{t('manage.policy_note')}</li>
                     </ul>
                 </div>
               </div>
@@ -605,7 +605,7 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                   checked={hasAgreedToPolicy}
                   onChange={(e) => setHasAgreedToPolicy(e.target.checked)}
                 />
-                <span className="text-sm font-bold text-gray-700">위 규정을 확인하였으며, 취소에 동의합니다.</span>
+                <span className="text-sm font-bold text-gray-700">{t('manage.agree_label')}</span>
               </label>
 
               <div className="flex space-x-3">
@@ -613,7 +613,7 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                   onClick={() => setShowCancelModal(false)}
                   className="flex-1 bg-gray-200 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-300 transition"
                 >
-                  돌아가기
+                  {t('manage.go_back')}
                 </button>
                 <button 
                   onClick={() => setShowFinalConfirmModal(true)}
@@ -624,7 +624,7 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                     : "bg-red-200 text-red-400 cursor-not-allowed"
                   }`}
                 >
-                  {isCancelling ? <Loader2 className="w-5 h-5 animate-spin" /> : "취소하기"}
+                  {isCancelling ? <Loader2 className="w-5 h-5 animate-spin" /> : t('manage.cancel_proceed')}
                 </button>
               </div>
             </div>
@@ -638,19 +638,19 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
           <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden animate-in zoom-in-95">
             <div className="p-6 text-center">
               <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-gray-900 mb-2">최종 취소 확인</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{t('manage.final_title')}</h3>
               
               <div className="bg-red-50 p-4 rounded-xl text-sm mb-6 border border-red-100">
-                <p className="font-bold text-red-800 mb-2">현재 고객님 적용 취소 규정:</p>
+                <p className="font-bold text-red-800 mb-2">{t('manage.final_policy_label')}</p>
                 <div className="font-bold text-red-600 text-base bg-white py-2 px-1 rounded shadow-sm border border-red-200 break-keep">
-                    {refundStatus === 0 ? "7일 전 접수 (100% 환불 가능)" : 
-                     refundStatus === 1 ? "6~3일 전 접수 (50% 공제 후 환불)" : 
-                     "2일 이내 및 당일 접수 (취소/환불 불가)"}
+                    {refundStatus === 0 ? t('manage.final_r0') : 
+                     refundStatus === 1 ? t('manage.final_r1') : 
+                     t('manage.final_r2')}
                 </div>
-                <p className="mt-3 text-xs text-red-500 font-medium">※ 하와이 현지 시각 기준으로 계산되었습니다.</p>
+                <p className="mt-3 text-xs text-red-500 font-medium">{t('manage.final_note')}</p>
               </div>
 
-              <p className="text-gray-600 text-sm mb-6">정말로 예약을 취소하시겠습니까?<br/>이 작업은 되돌릴 수 없습니다.</p>
+              <p className="text-gray-600 text-sm mb-6 whitespace-pre-line">{t('manage.final_question')}</p>
 
               <div className="flex space-x-3">
                 <button 
@@ -658,14 +658,14 @@ export default function ManageBookingClient({ lang }: { lang: Language }) {
                   className="flex-1 bg-gray-200 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-300 transition"
                   disabled={isCancelling}
                 >
-                  아니오
+                  {t('manage.no_btn')}
                 </button>
                 <button 
                   onClick={handleFinalCancel}
                   disabled={isCancelling}
                   className="flex-1 bg-red-600 hover:bg-red-700 text-white shadow-md font-bold py-3.5 rounded-xl transition duration-200 flex justify-center items-center gap-2 disabled:opacity-50"
                 >
-                  {isCancelling ? <Loader2 className="w-5 h-5 animate-spin" /> : "최종 취소 확정"}
+                  {isCancelling ? <Loader2 className="w-5 h-5 animate-spin" /> : t('manage.final_confirm')}
                 </button>
               </div>
             </div>

@@ -14,7 +14,7 @@ import "react-day-picker/dist/style.css";
 import { format, parse } from "date-fns";
 import Image from "next/image";
 import imageCompression from "browser-image-compression";
-import { TourSetting } from "@/lib/tourUtils";
+import { TourSetting, getTourNameByLang } from "@/lib/tourUtils";
 import FAQSection from "@/components/landing/FAQSection";
 import PickupGuide from "@/components/landing/PickupGuide";
 import TourCourseTimeline from "@/components/landing/TourCourseTimeline";
@@ -91,7 +91,6 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
 
   const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [availabilities, setAvailabilities] = useState<Record<string, { booked: number, remaining: number, isAvailable: boolean }>>({});
   const [maxCapacity, setMaxCapacity] = useState(45);
@@ -215,12 +214,6 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
       formData.append('author_name', reviewForm.author_name);
       formData.append('rating', String(reviewForm.rating));
       formData.append('content', reviewForm.content);
-
-      if (reviewForm.images.length > 5) {
-        alert(lang === 'en' ? "You can upload up to 5 photos." : "사진은 최대 5장까지만 업로드 가능합니다.");
-        setIsSubmittingReview(false);
-        return;
-      }
 
       for (const file of reviewForm.images) {
         try {
@@ -460,32 +453,6 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
      totalPrice = (adultCount * (currentAdultPrice || 0)) + (childCount * (currentChildPrice || 0));
   }
 
-  const handleNextStep = async () => {
-    let isValid = false;
-    if (currentStep === 1) {
-      if (!selectedTour) {
-        alert(lang === 'en' ? 'Please select a tour.' : '투어를 선택해주세요.');
-        return;
-      }
-      if (selectedTour === 'combo_marine') {
-        if (!comboOption) { alert(lang === 'en' ? 'Please select a combo option.' : '콤보 세부 옵션을 선택해주세요.'); return; }
-        if (!comboTimeOption) { alert(lang === 'en' ? 'Please select a time.' : '거북이 스노클링 시간을 선택해주세요.'); return; }
-      }
-      isValid = true;
-    } else if (currentStep === 2) {
-      isValid = await form.trigger(["adultCount", "childCount", "tourDate"]);
-      if (!selectedDate) {
-        alert(lang === 'en' ? 'Please select a date.' : '날짜를 선택해주세요.');
-        isValid = false;
-      }
-    } else if (currentStep === 3) {
-      isValid = await form.trigger(["hotelName", "bookerName", "bookerEmail", "bookerPhone"]);
-    }
-    
-    if (isValid) setCurrentStep(prev => prev + 1);
-  };
-
-  const handlePrevStep = () => setCurrentStep(prev => prev - 1);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!selectedTour) {
@@ -496,6 +463,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
     if (selectedTour === 'combo_marine') {
       if (!comboOption) {
         alert(lang === 'en' ? 'Please select a combo option.' : '패러세일링/제트스키 옵션을 선택해주세요.');
+        return;
+      }
+      if (!comboTimeOption) {
+        alert(lang === 'en' ? 'Please select a snorkeling time.' : '거북이 스노클링 시간을 선택해주세요.');
         return;
       }
       if (!values.secondaryDate) {
@@ -1232,14 +1203,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                               </div>
                             )}
                             <h3 className="font-bold text-base mb-1 text-slate-800">
-                              {lang === 'en' ? (
-                                tour.tour_id === 'morning1' ? '1st Trip Waikiki Turtle Snorkeling' :
-                                tour.tour_id === 'morning2' ? '2nd Trip Waikiki Turtle Snorkeling' :
-                                tour.tour_id?.toLowerCase().includes('sunset') ? 'Sunset Wine & Waikiki Turtle Snorkeling' :
-                                tour.tour_id === 'private' ? '[Private] Waikiki Turtle Snorkeling Trip' :
-                                tour.tour_id === 'combo_marine' ? 'Turtle Snorkeling + Parasailing / Jet Ski' :
-                                tour.name
-                              ) : tour.name}
+                              {getTourNameByLang(tour.tour_id, tour.name, lang)}
                             </h3>
                             <p className="text-xs text-slate-500 mb-3">
                               {tour.is_flat_rate ? t('bookingModal.flatRate_sub').replace('{max}', tour.max_capacity) : (tour.tour_id?.toLowerCase().includes('sunset') ? t('tour.details.time_variable') : t('bookingModal.normalRate_sub').replace('{start}', tour.start_time || 'AM').replace('{end}', tour.end_time || ''))}
@@ -1478,7 +1442,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                       {selectedTour && selectedDate && (
                         <section ref={infoSectionRef} className="bg-white/60 p-6 rounded-3xl shadow-sm border border-white/50">
                         <h2 className="text-lg font-bold mb-6 flex items-center gap-2 text-sky-950">
-                          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-sky-500 text-white text-sm font-black">3</span>
+                          <span className="flex items-center justify-center w-7 h-7 rounded-full bg-sky-500 text-white text-sm font-black">4</span>
                           {t('bookingModal.step4')}
                         </h2>
 
@@ -1508,6 +1472,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                         className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-medium"
                                     />
                                     )}
+                                    <p className="text-xs text-slate-500 mt-1.5">{t('bookingModal.hotel_helper')}</p>
                                     {form.formState.errors.hotelName && <p className="text-red-500 text-xs mt-1 font-bold">{form.formState.errors.hotelName.message}</p>}
                                 </div>
 
@@ -1576,6 +1541,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                               {form.formState.errors.bookerPhone && <p className="text-red-500 text-xs mt-1 font-bold">{form.formState.errors.bookerPhone.message}</p>}
                             </div>
                           </div>
+
+                          <p className="text-xs text-slate-500 flex items-start gap-1.5">
+                            <ShieldCheck size={14} className="text-emerald-500 mt-0.5 shrink-0" /> {t('bookingModal.safe_notice')}
+                          </p>
                         </div>
                       </section>
                     )}
@@ -1728,17 +1697,17 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
               <div className="p-6">
                 <form onSubmit={onReviewSubmit} className="flex flex-col gap-5">
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">{lang === 'en' ? 'Booking ID (6 alphanumeric characters)' : '예약 번호 (영숫자 6자리)'}</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">{t('reviewModal.order_id')}</label>
                         <input
                             type="text"
                             required
                             maxLength={6}
-                            placeholder={lang === 'en' ? "e.g.: A4X9T2" : "예: A4X9T2"}
+                            placeholder={t('reviewModal.order_id_placeholder')}
                             value={reviewForm.order_id}
                             onChange={(e) => setReviewForm({ ...reviewForm, order_id: e.target.value.toUpperCase() })}
                             className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all uppercase tracking-widest font-mono font-bold"
                         />
-                        <p className="text-xs text-slate-500 mt-1">{lang === 'en' ? 'You can find it on your booking confirmation voucher.' : '예약 확정 및 결제 후 전송된 바우처에서 확인하실 수 있습니다.'}</p>
+                        <p className="text-xs text-slate-500 mt-1">{t('reviewModal.order_id_desc')}</p>
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1">{t('reviewModal.name_label')}</label>
@@ -1780,7 +1749,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">{t('reviewModal.photo_label')} (Max 5)</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">{t('reviewModal.photo_label')}</label>
                         <input
                             type="file"
                             multiple
@@ -1789,7 +1758,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                 if (e.target.files) {
                                     const files = Array.from(e.target.files);
                                     if (files.length > 5) {
-                                        alert("사진은 최대 5장까지만 선택할 수 있습니다.");
+                                        alert(lang === 'en' ? "You can select up to 5 photos." : "사진은 최대 5장까지만 선택할 수 있습니다.");
                                         e.target.value = '';
                                     } else {
                                         setReviewForm({ ...reviewForm, images: files });
@@ -1823,7 +1792,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-md flex justify-center items-center gap-2"
                         >
                             {isSubmittingReview ? <Loader2 className="animate-spin" size={20} /> : <Check size={20} />}
-                            {isSubmittingReview ? (lang === 'en' ? "Submitting..." : "등록 중...") : t('reviewModal.submitBtn')}
+                            {isSubmittingReview ? t('reviewModal.submitting') : t('reviewModal.submitBtn')}
                         </button>
                     </div>
                 </form>
@@ -1858,9 +1827,9 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                              <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4">
                                  <ClipboardList size={32} opacity={0.5} />
                              </div>
-                             <p className="font-bold text-slate-700 text-lg sm:text-xl mb-2 text-center">{lang === 'en' ? 'Detailed information is not yet available.' : '상세 정보가 아직 입력되지 않았습니다.'}</p>
+                             <p className="font-bold text-slate-700 text-lg sm:text-xl mb-2 text-center">{t('tourDetailsModal.no_info')}</p>
                              <p className="text-slate-500 text-sm text-center max-w-md leading-relaxed px-4">
-                                 {lang === 'en' ? 'More information like schedule, diagrams, and photos will be added here soon!' : '관리자님, 나중에 이곳에 투어 스케줄, 코스 다이어그램, 준비물, 주의사항, 수많은 사진들을 마음껏 올릴 수 있습니다. (상하 스크롤이 자유로운 넓은 영역입니다!)'}
+                                 {t('tourDetailsModal.no_info_desc')}
                              </p>
                          </div>
                      )}
@@ -1868,7 +1837,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                  {/* Modal Footer */}
                  <div className="p-4 sm:p-6 border-t border-slate-100 bg-white flex flex-col sm:flex-row justify-end gap-3">
                      <button onClick={() => setExpandedTourDetails(null)} className="px-6 py-3 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors w-full sm:w-auto text-center">
-                         {lang === 'en' ? 'Close' : '닫기'}
+                         {t('tourDetailsModal.close')}
                      </button>
                      <button 
                         onClick={() => { 
