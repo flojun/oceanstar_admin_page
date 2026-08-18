@@ -22,6 +22,7 @@ import { getPickupDisplayNameByLang } from '@/constants/pickupLocations';
 import ImageCarousel from "@/components/landing/ImageCarousel";
 import { getTranslation, setLanguageCookie, type Language } from "@/lib/translations";
 import CurrencySelectModal from "@/components/payment/CurrencySelectModal";
+import GoogleReviews from "@/components/GoogleReviews";
 
 // Helper to format HH:mm:ss string to "hh:mm a"
 const formatTimeAMPM = (timeString: string | null | undefined) => {
@@ -1045,33 +1046,9 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                 </div>
             )}
             
-            {/* Google Reviews Banner */}
-            <div className="mt-12 bg-gradient-to-r from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 border border-white/60 shadow-[inset_0_0_20px_rgba(255,255,255,0.5),0_15px_35px_rgba(0,0,0,0.05)] flex flex-col md:flex-row items-center justify-between gap-6 hover:-translate-y-1 transition-all duration-500 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.8),0_20px_40px_rgba(0,0,0,0.1)]">
-                <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 bg-blue-50/50 rounded-2xl flex items-center justify-center shrink-0">
-                        <span className="text-3xl font-black text-blue-600">G</span>
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="text-2xl font-black text-slate-900">4.9</span>
-                            <div className="flex gap-1">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star key={i} size={20} className="text-yellow-400 fill-yellow-400" />
-                                ))}
-                            </div>
-                        </div>
-                        <p className="text-slate-600 font-medium">{t('review.google_desc1')}<strong className="text-slate-900">5,000+</strong>{t('review.google_desc2')}</p>
-                    </div>
-                </div>
-                
-                <a 
-                    href="https://www.google.com/maps/search/?api=1&query=Ocean+Star+Hawaii" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="w-full md:w-auto bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800 font-bold px-8 py-4 rounded-xl transition-all flex items-center justify-center gap-3 shrink-0"
-                >
-                    {t('review.google_btn')} <ChevronRight size={18} />
-                </a>
+            {/* Google Reviews Carousel */}
+            <div className="mt-12">
+                <GoogleReviews />
             </div>
 
             {/* YouTube Video Section */}
