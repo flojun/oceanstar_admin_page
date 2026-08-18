@@ -41,7 +41,7 @@ export async function sendDiscordUrgentAlert(params: DiscordAlertParams): Promis
     }
 
     const payload: Record<string, unknown> = {
-        content: roleId ? `<@&${roleId}>` : undefined,
+        content: (roleId ? `<@&${roleId}> ` : '') + `${params.title} - ${params.customerName} (${params.tourDate})`,
         embeds: [
             {
                 title: params.title,
