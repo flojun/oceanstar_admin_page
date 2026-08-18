@@ -19,6 +19,7 @@ import PickupGuide from "@/components/PickupGuide";
 import TourCourseTimeline from "@/components/TourCourseTimeline";
 import { getPickupDisplayName } from '@/constants/pickupLocations';
 import ImageCarousel from "@/components/ImageCarousel";
+import GoogleReviews from "@/components/GoogleReviews";
 
 // Helper to format HH:mm:ss string to "hh:mm a"
 const formatTimeAMPM = (timeString: string | null | undefined) => {
@@ -669,35 +670,8 @@ export default function ReservationPage() {
                 </div>
             )}
             
-            {/* Google Reviews Banner */}
-            <div className="mt-12 bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0">
-                        {/* Using a simple G text as placeholder for Google logo if SVG is unavailable */}
-                        <span className="text-3xl font-black text-blue-600">G</span>
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="text-2xl font-black text-slate-900">4.9</span>
-                            <div className="flex gap-1">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star key={i} size={20} className="text-yellow-400 fill-yellow-400" />
-                                ))}
-                            </div>
-                        </div>
-                        <p className="text-slate-600 font-medium">구글 맵 기준 <strong className="text-slate-900">5,000+</strong>개의 실제 고객 리뷰</p>
-                    </div>
-                </div>
-                
-                <a 
-                    href="https://www.google.com/maps/search/?api=1&query=Ocean+Star+Hawaii" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="w-full md:w-auto bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800 font-bold px-8 py-4 rounded-xl transition-all flex items-center justify-center gap-3 shrink-0"
-                >
-                    구글에서 전체 리뷰 보기 <ChevronRight size={18} />
-                </a>
-            </div>
+            {/* Google Reviews Carousel */}
+            <GoogleReviews />
         </section>
 
         {/* === Pickup Guide Section === */}
