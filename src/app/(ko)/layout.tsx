@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import KakaoChatWidget from "@/components/common/KakaoChatWidget";
 import Script from "next/script";
+import { SITE_URL } from "@/lib/site";
 import "../globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.oceanstarhawaii.com'),
+  metadataBase: new URL(SITE_URL),
   title: "하와이 거북이 스노클링 & 선셋 크루즈 예약 | 오션스타 하와이",
   description: "와이키키 최고 평점! 하와이 거북이 스노클링, 해양 액티비티, 선셋 크루즈, 프라이빗 보트 대관까지. 와이키키 픽업 포함, 지금 바로 실시간 예약하세요.",
   keywords: "하와이 거북이 스노클링, 하와이 액티비티, 하와이 선셋 크루즈, 와이키키 스노클링, 오션스타 하와이, 하와이 프라이빗 보트",

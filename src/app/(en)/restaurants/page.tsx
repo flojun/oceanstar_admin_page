@@ -269,7 +269,7 @@ export default function RestaurantsPage() {
                         <h3 className="text-xl font-black text-sky-900 mb-6 text-center">맛집 추천 QR 코드</h3>
                         <div className="bg-white p-4 rounded-2xl shadow-inner mb-6 flex justify-center">
                             <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://oceanstarhawaii.com/restaurants" 
+                                src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://oceanstarhi.com/restaurants" 
                                 alt="QR Code" 
                                 className="w-48 h-48 sm:w-56 sm:h-56 object-contain"
                             />
@@ -277,7 +277,7 @@ export default function RestaurantsPage() {
                         <button 
                             onClick={async () => {
                                 try {
-                                    const response = await fetch("https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://oceanstarhawaii.com/restaurants");
+                                    const response = await fetch("https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://oceanstarhi.com/restaurants");
                                     const blob = await response.blob();
                                     const url = window.URL.createObjectURL(blob);
                                     const link = document.createElement('a');
@@ -288,7 +288,7 @@ export default function RestaurantsPage() {
                                     document.body.removeChild(link);
                                     window.URL.revokeObjectURL(url);
                                 } catch (e) {
-                                    window.open("https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://oceanstarhawaii.com/restaurants", "_blank");
+                                    window.open("https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://oceanstarhi.com/restaurants", "_blank");
                                 }
                             }}
                             className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-md"

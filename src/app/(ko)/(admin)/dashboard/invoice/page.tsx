@@ -213,7 +213,7 @@ export default function InvoiceManager() {
 
         sheet.mergeCells('A2:G2');
         const h2 = sheet.getCell('A2');
-        h2.value = 'www.oceanstarhawaii.com          email - isporex@gmail.com';
+        h2.value = 'www.oceanstarhi.com          email - isporex@gmail.com';
         h2.font = { size: 11 };
         h2.alignment = { vertical: 'middle', horizontal: 'left' };
 

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Poppins } from "next/font/google";
 import Script from "next/script";
+import { SITE_URL } from "@/lib/site";
 import "../globals.css";
 
 const inter = Inter({
@@ -15,7 +16,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.oceanstarhawaii.com'),
+  metadataBase: new URL(SITE_URL),
   title: "Hawaii Turtle Snorkeling & Sunset Cruise | Ocean Star",
   description: "Highest rated in Waikiki! Hawaii turtle snorkeling, marine activities, sunset cruise, and private boat trips. Book now with Waikiki pickup included.",
   keywords: "Hawaii turtle snorkeling, Hawaii activities, Hawaii sunset cruise, Waikiki snorkeling, Ocean Star Hawaii, Hawaii private boat",

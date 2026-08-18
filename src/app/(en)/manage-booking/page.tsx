@@ -4,10 +4,11 @@ import ManageBookingClient from "@/components/booking/ManageBookingClient";
 export const metadata: Metadata = {
   title: "Manage Booking",
   alternates: {
-    canonical: "https://www.oceanstarhawaii.com/manage-booking",
+    canonical: "/manage-booking",
     languages: {
-      "ko-KR": "https://www.oceanstarhawaii.com/kr/manage-booking",
-      "en-US": "https://www.oceanstarhawaii.com/manage-booking",
+      "ko-KR": "/kr/manage-booking",
+      "en-US": "/manage-booking",
+      "x-default": "/manage-booking",
     },
   },
 };

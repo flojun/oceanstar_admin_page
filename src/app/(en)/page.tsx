@@ -3,10 +3,11 @@ import ReservationClientPage from "@/components/landing/ReservationClientPage";
 
 export const metadata: Metadata = {
   alternates: {
-    canonical: "https://www.oceanstarhawaii.com",
+    canonical: "/",
     languages: {
-      "ko-KR": "https://www.oceanstarhawaii.com/kr",
-      "en-US": "https://www.oceanstarhawaii.com",
+      "ko-KR": "/kr",
+      "en-US": "/",
+      "x-default": "/",
     },
   },
 };
