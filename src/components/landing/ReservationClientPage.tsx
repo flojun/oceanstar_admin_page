@@ -23,6 +23,7 @@ import ImageCarousel from "@/components/landing/ImageCarousel";
 import { getTranslation, setLanguageCookie, type Language } from "@/lib/translations";
 import CurrencySelectModal from "@/components/payment/CurrencySelectModal";
 import GoogleReviews from "@/components/GoogleReviews";
+import Reveal from "@/components/landing/Reveal";
 
 // Helper to format HH:mm:ss string to "hh:mm a"
 const formatTimeAMPM = (timeString: string | null | undefined) => {
@@ -619,7 +620,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
              <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-lg transition-all"
+                className="lg:hidden bg-slate-100 hover:bg-slate-200 text-slate-700 p-3 rounded-lg transition-all"
                 aria-label="Toggle Menu"
              >
                 {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -644,9 +645,9 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                 className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-full font-bold text-[11.5px] sm:text-sm shadow-sm transition-all whitespace-nowrap shrink-0">
                 {t('header.manageBooking')}
              </Link>
-             <button 
+             <button
                 onClick={() => setIsBookingOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-bold text-sm shadow-md transition-all sm:block hidden whitespace-nowrap">
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md shadow-blue-500/30 transition-all sm:block hidden whitespace-nowrap">
                 {t('header.bookNow')}
              </button>
           </div>
@@ -671,8 +672,8 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
           
           {/* Content Wrapper */}
           <div className="relative z-20 w-full max-w-4xl mx-auto px-4 flex flex-col items-center justify-center pt-20">
-             
-             <div className="bg-gradient-to-b from-white/40 to-white/10 backdrop-blur-[40px] border border-white/60 p-8 sm:p-20 rounded-[3rem] shadow-[inset_0_0_40px_rgba(255,255,255,0.8),0_15px_35px_rgba(0,0,0,0.08)] flex flex-col items-center animate-fade-in-up">
+
+             <Reveal className="bg-gradient-to-b from-white/40 to-white/10 backdrop-blur-[40px] border border-white/60 p-8 sm:p-20 rounded-[3rem] shadow-[inset_0_0_40px_rgba(255,255,255,0.8),0_15px_35px_rgba(0,0,0,0.08)] flex flex-col items-center">
                  <h1 className="text-center drop-shadow-sm mb-6">
                     {lang === 'ko' ? (
                       <>
@@ -694,13 +695,13 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     {t('hero.desc1')}
                  </p>
 
-                 <button 
+                 <button
                     onClick={() => setIsBookingOpen(true)}
-                    className="bg-white/50 backdrop-blur-md border border-white/80 hover:bg-white/70 hover:scale-105 text-sky-700 shadow-[inset_0_0_20px_rgba(255,255,255,1),0_10px_30px_rgba(0,0,0,0.05)] transition-all px-12 py-4 sm:px-16 sm:py-5 rounded-full font-black tracking-tight text-[16px] sm:text-xl mb-2"
+                    className="bg-blue-600 hover:bg-blue-700 hover:scale-105 text-white shadow-[0_15px_35px_rgba(37,99,235,0.35)] transition-all px-12 py-4 sm:px-16 sm:py-5 rounded-full font-black tracking-tight text-[16px] sm:text-xl mb-2"
                     style={{ fontFamily: "'Inter', 'Pretendard', -apple-system, sans-serif" }}>
                     {t('hero.mainBtn')}
                  </button>
-             </div>
+             </Reveal>
           </div>
         </section>
 
@@ -708,53 +709,53 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         
           {/* === 2. Bento Box Introduction === */}
           <section className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4 sm:gap-6 mb-16 sm:mb-24">
-            <div className="md:col-span-3 lg:col-span-4 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
+            <Reveal delay={0} className="md:col-span-3 lg:col-span-4 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
               <div className="w-16 h-16 bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-white/80 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
                 <Award className="w-8 h-8 text-sky-600" strokeWidth={2.5} />
               </div>
               <h3 className="text-xl lg:text-2xl font-black text-slate-800 mb-3 break-keep">{t('bento.desc1_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc1_text')}</p>
-            </div>
-            
-            <div className="md:col-span-3 lg:col-span-4 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
+            </Reveal>
+
+            <Reveal delay={0.08} className="md:col-span-3 lg:col-span-4 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
               <div className="w-16 h-16 bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-white/80 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500">
                 <Star className="w-8 h-8 text-sky-600" strokeWidth={2.5} />
               </div>
               <h3 className="text-xl lg:text-2xl font-black text-slate-800 mb-3 break-keep">{t('bento.desc2_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc2_text')}</p>
-            </div>
-            
-            <div className="md:col-span-6 lg:col-span-4 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
+            </Reveal>
+
+            <Reveal delay={0.16} className="md:col-span-6 lg:col-span-4 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
               <div className="w-16 h-16 bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-white/80 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
                 <ShieldCheck className="w-8 h-8 text-sky-600" strokeWidth={2.5} />
               </div>
               <h3 className="text-xl lg:text-2xl font-black text-slate-800 mb-3 break-keep">{t('bento.desc3_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc3_text')}</p>
-            </div>
-            
-            <div className="md:col-span-3 lg:col-span-6 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
+            </Reveal>
+
+            <Reveal delay={0} className="md:col-span-3 lg:col-span-6 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
               <div className="w-16 h-16 bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-white/80 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500">
                 <Anchor className="w-8 h-8 text-sky-600" strokeWidth={2.5} />
               </div>
               <h3 className="text-xl lg:text-2xl font-black text-slate-800 mb-3 break-keep">{t('bento.desc4_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc4_text')}</p>
-            </div>
-            
-            <div className="md:col-span-3 lg:col-span-6 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
+            </Reveal>
+
+            <Reveal delay={0.08} className="md:col-span-3 lg:col-span-6 bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] rounded-[2rem] p-8 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)] border border-white/60 flex flex-col justify-start transform hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 group">
               <div className="w-16 h-16 bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-white/80 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
                 <UsersRound className="w-8 h-8 text-sky-600" strokeWidth={2.5} />
               </div>
               <h3 className="text-xl lg:text-2xl font-black text-slate-800 mb-3 break-keep">{t('bento.desc5_title')}</h3>
               <p className="text-slate-600 font-medium text-base leading-relaxed break-keep">{t('bento.desc5_text')}</p>
-            </div>
+            </Reveal>
           </section>
 
           {/* === 3. Tour Packages (Cards) === */}
           <section id="tours" className="mb-10">
-            <div className="text-center mb-12">
+            <Reveal className="text-center mb-12">
                <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">{t('tour.title')}</h2>
                <p className="text-lg text-slate-500">{t('tour.subtitle')}</p>
-            </div>
+            </Reveal>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                {(() => {
@@ -839,7 +840,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                       })();
 
                     return (
-                      <div key={tour.tour_id} className={`${isPrivate ? 'lg:col-span-3 lg:flex-row' : ''} ${theme.isDark ? 'bg-gradient-to-br from-sky-900/60 to-indigo-900/60 backdrop-blur-[40px] text-white border border-white/40 shadow-[inset_0_0_30px_rgba(255,255,255,0.2),0_15px_35px_rgba(0,0,0,0.2)]' : 'bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] border border-white/60 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)]'} flex-col rounded-[2.5rem] overflow-hidden hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 flex group relative`}>
+                      <Reveal key={tour.tour_id} delay={(idx % 3) * 0.08} className={`${isPrivate ? 'lg:col-span-3 lg:flex-row' : ''} ${theme.isDark ? 'bg-gradient-to-br from-sky-900/60 to-indigo-900/60 backdrop-blur-[40px] text-white border border-white/40 shadow-[inset_0_0_30px_rgba(255,255,255,0.2),0_15px_35px_rgba(0,0,0,0.2)]' : 'bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] border border-white/60 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)]'} flex-col rounded-[2.5rem] overflow-hidden hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 flex group relative`}>
                         {theme.specialLabel && (
                           <div className={`absolute top-0 right-10 ${theme.specialLabelBg || 'bg-gradient-to-r from-orange-400 to-red-500'} text-white text-xs font-bold px-4 py-1.5 rounded-b-xl z-10 shadow-md`}>
                             {theme.specialLabel}
@@ -929,11 +930,11 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                 >
                                   {t('tour.seeDetails')}
                                 </button>
-                                <button onClick={() => { if(tour.tour_id !== 'combined_morning' && tour.tour_id) { setSelectedTour(tour.tour_id); } else { setSelectedTour(null); } if(tour.is_flat_rate) form.setValue("childCount", 0); setIsBookingOpen(true); }} className={`flex-1 sm:flex-none bg-blue-900 hover:bg-blue-950 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-transform active:scale-95 whitespace-nowrap shadow-[0_4px_14px_0_rgba(0,118,255,0.39)]`}>{t('tour.bookBtn')}</button>
+                                <button onClick={() => { if(tour.tour_id !== 'combined_morning' && tour.tour_id) { setSelectedTour(tour.tour_id); } else { setSelectedTour(null); } if(tour.is_flat_rate) form.setValue("childCount", 0); setIsBookingOpen(true); }} className={`flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 whitespace-nowrap shadow-[0_4px_14px_0_rgba(37,99,235,0.35)]`}>{t('tour.bookBtn')}</button>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </Reveal>
                     );
                   });
                })()}
@@ -943,18 +944,18 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
         {/* === 4. Customer Reviews Section === */}
         <section id="reviews" className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-20 relative z-30">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+            <Reveal className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
                 <div>
                    <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">{t('review.title')}</h2>
                    <p className="text-lg text-slate-500">{t('review.subtitle')}</p>
                 </div>
-                <button 
+                <button
                    onClick={() => setIsReviewOpen(true)}
                    className="bg-blue-600 hover:bg-blue-700 text-white w-full md:w-auto px-8 py-4 md:py-3 rounded-2xl font-black text-base md:text-lg shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
                    <MessageSquare size={20} />
                    {t('review.writeBtn')}
                 </button>
-            </div>
+            </Reveal>
 
             {isLoadingReviews ? (
                 <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-blue-500 w-10 h-10" /></div>
@@ -963,7 +964,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                     {t('review.empty')}
                 </div>
             ) : (
-                <div className="relative group">
+                <Reveal className="relative group">
                     <button 
                         onClick={() => scrollReviews('left')} 
                         className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 sm:-ml-6 z-10 bg-white/80 backdrop-blur-md shadow-lg border border-white/50 text-slate-800 w-12 h-12 rounded-full hover:bg-white hover:scale-105 transition-all hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100 disabled:opacity-0"
@@ -1035,16 +1036,16 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         </div>
                     ))}
                     </div>
-                </div>
+                </Reveal>
             )}
-            
+
             {/* Google Reviews Carousel */}
-            <div className="mt-12">
+            <Reveal className="mt-12">
                 <GoogleReviews />
-            </div>
+            </Reveal>
 
             {/* YouTube Video Section */}
-            <div className="mt-12">
+            <Reveal className="mt-12">
                 <div className="text-center mb-8">
                     <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">{t('review.video_title')}</h3>
                     <p className="text-base text-slate-500 mt-2">{t('review.video_subtitle')}</p>
@@ -1058,22 +1059,22 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         allowFullScreen
                     />
                 </div>
-            </div>
+            </Reveal>
         </section>
 
         {/* === Pickup Guide Section === */}
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-20 relative z-30">
+        <Reveal className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-20 relative z-30">
             <PickupGuide lang={lang} />
-        </div>
+        </Reveal>
 
         {/* === FAQ Section === */}
-        <div id="faq">
+        <Reveal id="faq">
            <FAQSection lang={lang} />
-        </div>
+        </Reveal>
 
         {/* === 6. Business Hours and Company Info (Footer) === */}
         <section id="about" className="bg-gradient-to-t from-sky-900/40 to-transparent backdrop-blur-[40px] text-slate-800 py-16 mt-20 relative z-30 pb-32 border-t border-white/60 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-          <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
                  <div>
                     <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2"><Mail size={20} className="text-sky-600 drop-shadow-sm" /> {t('footer.hours_title')}</h3>
@@ -1103,7 +1104,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             </a>
                             <Link 
                                 href={lang === 'en' ? '/restaurants' : '/kr/restaurants'}
-                                className="transform transition-all duration-300 hover:-translate-y-2 hover:scale-105 drop-shadow-sm hover:drop-shadow-xl bg-gradient-to-r from-orange-400 to-rose-400 text-white font-black px-4 py-3 rounded-2xl flex items-center gap-2 shadow-md hover:shadow-lg border border-white/40"
+                                className="transform transition-all duration-300 hover:-translate-y-2 hover:scale-105 drop-shadow-sm hover:drop-shadow-xl bg-teal-600 hover:bg-teal-700 text-white font-black px-4 py-3 rounded-2xl flex items-center gap-2 shadow-md hover:shadow-lg border border-white/40"
                             >
                                 <Utensils size={24} />
                                 <span className="text-sm sm:text-base leading-tight text-center">{lang === 'en' ? 'Hawaiian Restaurants' : '맛집 리스트 보기'}</span>
@@ -1151,7 +1152,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
              <div className="mt-8 pt-4 border-t border-white/40 text-center">
                  <p className="text-slate-500 font-medium text-xs">© 2026 Ocean Star. All Rights Reserved.</p>
              </div>
-          </div>
+          </Reveal>
         </section>
 
         {/* Google Ads Phone Tracking */}
@@ -1174,7 +1175,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
             </div>
             <button
               onClick={() => setIsBookingOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 sm:py-3 sm:px-8 rounded-full shadow-lg shadow-blue-500/30 transition-transform active:scale-95 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 sm:py-3.5 sm:px-8 rounded-full shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0"
             >
               {t('floater.btn')} <ChevronRight size={18} />
             </button>
@@ -1698,7 +1699,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             type="button"
                             onClick={() => form.handleSubmit(onSubmit)()}
                             disabled={isSubmitting}
-                            className="px-6 py-3 sm:px-8 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 flex justify-center items-center gap-2"
+                            className="px-6 py-3 sm:px-8 sm:py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/30 active:scale-95 flex justify-center items-center gap-2"
                         >
                             {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <CreditCard size={20} />}
                             {isSubmitting ? t('bookingModal.waiting') : t('bookingModal.checkout_btn')}
@@ -1878,7 +1879,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                             if(expandedTourDetails.is_flat_rate) form.setValue("childCount", 0); 
                             setIsBookingOpen(true); 
                         }} 
-                        className="px-8 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30 w-full sm:w-auto text-center"
+                        className="px-8 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 w-full sm:w-auto text-center"
                      >
                          {t('tour.bookBtn')}
                      </button>
