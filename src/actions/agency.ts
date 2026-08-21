@@ -147,6 +147,28 @@ async function checkCapacity(tourDate: string, option: string, additionalPax: nu
     return null;
 }
 
+// Fields an agency partner may set on a reservation. Everything else on the
+// row (status, settlement_*, is_admin_checked, expected_refund, vehicle_*,
+// agency_id, source, order_id, ...) is admin-owned or server-owned and must
+// never be taken from partner-supplied input.
+const AGENCY_EDITABLE_FIELDS = [
+    "name",
+    "tour_date",
+    "pax",
+    "option",
+    "pickup_location",
+    "contact",
+    "note",
+] as const;
+
+function pickAgencyEditable(input: Record<string, unknown>) {
+    const out: Record<string, unknown> = {};
+    for (const f of AGENCY_EDITABLE_FIELDS) {
+        if (Object.prototype.hasOwnProperty.call(input, f)) out[f] = input[f];
+    }
+    return out;
+}
+
 export async function createAgencyReservation(reservation: ReservationInsert) {
     const session = await getAgencySession();
     if (!session.id) return { success: false, error: "Unauthorized" };
@@ -166,8 +188,13 @@ export async function createAgencyReservation(reservation: ReservationInsert) {
         const { data, error } = await supabase
             .from("reservations")
             .insert({
-                ...reservation,
+                ...pickAgencyEditable(reservation),
+                // Server-owned: a partner must not be able to spoof these.
                 agency_id: session.id,
+                source: session.name,
+                status: "예약확정",
+                receipt_date: new Date().toISOString().split("T")[0],
+                is_reconfirmed: false,
                 is_admin_checked: false, // Force it to show in Admin Notification Center
             })
             .select()
@@ -228,10 +255,11 @@ export async function updateAgencyReservation(id: string, updates: ReservationUp
         const { data, error } = await supabase
             .from("reservations")
             .update({
-                ...updates,
+                ...pickAgencyEditable(updates),
                 is_admin_checked: false // Uncheck it so Admin reviews the modification
             })
             .eq("id", id)
+            .eq("agency_id", session.id) // Partners may only touch their own bookings
             .select()
             .single();
 
@@ -261,6 +289,7 @@ export async function cancelAgencyReservation(id: string, reserverName: string) 
             .from("reservations")
             .update({ status: "취소요청" })
             .eq("id", id)
+            .eq("agency_id", session.id) // Partners may only cancel their own bookings
             .select()
             .single();
 

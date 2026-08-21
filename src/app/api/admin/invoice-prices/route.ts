@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { getAdminUser } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,15 +25,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
-        const cookieStore = await cookies();
-        const supabaseAuth = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            {
-                cookies: { getAll: () => cookieStore.getAll() }
-            }
-        );
-        const { data: { user } } = await supabaseAuth.auth.getUser();
+        const user = await getAdminUser();
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }

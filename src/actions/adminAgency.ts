@@ -3,6 +3,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { Agency } from "@/types/agency";
 import bcrypt from "bcryptjs";
+import { getAdminUser } from "@/lib/adminAuth";
 
 // Ensure this uses the service role key to bypass the new restrictive RLS
 // Helper to get supabase client on demand instead of at build time
@@ -14,6 +15,8 @@ const getSupabase = () => {
 
 export async function getAgencies() {
     try {
+        if (!(await getAdminUser())) return { success: false, error: "Unauthorized" };
+
         const supabase = getSupabase();
         const { data, error } = await supabase
             .from("agencies")
@@ -30,6 +33,8 @@ export async function getAgencies() {
 
 export async function createAgency(agencyData: { name: string; login_id: string; password?: string }) {
     try {
+        if (!(await getAdminUser())) return { success: false, error: "Unauthorized" };
+
         let finalPassword = agencyData.password;
 
         // Hash password before inserting
@@ -58,6 +63,8 @@ export async function createAgency(agencyData: { name: string; login_id: string;
 
 export async function updateAgency(id: string, updates: { name?: string; login_id?: string; password?: string }) {
     try {
+        if (!(await getAdminUser())) return { success: false, error: "Unauthorized" };
+
         const payload: any = { ...updates };
 
         // Hash password if provided in the update payload
@@ -82,6 +89,8 @@ export async function updateAgency(id: string, updates: { name?: string; login_i
 
 export async function deleteAgency(id: string) {
     try {
+        if (!(await getAdminUser())) return { success: false, error: "Unauthorized" };
+
         const supabase = getSupabase();
         const { error } = await supabase.from("agencies").delete().eq('id', id);
 

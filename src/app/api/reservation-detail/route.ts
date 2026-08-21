@@ -10,9 +10,12 @@ export async function GET(req: Request) {
     }
 
     try {
+        // order_id alone is not proof of ownership - it is printed on vouchers
+        // and typed into the public review form. Return only what the booking
+        // success page renders, never the booker's name/phone/email/price.
         const { data: reservation, error } = await supabaseServer
             .from('reservations')
-            .select('*')
+            .select('order_id, tour_date, option, pickup_location')
             .eq('order_id', orderId)
             .single();
 
