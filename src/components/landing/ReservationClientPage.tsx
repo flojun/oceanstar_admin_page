@@ -811,7 +811,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                       })();
 
                     return (
-                      <Reveal key={tour.tour_id} delay={(idx % 3) * 0.08} className={`${isPrivate ? 'lg:col-span-3 lg:flex-row' : ''} ${theme.isDark ? 'bg-gradient-to-br from-sky-900/60 to-indigo-900/60 backdrop-blur-[40px] text-white border border-white/40 shadow-[inset_0_0_30px_rgba(255,255,255,0.2),0_15px_35px_rgba(0,0,0,0.2)]' : 'bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] border border-white/60 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)]'} flex-col rounded-[2.5rem] overflow-hidden hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 flex group relative`}>
+                      <Reveal key={tour.tour_id} delay={(idx % 3) * 0.08} className={`${isPrivate ? 'lg:col-span-3 lg:flex-row' : ''} ${theme.isDark ? 'bg-[#0a1740] backdrop-blur-[40px] text-white border border-white/40 shadow-[inset_0_0_30px_rgba(255,255,255,0.2),0_15px_35px_rgba(0,0,0,0.2)]' : 'bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-[40px] border border-white/60 shadow-[inset_0_0_20px_rgba(255,255,255,0.6),0_15px_35px_rgba(0,0,0,0.05)]'} flex-col rounded-[2.5rem] overflow-hidden hover:-translate-y-2 hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.9),0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 flex group relative`}>
                         {theme.specialLabel && (
                           <div className={`absolute top-0 right-10 ${theme.specialLabelBg || 'bg-gradient-to-r from-orange-400 to-red-500'} text-white text-xs font-bold px-4 py-1.5 rounded-b-xl z-10 shadow-md`}>
                             {theme.specialLabel}
@@ -819,7 +819,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         )}
                         <div className={`${isPrivate ? 'h-56 lg:h-auto lg:w-[45%]' : 'h-56'} relative overflow-hidden shrink-0`}>
                           <ImageCarousel images={tourImages} interval={4000} />
-                          <div className={`absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t ${theme.isDark ? 'from-indigo-900/60' : 'from-white/40'} to-transparent z-10 pointer-events-none`}></div>
+                          <div className={`absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t ${theme.isDark ? 'from-[#0a1740]/80' : 'from-white/40'} to-transparent z-10 pointer-events-none`}></div>
                         </div>
                         <div className={`p-6 sm:p-8 flex-1 flex flex-col justify-center relative z-20`}>
                           <h3 className={`text-2xl font-bold text-center ${theme.isDark ? 'text-white drop-shadow-md' : 'text-slate-800 drop-shadow-sm'} mb-3`}>{tour.name}</h3>
@@ -901,7 +901,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                 >
                                   {t('tour.seeDetails')}
                                 </button>
-                                <button onClick={() => { if(tour.tour_id !== 'combined_morning' && tour.tour_id) { setSelectedTour(tour.tour_id); } else { setSelectedTour(null); } if(tour.is_flat_rate) form.setValue("childCount", 0); setIsBookingOpen(true); }} className={`flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 whitespace-nowrap shadow-[0_4px_14px_0_rgba(37,99,235,0.35)]`}>{t('tour.bookBtn')}</button>
+                                <button onClick={() => { if(tour.tour_id !== 'combined_morning' && tour.tour_id) { setSelectedTour(tour.tour_id); } else { setSelectedTour(null); } if(tour.is_flat_rate) form.setValue("childCount", 0); setIsBookingOpen(true); }} className={`flex-1 sm:flex-none px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 whitespace-nowrap ${isPrivate ? 'bg-white hover:bg-slate-100 text-blue-950 shadow-[0_4px_14px_0_rgba(255,255,255,0.25)]' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.35)]'}`}>{t('tour.bookBtn')}</button>
                             </div>
                           </div>
                         </div>
