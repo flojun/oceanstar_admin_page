@@ -76,3 +76,50 @@ export function getWalkingMinutes(meters: number): number {
     return Math.ceil(meters / 83);
 }
 
+export interface SplitGroup {
+    name: string;
+    pickup: string;
+    pax: number;
+}
+
+/**
+ * Detect multi-pickup patterns in pickup_location.
+ * Supported: "장소 N명 (이름), 장소 N명 (이름)"
+ *       or: "이름,장소,인원,이름,장소,인원"
+ */
+export function parseSplitPickup(loc: string | null): SplitGroup[] | null {
+    if (!loc) return null;
+    const trimmed = loc.trim();
+
+    // Pattern: "장소 N명 (이름), 장소 N명 (이름)"
+    const descRegex = /([^\s,]+)\s+(\d+)\s*명\s*\(([^)]+)\)/g;
+    const groups: SplitGroup[] = [];
+    let m: RegExpExecArray | null;
+    while ((m = descRegex.exec(trimmed)) !== null) {
+        groups.push({ pickup: m[1], pax: parseInt(m[2], 10), name: m[3].trim() });
+    }
+    if (groups.length >= 2) return groups;
+
+    // Pattern: "이름,장소,인원,이름,장소,인원"
+    const parts = trimmed.split(',').map(s => s.trim());
+    if (parts.length >= 6 && parts.length % 3 === 0) {
+        const csvGroups: SplitGroup[] = [];
+        let valid = true;
+        for (let i = 0; i < parts.length; i += 3) {
+            const pax = parseInt(parts[i + 2], 10);
+            if (!parts[i] || !parts[i + 1] || isNaN(pax)) { valid = false; break; }
+            csvGroups.push({ name: parts[i], pickup: parts[i + 1], pax });
+        }
+        if (valid && csvGroups.length >= 2) return csvGroups;
+    }
+
+    return null;
+}
+
+// Helper to mask middle characters of a name
+export function maskName(name: string | null | undefined): string {
+    if (!name) return '';
+    if (name.length <= 1) return name;
+    if (name.length === 2) return name.charAt(0) + '*';
+    return name.charAt(0) + '*'.repeat(name.length - 2) + name.charAt(name.length - 1);
+}

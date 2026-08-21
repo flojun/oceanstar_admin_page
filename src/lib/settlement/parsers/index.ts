@@ -13,11 +13,16 @@ export interface ParseResult {
 
 export type PlatformParser = (file: File) => Promise<ParseResult>;
 
+const parseKlook: PlatformParser = async (file: File) => {
+    return { rows: [], errors: ['Klook parser not yet implemented'] };
+};
+
 const parserMap: Record<PlatformKey, PlatformParser> = {
     myRealTrip: parseMyRealTrip,
     zoomZoom: parseZoomZoom,
     triple: parseTriple,
     waug: parseWaug,
+    klook: parseKlook,
 };
 
 export function getParser(platform: PlatformKey): PlatformParser {

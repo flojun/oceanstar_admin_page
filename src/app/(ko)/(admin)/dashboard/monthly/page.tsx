@@ -1,0 +1,282 @@
+"use client";
+
+import React, { useEffect, useState, useMemo } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { Reservation } from "@/types/reservation";
+import { cn } from "@/lib/utils";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isToday } from "date-fns";
+import { ko } from "date-fns/locale";
+import type { TourSetting } from "@/lib/tourUtils";
+import { resolveOptionToTourSetting, getDisplayOrder, getTrafficLightStatus, getShortLabel } from "@/lib/tourUtils";
+import { ReservationModal } from "@/components/reservations/ReservationModal";
+
+// ---------- Types ----------
+interface DailyStats {
+    totalPax: number;
+    optionStats: Record<string, number>;
+}
+
+// ---------- Helper: Parse Pax ----------
+function parsePax(paxStr: string): number {
+    if (!paxStr) return 0;
+    const num = parseInt(paxStr.replace(/[^0-9]/g, ''), 10);
+    return isNaN(num) ? 0 : num;
+}
+
+export default function MonthlyPage() {
+    const router = useRouter();
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [reservations, setReservations] = useState<Reservation[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [tourSettings, setTourSettings] = useState<TourSetting[]>([]);
+
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+    // Dynamic display order from DB
+    const displayOrder = useMemo(() => getDisplayOrder(tourSettings), [tourSettings]);
+
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
+    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+    // Fetch tour settings once
+    useEffect(() => {
+        supabase.from('tour_settings').select('*').order('display_order').then(({ data }) => {
+            if (data) setTourSettings(data);
+        });
+    }, []);
+
+    // Fetch reservations for the month
+    useEffect(() => {
+        const fetchMonthData = async () => {
+            setLoading(true);
+            const startStr = format(monthStart, 'yyyy-MM-dd');
+            const endStr = format(monthEnd, 'yyyy-MM-dd');
+
+            try {
+                const { data, error } = await supabase
+                    .from("reservations")
+                    .select("*")
+                    .gte("tour_date", startStr)
+                    .lte("tour_date", endStr)
+                    .neq("status", "취소");
+
+                if (error) throw error;
+                setReservations(data || []);
+            } catch (err) {
+                console.error("Fetch monthly error:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchMonthData();
+    }, [currentDate, refreshTrigger]);
+
+    // Aggregate Data by Date using dynamic grouping
+    const statsByDate = useMemo(() => {
+        const stats: Record<string, DailyStats> = {};
+
+        reservations.forEach(r => {
+            const dateKey = r.tour_date;
+            if (!stats[dateKey]) {
+                stats[dateKey] = { totalPax: 0, optionStats: {} };
+            }
+
+            const pax = parsePax(r.pax);
+            const resolved = resolveOptionToTourSetting(r.option, tourSettings);
+            const group = resolved.group;
+
+            stats[dateKey].optionStats[group] = (stats[dateKey].optionStats[group] || 0) + pax;
+            stats[dateKey].totalPax += pax;
+        });
+
+        return stats;
+    }, [reservations, tourSettings]);
+
+    const handlePrevMonth = () => setCurrentDate(subMonths(currentDate, 1));
+    const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
+
+    const handleYearMonthChange = (e: React.ChangeEvent<HTMLSelectElement>, type: 'year' | 'month') => {
+        const newDate = new Date(currentDate);
+        if (type === 'year') newDate.setFullYear(parseInt(e.target.value));
+        if (type === 'month') newDate.setMonth(parseInt(e.target.value));
+        setCurrentDate(newDate);
+    };
+
+    const handleDateClick = (dateStr: string) => {
+        if (selectedDate === dateStr) {
+            router.push(`/dashboard/today?date=${dateStr}`);
+            setSelectedDate(null);
+        } else {
+            setSelectedDate(dateStr);
+        }
+    };
+
+    const startDayOfWeek = monthStart.getDay();
+    const blanks = Array.from({ length: startDayOfWeek });
+
+    const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
+    const months = Array.from({ length: 12 }, (_, i) => i);
+
+    return (
+        <div className="h-full flex flex-col space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between shrink-0 relative">
+                <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                    {format(currentDate, 'yyyy년 M월', { locale: ko })}
+                </h2>
+                
+                <div className="absolute left-1/2 -translate-x-1/2">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-bold shadow-sm transition-all text-sm flex items-center gap-1"
+                    >
+                        <span>+</span> 새 예약 추가
+                    </button>
+                </div>
+
+                <div className="flex gap-2 items-center relative">
+                    <button onClick={handlePrevMonth} className="p-2 rounded hover:bg-blue-50 text-blue-600 transition-colors">
+                        <ChevronLeft className="h-6 w-6" />
+                    </button>
+
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowDatePicker(!showDatePicker)}
+                            className="px-4 py-2 text-sm font-bold bg-white border border-blue-200 rounded-full shadow-sm text-blue-700 hover:bg-blue-50 transition-all flex items-center gap-2"
+                        >
+                            <span>{format(currentDate, 'yyyy.MM')}</span>
+                            <span className="text-xs">▼</span>
+                        </button>
+
+                        {showDatePicker && (
+                            <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 p-3 z-50 grid grid-cols-2 gap-2 animate-in fade-in zoom-in-95 duration-200">
+                                <select className="p-1 border rounded text-sm focus:ring-2 focus:ring-blue-500"
+                                    value={currentDate.getFullYear()} onChange={(e) => handleYearMonthChange(e, 'year')}>
+                                    {years.map(y => <option key={y} value={y}>{y}년</option>)}
+                                </select>
+                                <select className="p-1 border rounded text-sm focus:ring-2 focus:ring-blue-500"
+                                    value={currentDate.getMonth()} onChange={(e) => handleYearMonthChange(e, 'month')}>
+                                    {months.map(m => <option key={m} value={m}>{m + 1}월</option>)}
+                                </select>
+                                <button onClick={() => { setCurrentDate(new Date()); setShowDatePicker(false); }}
+                                    className="col-span-2 mt-1 py-1.5 text-xs font-semibold bg-blue-50 text-blue-600 rounded hover:bg-blue-100">
+                                    오늘 날짜로 이동
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    <button onClick={handleNextMonth} className="p-2 rounded hover:bg-blue-50 text-blue-600 transition-colors">
+                        <ChevronRight className="h-6 w-6" />
+                    </button>
+
+                    {showDatePicker && (
+                        <div className="fixed inset-0 z-40" onClick={() => setShowDatePicker(false)} />
+                    )}
+                </div>
+            </div>
+
+            {/* Calendar Grid */}
+            <div className="w-full border border-gray-200 rounded-lg bg-white shadow-sm flex flex-col overflow-hidden max-h-[calc(100vh-200px)] sm:max-h-none sm:flex-1">
+                <div className="grid grid-cols-7 border-b border-blue-100 bg-blue-50/50">
+                    {['일', '월', '화', '수', '목', '금', '토'].map((day, i) => (
+                        <div key={day} className={cn(
+                            "py-2 text-center text-sm font-bold",
+                            i === 0 ? "text-red-500" : (i === 6 ? "text-blue-600" : "text-gray-700")
+                        )}>
+                            {day}
+                        </div>
+                    ))}
+                </div>
+
+                <div className="overflow-y-auto sm:flex-1 grid grid-cols-7 auto-rows-auto sm:auto-rows-fr">
+                    {blanks.map((_, i) => (
+                        <div key={`blank-${i}`} className="border-b border-r border-gray-100 bg-gray-50/30" />
+                    ))}
+
+                    {daysInMonth.map((day) => {
+                        const dateStr = format(day, 'yyyy-MM-dd');
+                        const isTodayDate = isToday(day);
+                        const isSelected = selectedDate === dateStr;
+                        const dayStats = statsByDate[dateStr];
+
+                        return (
+                            <div
+                                key={dateStr}
+                                onClick={() => handleDateClick(dateStr)}
+                                className={cn(
+                                    "relative border-b border-r border-gray-100 p-1 hover:bg-blue-50 cursor-pointer sm:min-h-[100px] transition-colors flex flex-col",
+                                    isTodayDate && "bg-red-50 ring-1 ring-inset ring-red-400",
+                                    isSelected && "bg-blue-100 ring-2 ring-inset ring-blue-500"
+                                )}
+                            >
+                                <span className={cn(
+                                    "text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full ml-auto mb-1",
+                                    isTodayDate ? "bg-blue-600 text-white shadow-sm" : "text-gray-700"
+                                )}>
+                                    {format(day, 'd')}
+                                </span>
+
+                                <div className="flex flex-col gap-0.5 w-full mt-1">
+                                    {dayStats && displayOrder.map(group => {
+                                        const count = dayStats.optionStats[group];
+                                        if (!count) return null;
+
+                                        const { color, percent } = getTrafficLightStatus(group, count, tourSettings);
+
+                                        return (
+                                            <div key={group}
+                                                className="relative w-full h-9 sm:h-6 rounded-md bg-gray-200 shadow-inner border border-gray-300 overflow-hidden"
+                                            >
+                                                <div
+                                                    className={cn(
+                                                        "h-full absolute left-0 top-0 transition-all duration-300 ease-out",
+                                                        "bg-gradient-to-b shadow-md border-t border-b-2 border-r",
+                                                        color
+                                                    )}
+                                                    style={{ width: `${percent}%` }}
+                                                />
+                                                <div className="relative z-10 w-full h-full flex flex-col sm:flex-row items-center justify-center sm:justify-between px-2 text-[10px] sm:text-xs font-bold leading-tight sm:leading-none text-white select-none">
+                                                    <span className="hidden sm:inline" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,0.5)' }}>
+                                                        {group} : {count}명
+                                                    </span>
+                                                    <div className="sm:hidden flex flex-col items-center justify-center w-full h-full leading-3" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,0.5)' }}>
+                                                        <span className="mb-0.5">{getShortLabel(group)}</span>
+                                                        <span>{count}명</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            <div className="shrink-0 flex gap-4 text-sm font-medium text-gray-500 px-2 justify-end flex-wrap">
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-yellow-400 to-yellow-600 border border-yellow-300 shadow-sm"></span>1~9명</div>
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-emerald-400 to-emerald-600 border border-emerald-300 shadow-sm"></span>10명~</div>
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-blue-500 to-blue-700 border border-blue-400 shadow-sm"></span>마감</div>
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-red-500 to-red-700 border border-red-400 shadow-sm"></span>초과</div>
+                <div className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gradient-to-b from-pink-400 to-pink-600 border border-pink-300 shadow-sm"></span>기타</div>
+            </div>
+
+            <ReservationModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={() => {
+                    setIsModalOpen(false);
+                    setRefreshTrigger(prev => prev + 1);
+                }}
+            />
+        </div>
+    );
+}

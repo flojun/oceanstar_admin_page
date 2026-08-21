@@ -43,7 +43,13 @@ export function useReservationRealtime({ onEvent, onCountRefresh }: UseReservati
                     let type: ReservationEventType = "general_update";
 
                     if (payload.eventType === "INSERT") {
-                        type = "new_reservation";
+                        // Admin manual entries have is_admin_checked = true
+                        // External bookings (agency/website) have is_admin_checked = false
+                        if ((payload.new as any)?.is_admin_checked === false) {
+                            type = "new_reservation";
+                        } else {
+                            type = "general_update";
+                        }
                     } else if (payload.eventType === "UPDATE") {
                         const newStatus = (payload.new as any)?.status;
                         // Check if current status is an alertable status change

@@ -47,3 +47,4 @@ export function DraggableBar({ reservation, index }: DraggableBarProps) {
         </div>
     );
 }
+

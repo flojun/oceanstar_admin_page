@@ -37,24 +37,24 @@ export async function middleware(request: NextRequest) {
 
     const path = request.nextUrl.pathname
 
-    // 0. Public routes - no auth required
+    // 0.5 Public routes - no auth required
     if (path.startsWith('/checkin')) {
         return response
     }
 
-    // 1. If trying to access /login but already logged in -> Redirect to /dashboard/home
+    // 1. If trying to access /login but already logged in -> Redirect to /dashboard/alerts
     if (path === '/login') {
         if (user) {
-            return NextResponse.redirect(new URL('/dashboard/home', request.url))
+            return NextResponse.redirect(new URL('/dashboard/alerts', request.url))
         }
         return response
     }
 
     // 2. If trying to access /dashboard (or sub-routes) -> Check Auth
     if (path.startsWith('/dashboard')) {
-        // 2a. If accessing exactly /dashboard -> Redirect to /dashboard/home
+        // 2a. If accessing exactly /dashboard -> Redirect to /dashboard/alerts
         if (path === '/dashboard') {
-            return NextResponse.redirect(new URL('/dashboard/home', request.url))
+            return NextResponse.redirect(new URL('/dashboard/alerts', request.url))
         }
 
         // 2b. If not logged in -> Redirect to /login
@@ -86,6 +86,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
+        '/',
         '/login',
         '/agency-login',
         '/dashboard/:path*',

@@ -254,3 +254,25 @@ export function getShortLabel(name: string): string {
     if (name.length <= 3) return name + ':';
     return name.substring(0, 3) + ':';
 }
+
+// ============================================================
+// Localized display names
+// ============================================================
+
+const TOUR_NAMES_EN: Record<string, string> = {
+    morning1: '1st Trip Waikiki Turtle Snorkeling',
+    morning2: '2nd Trip Waikiki Turtle Snorkeling',
+    sunset: 'Sunset Wine & Waikiki Turtle Snorkeling',
+    private: '[Private] Waikiki Turtle Snorkeling Trip',
+    combo_marine: 'Turtle Snorkeling + Parasailing / Jet Ski',
+};
+
+/**
+ * Tour names are stored in Korean in the DB, so English needs a lookup by tour_id.
+ * Falls back to the stored name when the id is unknown.
+ */
+export function getTourNameByLang(tourId: string | undefined | null, koName: string, lang: 'ko' | 'en'): string {
+    if (lang !== 'en' || !tourId) return koName;
+    if (tourId.toLowerCase().includes('sunset')) return TOUR_NAMES_EN.sunset;
+    return TOUR_NAMES_EN[tourId] ?? koName;
+}

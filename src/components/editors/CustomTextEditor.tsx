@@ -13,6 +13,7 @@ interface CustomTextEditorProps {
     onNavigate?: (action: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' | 'TAB' | 'ENTER' | 'SHIFT_TAB') => void;
     className?: string;
     textAlign?: 'left' | 'center' | 'right';
+    formatDisplay?: (val: any) => string;
 }
 
 /**
@@ -35,7 +36,8 @@ export default function CustomTextEditor({
     isSelected = false,
     onNavigate,
     className,
-    textAlign = 'left'
+    textAlign = 'left',
+    formatDisplay
 }: CustomTextEditorProps) {
     const inputRef = useRef<HTMLInputElement>(null);
     const [value, setValue] = useState((row as any)[column.key] ?? "");
@@ -239,13 +241,13 @@ export default function CustomTextEditor({
                 }}
                 aria-hidden="true"
             >
-                {value || ' '}
+                {(formatDisplay && !isFocused) ? formatDisplay(value) : (value || ' ')}
             </span>
 
             {/* Actual Input: Overlays the span */}
             <input
                 ref={inputRef}
-                value={value}
+                value={(formatDisplay && !isFocused) ? formatDisplay(value) : value}
                 onChange={handleChange}
                 className={cn(
                     "col-start-1 row-start-1 w-full h-full px-2 outline-none text-gray-900 select-text transition-colors duration-75",

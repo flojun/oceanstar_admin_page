@@ -1,23 +1,35 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
+@import url("https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/static/woff2/SUIT.css");
 @import "tailwindcss";
 
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 :root {
-  --background: #eff6ff;
+  --background: #ffffff;
   --foreground: #171717;
 }
 
+html[lang="ko"] {
+  --font-sans: "Pretendard", sans-serif;
+  --font-heading: "SUIT", sans-serif;
+}
 
+html[lang="en"] {
+  --font-sans: var(--font-inter, "Inter", sans-serif);
+  --font-heading: var(--font-poppins, "Poppins", sans-serif);
+}
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
 }
 
 /* =========================================
@@ -134,3 +146,34 @@ input[type="date"].date-input-horizontal::-webkit-calendar-picker-indicator {
 .animate-notification-ping {
   animation: notification-ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
+
+/* =========================================
+   [HubSpot Chat Widget 위치 조정]
+   하단 배너를 가리지 않도록 위로 올림.
+   HubSpot 기본 런처를 그대로 사용합니다.
+   ========================================= */
+#hubspot-messages-iframe-container {
+  bottom: 80px !important;
+}
+
+@media (max-width: 639px) {
+  #hubspot-messages-iframe-container {
+    transform: scale(0.8);
+    transform-origin: bottom right;
+  }
+}
+
+/* =========================================
+   [Google Places Autocomplete 모바일 픽스]
+   모바일에서 터치 시 리스트가 클릭되지 않는 문제와 z-index 문제 해결
+   ========================================= */
+.pac-container {
+  z-index: 100000 !important;
+  /* 모바일에서 빠른 클릭을 위해 터치 액션 최적화 */
+  touch-action: manipulation;
+}
+
+.pac-item {
+  cursor: pointer;
+  padding: 10px 12px; /* 모바일에서 터치하기 쉽게 패딩 증가 */
+}

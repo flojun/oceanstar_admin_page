@@ -15,6 +15,7 @@ export interface Reservation {
   option: string;
   pickup_location: string;
   contact: string;
+  booker_email?: string;
   note: string;
   // Settlement fields
   settlement_status?: 'completed' | 'excluded' | null;
@@ -44,4 +45,5 @@ export const SOURCE_MAPPING: Record<string, string> = {
   'v': 'Viator',
   '팜': '팜투어',
   '탐': '타미스',
+  '클': '클록',
 };

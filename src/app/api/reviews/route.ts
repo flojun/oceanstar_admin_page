@@ -120,6 +120,44 @@ export async function POST(req: Request) {
             }
         }
 
+        // DeepL Auto Translation Strategy
+        let content_en: string | null = null;
+        let author_name_en: string | null = author_name; // Do not translate proper names directly
+
+        try {
+            const deeplKey = process.env.DEEPL_API_KEY;
+            if (deeplKey) {
+                const isFree = deeplKey.endsWith(':fx');
+                const deeplUrl = isFree 
+                    ? 'https://api-free.deepl.com/v2/translate' 
+                    : 'https://api.deepl.com/v2/translate';
+
+                const response = await fetch(deeplUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `DeepL-Auth-Key ${deeplKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: [content],
+                        target_lang: 'EN-US'
+                    })
+                });
+
+                if (response.ok) {
+                    const dlData = await response.json();
+                    if (dlData.translations && dlData.translations.length > 0) {
+                        content_en = dlData.translations[0].text;
+                    }
+                } else {
+                    console.warn(`DeepL translation failed with status ${response.status}`);
+                }
+            }
+        } catch (translationError) {
+            console.error("DeepL Translation Error:", translationError);
+            // Non-blocking: let DB write proceed with nulls
+        }
+
         // 5. Insert Review
         const { error: insertError } = await supabaseServer
             .from('reviews')
@@ -129,7 +167,9 @@ export async function POST(req: Request) {
                 content,
                 rating,
                 is_hidden: false,
-                image_urls: uploadedUrls
+                image_urls: uploadedUrls,
+                content_en,
+                author_name_en
             }]);
 
         if (insertError) throw insertError;

@@ -10,12 +10,7 @@ export async function GET() {
             .eq('is_visible', true)
             .order('created_at', { ascending: false });
 
-        if (error) {
-            if (error.code === '42P01') {
-                return NextResponse.json({ success: true, reviews: [] });
-            }
-            throw error;
-        }
+        if (error) throw error;
 
         return NextResponse.json({ success: true, reviews: data });
     } catch (error) {

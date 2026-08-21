@@ -1,0 +1,131 @@
+import { NextResponse } from 'next/server';
+import { supabaseServer } from '@/lib/supabaseServer';
+import { sendVoucherEmail } from '@/lib/email';
+import Stripe from 'stripe';
+
+const stripe = process.env.STRIPE_SECRET_KEY 
+    ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' as any })
+    : null;
+
+export async function POST(req: Request) {
+    if (!stripe) {
+        return NextResponse.json({ error: 'Stripe secret key is not configured' }, { status: 500 });
+    }
+    try {
+        const body = await req.json();
+        const { session_id } = body;
+
+        if (!session_id) {
+            return NextResponse.json({ error: '세션 ID가 없습니다.' }, { status: 400 });
+        }
+
+        // 1. Stripe에서 세션 정보 가져오기
+        const session = await stripe.checkout.sessions.retrieve(session_id);
+
+        if (!session) {
+            return NextResponse.json({ error: '유효하지 않은 결제 세션입니다.' }, { status: 404 });
+        }
+
+        const metadata = session.metadata;
+        if (!metadata || !metadata.order_id) {
+            return NextResponse.json({ error: '메타데이터가 누락되었습니다.' }, { status: 400 });
+        }
+
+        const order_id = metadata.order_id;
+
+        // 2. 이미 해당 예약이 DB에 존재하는지 확인
+        const { data: existingData } = await supabaseServer
+            .from('reservations')
+            .select('order_id')
+            .eq('order_id', order_id)
+            .single();
+
+        // 3. 결제가 성공적으로 완료된 경우 DB에 저장 (없을 경우에만)
+        if (session.payment_status === 'paid' && !existingData) {
+            let insertRows = [];
+            const baseRow = {
+                order_id: order_id,
+                source: metadata.source,
+                name: metadata.name,
+                contact: metadata.contact,
+                tour_date: metadata.tour_date,
+                option: metadata.option,
+                pax: metadata.pax,
+                note: metadata.note,
+                pickup_location: metadata.pickup_location,
+                status: '예약확정', // 결제가 완료되었으므로 바로 예약확정 처리
+                total_price: Number(metadata.total_price),
+                booker_email: metadata.booker_email,
+                adult_count: Number(metadata.adult_count),
+                child_count: Number(metadata.child_count),
+                currency: metadata.currency,
+                receipt_date: metadata.receipt_date,
+            };
+
+            if (metadata.combo_option) {
+                const comboSuffix = metadata.combo_option === '1' ? '패러' : metadata.combo_option === '2' ? '제트' : '패러및제트';
+                const timeOptionLabel = metadata.combo_time_option === 'morning1' ? '1부' : metadata.combo_time_option === 'morning2' ? '2부' : '거북이 스노클링';
+                insertRows.push({
+                    ...baseRow,
+                    option: timeOptionLabel,
+                    note: `${metadata.note} [거북이+${comboSuffix} 콤보]`,
+                });
+                insertRows.push({
+                    ...baseRow,
+                    tour_date: metadata.secondary_date,
+                    option: comboSuffix,
+                    pickup_location: metadata.secondary_pickup || metadata.pickup_location,
+                    note: `${metadata.note} [거북이+${comboSuffix} 콤보]`,
+                });
+            } else {
+                insertRows.push(baseRow);
+            }
+
+            const { data: insertedData, error: insertError } = await supabaseServer
+                .from('reservations')
+                .insert(insertRows)
+                .select();
+
+            if (insertError) {
+                console.error('Supabase Insert Error after payment:', insertError);
+                return NextResponse.json({ error: 'DB 저장 중 오류 발생' }, { status: 500 });
+            }
+
+            // 바우처 이메일 자동 발송
+            if (insertedData && insertedData.length > 0) {
+                const reservation = insertedData[0];
+                if (reservation.booker_email) {
+                    sendVoucherEmail({
+                        to: reservation.booker_email,
+                        name: reservation.name,
+                        order_id: reservation.order_id,
+                        tour_name: 'OceanStar Hawaii Turtle Snorkeling',
+                        tour_date: reservation.tour_date,
+                        pax: reservation.pax,
+                        option: reservation.option,
+                        pickup_location: reservation.pickup_location,
+                    }).catch(err => {
+                        console.error('Failed to send voucher email via Stripe verify:', err);
+                    });
+                }
+            }
+        } else if (existingData && session.payment_status === 'paid') {
+            // 이미 존재하는데 예약확정 상태가 아닐 경우 업데이트 할 수도 있습니다 (웹훅 등 중복 호출 대비)
+            await supabaseServer
+                .from('reservations')
+                .update({ status: '예약확정' })
+                .eq('order_id', order_id)
+                .neq('status', '예약확정');
+        }
+
+        return NextResponse.json({ 
+            success: true, 
+            order_id: order_id,
+            status: session.payment_status 
+        });
+
+    } catch (error: any) {
+        console.error('Verify Session Error:', error);
+        return NextResponse.json({ error: error.message || '서버 오류' }, { status: 500 });
+    }
+}

@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/update-exchange-rate",
+      "schedule": "0 0 * * 1"
+    },
+    {
+      "path": "/api/cron/check-myrealtrip-emails",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}

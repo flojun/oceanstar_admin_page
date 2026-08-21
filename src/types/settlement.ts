@@ -2,7 +2,7 @@
 
 // ---- Platform Config ----
 
-export type PlatformKey = 'myRealTrip' | 'zoomZoom' | 'triple' | 'waug';
+export type PlatformKey = 'myRealTrip' | 'zoomZoom' | 'triple' | 'waug' | 'klook';
 
 export interface PlatformConfig {
     key: PlatformKey;
@@ -17,9 +17,10 @@ export const PLATFORMS: Record<PlatformKey, PlatformConfig> = {
     zoomZoom: { key: 'zoomZoom', label: '줌줌투어', sourceCode: 'Z', color: 'green', enabled: false },
     triple: { key: 'triple', label: '트리플', sourceCode: 'T', color: 'purple', enabled: false },
     waug: { key: 'waug', label: '와그', sourceCode: 'W', color: 'orange', enabled: false },
+    klook: { key: 'klook', label: '클록', sourceCode: 'KLOOK', color: 'orange', enabled: false },
 };
 
-export const PLATFORM_KEYS: PlatformKey[] = ['myRealTrip', 'zoomZoom', 'triple', 'waug'];
+export const PLATFORM_KEYS: PlatformKey[] = ['myRealTrip', 'zoomZoom', 'triple', 'waug', 'klook'];
 
 // ---- Excel Parsed Row ----
 
@@ -36,6 +37,7 @@ export interface SettlementRow {
     status: string;           // "예약확정", "취소" etc.
     receiptDate?: string;     // Extracted from Reservation ID if available (YYYY-MM-DD)
     rawData: Record<string, unknown>;
+    originalIndex?: number;   // To preserve original Excel row order
 }
 
 // ---- DB Virtual Merge ----
