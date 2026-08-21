@@ -1086,7 +1086,7 @@ function AllReservationsContent() {
             }
 
             alert(`저장 완료 (추가: ${inserts.length}건, 수정: ${updates.length}건)`);
-            fetchReservations(0, true);
+            await fetchReservations(0, true);
         } catch (error: any) {
             console.error("Save error:", error);
             console.error("Error details:", {
