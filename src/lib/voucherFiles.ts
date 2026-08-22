@@ -152,29 +152,24 @@ async function downloadVoucher(lang: 'ko' | 'en', fileName: string): Promise<str
 
 const SESSION_EN: Record<Session, string> = { '1': '1st', '2': '2nd', '3': '3rd' };
 
+/** 파일명("HM_3_305.pdf")에서 세션을 읽는다. */
+function sessionOf(fileName: string): Session {
+    return (fileName.split('_')[1]?.replace('.pdf', '') as Session) ?? '1';
+}
+
 /**
- * 한국어 + 영어 바우처를 모두 첨부한다.
- * 한쪽이 없어도 있는 것만 돌려주고, 둘 다 없으면 빈 배열이다.
+ * 해당 언어의 바우처 첨부 하나를 만든다. 받아오지 못하면 null.
  * 바우처 누락이 예약 확정 메일 자체를 막아서는 안 된다.
  */
-export async function getVoucherAttachments(pickupLocation: string, option: string) {
-    const fileName = await resolveVoucherFile(pickupLocation, option);
-    if (!fileName) return [];
+export async function getVoucherAttachment(lang: 'ko' | 'en', fileName: string) {
+    const local = await downloadVoucher(lang, fileName);
+    if (!local) return null;
 
     const key = fileName.split('_')[0];
-    const session = parseSession(option);
+    const session = sessionOf(fileName);
+    const filename = lang === 'ko'
+        ? `오션스타_바우처_${key}_${session}부.pdf`
+        : `OceanStar_Voucher_${key}_${SESSION_EN[session]}.pdf`;
 
-    const [ko, en] = await Promise.all([
-        downloadVoucher('ko', fileName),
-        downloadVoucher('en', fileName),
-    ]);
-
-    const attachments: { filename: string; path: string }[] = [];
-    if (ko) attachments.push({ filename: `오션스타_바우처_${key}_${session}부.pdf`, path: ko });
-    if (en) attachments.push({ filename: `OceanStar_Voucher_${key}_${SESSION_EN[session]}.pdf`, path: en });
-
-    if (attachments.length < 2) {
-        console.warn(`[voucher] ${fileName}: 첨부 ${attachments.length}/2`);
-    }
-    return attachments;
+    return { filename, path: local };
 }

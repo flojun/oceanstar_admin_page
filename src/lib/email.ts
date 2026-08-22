@@ -1,7 +1,8 @@
 import nodemailer from 'nodemailer';
 import { render } from '@react-email/render';
 import VoucherEmail from '@/emails/VoucherEmail';
-import { getVoucherAttachments } from '@/lib/voucherFiles';
+import { resolveVoucherFile, getVoucherAttachment } from '@/lib/voucherFiles';
+import { getTranslation, type Language } from '@/lib/translations';
 import React from 'react';
 
 // Nodemailer transport
@@ -13,16 +14,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendVoucherEmail({
-  to,
-  name,
-  order_id,
-  tour_name,
-  tour_date,
-  pax,
-  option,
-  pickup_location,
-}: {
+const LANGS: Language[] = ['ko', 'en'];
+
+interface VoucherMail {
   to: string;
   name: string;
   order_id: string;
@@ -31,30 +25,50 @@ export async function sendVoucherEmail({
   pax: string;
   option: string;
   pickup_location: string;
-}) {
-  const emailHtml = await render(
-    React.createElement(VoucherEmail, {
-      name,
-      order_id,
-      tour_name,
-      tour_date,
-      pax,
-      option,
-      pickup_location,
+}
+
+/**
+ * 예약 확정 메일을 한국어 1통, 영어 1통 보낸다.
+ * 각 메일에는 해당 언어의 바우처 PDF만 첨부한다.
+ * 한 통이 실패해도 나머지 한 통은 계속 보낸다.
+ */
+export async function sendVoucherEmail(booking: VoucherMail) {
+  const { to, option, pickup_location, order_id } = booking;
+
+  // 선셋 시간 조회가 들어 있어 언어당 한 번씩 하지 않고 한 번만 푼다.
+  const fileName = await resolveVoucherFile(pickup_location, option);
+
+  const results = await Promise.allSettled(
+    LANGS.map(async (lang) => {
+      const t = getTranslation(lang);
+      const attachment = fileName ? await getVoucherAttachment(lang, fileName) : null;
+
+      const html = await render(
+        React.createElement(VoucherEmail, { lang, ...booking })
+      );
+
+      await transporter.sendMail({
+        from: `"오션스타 하와이" <${process.env.NODEMAILER_EMAIL}>`,
+        to,
+        subject: t('voucherEmail.subject').replace('{id}', order_id),
+        html,
+        attachments: attachment ? [attachment] : [],
+      });
+
+      return { lang, attached: Boolean(attachment) };
     })
   );
 
-  // 한국어 + 영어 바우처를 모두 첨부한다. 파일을 못 받아와도 메일은 나간다.
-  const attachments = await getVoucherAttachments(pickup_location, option);
+  results.forEach((r, i) => {
+    if (r.status === 'fulfilled') {
+      console.log(`Voucher email (${r.value.lang}) sent to ${to} for ${order_id}` +
+        (r.value.attached ? '' : ' — 첨부 없음'));
+    } else {
+      console.error(`Voucher email (${LANGS[i]}) failed for ${order_id}:`, r.reason);
+    }
+  });
 
-  const options = {
-    from: `"오션스타 하와이" <${process.env.NODEMAILER_EMAIL}>`,
-    to,
-    subject: `[오션스타] 예약 확정 안내 (예약번호: ${order_id})`,
-    html: emailHtml,
-    attachments,
-  };
-
-  await transporter.sendMail(options);
-  console.log(`Voucher email sent successfully to ${to} for order ${order_id} (첨부 ${attachments.length}개)`);
+  if (results.every(r => r.status === 'rejected')) {
+    throw new Error(`두 언어 모두 메일 발송에 실패했습니다 (${order_id})`);
+  }
 }

@@ -10,8 +10,10 @@ import {
   Text,
 } from '@react-email/components';
 import * as React from 'react';
+import { getTranslation, type Language } from '@/lib/translations';
 
 interface VoucherEmailProps {
+  lang: Language;
   name: string;
   order_id: string;
   tour_name: string;
@@ -22,6 +24,7 @@ interface VoucherEmailProps {
 }
 
 export const VoucherEmail = ({
+  lang,
   name,
   order_id,
   tour_name,
@@ -30,56 +33,50 @@ export const VoucherEmail = ({
   option,
   pickup_location,
 }: VoucherEmailProps) => {
+  const t = getTranslation(lang);
+  const rows: [string, string][] = [
+    [t('voucherEmail.label_order'), order_id],
+    [t('voucherEmail.label_date'), tour_date],
+    [t('voucherEmail.label_tour'), tour_name],
+    [t('voucherEmail.label_option'), option],
+    [t('voucherEmail.label_pax'), pax],
+    [t('voucherEmail.label_pickup'), pickup_location],
+  ];
+
   return (
-    <Html>
+    <Html lang={lang}>
       <Head />
-      <Preview>오션스타 하와이 거북이 스노클링 예약 확정 바우처입니다.</Preview>
+      <Preview>{t('voucherEmail.preview')}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>예약이 확정되었습니다.</Heading>
+          <Heading style={h1}>{t('voucherEmail.title')}</Heading>
           <Text style={text}>
-            안녕하세요, {name}님!
+            {t('voucherEmail.greeting').replace('{name}', name)}
             <br />
-            오션스타 하와이 거북이 스노클링 투어를 예약해 주셔서 감사합니다.
-            결제가 정상적으로 완료되어 예약이 확정되었습니다.
+            {t('voucherEmail.intro')}
           </Text>
 
           <Section style={infoSection}>
             <Heading as="h2" style={h2}>
-              예약 상세 정보
+              {t('voucherEmail.details_title')}
             </Heading>
-            <Text style={infoText}>
-              <strong>예약 번호:</strong> {order_id}
-            </Text>
-            <Text style={infoText}>
-              <strong>투어 날짜:</strong> {tour_date}
-            </Text>
-            <Text style={infoText}>
-              <strong>투어 상품:</strong> {tour_name}
-            </Text>
-            <Text style={infoText}>
-              <strong>예약 옵션:</strong> {option}
-            </Text>
-            <Text style={infoText}>
-              <strong>예약 인원:</strong> {pax}
-            </Text>
-            <Text style={infoText}>
-              <strong>픽업 장소:</strong> {pickup_location}
-            </Text>
+            {rows.map(([label, value]) => (
+              <Text key={label} style={infoText}>
+                <strong>{label}:</strong> {value}
+              </Text>
+            ))}
           </Section>
 
-          <Text style={text}>
-            자세한 픽업 시간 및 안내 사항은 첨부된 바우처 파일(PDF)을 반드시 확인해 주시기 바랍니다.
-          </Text>
+          <Text style={text}>{t('voucherEmail.attachment_notice')}</Text>
 
           <Hr style={hr} />
           <Text style={footer}>
-            안내 사항<br />
-            - 픽업 시간 5분전까지로 지정된 장소에 대기해 주시기 바랍니다.<br />
-            - 일자 변경은 투어일 기준 7일 전까지만 가능합니다.<br />
-            - 당일 취소 및 노쇼는 환불이 불가합니다.<br />
+            {t('voucherEmail.notice_title')}<br />
+            - {t('voucherEmail.notice_1')}<br />
+            - {t('voucherEmail.notice_2')}<br />
+            - {t('voucherEmail.notice_3')}<br />
             <br />
-            오션스타 문의 (카카오톡 ID : hioceanstar)
+            {t('voucherEmail.contact')}
           </Text>
         </Container>
       </Body>
