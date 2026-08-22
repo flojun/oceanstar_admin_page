@@ -165,6 +165,7 @@ const en = {
     label_pax: "Guests",
     label_pickup: "Pickup Location",
     attachment_notice: "Please review the attached voucher (PDF) for your exact pickup time and full instructions.",
+    no_voucher_notice: "Your pickup location requires individual arrangement. Please contact us at the KakaoTalk channel below and we will confirm your exact pickup time and place.",
     notice_title: "Please Note",
     notice_1: "Please be at your pickup location at least 5 minutes before the pickup time.",
     notice_2: "Date changes are only possible up to 7 days before the tour date.",

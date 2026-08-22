@@ -44,7 +44,7 @@ export async function sendVoucherEmail(booking: VoucherMail) {
       const attachment = fileName ? await getVoucherAttachment(lang, fileName) : null;
 
       const html = await render(
-        React.createElement(VoucherEmail, { lang, ...booking })
+        React.createElement(VoucherEmail, { lang, hasVoucher: Boolean(attachment), ...booking })
       );
 
       await transporter.sendMail({

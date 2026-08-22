@@ -14,6 +14,7 @@ import { getTranslation, type Language } from '@/lib/translations';
 
 interface VoucherEmailProps {
   lang: Language;
+  hasVoucher: boolean;
   name: string;
   order_id: string;
   tour_name: string;
@@ -25,6 +26,7 @@ interface VoucherEmailProps {
 
 export const VoucherEmail = ({
   lang,
+  hasVoucher,
   name,
   order_id,
   tour_name,
@@ -67,7 +69,9 @@ export const VoucherEmail = ({
             ))}
           </Section>
 
-          <Text style={text}>{t('voucherEmail.attachment_notice')}</Text>
+          <Text style={hasVoucher ? text : noticeBox}>
+            {t(hasVoucher ? 'voucherEmail.attachment_notice' : 'voucherEmail.no_voucher_notice')}
+          </Text>
 
           <Hr style={hr} />
           <Text style={footer}>
@@ -138,6 +142,17 @@ const infoText = {
   fontSize: '15px',
   lineHeight: '1.5',
   margin: '8px 0',
+};
+
+const noticeBox = {
+  color: '#8a5a00',
+  backgroundColor: '#fff8e6',
+  border: '1px solid #ffe2a8',
+  borderRadius: '8px',
+  padding: '16px',
+  fontSize: '15px',
+  lineHeight: '1.6',
+  marginBottom: '20px',
 };
 
 const hr = {
