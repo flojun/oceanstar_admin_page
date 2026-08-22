@@ -158,8 +158,8 @@ export async function POST(req: Request) {
                 secondary_date: body.secondaryDate || '',
                 secondary_pickup: body.secondaryPickupLocationName || ''
             },
-            success_url: `${origin}/${isEn ? 'en/' : ''}booking/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${origin}/${isEn ? 'en/' : ''}booking/payment-cancel?order_id=${order_id}`,
+            success_url: `${origin}${isEn ? '' : '/kr'}/booking/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${origin}${isEn ? '' : '/kr'}/booking/payment-cancel?order_id=${order_id}`,
         });
 
         return NextResponse.json({

@@ -18,7 +18,7 @@ function PaymentSuccessContent() {
                 });
                 const data = await res.json();
                 if (data.success && data.order_id) {
-                    router.replace(`/booking/success?order_id=${data.order_id}`);
+                    router.replace(`/kr/booking/success?order_id=${data.order_id}`);
                 } else {
                     alert("결제 검증에 실패했습니다.");
                     router.replace("/kr");
@@ -34,7 +34,7 @@ function PaymentSuccessContent() {
         if (session_id) {
             verifySession(session_id);
         } else if (legacy_order_id) {
-            router.replace(`/booking/success?order_id=${legacy_order_id}`);
+            router.replace(`/kr/booking/success?order_id=${legacy_order_id}`);
         }
     }, [searchParams, router]);
 
