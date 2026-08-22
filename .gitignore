@@ -52,3 +52,6 @@ test-tz.mjs
 generate_report.js
 public/*.pptx
 *.pptx
+
+# claude code worktrees (실수로 gitlink 로 커밋되던 항목)
+.claude/worktrees/
