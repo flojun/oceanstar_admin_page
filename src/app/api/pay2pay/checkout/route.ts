@@ -168,7 +168,7 @@ export async function POST(req: Request) {
         }
 
         // 실제 결제가 안되므로 모의결제 건너뛰고 바로 성공(결제대기) 페이지로 안내
-        const pay2payMockUrl = `/booking/success?order_id=${order_id}`;
+        const pay2payMockUrl = `${isEn ? '' : '/kr'}/booking/success?order_id=${order_id}`;
 
         return NextResponse.json({
             success: true,

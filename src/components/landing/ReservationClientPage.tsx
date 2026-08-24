@@ -495,13 +495,6 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   const processPayment = async (type: 'KRW' | 'USD') => {
     if (!pendingBookingData || !selectedTour) return;
 
-    if (type === 'KRW') {
-        // 기존 한화 결제 로직은 건드리지 않고 버튼만 만들어달라는 요청에 따라 알림만 띄우거나,
-        // 원할 경우 기존 Pay2Pay를 바로 실행하도록 할 수 있습니다. 
-        // 일단 기존 작동하던 Pay2Pay 로직을 그대로 유지합니다.
-        console.log("KRW payment selected");
-    }
-
     setIsSubmitting(true);
     setIsCurrencyModalOpen(false);
     try {
