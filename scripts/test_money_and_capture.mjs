@@ -126,27 +126,41 @@ check('프라이빗 31명 이상은 3000', () =>
 check('프라이빗 KRW 환산', () =>
     assert.equal(basePrice(priv, 'KRW', { adultCount: 5, childCount: 0 }), 1200 * 1350));
 
-console.log('\n수수료 - USD 는 기존 공식 그대로, KRW 는 원 단위');
-check('USD 회귀: (200+0.30)/(1-0.0295)', () =>
+console.log('\n수수료 - USD 2.95%, KRW 5.4% (해외카드 +1.5% + 통화변환 +1%)');
+check('USD 회귀: (200+0.30)/(1-0.0295) - 기존 운영값 유지', () =>
     assert.equal(grossUp(200, 'USD'), Math.round(((200 + 0.3) / (1 - 0.0295)) * 100) / 100));
+check('USD 는 환율 인자를 무시한다', () =>
+    assert.equal(grossUp(200, 'USD', 1500), grossUp(200, 'USD', 1000)));
 check('USD 는 소수점 2자리를 넘지 않는다', () => {
     const v = grossUp(215.37, 'USD');
     assert.equal(v, Math.round(v * 100) / 100);
 });
 check('KRW 는 정수', () =>
-    assert.equal(grossUp(180000, 'KRW') % 1, 0));
+    assert.equal(grossUp(180000, 'KRW', 1350) % 1, 0));
+check('KRW 는 5.4% + $0.30x환율 만큼 걷는다', () =>
+    assert.equal(grossUp(180000, 'KRW', 1350), Math.ceil((180000 + 0.3 * 1350) / (1 - 0.054))));
 check('KRW 수수료는 모자라지 않게 올림', () =>
-    assert.ok(grossUp(180000, 'KRW') >= (180000 + 400) / (1 - 0.0295)));
+    assert.ok(grossUp(180000, 'KRW', 1350) >= (180000 + 0.3 * 1350) / (1 - 0.054)));
+
+// 고정 수수료가 달러로 매겨지므로 환율이 오르면 원화 총액도 올라야 한다.
+check('환율이 오르면 KRW 총액도 오른다', () =>
+    assert.ok(grossUp(180000, 'KRW', 1500) > grossUp(180000, 'KRW', 1300)));
+check('환율 차이는 고정 수수료분만큼만', () =>
+    assert.ok(grossUp(180000, 'KRW', 1500) - grossUp(180000, 'KRW', 1300)
+              <= Math.ceil(0.3 * 200 / (1 - 0.054)) + 1));
+
 check('수수료는 항상 상품가보다 크다', () =>
-    assert.ok(grossUp(100, 'USD') > 100 && grossUp(100000, 'KRW') > 100000));
+    assert.ok(grossUp(100, 'USD') > 100 && grossUp(100000, 'KRW', 1350) > 100000));
 check('상품가 + 수수료 = 총액 (USD)', () =>
     assert.equal(Math.round((200 + feeAmount(200, 'USD')) * 100) / 100, grossUp(200, 'USD')));
 check('상품가 + 수수료 = 총액 (KRW)', () =>
-    assert.equal(180000 + feeAmount(180000, 'KRW'), grossUp(180000, 'KRW')));
+    assert.equal(180000 + feeAmount(180000, 'KRW', 1350), grossUp(180000, 'KRW', 1350)));
+check('수수료 계산에도 같은 환율이 쓰인다', () =>
+    assert.equal(180000 + feeAmount(180000, 'KRW', 1500), grossUp(180000, 'KRW', 1500)));
 
 console.log('\n통화 변환 - 원화 100배 사고 방지');
 check('KRW 총액을 Stripe 단위로 바꿔도 그대로', () =>
-    assert.equal(toMinor(grossUp(180000, 'KRW'), 'krw'), grossUp(180000, 'KRW')));
+    assert.equal(toMinor(grossUp(180000, 'KRW', 1350), 'krw'), grossUp(180000, 'KRW', 1350)));
 check('USD 총액은 센트로', () =>
     assert.equal(toMinor(grossUp(200, 'USD'), 'usd'), Math.round(grossUp(200, 'USD') * 100)));
 check('KRW 최소 결제액 100원이 100 으로 전달', () =>

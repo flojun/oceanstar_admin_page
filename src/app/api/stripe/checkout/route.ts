@@ -3,7 +3,7 @@ import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { stripeClient as stripe } from '@/lib/stripeBooking';
-import { basePrice, grossUp, feeAmount, MIN_AMOUNT, type Currency } from '@/lib/pricing';
+import { basePrice, grossUp, feeAmount, resolveExchangeRate, MIN_AMOUNT, type Currency } from '@/lib/pricing';
 import { toMinor } from '@/lib/money';
 
 // Hawaii time helper
@@ -86,8 +86,11 @@ export async function POST(req: Request) {
         }
 
         // 4. 결제 수수료를 얹어 손님이 낼 총액을 만든다.
-        const totalRounded = grossUp(productPrice, currency);
-        const fee = feeAmount(productPrice, currency);
+        // 고정 수수료($0.30)는 달러로 매겨지므로 원화 결제는 환율 환산이 필요하다.
+        // 상품 가격에 쓴 환율과 같은 값을 써야 표시가와 청구액이 어긋나지 않는다.
+        const exchangeRate = resolveExchangeRate(tourSetting);
+        const totalRounded = grossUp(productPrice, currency, exchangeRate);
+        const fee = feeAmount(productPrice, currency, exchangeRate);
 
         if (totalRounded < MIN_AMOUNT[currency]) {
             return NextResponse.json({ error: '결제 최소 금액에 미달합니다.' }, { status: 400 });

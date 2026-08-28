@@ -39,15 +39,26 @@ const COMBO_USD = { both: 310, single: 210 };
 /**
  * 결제 수수료율. 손님에게 얹어서 받는다.
  *
- * USD 는 기존 운영값(2.95% + $0.30)을 그대로 유지한다.
+ * 이 계정은 미국 사업자라 한국 요율이 아니라 미국 요율이 적용된다.
+ * (stripe.com/pricing 기준)
+ *   기본 카드            2.9% + $0.30
+ *   해외 발행 카드        +1.5%
+ *   통화 변환            +1%
  *
- * TODO(요율확정): KRW 값은 Stripe 대시보드에서 한국 결제수단(kr_card /
- * kakao_pay / naver_pay / samsung_pay) 실제 요율을 확인해 넣을 것. 지금 값은
- * USD 요율을 원화로 옮겨놓은 임시값이라 실제 수수료와 다를 수 있다.
+ * KRW = 한국 카드(해외 발행) + 원화를 달러로 정산 = 2.9 + 1.5 + 1 = 5.4%
+ *
+ * USD 는 기존 운영값 2.95% 를 유지한다. 다만 달러로 내는 손님도 한국 카드를
+ * 쓰면 해외 발행 +1.5% 가 붙으므로 실제로는 덜 걷고 있다. 운영 중인 가격을
+ * 바꾸는 일이라 여기서는 손대지 않는다.
+ *
+ * 고정 수수료 $0.30 은 달러로 매겨진다. 원화 결제일 때는 환율로 환산해야
+ * 하므로 상수로 박지 않고 매번 계산한다.
  */
-const FEE_RATES: Record<Currency, { percent: number; fixed: number }> = {
-    USD: { percent: 0.0295, fixed: 0.3 },
-    KRW: { percent: 0.0295, fixed: 400 },
+const FIXED_FEE_USD = 0.3;
+
+const FEE_PERCENT: Record<Currency, number> = {
+    USD: 0.0295,
+    KRW: 0.054,
 };
 
 /** Stripe 가 받는 최소 결제액. */
@@ -107,21 +118,34 @@ export function basePrice(
 }
 
 /**
+ * 결제 통화로 표현한 고정 수수료.
+ *
+ * Stripe 는 $0.30 을 달러로 매긴다. 원화 결제면 환율만큼 원화 금액이 달라지고,
+ * 환율은 주 1회 cron 이 tour_settings 를 갱신할 때마다 움직인다. 그래서 상수로
+ * 박지 않고 가격에 쓰는 것과 같은 환율에서 파생시킨다.
+ */
+function fixedFee(currency: Currency, exchangeRate: number): number {
+    return currency === "KRW" ? FIXED_FEE_USD * exchangeRate : FIXED_FEE_USD;
+}
+
+/**
  * 상품가에 결제 수수료를 얹은 총액. 손님이 실제로 내는 금액.
  *
  * 공식: total = (base + 고정수수료) / (1 - 요율)
  * 이렇게 해야 Stripe 가 total 에서 수수료를 떼고도 base 가 남는다.
+ *
+ * `exchangeRate` 는 resolveExchangeRate(tourSetting) 값을 넘긴다. USD 결제에는
+ * 쓰이지 않는다.
  */
-export function grossUp(base: number, currency: Currency): number {
-    const { percent, fixed } = FEE_RATES[currency];
-    const total = (base + fixed) / (1 - percent);
+export function grossUp(base: number, currency: Currency, exchangeRate = FALLBACK_EXCHANGE_RATE): number {
+    const total = (base + fixedFee(currency, exchangeRate)) / (1 - FEE_PERCENT[currency]);
     // 원화는 소수점이 없다. 반올림이 아니라 올림이라야 수수료가 모자라지 않는다.
     return currency === "KRW" ? Math.ceil(total) : Math.round(total * 100) / 100;
 }
 
 /** 총액에서 상품가를 뺀 수수료. Stripe line item 을 둘로 나눌 때 쓴다. */
-export function feeAmount(base: number, currency: Currency): number {
-    const total = grossUp(base, currency);
+export function feeAmount(base: number, currency: Currency, exchangeRate = FALLBACK_EXCHANGE_RATE): number {
+    const total = grossUp(base, currency, exchangeRate);
     return currency === "KRW"
         ? total - base
         : Math.round((total - base) * 100) / 100;
