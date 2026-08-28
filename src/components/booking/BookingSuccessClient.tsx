@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle, MapPin, Calendar, Clock, Download, ArrowRight, Loader2, MessageCircle } from "lucide-react";
+import { CheckCircle, MapPin, Calendar, Clock, Download, ArrowRight, Loader2 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Suspense, useEffect, useState, useRef } from "react";
@@ -124,33 +124,14 @@ function SuccessContent({ lang }: { lang: Language }) {
                                     {orderId}
                                 </span>
                             </div>
-                            {reservation?.currency === 'KRW' ? (
-                                <div className="bg-[#FFFCE0] border border-[#FEE500] p-6 rounded-2xl text-[15px] font-medium text-[#3A1D1D] shadow-sm flex flex-col gap-4">
-                                    <h3 className="font-extrabold text-lg flex items-center gap-2">
-                                        {t('voucher.kakao_title')}
-                                    </h3>
-                                    <div className="leading-relaxed whitespace-pre-wrap">
-                                        {t('voucher.kakao_body')}
-                                    </div>
-                                    <a
-                                        href={`http://pf.kakao.com/${process.env.NEXT_PUBLIC_KAKAO_CHANNEL_ID || '_hzxeEn'}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="mt-2 bg-[#FEE500] hover:bg-[#F4DC00] text-[#3A1D1D] font-black py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(254,229,0,0.3)] active:scale-[0.98]"
-                                    >
-                                        <MessageCircle size={20} /> {t('voucher.kakao_btn')}
-                                    </a>
-                                </div>
-                            ) : (
-                                <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm font-medium flex flex-col gap-2 border border-blue-100 shadow-inner">
-                                    {['voucher.tip_review', 'voucher.tip_manage', 'voucher.tip_save'].map((key) => (
-                                        <p key={key} className="flex items-start gap-2">
-                                            <CheckCircle size={16} className="shrink-0 mt-0.5" />
-                                            {t(key)}
-                                        </p>
-                                    ))}
-                                </div>
-                            )}
+                            <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm font-medium flex flex-col gap-2 border border-blue-100 shadow-inner">
+                                {['voucher.tip_review', 'voucher.tip_manage', 'voucher.tip_save'].map((key) => (
+                                    <p key={key} className="flex items-start gap-2">
+                                        <CheckCircle size={16} className="shrink-0 mt-0.5" />
+                                        {t(key)}
+                                    </p>
+                                ))}
+                            </div>
                         </div>
 
                         <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">

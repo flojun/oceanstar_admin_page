@@ -42,6 +42,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
     { name: "차량용 명단", href: "/dashboard/vehicle", icon: Car },
     { name: "캘린더", href: "/dashboard/monthly", icon: Calendar },
     { name: "예약관리", href: "/dashboard/all", icon: ClipboardList },
+    { name: "취소 및 환불", href: "/dashboard/refunds", icon: Receipt },
     {
         name: "크루 스케쥴",
         icon: Anchor,

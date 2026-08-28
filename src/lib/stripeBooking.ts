@@ -2,9 +2,11 @@ import Stripe from 'stripe';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { sendVoucherEmail } from '@/lib/email';
 
+// apiVersion 을 고정하지 않는다. SDK 가 자기 기본 버전을 쓰게 두면 타입이
+// 런타임과 맞아떨어진다. 한국 결제수단(kakao_pay 등)의 capture_method 는
+// 2024-11-20 이상에서만 존재하므로 옛 버전 고정으로는 쓸 수 없다.
 export const stripeClient = process.env.STRIPE_SECRET_KEY
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- SDK types apiVersion as its own pinned literal; this integration is on 2023-10-16
-    ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' as any })
+    ? new Stripe(process.env.STRIPE_SECRET_KEY)
     : null;
 
 /**
@@ -28,7 +30,14 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
         .eq('order_id', order_id)
         .single();
 
-    if (session.payment_status !== 'paid') {
+    // 수동 캡처를 쓰면 캡처 전까지 session.payment_status 가 'unpaid' 로 남는다.
+    // 'paid' 만 통과시키면 승인은 됐는데 예약이 안 만들어지고 바우처도 안 나간다.
+    // 돈이 확보된 상태인지는 PaymentIntent 로 판단한다.
+    const paymentIntent = typeof session.payment_intent === 'object' ? session.payment_intent : null;
+    const authorizedOnly = paymentIntent?.status === 'requires_capture';
+    const captured = session.payment_status === 'paid';
+
+    if (!captured && !authorizedOnly) {
         return { ok: true as const, order_id, created: false, status: session.payment_status };
     }
 
@@ -53,6 +62,9 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
         note: metadata.note,
         pickup_location: metadata.pickup_location,
         status: '예약확정',
+        // 환불/캡처의 유일한 연결 고리. 없으면 나중에 이 예약을 환불할 방법이 없다.
+        payment_intent_id: paymentIntent?.id ?? (typeof session.payment_intent === 'string' ? session.payment_intent : null),
+        captured_at: captured ? new Date().toISOString() : null,
         total_price: Number(metadata.total_price),
         booker_email: metadata.booker_email,
         adult_count: Number(metadata.adult_count),

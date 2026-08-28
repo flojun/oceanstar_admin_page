@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/check-myrealtrip-emails",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/capture-pending",
+      "schedule": "0 6 * * *"
     }
   ]
 }

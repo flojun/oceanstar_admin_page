@@ -499,7 +499,8 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
     setIsCurrencyModalOpen(false);
     try {
       const formattedDate = format(pendingBookingData.tourDate, "yyyy-MM-dd");
-      const endpoint = type === 'USD' ? '/api/stripe/checkout' : '/api/pay2pay/checkout';
+      // 원화도 Stripe 로 결제한다. 통화는 서버가 lang 으로 추측하지 않도록 명시한다.
+      const endpoint = '/api/stripe/checkout';
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -517,17 +518,15 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
           tourDate: formattedDate,
           secondaryDate: pendingBookingData.secondaryDate ? format(pendingBookingData.secondaryDate, "yyyy-MM-dd") : null,
           comboOption,
-          lang: lang
+          lang: lang,
+          currency: type
         })
       });
 
       const data = await response.json();
 
-      if (data.success && data.redirectUrl) {
-        // 기존 PG사 응답
-        window.location.href = data.redirectUrl;
-      } else if (data.url) {
-        // Stripe Checkout 세션 응답
+      if (data.url) {
+        // Stripe Checkout 세션으로 이동
         window.location.href = data.url;
       } else {
         alert((lang === 'en' ? "Payment error: " : "결제 준비 중 오류가 발생했습니다: ") + (data.error || "Unknown error"));

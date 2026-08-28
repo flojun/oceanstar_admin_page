@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Reservation } from "@/types/reservation";
 import { formatDateDisplay } from "@/lib/timeUtils";
-import { Check, X, AlertTriangle, DollarSign } from "lucide-react";
+import { Check, X, AlertTriangle, Loader2 } from "lucide-react";
+import { cancelTiming } from "@/lib/cancelTiming";
 import { useRouter } from "next/navigation";
 
 export default function CancellationRequestsView() {
@@ -18,6 +19,7 @@ export default function CancellationRequestsView() {
     const [refundAmount, setRefundAmount] = useState<string>("");
     const [refundReason, setRefundReason] = useState<string>("");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const requestIdRef = useRef<string>("");
 
     const fetchRequests = async () => {
         setLoading(true);
@@ -42,7 +44,9 @@ export default function CancellationRequestsView() {
 
     const openProcessModal = (reservation: Reservation) => {
         setSelectedReservation(reservation);
-        
+        // 재시도해도 같은 값을 보내야 이중 환불이 안 난다. 모달을 열 때 한 번만 만든다.
+        requestIdRef.current = crypto.randomUUID();
+
         let defaultAmount = "";
         if (reservation.expected_refund != null) {
             const amountNum = Number(reservation.expected_refund);
@@ -59,35 +63,55 @@ export default function CancellationRequestsView() {
     const handleProcessCancellation = async () => {
         if (!selectedReservation) return;
 
-        setProcessingId(selectedReservation.id);
+        const target = selectedReservation;
+        setProcessingId(target.id);
 
-        // Optimistic update
         const originalRequests = [...requests];
-        setRequests(prev => prev.filter(r => r.id !== selectedReservation.id));
-        setIsModalOpen(false);
 
         try {
-            // Update status to '취소' and append note
-            const currentNote = selectedReservation.note || "";
-            const currencySymbol = selectedReservation.currency === 'USD' ? '$' : '₩';
-            const newNote = `${currentNote} [취소처리: ${new Date().toLocaleDateString()} / 환불: ${currencySymbol}${refundAmount || '0'} / 사유: ${refundReason}]`.trim();
+            if (target.payment_intent_id) {
+                // Stripe 결제 건. 서버가 승인 취소 또는 환불을 실행하고
+                // status/note 까지 쓴다. 화면에서 DB를 직접 건드리지 않는다.
+                const amount = Number(refundAmount);
+                const res = await fetch("/api/admin/refund", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        order_id: target.order_id,
+                        amount: Number.isFinite(amount) && amount > 0 ? amount : undefined,
+                        reason: refundReason,
+                        requestId: requestIdRef.current,
+                    }),
+                });
+                const json = await res.json();
+                if (!res.ok || !json.success) throw new Error(json.error || `HTTP ${res.status}`);
 
-            const { error } = await supabase
-                .from("reservations")
-                .update({
-                    status: "취소",
-                    note: newNote
-                })
-                .eq("id", selectedReservation.id);
+                setRequests(prev => prev.filter(r => r.id !== target.id));
+                setIsModalOpen(false);
+                alert(json.mode === "canceled"
+                    ? "결제 승인이 취소되었습니다. (수수료 없음)"
+                    : "환불 처리가 완료되었습니다.");
+            } else {
+                // Stripe 결제가 아닌 예약(마이리얼트립 등). 돈은 수기로 옮기고
+                // 여기서는 기록만 남긴다.
+                const currencySymbol = target.currency === 'USD' ? '$' : '₩';
+                const newNote = `${target.note || ""} [취소처리(수기환불): ${new Date().toLocaleDateString()} / 환불: ${currencySymbol}${refundAmount || '0'} / 사유: ${refundReason}]`.trim();
 
-            if (error) throw error;
+                const { error } = await supabase
+                    .from("reservations")
+                    .update({ status: "취소", note: newNote })
+                    .eq("id", target.id);
+                if (error) throw error;
 
-            alert("취소 처리가 완료되었습니다.");
+                setRequests(prev => prev.filter(r => r.id !== target.id));
+                setIsModalOpen(false);
+                alert("취소 처리가 완료되었습니다. (환불은 수기로 진행해주세요)");
+            }
+
             window.dispatchEvent(new Event("reservation_status_changed"));
         } catch (error) {
             console.error("Error processing cancellation:", error);
-            alert("처리 중 오류가 발생했습니다.");
-            // Revert optimistic update
+            alert(error instanceof Error ? `처리 실패: ${error.message}` : "처리 중 오류가 발생했습니다.");
             setRequests(originalRequests);
         } finally {
             setProcessingId(null);
@@ -172,6 +196,21 @@ export default function CancellationRequestsView() {
                                     )}
                                 </div>
                                 <p><span className="font-bold w-20 inline-block text-gray-500">예약일:</span> {selectedReservation.tour_date}</p>
+                                {(() => {
+                                    const timing = cancelTiming(selectedReservation.created_at, selectedReservation.cancel_requested_at);
+                                    return (
+                                        <>
+                                            {timing.bookedAt && (
+                                                <p><span className="font-bold w-20 inline-block text-gray-500">예약시각:</span> {timing.bookedAt} 하와이</p>
+                                            )}
+                                            <p className={timing.withinGracePeriod ? "text-orange-600 font-bold" : ""}>
+                                                <span className="font-bold w-20 inline-block text-gray-500">취소요청:</span>
+                                                {timing.requestedAt ? `${timing.requestedAt} 하와이 · 예약 ${timing.hoursAfterBooking}시간 후` : "기록 없음"}
+                                                {timing.withinGracePeriod && " ⚠ 24시간 이내"}
+                                            </p>
+                                        </>
+                                    );
+                                })()}
                                 <p><span className="font-bold w-20 inline-block text-gray-500">인원수:</span> {selectedReservation.pax}</p>
                                 <p><span className="font-bold w-20 inline-block text-gray-500">옵션:</span> {selectedReservation.option}</p>
                                 <p className="flex items-start">
@@ -186,14 +225,30 @@ export default function CancellationRequestsView() {
                                 )}
                             </div>
 
+                            {selectedReservation.payment_intent_id && !selectedReservation.captured_at && (
+                                <p className="text-xs text-green-800 bg-green-50 border border-green-200 rounded p-3 leading-relaxed">
+                                    이 예약은 아직 결제가 확정되지 않았습니다(승인 상태).
+                                    지금 처리하면 <b>수수료 없이</b> 카드 승인이 즉시 해제됩니다.
+                                </p>
+                            )}
+                            {!selectedReservation.payment_intent_id && (
+                                <p className="text-xs text-gray-600 bg-gray-100 border border-gray-200 rounded p-3">
+                                    Stripe 결제 건이 아닙니다. 상태와 메모만 기록되며 <b>환불은 수기로</b> 진행해주세요.
+                                </p>
+                            )}
+
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">환불 예정 금액 (선택사항)</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    환불 금액 {selectedReservation.payment_intent_id ? "(비우면 전액)" : "(기록용)"}
+                                </label>
                                 <div className="relative">
                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">
                                         {selectedReservation.currency === 'USD' ? '$' : '₩'}
                                     </span>
                                     <input
-                                        type="text"
+                                        type="number"
+                                        step={selectedReservation.currency === 'USD' ? '0.01' : '1'}
+                                        min="0"
                                         value={refundAmount}
                                         onChange={(e) => setRefundAmount(e.target.value)}
                                         placeholder="환불 금액 입력"
@@ -215,16 +270,22 @@ export default function CancellationRequestsView() {
                         <div className="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
                             <button
                                 onClick={() => setIsModalOpen(false)}
-                                className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded"
+                                disabled={processingId === selectedReservation.id}
+                                className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded disabled:opacity-50"
                             >
                                 닫기
                             </button>
                             <button
                                 onClick={handleProcessCancellation}
-                                className="px-4 py-2 bg-red-600 text-white font-bold rounded hover:bg-red-700 flex items-center gap-2"
+                                disabled={processingId === selectedReservation.id}
+                                className="px-4 py-2 bg-red-600 text-white font-bold rounded hover:bg-red-700 flex items-center gap-2 disabled:opacity-50"
                             >
-                                <Check className="w-4 h-4" />
-                                처리 완료
+                                {processingId === selectedReservation.id
+                                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                                    : <Check className="w-4 h-4" />}
+                                {selectedReservation.payment_intent_id && !selectedReservation.captured_at
+                                    ? "결제 취소 (수수료 없음)"
+                                    : selectedReservation.payment_intent_id ? "환불 실행" : "처리 완료"}
                             </button>
                         </div>
                     </div>

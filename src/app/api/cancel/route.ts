@@ -79,7 +79,9 @@ export async function POST(req: Request) {
             .update({ 
                 status: '취소요청', 
                 note: newNote.trim(),
-                expected_refund: expectedRefund
+                expected_refund: expectedRefund,
+                // 관리자가 "예약 후 얼마 만에 취소 요청했는지"를 보고 판단할 수 있어야 한다.
+                cancel_requested_at: new Date().toISOString()
             })
             .eq('id', reservation.id);
 

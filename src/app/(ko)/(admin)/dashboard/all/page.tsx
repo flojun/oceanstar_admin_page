@@ -93,6 +93,7 @@ const parsePax = (str: string): number => {
 };
 
 import CancellationRequestsView from "@/components/reservations/CancellationRequestsView";
+import BulkRefundSheet from "@/components/reservations/BulkRefundSheet";
 import RescheduleRequestsView from "@/components/reservations/RescheduleRequestsView";
 import { useSearchParams } from "next/navigation";
 
@@ -120,6 +121,7 @@ function AllReservationsContent() {
     const [rows, setRows] = useState<(Reservation | (Partial<Reservation> & { isNew?: boolean, _grid_id?: string, _capacityStatus?: string, _capacityMsg?: string }))[]>([]);
     const [totalCount, setTotalCount] = useState<number>(0); // Store total count for row numbering
     const [selectedRows, setSelectedRows] = useState<ReadonlySet<string>>(new Set());
+    const [refundTargets, setRefundTargets] = useState<Reservation[] | null>(null);
     const [changedRowIds, setChangedRowIds] = useState<Set<string>>(new Set());
     const changedRowIdsRef = useRef<Set<string>>(new Set());
     const rowsRef = useRef<any[]>([]);
@@ -991,6 +993,25 @@ function AllReservationsContent() {
         }
     };
 
+    // 환불은 돈이 움직이므로 handleBulkAction 의 낙관적 업데이트에 끼워 넣지 않는다.
+    // 확인 시트에서 대상을 추리고 건별 결과를 보고한다.
+    const openRefundSheet = () => {
+        const selected = rows.filter(r => selectedRows.has((r as any)._grid_id));
+        if (selected.length === 0) return;
+        setRefundTargets(selected as Reservation[]);
+    };
+
+    // 서버가 이미 쓴 값이므로 changedRowIds 에 넣지 않는다. dirty 로 표시하면
+    // 나중에 저장할 때 낡은 값으로 덮어쓴다.
+    const applyRefundResults = (updates: { orderId: string; refundedAmount: number; fullyRefunded: boolean }[]) => {
+        const byOrder = new Map(updates.map(u => [u.orderId, u]));
+        setRows(prev => prev.map(r => {
+            const u = r.order_id ? byOrder.get(r.order_id) : undefined;
+            if (!u) return r;
+            return { ...r, refunded_amount: u.refundedAmount, ...(u.fullyRefunded ? { status: '취소' } : {}) };
+        }));
+    };
+
     const handleSwapOrder = async (direction: 'up' | 'down') => {
         if (selectedRows.size !== 1) return;
         const selectedId = Array.from(selectedRows)[0];
@@ -1181,7 +1202,8 @@ function AllReservationsContent() {
         Object.entries(grouped).forEach(([dateStr, groupRows]) => {
             // Convert MM-DD-YYYY to *MM/DD/YYYY
             const dateSlash = dateStr.replace(/-/g, '/');
-            const rawTourDate = (groupRows[0] as any).tour_date || "";
+            const rawTourDate = (groupRows[0] as any).tour_date || "";
+
             const dayOfWeek = getKoreanDay(rawTourDate); // Fix: dateStr is MM-DD-YYYY, use raw YYYY-MM-DD
             textToCopy += `${dayOfWeek} ${dateSlash}\n`;
 
@@ -2177,6 +2199,12 @@ function AllReservationsContent() {
                         >
                             취소처리
                         </button>
+                        <button
+                            onClick={openRefundSheet}
+                            className="px-3 py-1.5 text-xs font-bold bg-orange-50 text-orange-600 rounded-md hover:bg-orange-100"
+                        >
+                            환불하기
+                        </button>
                         <div className="h-4 w-px bg-gray-300 mx-1" />
                         <button
                             onClick={() => handleBulkAction('delete')}
@@ -2194,6 +2222,14 @@ function AllReservationsContent() {
                 </div>
             )
             }
+
+            {refundTargets && (
+                <BulkRefundSheet
+                    reservations={refundTargets}
+                    onClose={() => setRefundTargets(null)}
+                    onRefunded={applyRefundResults}
+                />
+            )}
 
             {/* Tab Navigation */}
             <div className="flex items-center space-x-1 border-b border-gray-200 mb-4 bg-white px-2 pt-2 rounded-t-lg">

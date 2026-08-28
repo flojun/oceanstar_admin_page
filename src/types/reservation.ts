@@ -27,6 +27,17 @@ export interface Reservation {
   expected_refund?: number | null;
   currency?: string;
 
+  // Payment fields (DB에는 이미 있었으나 타입에 빠져 있던 것들)
+  total_price?: number | null;
+  adult_count?: number | null;
+  child_count?: number | null;
+
+  // Stripe 환불/캡처
+  payment_intent_id?: string | null;
+  captured_at?: string | null;      // NULL이면 승인만 된 상태
+  refunded_amount?: number | null;  // 누적 환불 총액
+  cancel_requested_at?: string | null;
+
   // UI/Transient fields
   isNew?: boolean;
   _grid_id?: string;

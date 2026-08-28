@@ -12,7 +12,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: '세션 ID가 없습니다.' }, { status: 400 });
         }
 
-        const session = await stripeClient.checkout.sessions.retrieve(session_id);
+        const session = await stripeClient.checkout.sessions.retrieve(session_id, {
+            expand: ['payment_intent'],
+        });
         if (!session) {
             return NextResponse.json({ error: '유효하지 않은 결제 세션입니다.' }, { status: 404 });
         }

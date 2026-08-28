@@ -2,11 +2,9 @@ import { getReceiptDateStr } from '@/lib/timeUtils';
 import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
-import Stripe from 'stripe';
-
-const stripe = process.env.STRIPE_SECRET_KEY 
-    ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' as any })
-    : null;
+import { stripeClient as stripe } from '@/lib/stripeBooking';
+import { basePrice, grossUp, feeAmount, MIN_AMOUNT, type Currency } from '@/lib/pricing';
+import { toMinor } from '@/lib/money';
 
 // Hawaii time helper
 function getHawaiiDateStrServer(): string {
@@ -70,32 +68,30 @@ export async function POST(req: Request) {
             pickupLabel = body.hotelName + ' (개별안내)';
         }
 
-        // 3. Calculate USD Price
-        let usdPrice = 0;
-
-        if (tourSetting.tour_id === 'combo_marine') {
-            const comboPrice = body.comboOption === '3' ? 310 : 210;
-            usdPrice = (body.adultCount * comboPrice) + (body.childCount * comboPrice);
-        } else if (tourSetting.is_flat_rate && tourSetting.tour_id === 'private') {
-            if (totalCount <= 10) usdPrice = 1200;
-            else if (totalCount <= 20) usdPrice = 1800;
-            else if (totalCount <= 30) usdPrice = 2400;
-            else usdPrice = 3000;
-        } else if (tourSetting.is_flat_rate) {
-            usdPrice = tourSetting.adult_price_usd || 0;
-        } else {
-            usdPrice = (body.adultCount * (tourSetting.adult_price_usd || 0)) + (body.childCount * (tourSetting.child_price_usd || 0));
+        // 3. 가격 계산 - 통화는 클라이언트가 명시한다.
+        // lang 으로 추측하면 안 된다. 한국어 페이지에서도 달러를 고를 수 있다.
+        if (body.currency !== 'KRW' && body.currency !== 'USD') {
+            return NextResponse.json({ error: '결제 통화가 올바르지 않습니다.' }, { status: 400 });
         }
+        const currency: Currency = body.currency;
 
-        if (usdPrice <= 0) {
+        // 가격 로직은 pricing.ts 한 곳에만 둔다. 화면 표시와 같은 값이어야 한다.
+        const productPrice = basePrice(tourSetting, currency, {
+            adultCount: body.adultCount,
+            childCount: body.childCount,
+        }, body.comboOption);
+
+        if (productPrice <= 0) {
             return NextResponse.json({ error: 'Invalid price calculation.' }, { status: 400 });
         }
 
-        // 4. Calculate Booking Fee (2.95% + $0.30) to make the merchant whole
-        // Formula: Total = (Base + 0.30) / (1 - 0.0295)
-        const totalAmount = (usdPrice + 0.30) / (1 - 0.0295);
-        const feeAmount = totalAmount - usdPrice;
-        const totalRounded = Math.round(totalAmount * 100) / 100; // Total rounded to 2 decimal places
+        // 4. 결제 수수료를 얹어 손님이 낼 총액을 만든다.
+        const totalRounded = grossUp(productPrice, currency);
+        const fee = feeAmount(productPrice, currency);
+
+        if (totalRounded < MIN_AMOUNT[currency]) {
+            return NextResponse.json({ error: '결제 최소 금액에 미달합니다.' }, { status: 400 });
+        }
 
         // 5. Create Stripe Checkout Session
         const isEn = body.lang === 'en';
@@ -104,36 +100,57 @@ export async function POST(req: Request) {
             `오션스타 ${optionLabel}`;
 
         let order_id = generateOrderId();
-        const noteText = `(성${body.adultCount}/아${body.childCount}) (예약번호 ${order_id}) [USD결제] (Stripe)`;
+        const noteText = `(성${body.adultCount}/아${body.childCount}) (예약번호 ${order_id}) [${currency}결제] (Stripe)`;
+        const stripeCurrency = currency.toLowerCase();
 
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
+            // payment_method_types 를 지정하지 않는다. 지정하면 대시보드에서 켠
+            // 한국 결제수단(카카오페이/네이버페이 등)이 결제창에 뜨지 않는다.
             line_items: [
                 {
                     price_data: {
-                        currency: 'usd',
+                        currency: stripeCurrency,
                         product_data: {
                             name: productName,
                             description: `Booking ID: ${order_id}`,
                         },
-                        unit_amount: Math.round(usdPrice * 100), // Original price in cents
+                        // KRW 은 소수점이 없어 배율이 1이다. toMinor 밖에서 * 100 금지.
+                        unit_amount: toMinor(productPrice, currency),
                     },
                     quantity: 1,
                 },
                 {
                     price_data: {
-                        currency: 'usd',
+                        currency: stripeCurrency,
                         product_data: {
                             name: isEn ? 'Online Booking Fee' : '온라인 예약 수수료',
                             description: `Payment Processing Fee`,
                         },
-                        unit_amount: Math.round(feeAmount * 100), // Fee in cents
+                        unit_amount: toMinor(fee, currency),
                     },
                     quantity: 1,
                 }
             ],
             mode: 'payment',
             client_reference_id: order_id,
+            // 카카오페이는 이메일이 필수다.
+            customer_email: body.bookerEmail || undefined,
+            // 승인만 걸고 캡처는 미룬다. 캡처 전에 취소하면 Stripe 수수료가 0원이다.
+            // 캡처는 /api/cron/capture-pending 이 투어 전날 하와이 20시에 처리한다.
+            payment_intent_data: {
+                capture_method: 'manual',
+                // 세션 metadata 는 PaymentIntent 로 전파되지 않는다. 대시보드에서
+                // 예약번호로 결제를 역추적하려면 여기에도 넣어야 한다.
+                metadata: { order_id },
+            },
+            // 한국 결제수단은 결제수단별 옵션에 넣어야 수동 캡처가 걸린다.
+            // 지원하지 않는 수단은 즉시 캡처될 뿐 결제가 실패하지는 않는다.
+            payment_method_options: {
+                kr_card: { capture_method: 'manual' },
+                kakao_pay: { capture_method: 'manual' },
+                naver_pay: { capture_method: 'manual' },
+                samsung_pay: { capture_method: 'manual' },
+            },
             adaptive_pricing: { enabled: false },
             allow_promotion_codes: true,
             metadata: {
@@ -150,7 +167,7 @@ export async function POST(req: Request) {
                 booker_email: body.bookerEmail,
                 adult_count: body.adultCount.toString(),
                 child_count: body.childCount.toString(),
-                currency: 'USD',
+                currency: currency,
                 receipt_date: await getDynamicReceiptDateStr(),
                 // Combo specific metadata
                 combo_option: body.comboOption || '',
