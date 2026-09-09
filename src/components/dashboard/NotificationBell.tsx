@@ -12,7 +12,7 @@ import { usePushNotification } from "@/hooks/usePushNotification";
 import { cn } from "@/lib/utils";
 import { isUrgentTourDate } from "@/lib/reservationUrgency";
 
-const ALERT_STATUSES = ["예약대기", "변경요청", "취소요청"];
+const ALERT_STATUSES = ["예약대기", "안내필요", "변경요청", "취소요청"];
 
 interface LiveEvent {
     id: string;

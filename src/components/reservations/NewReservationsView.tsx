@@ -87,6 +87,7 @@ export default function NewReservationsView({ onBack, onCountChange }: NewReserv
         switch (status) {
             case "예약확정": return "text-green-600 bg-green-50";
             case "예약대기": return "text-yellow-600 bg-yellow-50";
+            case "안내필요": return "text-purple-600 bg-purple-50";
             case "취소요청": return "text-orange-600 bg-orange-50";
             default: return "text-gray-600 bg-gray-50";
         }

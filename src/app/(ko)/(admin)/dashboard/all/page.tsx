@@ -1602,6 +1602,7 @@ function AllReservationsContent() {
                 let className = "text-gray-600";
                 if (status === "예약확정") className = "text-green-600 font-bold";
                 else if (status === "예약대기") className = "text-yellow-600 font-bold";
+                else if (status === "안내필요") className = "text-purple-600 font-bold";
                 else if (status === "취소요청") className = "text-orange-600 font-bold";
                 else if (status === "취소") className = "text-red-600 font-bold line-through";
 
