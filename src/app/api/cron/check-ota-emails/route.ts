@@ -14,6 +14,7 @@ import { simpleParser } from 'mailparser';
  * - 5분마다 Gmail IMAP 의 UNSEEN 메일을 플랫폼별로 검색
  * - 신규 예약 → reservations INSERT (상태 '안내필요')  ← 운영자가 직접 안내 후 '예약확정' 으로 변경
  * - 취소     → 기존 예약 UPDATE (상태 '취소요청')      ← '취소' 로 바로 바꾸지 않는다. 눈으로 확인 후 마감.
+ * - 부분취소 → 인원만 '남은 수량' 으로 줄이고 상태 '안내필요' ← 남은 손님이 있으므로 취소요청으로 보내지 않는다.
  * - 픽업이 호텔 주소로만 오면 가장 가까운 픽업 장소로 치환 (원문 주소는 note 에 보존)
  * - 취소는 투어일과 무관하게 항상 Discord 알림
  * - 파싱/매칭 실패 시 \Seen 을 붙이지 않아 메일이 안읽음으로 남는다 (수동 대응 가능)
@@ -48,6 +49,7 @@ export async function GET(request: Request) {
 
         let inserted = 0;
         let cancelled = 0;
+        let partial = 0;
         let unmatched = 0;
         let skipped = 0;
         let alertsSent = 0;
@@ -82,13 +84,14 @@ export async function GET(request: Request) {
                             }
                         }
 
-                        const done = booking.kind === 'new'
-                            ? await handleNew(booking)
-                            : await handleCancel(booking);
+                        const done = booking.kind === 'new' ? await handleNew(booking)
+                            : booking.kind === 'partial_cancel' ? await handlePartialCancel(booking)
+                                : await handleCancel(booking);
 
                         if (done === 'error') { errors++; continue; }
                         if (done === 'inserted') inserted++;
                         if (done === 'cancelled') cancelled++;
+                        if (done === 'partial') partial++;
                         if (done === 'unmatched') unmatched++;
                         if (done === 'duplicate') skipped++;
 
@@ -109,6 +112,7 @@ export async function GET(request: Request) {
             success: true,
             inserted,
             cancelled,
+            partial,
             unmatched,
             skipped,
             alertsSent,
@@ -122,7 +126,26 @@ export async function GET(request: Request) {
     }
 }
 
-type Outcome = 'inserted' | 'duplicate' | 'cancelled' | 'unmatched' | 'error';
+type Outcome = 'inserted' | 'duplicate' | 'cancelled' | 'partial' | 'unmatched' | 'error';
+
+type Target = { id: string; status: string; note: string | null; pax: string | null };
+
+/** 1순위 예약번호, 2순위 출처+이름+투어일 (수기로 넣어 order_id 가 빈 건 대비) */
+async function findTarget(b: OtaBooking): Promise<Target | null> {
+    const cols = 'id, status, note, pax';
+
+    const { data: byOrder } = await supabaseServer
+        .from('reservations').select(cols).eq('order_id', b.orderId).maybeSingle();
+    if (byOrder) return byOrder as Target;
+
+    if (!b.name) return null;
+
+    const { data: byName } = await supabaseServer
+        .from('reservations').select(cols)
+        .eq('source', b.source).eq('name', b.name).eq('tour_date', b.tourDate)
+        .maybeSingle();
+    return (byName as Target) ?? null;
+}
 
 /** 신규 예약 → '안내필요' 로 INSERT */
 async function handleNew(b: OtaBooking): Promise<Outcome> {
@@ -163,24 +186,8 @@ async function handleNew(b: OtaBooking): Promise<Outcome> {
 }
 
 /** 취소 메일 → 기존 예약을 '취소요청' 으로. 없으면 unmatched (INSERT 하지 않는다) */
-async function handleCancel(b: OtaBooking): Promise<Outcome> {
-    // 1순위 예약번호, 2순위 출처+이름+투어일 (수기로 넣어 order_id 가 빈 건 대비)
-    let { data: target } = await supabaseServer
-        .from('reservations')
-        .select('id, status, note')
-        .eq('order_id', b.orderId)
-        .maybeSingle();
-
-    if (!target && b.name) {
-        const { data: fallback } = await supabaseServer
-            .from('reservations')
-            .select('id, status, note')
-            .eq('source', b.source)
-            .eq('name', b.name)
-            .eq('tour_date', b.tourDate)
-            .maybeSingle();
-        target = fallback;
-    }
+async function handleCancel(b: OtaBooking, preloaded?: Target): Promise<Outcome> {
+    const target = preloaded ?? await findTarget(b);
 
     if (!target) {
         console.warn(`[OTA Cron] 취소 메일인데 매칭 예약 없음: ${b.orderId}`);
@@ -210,13 +217,58 @@ async function handleCancel(b: OtaBooking): Promise<Outcome> {
     return 'cancelled';
 }
 
+/**
+ * 부분 취소 → 인원만 '남은 수량' 으로 줄이고 '안내필요' 로 올려 둔다.
+ *
+ * 취소요청으로 보내면 안 된다. 취소요청 화면의 처리 버튼은 상태를 '취소' 로 마감하는데,
+ * 부분 취소는 남은 손님이 있어서 그렇게 닫히면 그 손님까지 사라진다.
+ * 남은 인원이 0이면 사실상 전체 취소이므로 그때만 취소요청으로 넘긴다.
+ */
+async function handlePartialCancel(b: OtaBooking): Promise<Outcome> {
+    const target = await findTarget(b);
+
+    if (!target) {
+        console.warn(`[OTA Cron] 부분취소 메일인데 매칭 예약 없음: ${b.orderId}`);
+        return 'unmatched';
+    }
+    if (target.status === '취소') return 'duplicate';
+
+    const remaining = b.adultCount + b.childCount;
+    if (remaining === 0) return handleCancel(b, target);
+
+    const cancelledQty = b.note.match(/취소수량: ([^/]+)/)?.[1]?.trim();
+    const stamp = `[${b.source} 부분취소 수신: ${getHawaiiDateStr()}`
+        + `${cancelledQty ? ` / 취소 ${cancelledQty}` : ''}`
+        + ` / ${target.pax || '?'} → ${b.pax}]`;
+
+    const { error } = await supabaseServer
+        .from('reservations')
+        .update({
+            pax: b.pax,
+            adult_count: b.adultCount,
+            child_count: b.childCount,
+            option: b.option || undefined,
+            status: '안내필요',
+            is_admin_checked: false,
+            note: `${target.note || ''} ${stamp}`.trim(),
+        })
+        .eq('id', target.id);
+
+    if (error) {
+        console.error('[OTA Cron] 부분취소 UPDATE 실패:', error);
+        return 'error';
+    }
+    return 'partial';
+}
+
 /** 취소는 항상, 신규는 당일/전날 투어일 때만 알린다. */
 async function notify(b: OtaBooking, outcome: Outcome): Promise<boolean> {
     const title =
         outcome === 'cancelled' ? '❌ [취소요청] OTA 취소 접수'
-            : outcome === 'unmatched' ? '⚠️ [취소] 매칭되는 예약을 못 찾음'
-                : outcome === 'inserted' && isUrgentTourDate(b.tourDate) ? '🚨 [안내필요] OTA 긴급 예약!'
-                    : null;
+            : outcome === 'partial' ? '✂️ [부분취소] 인원이 줄었습니다'
+                : outcome === 'unmatched' ? '⚠️ [취소] 매칭되는 예약을 못 찾음'
+                    : outcome === 'inserted' && isUrgentTourDate(b.tourDate) ? '🚨 [안내필요] OTA 긴급 예약!'
+                        : null;
 
     if (!title) return false;
 

@@ -9,7 +9,7 @@
  */
 
 export type OtaPlatform = 'klook' | 'gyg' | 'viator' | 'yeogi';
-export type OtaEmailKind = 'new' | 'cancel';
+export type OtaEmailKind = 'new' | 'cancel' | 'partial_cancel';
 
 export interface OtaBooking {
     kind: OtaEmailKind;
@@ -52,7 +52,7 @@ export const OTA_FROM: Record<OtaPlatform, string> = {
  *   GYG… was cancelled                                                        → "cancelled"
  */
 export const OTA_SUBJECT: Record<OtaPlatform, string[]> = {
-    klook: ['예약'],          // 예약내역 확정 / 확정된 예약 취소 / 예약 요청
+    klook: ['예약', '취소'],  // 예약내역 확정 / 예약 요청 / 확정된 예약 취소 / **부분 취소**(제목에 '예약' 없음)
     gyg: ['Booking', 'cancelled'],
     viator: ['Booking'],      // New Booking for… / Cancelled Booking:…
     yeogi: ['예약'],          // 예약이 확정되었어요
@@ -193,6 +193,8 @@ export function detectPlatform(from: string, subject: string): OtaPlatform | nul
 function detectKind(platform: OtaPlatform, subject: string, text: string): OtaEmailKind | null {
     switch (platform) {
         case 'klook':
+            // "클룩 부분 취소" 는 제목에 '예약' 이 없다. 전체 취소보다 먼저 봐야 한다.
+            if (/부분\s*취소/.test(subject)) return 'partial_cancel';
             return /Klook Canceled|예약\s*취소/i.test(subject) ? 'cancel' : 'new';
         case 'viator':
             return /Cancelled Booking/i.test(subject) || /Booking Canceled/i.test(text) ? 'cancel' : 'new';
@@ -219,9 +221,14 @@ function parseKlook(text: string): ParsedFields | null {
 
     const first = clean(field(text, '영문 이름'));
     const last = clean(field(text, '영문 성'));
-    const name = [first, last].filter(Boolean).join(' ') || clean(field(text, '대표 예약자명'));
+    // 성/이름에 같은 값을 적어 보내는 손님이 있다. "조용진 조용진" 이 되지 않게 한 번 거른다.
+    const name = (first && first === last ? first : [first, last].filter(Boolean).join(' '))
+        || clean(field(text, '대표 예약자명'));
 
-    const travelers = field(text, '여행자');
+    // 부분 취소 메일에는 '여행자' 가 없고 '취소된 수량' / '남은 수량' 으로 온다.
+    // 이때 인원·옵션은 **남은 수량** 기준이어야 한다.
+    const cancelledQty = clean(field(text, '취소된 수량'));
+    const travelers = field(text, '여행자') || clean(field(text, '남은 수량'));
     const { adult, child } = paxFromXForm(travelers);
 
     const kakao = clean(field(text, '카카오톡'));
@@ -238,7 +245,8 @@ function parseKlook(text: string): ParsedFields | null {
         pickupLocation: clean(field(text, '숙박하시는 호텔 주소')),
         contact: phoneOf(field(text, '전화번호')) || phoneOf(field(text, '대표 예약자 핸드폰 번호')),
         bookerEmail: clean(field(text, '대표 예약자 이메일 주소')),
-        note: [pkg && `패키지: ${pkg}`, kakao && `카톡: ${kakao}`].filter(Boolean).join(' / '),
+        note: [pkg && `패키지: ${pkg}`, kakao && `카톡: ${kakao}`, cancelledQty && `취소수량: ${cancelledQty}`]
+            .filter(Boolean).join(' / '),
     };
 }
 

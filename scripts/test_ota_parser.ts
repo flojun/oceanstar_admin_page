@@ -62,6 +62,38 @@ assert.ok(klookCancel, 'klook cancel 파싱 실패');
 assert.equal(klookCancel.kind, 'cancel');
 assert.equal(klookCancel.orderId, 'SFA720708');
 
+// 부분 취소: '여행자' 대신 '취소된 수량' / '남은 수량' 이 오고, 제목에 '예약' 이 없다.
+const klookPartial = parseOtaEmail(
+    `<p>아래 예약이 부분 취소되었습니다.</p>
+     <div>패키지: 거북이 스노클링 + 해양 액티비티</div>
+     <table>
+     ${row('예약 확인 ID', 'VFT631317')}
+     ${row('취소된 수량', '1 x 1부(07:30-11:30) 성인')}
+     ${row('요청 날짜', '2026-09-12')}
+     ${row('요청 시간', 'NA')}
+     ${row('대표 예약자명', '()')}
+     ${row('여권상 국가', '')}
+     ${row('남은 수량', '1 x 1부(07:30-11:30) 성인')}
+     ${row('출발 장소', '호텔 근처 픽업 장소')}
+     <tr><td>숙박하시는 호텔 주소를 적어주세요. 예약 확정 후 호텔에 따른 지정 픽업 장소를 카카오톡으로 안내 드립니다.:</td>
+         <td>와이키키</td></tr>
+     ${row('영문 성', '조용진')}
+     ${row('영문 이름', '조용진')}
+     ${row('전화번호', '+82-01063438385')}
+     </table>`,
+    '[Klook] 클룩 부분 취소 - 한국어 가이드 - 하와이 거북이 스노클링｜후기 15000개 - 2026-09-12 - - VFT631317',
+    'Klook.com <noreply@klook.com>',
+);
+assert.ok(klookPartial, 'klook 부분취소 파싱 실패');
+assert.equal(klookPartial.kind, 'partial_cancel');   // 신규로 오인하면 중복 예약이 생긴다
+assert.equal(klookPartial.orderId, 'VFT631317');
+assert.equal(klookPartial.tourDate, '2026-09-12');
+assert.equal(klookPartial.pax, '1명');               // 취소된 1명이 아니라 **남은** 1명
+assert.equal(klookPartial.adultCount, 1);
+assert.equal(klookPartial.option, '1부');
+assert.equal(klookPartial.name, '조용진');           // 성/이름이 같으면 한 번만
+assert.ok(klookPartial.note.includes('취소수량: 1 x 1부(07:30-11:30) 성인'), '취소수량이 note 에 없다');
+
 // ---------------------------------------------------------------- GetYourGuide
 const gygNew = parseOtaEmail(
     `<div>
@@ -229,4 +261,4 @@ assert.equal(
     '여기어때 취소 메일은 아직 null 이어야 한다',
 );
 
-console.log('OK — 9건 파싱 + 여기어때 취소 보류 확인');
+console.log('OK — 10건 파싱 + 여기어때 취소 보류 확인');
