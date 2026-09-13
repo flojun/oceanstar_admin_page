@@ -227,8 +227,26 @@ assert.ok(viatorCancel, 'viator cancel 파싱 실패');
 assert.equal(viatorCancel.kind, 'cancel');
 assert.equal(viatorCancel.orderId, 'BR-1445149027');   // '#' 접두사가 붙어도 뽑혀야 한다
 assert.equal(viatorCancel.tourDate, '2026-09-08');
-assert.equal(viatorCancel.option, '1부');              // 10:30
+assert.equal(viatorCancel.option, '2부');              // 10:30 = 2부 픽업 시각
 assert.equal(viatorCancel.name, 'Jillian Lane');
+
+// Viator 가 싣는 시각은 출항 시각이 아니라 **픽업 시각** 이다 (07:30 / 10:30 / 15:30).
+const viatorGrade = (code: string) => parseOtaEmail(
+    `<div>
+      <p>Booking Reference: BR-1446705169</p>
+      <p>Travel Date: Mon, Jan 04, 2027</p>
+      <p>Lead Traveler Name: CHRISTOPHER TAPIA</p>
+      <p>Travelers: 5 Adults</p>
+      <p>Tour Grade: Waikiki Turtle Canyon Snorkeling Adventure${code ? ` ${code}` : ''}</p>
+      <p>Tour Grade Code: TG1${code ? `~${code}` : ''}</p>
+    </div>`,
+    'New Booking for Mon, Jan 04, 2027 (#BR-1446705169)',
+    'Viator <booking@t1.viator.com>',
+);
+assert.equal(viatorGrade('07:30')?.option, '1부');
+assert.equal(viatorGrade('10:30')?.option, '2부');   // 예전엔 1부로 잘못 들어갔다
+assert.equal(viatorGrade('15:30')?.option, '3부');
+assert.equal(viatorGrade('')?.option, '');           // 시각이 아예 없는 예약도 있다
 
 // ---------------------------------------------------------------- 여기어때
 const yeogiNew = parseOtaEmail(
@@ -261,4 +279,4 @@ assert.equal(
     '여기어때 취소 메일은 아직 null 이어야 한다',
 );
 
-console.log('OK — 10건 파싱 + 여기어때 취소 보류 확인');
+console.log('OK — 14건 파싱 + 여기어때 취소 보류 확인');

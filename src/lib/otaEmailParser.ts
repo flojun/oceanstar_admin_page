@@ -132,9 +132,15 @@ export function parseOtaDate(s: string): string {
 }
 
 /**
- * 시각 → 1부/2부/3부. tour_settings 기준(08:00 / 11:00 / 15:00).
- * 네 플랫폼 모두 옵션 문자열 안에 실제 출발 시각이 들어 있어서 시각만 보면 된다.
- * 특히 여기어때는 옵션명이 "1부, 2부 ... / ... 크루즈 07:30" 처럼 그룹명 전체라
+ * 시각 → 1부/2부/3부.
+ *
+ * 플랫폼마다 싣는 시각의 의미가 다르다.
+ *   tour_settings 출항 시각 : 08:00 / 11:00 / 15:00
+ *   픽업 시각(클룩·Viator)  : 07:30 / 10:30 / 15:30
+ * 그래서 경계를 **10시와 14시**에 둔다. 출항 시각이 와도 픽업 시각이 와도 같은 부로 떨어진다.
+ *   07:30·08:00 → 1부 / 10:30·11:00 → 2부 / 14:30·15:00·15:30 → 3부
+ *
+ * 여기어때는 옵션명이 "1부, 2부 ... / ... 크루즈 07:30" 처럼 그룹명 전체라
  * 앞의 "1부/2부" 를 믿으면 안 되고 맨 뒤 시각을 봐야 한다.
  */
 export function optionFromTime(text: string): string {
@@ -146,8 +152,8 @@ export function optionFromTime(text: string): string {
     if (mer === 'PM' && h < 12) h += 12;
     if (mer === 'AM' && h === 12) h = 0;
 
-    if (h < 11) return '1부';
-    if (h < 15) return '2부';
+    if (h < 10) return '1부';
+    if (h < 14) return '2부';
     return '3부';
 }
 
@@ -301,7 +307,10 @@ function parseViator(text: string): ParsedFields | null {
     const child = Number(travelers.match(/(\d+)\s*(?:Child|Infant)/i)?.[1] || 0);
 
     // 신규는 "Tour Grade", 취소는 "Tour Option" 으로 온다.
-    const grade = field(text, 'Tour Grade Code') || field(text, 'Tour Grade') || field(text, 'Tour Option');
+    // 셋 중 하나에만 시각이 붙어 오는 경우가 있어서 (`TG1` vs `TG1~10:30`) 전부 이어 붙인다.
+    // 세 줄 다 시각이 없는 예약도 실제로 있다 → option 은 공란으로 두고 운영자가 채운다.
+    const grade = [field(text, 'Tour Grade Code'), field(text, 'Tour Grade'), field(text, 'Tour Option')]
+        .filter(Boolean).join(' ');
 
     const lang = clean(field(text, 'Tour Language'));
     const rate = clean(field(text, 'Net Rate'));
