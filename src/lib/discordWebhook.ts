@@ -12,6 +12,7 @@ interface DiscordAlertParams {
     source: string;
     orderNumber?: string;
     pickupLocation?: string;
+    detail?: string;         // "픽업 HGI → 녹색천막 / 인원 2명 → 3명" 처럼 무엇이 바뀌었는지
 }
 
 export async function sendDiscordUrgentAlert(params: DiscordAlertParams): Promise<boolean> {
@@ -38,6 +39,9 @@ export async function sendDiscordUrgentAlert(params: DiscordAlertParams): Promis
     }
     if (params.pickupLocation) {
         fields.push({ name: '📍 픽업장소', value: params.pickupLocation, inline: true });
+    }
+    if (params.detail) {
+        fields.push({ name: '📝 변경내용', value: params.detail, inline: false });
     }
 
     const payload: Record<string, unknown> = {
