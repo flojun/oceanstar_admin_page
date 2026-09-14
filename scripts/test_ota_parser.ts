@@ -155,6 +155,54 @@ assert.ok(gygCancel2, 'gyg cancel(2) 파싱 실패');
 assert.equal(gygCancel2.kind, 'cancel');
 assert.equal(gygCancel2.orderId, 'GYG48YHQ5ZB5');
 
+// "Booking detail change" = 기존 예약의 픽업/인원 변경. 신규로 오인하면 가짜 예약이 생긴다.
+// 바뀐 라벨에 'New' 배지가 붙고 **새 값이 먼저, 취소선 친 옛 값이 그 다음**에 온다.
+const gygUpdate = parseOtaEmail(
+    `<div>
+      <p>Hi Oceanview Activity LLC</p>
+      <p>We would like to inform you that the following booking has changed.</p>
+      <p>Booking reference</p><p>GYGKBF5Z68G9</p>
+      <p>Date</p><p>September 15, 2026 at 11:00 AM</p>
+      <p>Pickup location New</p>
+      <p>The Buffet At Hyatt, 2424 Kalakaua Ave, Honolulu, HI 96815, USA</p>
+      <p>(coordinates: 21.2763612, -157.8250235)</p>
+      <p>Open in Google MapsCustomer hasn't specified a pickup location. We will remind them to specify a location.</p>
+      <p>Number of participants</p><p>2</p>
+      <p>Language</p><p>Japanese</p>
+    </div>`,
+    'Booking detail change: - S257755 - GYGKBF5Z68G9',
+    'GetYourGuide <do-not-reply@notification.getyourguide.com>',
+);
+assert.ok(gygUpdate, 'gyg 변경 파싱 실패');
+assert.equal(gygUpdate.kind, 'update');
+assert.equal(gygUpdate.orderId, 'GYGKBF5Z68G9');
+assert.equal(gygUpdate.tourDate, '2026-09-15');
+assert.equal(gygUpdate.option, '2부');
+assert.equal(gygUpdate.pax, '2명');                       // 예전엔 0명
+assert.equal(gygUpdate.name, '');                          // 예전엔 "hasn't specified a pickup…"
+assert.ok(gygUpdate.pickupLocation.startsWith('The Buffet At Hyatt'),
+    `픽업이 잘못 잡혔다: ${gygUpdate.pickupLocation}`);     // 예전엔 "location New"
+assert.ok(!/coordinates|Google Maps|hasn't specified/.test(gygUpdate.pickupLocation), '픽업에 군더더기가 남았다');
+
+// 인원만 바뀐 변형: 라벨이 "Number of participants New" 이고 새 값(5) 다음에 옛 값(6)이 온다.
+const gygUpdate2 = parseOtaEmail(
+    `<div>
+      <p>Booking reference</p><p>GYGRFQGY643A</p>
+      <p>Date</p><p>September 16, 2026 at 11:00 AM</p>
+      <p>Pickup location</p>
+      <p>Hilton Garden Inn Waikiki Beach, 2330 Kuhio Ave., Honolulu, HI 96815, USA</p>
+      <p>(coordinates: 21.2789, -157.8251052)</p>
+      <p>Open in Google Maps</p>
+      <p>Number of participants New</p><p>5</p><p>6</p>
+      <p>Language</p><p>English</p>
+    </div>`,
+    'Booking detail change: - S257755 - GYGRFQGY643A',
+    'GetYourGuide <do-not-reply@notification.getyourguide.com>',
+);
+assert.ok(gygUpdate2, 'gyg 변경(2) 파싱 실패');
+assert.equal(gygUpdate2.pax, '5명');   // 새 값 5 (옛 값 6 이 아니라)
+assert.ok(gygUpdate2.pickupLocation.startsWith('Hilton Garden Inn'));
+
 // ---------------------------------------------------------------- Viator
 const viatorNew = parseOtaEmail(
     `<div>
@@ -279,4 +327,4 @@ assert.equal(
     '여기어때 취소 메일은 아직 null 이어야 한다',
 );
 
-console.log('OK — 14건 파싱 + 여기어때 취소 보류 확인');
+console.log('OK — 16건 파싱 + 여기어때 취소 보류 확인');

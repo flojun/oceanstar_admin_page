@@ -9,7 +9,7 @@
  */
 
 export type OtaPlatform = 'klook' | 'gyg' | 'viator' | 'yeogi';
-export type OtaEmailKind = 'new' | 'cancel' | 'partial_cancel';
+export type OtaEmailKind = 'new' | 'cancel' | 'partial_cancel' | 'update';
 
 export interface OtaBooking {
     kind: OtaEmailKind;
@@ -111,6 +111,26 @@ function field(text: string, label: string): string {
     return '';
 }
 
+/**
+ * 라벨 **다음 줄**의 값을 뽑는다. GYG 변경 메일 전용.
+ * 라벨 줄에 `New` 배지가 붙어 오므로("Pickup location New") 그건 값으로 치지 않는다.
+ */
+function valueAfterLabel(text: string, label: string): string {
+    const lines = text.split('\n');
+    const i = lines.findIndex((l) => l.includes(label));
+    if (i === -1) return '';
+
+    const rest = lines[i].slice(lines[i].indexOf(label) + label.length)
+        .replace(/^[\s:：]+/, '').replace(/^New\b/i, '').trim();
+    if (rest) return rest;
+
+    for (let j = i + 1; j < lines.length; j++) {
+        const v = lines[j].trim();
+        if (v && !/^New$/i.test(v)) return v;
+    }
+    return '';
+}
+
 const pad = (n: number | string) => String(n).padStart(2, '0');
 
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
@@ -157,8 +177,8 @@ export function optionFromTime(text: string): string {
     return '3부';
 }
 
-/** "2 x 1부(...) 성인", "4 x Adults (Age 8-99)" 형태 */
-function paxFromXForm(v: string): { adult: number; child: number } {
+/** "2 x 1부(...) 성인", "4 x Adults (Age 8-99)" 형태. total 은 성인/아동 구분이 없을 때를 위한 총원. */
+function paxFromXForm(v: string): { adult: number; child: number; total: number } {
     let adult = 0;
     let child = 0;
     for (const m of v.matchAll(/(\d+)\s*x\s*([^,;]*)/gi)) {
@@ -166,7 +186,12 @@ function paxFromXForm(v: string): { adult: number; child: number } {
         if (/아동|소아|child/i.test(m[2])) child += n;
         else adult += n;
     }
-    return { adult, child };
+    // 변경 메일은 "2" 처럼 총원만 온다. 성인/아동 구분이 없으니 성인으로 세지 않는다.
+    if (adult + child === 0) {
+        const total = Number(v.match(/\d+/)?.[0] || 0);
+        return { adult: 0, child: 0, total };
+    }
+    return { adult, child, total: adult + child };
 }
 
 const paxLabel = (adult: number, child: number) => `${adult + child}명`;
@@ -205,6 +230,9 @@ function detectKind(platform: OtaPlatform, subject: string, text: string): OtaEm
         case 'viator':
             return /Cancelled Booking/i.test(subject) || /Booking Canceled/i.test(text) ? 'cancel' : 'new';
         case 'gyg':
+            // "Booking detail change: - S… - GYG…" 는 기존 예약의 픽업/인원/날짜가 바뀐 것이다.
+            // 신규로 오인하면 가짜 예약이 하나 더 생긴다.
+            if (/detail change/i.test(subject)) return 'update';
             // "GYG… was cancelled" 와 "A booking has been canceled - S… - GYG…" 두 가지로 온다.
             return /was cancelled|has been canceled/i.test(subject) ? 'cancel' : 'new';
         case 'yeogi':
@@ -282,7 +310,9 @@ function parseGyg(text: string): ParsedFields | null {
 
     return {
         orderId,
-        name: clean(namePart.trim()) || clean(field(text, 'Customer')),
+        // 'Customer' 는 "Customer hasn't specified a pickup location…" 같은 안내 문장에도 걸린다.
+        // 라벨 형태("Customer: 이름")일 때만 쓴다.
+        name: clean(namePart.trim()) || (text.match(/^Customer:\s*(.+)$/m)?.[1]?.trim() ?? ''),
         tourDate,
         option: optionFromTime(dateLine),
         pax: paxLabel(adult, child),
@@ -294,6 +324,45 @@ function parseGyg(text: string): ParsedFields | null {
         bookerEmail: emailPart.trim() || text.match(/[\w.+-]+@[\w.-]+\.\w+/)?.[0] || '',
         note: [lang && `언어: ${lang}`, price && `금액: ${price}`, reason && `취소사유: ${reason}`]
             .filter(Boolean).join(' / '),
+    };
+}
+
+/**
+ * GYG "Booking detail change" — 기존 예약의 픽업/인원/날짜가 바뀐 메일.
+ *
+ * 바뀐 항목의 라벨 뒤에 `New` 배지가 붙고, **새 값이 먼저, 취소선 친 옛 값이 그 다음** 줄에 온다.
+ *   Pickup location New
+ *   The Buffet At Hyatt, 2424 Kalākaua Ave, …      ← 새 값
+ *   (coordinates: 21.2763612, -157.8250235)
+ *   Open in Google MapsCustomer hasn't specified…  ← 옛 값(취소선)
+ * 그래서 라벨 다음의 첫 줄만 본다.
+ */
+function parseGygUpdate(text: string): ParsedFields | null {
+    const orderId = field(text, 'Booking reference') || text.match(/GYG[A-Z0-9]{6,}/)?.[0] || '';
+    const dateLine = valueAfterLabel(text, 'Date');
+    const tourDate = parseOtaDate(dateLine);
+    if (!orderId || !tourDate) return null;
+
+    const pickup = valueAfterLabel(text, 'Pickup location')
+        .replace(/\(coordinates:[^)]*\)/i, '')
+        .replace(/Open in Google Maps.*$/i, '')
+        .trim();
+
+    const total = Number(valueAfterLabel(text, 'Number of participants').match(/\d+/)?.[0] || 0);
+    const lang = valueAfterLabel(text, 'Language');
+
+    return {
+        orderId,
+        name: '',                       // 변경 메일에는 고객명이 없다. 기존 행의 이름을 유지한다.
+        tourDate,
+        option: optionFromTime(dateLine),
+        pax: total ? `${total}명` : '',
+        adultCount: 0,                  // 총원만 오고 성인/아동 구분이 없다 (§ 호출부에서 덮어쓰지 않는다)
+        childCount: 0,
+        pickupLocation: pickup,
+        contact: '',
+        bookerEmail: '',
+        note: lang ? `언어: ${lang}` : '',
     };
 }
 
@@ -381,13 +450,13 @@ export function parseOtaEmail(html: string, subject: string, from: string): OtaB
 
     const parsed =
         platform === 'klook' ? parseKlook(text)
-            : platform === 'gyg' ? parseGyg(text)
+            : platform === 'gyg' ? (kind === 'update' ? parseGygUpdate(text) : parseGyg(text))
                 : platform === 'viator' ? parseViator(text)
                     : parseYeogi(text);
 
     if (!parsed) return null;
 
-    // 취소는 예약번호만 있으면 된다. 신규는 이름까지 필요.
+    // 취소·변경은 예약번호만 있으면 된다. 신규는 이름까지 필요.
     if (kind === 'new' && !parsed.name) return null;
 
     return { kind, platform, source: OTA_SOURCE[platform], ...parsed };

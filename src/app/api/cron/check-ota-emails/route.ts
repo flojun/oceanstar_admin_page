@@ -15,6 +15,7 @@ import { simpleParser } from 'mailparser';
  * - 신규 예약 → reservations INSERT (상태 '안내필요')  ← 운영자가 직접 안내 후 '예약확정' 으로 변경
  * - 취소     → 기존 예약 UPDATE (상태 '취소요청')      ← '취소' 로 바로 바꾸지 않는다. 눈으로 확인 후 마감.
  * - 부분취소 → 인원만 '남은 수량' 으로 줄이고 상태 '안내필요' ← 남은 손님이 있으므로 취소요청으로 보내지 않는다.
+ * - 변경     → 기존 예약의 픽업/인원/날짜만 갱신 (GYG "Booking detail change") ← INSERT 하지 않는다.
  * - 픽업이 호텔 주소로만 오면 가장 가까운 픽업 장소로 치환 (원문 주소는 note 에 보존)
  * - 취소는 투어일과 무관하게 항상 Discord 알림
  * - 파싱/매칭 실패 시 \Seen 을 붙이지 않아 메일이 안읽음으로 남는다 (수동 대응 가능)
@@ -50,6 +51,7 @@ export async function GET(request: Request) {
         let inserted = 0;
         let cancelled = 0;
         let partial = 0;
+        let updated = 0;
         let unmatched = 0;
         let skipped = 0;
         let alertsSent = 0;
@@ -75,7 +77,7 @@ export async function GET(request: Request) {
 
                         // OTA 는 픽업 장소가 아니라 묵는 호텔 주소를 준다.
                         // 가장 가까운 픽업 장소로 바꾸되 원문 주소는 note 에 남긴다.
-                        if (booking.kind === 'new' && booking.pickupLocation) {
+                        if ((booking.kind === 'new' || booking.kind === 'update') && booking.pickupLocation) {
                             const resolved = await resolveNearestPickup(booking.pickupLocation, pickupLocations);
                             if (resolved !== booking.pickupLocation) {
                                 booking.note = [booking.note, `주소: ${booking.pickupLocation}`]
@@ -85,13 +87,15 @@ export async function GET(request: Request) {
                         }
 
                         const done = booking.kind === 'new' ? await handleNew(booking)
-                            : booking.kind === 'partial_cancel' ? await handlePartialCancel(booking)
-                                : await handleCancel(booking);
+                            : booking.kind === 'update' ? await handleUpdate(booking)
+                                : booking.kind === 'partial_cancel' ? await handlePartialCancel(booking)
+                                    : await handleCancel(booking);
 
                         if (done === 'error') { errors++; continue; }
                         if (done === 'inserted') inserted++;
                         if (done === 'cancelled') cancelled++;
                         if (done === 'partial') partial++;
+                        if (done === 'updated') updated++;
                         if (done === 'unmatched') unmatched++;
                         if (done === 'duplicate') skipped++;
 
@@ -113,6 +117,7 @@ export async function GET(request: Request) {
             inserted,
             cancelled,
             partial,
+            updated,
             unmatched,
             skipped,
             alertsSent,
@@ -126,13 +131,13 @@ export async function GET(request: Request) {
     }
 }
 
-type Outcome = 'inserted' | 'duplicate' | 'cancelled' | 'partial' | 'unmatched' | 'error';
+type Outcome = 'inserted' | 'duplicate' | 'cancelled' | 'partial' | 'updated' | 'unmatched' | 'error';
 
-type Target = { id: string; status: string; note: string | null; pax: string | null };
+type Target = { id: string; status: string; note: string | null; pax: string | null; pickup_location: string | null };
 
 /** 1순위 예약번호, 2순위 출처+이름+투어일 (수기로 넣어 order_id 가 빈 건 대비) */
 async function findTarget(b: OtaBooking): Promise<Target | null> {
-    const cols = 'id, status, note, pax';
+    const cols = 'id, status, note, pax, pickup_location';
 
     const { data: byOrder } = await supabaseServer
         .from('reservations').select(cols).eq('order_id', b.orderId).maybeSingle();
@@ -218,6 +223,53 @@ async function handleCancel(b: OtaBooking, preloaded?: Target): Promise<Outcome>
 }
 
 /**
+ * GYG "Booking detail change" → 기존 예약의 픽업·인원·날짜만 갱신한다.
+ *
+ * 이 메일에는 고객명·연락처가 없다. 신규로 처리하면 이름 자리에 안내 문장이 들어간
+ * 가짜 예약이 생기므로, **매칭되는 예약이 없으면 아무것도 만들지 않는다.**
+ * 인원은 총원만 오고 성인/아동 구분이 없어서 pax 만 갱신하고 adult/child 는 건드리지 않는다.
+ */
+async function handleUpdate(b: OtaBooking): Promise<Outcome> {
+    const target = await findTarget(b);
+
+    if (!target) {
+        console.warn(`[OTA Cron] 변경 메일인데 매칭 예약 없음: ${b.orderId}`);
+        return 'unmatched';
+    }
+    if (target.status === '취소') return 'duplicate';
+
+    const changes: string[] = [];
+    if (b.pickupLocation && b.pickupLocation !== target.pickup_location) {
+        changes.push(`픽업 ${target.pickup_location || '(없음)'} → ${b.pickupLocation}`);
+    }
+    if (b.pax && b.pax !== target.pax) changes.push(`인원 ${target.pax || '?'} → ${b.pax} (성인/아동 구분 확인 필요)`);
+
+    // 바뀐 게 없으면 상태만 흔들지 않는다.
+    if (changes.length === 0) return 'duplicate';
+
+    const stamp = `[${b.source} 예약변경 수신: ${getHawaiiDateStr()} / ${changes.join(' / ')}]`;
+
+    const { error } = await supabaseServer
+        .from('reservations')
+        .update({
+            tour_date: b.tourDate,
+            option: b.option || undefined,
+            pax: b.pax || undefined,
+            pickup_location: b.pickupLocation || undefined,
+            status: '안내필요',
+            is_admin_checked: false,
+            note: `${target.note || ''} ${stamp}`.trim(),
+        })
+        .eq('id', target.id);
+
+    if (error) {
+        console.error('[OTA Cron] 변경 UPDATE 실패:', error);
+        return 'error';
+    }
+    return 'updated';
+}
+
+/**
  * 부분 취소 → 인원만 '남은 수량' 으로 줄이고 '안내필요' 로 올려 둔다.
  *
  * 취소요청으로 보내면 안 된다. 취소요청 화면의 처리 버튼은 상태를 '취소' 로 마감하는데,
@@ -266,6 +318,7 @@ async function notify(b: OtaBooking, outcome: Outcome): Promise<boolean> {
     const title =
         outcome === 'cancelled' ? '❌ [취소요청] OTA 취소 접수'
             : outcome === 'partial' ? '✂️ [부분취소] 인원이 줄었습니다'
+                : outcome === 'updated' ? '🔄 [예약변경] 픽업·인원이 바뀌었습니다'
                 : outcome === 'unmatched' ? '⚠️ [취소] 매칭되는 예약을 못 찾음'
                     : outcome === 'inserted' && isUrgentTourDate(b.tourDate) ? '🚨 [안내필요] OTA 긴급 예약!'
                         : null;

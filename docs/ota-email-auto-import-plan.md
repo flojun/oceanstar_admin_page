@@ -224,6 +224,31 @@ Cancellation reason: Bad weather conditions   ← ★ note 에 반드시 기록
 → **취소 사유가 오는 유일한 플랫폼.** `Bad weather conditions` 처럼 우리 쪽 결항이 원인인 경우도
    있으므로 사유를 note 에 남겨야 나중에 원인 파악이 됨.
 
+### GYG "Booking detail change" (픽업·인원·날짜 변경)
+
+기존 예약이 바뀐 메일이다. **신규가 아니다.** 본문 구조:
+
+```
+Booking reference
+GYGKBF5Z68G9
+Date
+September 15, 2026 at 11:00 AM
+Pickup location New                ← 바뀐 항목 라벨에 'New' 배지가 붙는다
+The Buffet At Hyatt, 2424 Kalākaua Ave, Honolulu, HI 96815, USA   ← 새 값
+(coordinates: 21.2763612, -157.8250235)
+Open in Google MapsCustomer hasn't specified a pickup location…   ← 옛 값(취소선)
+Number of participants
+2
+Language
+Japanese
+```
+
+- **새 값이 먼저, 취소선 친 옛 값이 그 다음**에 온다 → 라벨 다음 첫 줄만 본다.
+- 인원 변경일 때는 `Number of participants New` / `5`(새) / `6`(옛) 형태가 된다.
+- 고객명·연락처가 없다 → **매칭되는 예약이 없으면 아무것도 만들지 않는다.**
+- 인원은 총원만 오고 성인/아동 구분이 없다 → `pax` 만 갱신하고 `adult_count`/`child_count` 는 손대지 않는다.
+- 좌표까지 주지만 주소 문자열로 지오코딩해도 같은 결과라 좌표는 쓰지 않는다.
+
 ### 취소 메일에서 필요한 필드는 사실상 예약번호 하나
 
 세 플랫폼 모두 취소 메일에 예약번호를 그대로 실어 보냄:
@@ -281,7 +306,8 @@ OTA 메일은 픽업 장소가 아니라 **손님이 묵는 호텔 이름/주소
 | GYG | `Urgent: New booking received - S… - GYG…` | 50 | 신규 |
 | GYG | `GYG… was cancelled` | 12 | 취소 |
 | GYG | **`A booking has been canceled - S… - GYG…`** | 6 | 취소 ← 이 형태를 처음에 놓쳤었음 |
-| GYG | `You have a message about a booking` / `Booking detail change` 등 | 16 | 파싱 실패 → 안읽음 유지 |
+| GYG | **`Booking detail change: - S… - GYG…`** | 6 | **변경** ← 신규로 오인해 가짜 예약을 만들던 형태 |
+| GYG | `You have a message about a booking` 등 | 13 | 파싱 실패 → 안읽음 유지 |
 | Viator | `New Booking for …(#BR-…)` / `Cancelled Booking: …` | 30 | 신규/취소 |
 | Viator | 마케팅·정산·케이스 메일 | 24 | 제목 필터에서 제외 |
 | 여기어때 | `[여기어때] 예약이 확정되었어요…` | 1 | 신규 |
@@ -310,6 +336,7 @@ yeogi  : ['예약']                 1/14
 | GYG 픽업에 `Open in Google Maps` 가 붙음 | 링크 텍스트 | 접미사 제거 |
 | Viator 연락처에 `(Alternate Phone)AU…Send the customer a message.` | 안내문구 포함 | `phoneOf()` 로 번호만 추출 |
 | **Viator 픽업이 `Special Requirements: No` 로 들어감** | `Hotel Pickup: My hotel is not yet booked:` 처럼 값이 `:` 로 끝나자 다음 줄을 값으로 오인 | 라벨 바로 뒤 콜론 유무로 구분 |
+| **GYG 변경 메일이 가짜 예약으로 INSERT 됨** | 제목에 `Booking` 이 있어 필터를 통과하고, 취소 키워드가 없어 `new` 로 판정. 게다가 `Main customer` 가 없어 `Customer` 폴백이 취소선 문장 "Customer hasn't specified a pickup location…" 을 **이름**으로, `Pickup location New` 를 픽업으로, `Number of participants: 2`(x 형식 아님)를 **0명**으로 읽음 | `detail change` 를 별도 kind 로 분리 + `Customer` 폴백을 라벨 형태로 한정 + 총원만 오는 인원 처리 |
 | **클룩 부분취소를 신규 예약으로 오인** | 제목에 `예약`·`Klook Canceled` 가 없음 → `new` 판정 → 중복 INSERT 위험. IMAP 제목 필터에도 안 걸림 | `부분 취소` 를 먼저 판정 + 제목 필터에 `취소` 추가 |
 | 부분취소 인원을 '취소된 수량' 으로 잘못 읽음 | 부분취소 메일엔 `여행자` 가 없고 `취소된 수량`/`남은 수량` 이 옴 | **남은 수량** 기준으로 인원·옵션 계산 |
 | 이름이 `조용진 조용진` | 손님이 영문 성/이름에 같은 값을 적음 | 같으면 한 번만 |
@@ -373,6 +400,7 @@ yeogi  : ['예약']                 1/14
 | 신규 예약 — 그 외 | 발송 안 함 (기존 MRT와 동일) | — |
 | **취소요청 전환 성공** | **항상 발송** (투어일 무관) | `❌ [취소요청] OTA 취소 접수` |
 | **부분취소 반영 성공** | **항상 발송** | `✂️ [부분취소] 인원이 줄었습니다` |
+| **변경 반영 성공** | **항상 발송** | `🔄 [예약변경] 픽업·인원이 바뀌었습니다` |
 | 취소 메일인데 매칭 예약 없음 | 발송 | `⚠️ [취소] 매칭되는 예약을 못 찾음` |
 
 - 기존 `sendDiscordUrgentAlert()` 를 **그대로 재사용** (title 이 파라미터라 코드 변경 0줄).
@@ -454,5 +482,5 @@ OTA 취소 메일 도착
 
 - 자동 안내 메일/카톡 발송 — 요구사항이 "내가 직접 보낸다" 이므로 제외
 - **여기어때 취소 메일 처리** — 샘플 확보 후 별도 추가. 그전까지는 안읽음으로 남겨 수동 대응
-- **변경(일정 변경) 메일 처리** — 취소/신규만 우선. 변경은 취소+신규로 오는 경우가 많음
+- **클룩·Viator·여기어때의 변경 메일** — GYG 만 확인됨. 나머지는 샘플 확보 후 추가
 - 정산(settlement) 파서 연동 — 별도 엑셀 업로드 경로가 이미 있음
