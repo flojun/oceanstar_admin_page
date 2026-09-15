@@ -1195,7 +1195,12 @@ function UnassignedDropZone({ items, id, totalPax }: { items: Reservation[], id:
 
     // Split items by status
     const confirmedItems = useMemo(() => items.filter(i => i.status === '예약확정'), [items]);
-    const pendingItems = useMemo(() => items.filter(i => i.status === '대기' || i.status === '예약대기'), [items]);
+    // '안내필요' 도 아직 확정 전이라 예약대기와 같은 자리에 둔다.
+    // 빠뜨리면 조회는 되는데 어느 목록에도 안 그려져서 배차에서 통째로 사라진다.
+    const pendingItems = useMemo(
+        () => items.filter(i => i.status === '대기' || i.status === '예약대기' || i.status === '안내필요'),
+        [items],
+    );
 
     // Only pass items that are actually rendered to SortableContext
     const sortableItemIds = useMemo(() => [...confirmedItems, ...pendingItems].map(i => i.id), [confirmedItems, pendingItems]);
@@ -1225,7 +1230,7 @@ function UnassignedDropZone({ items, id, totalPax }: { items: Reservation[], id:
                         <>
                             <div className="relative flex py-2 items-center">
                                 <div className="flex-grow border-t border-gray-300"></div>
-                                <span className="flex-shrink-0 mx-2 text-red-500 text-xs font-bold">대기중인 명단</span>
+                                <span className="flex-shrink-0 mx-2 text-red-500 text-xs font-bold">대기 · 안내필요 명단</span>
                                 <div className="flex-grow border-t border-gray-300"></div>
                             </div>
                             {pendingItems.map((item, index) => (

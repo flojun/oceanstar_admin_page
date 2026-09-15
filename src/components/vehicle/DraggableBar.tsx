@@ -41,6 +41,17 @@ export function DraggableBar({ reservation, index }: DraggableBarProps) {
             <div className="w-10 text-center bg-blue-100 text-blue-700 rounded px-1 font-bold text-xs py-0.5">
                 {reservation.pax?.replace(/명/g, '')}명
             </div>
+            {reservation.status !== '예약확정' && (
+                <span
+                    className={`shrink-0 rounded px-1 py-0.5 text-[10px] font-bold ${
+                        reservation.status === '안내필요'
+                            ? 'bg-purple-100 text-purple-700'
+                            : 'bg-yellow-100 text-yellow-700'
+                    }`}
+                >
+                    {reservation.status}
+                </span>
+            )}
             <div className="flex-1 text-right text-gray-500 text-xs truncate">
                 {reservation.contact}
             </div>
