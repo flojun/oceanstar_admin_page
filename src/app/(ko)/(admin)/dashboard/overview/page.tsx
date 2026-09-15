@@ -30,9 +30,15 @@ const GRID = '#eef1f5';
 const AXIS_TEXT = '#64748b';
 
 const color = (i: number) => `#${SERIES_COLORS[i % SERIES_COLORS.length]}`;
+/** 막대는 단색 블록 대신 위→아래로 옅어지는 그라디언트로 칠한다 (같은 색상, 투명도만 변화) */
+const gradId = (i: number) => `barGrad-${i}`;
+const gradFill = (i: number) => `url(#${gradId(i)})`;
 const comma = (n: number) => n.toLocaleString('ko-KR');
 /** "2026-03" -> "26.03" (13개월까지 라벨이 겹치지 않는다) */
 const tick = (m: string) => `${m.slice(2, 4)}.${m.slice(5)}`;
+
+/** 카드 공통: 흰 판 + 배경 톤을 머금은 옅은 그림자 (순수 검정 그림자는 흰 배경에서 탁해진다) */
+const CARD = 'rounded-xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_10px_28px_-16px_rgba(15,23,42,0.18)]';
 
 const YEARS = [2024, 2025, 2026, 2027, 2028];
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -201,7 +207,7 @@ export default function DashboardOverviewPage() {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-xl border border-slate-200 bg-white p-4">
+            <div className={`flex flex-wrap items-center gap-x-6 gap-y-3 ${CARD} p-4`}>
                 <Segmented
                     label="집계 기준"
                     options={DATE_FIELDS.map(f => ({ value: f, label: DATE_FIELD_LABEL[f] }))}
@@ -238,7 +244,7 @@ export default function DashboardOverviewPage() {
             ) : (
                 <>
                     {/* 1. 월별 플랫폼 비교 — 한 달을 골라 플랫폼끼리 나란히 */}
-                    <section className="rounded-xl border border-slate-200 bg-white p-5">
+                    <section className={`${CARD} p-5`}>
                         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                             <div>
                                 <h2 className="text-base font-bold text-slate-900">월별 플랫폼 비교</h2>
@@ -275,7 +281,7 @@ export default function DashboardOverviewPage() {
                     </div>
 
                     {/* Legend (identity is never color-alone: 범례 + 상세 표) */}
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-slate-200 bg-white px-4 py-3">
+                    <div className={`flex flex-wrap items-center gap-x-4 gap-y-2 ${CARD} px-4 py-3`}>
                         <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">플랫폼</span>
                         {stats.platforms.map((p, i) => {
                             const off = hidden.has(p);
@@ -301,6 +307,7 @@ export default function DashboardOverviewPage() {
                     <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                         <ChartCard title="월별 탑승 인원" subtitle="플랫폼별 누적">
                             <BarChart data={paxRows} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                                <BarGradients count={SERIES_COLORS.length} />
                                 <CartesianGrid stroke={GRID} vertical={false} />
                                 <XAxis dataKey="month" tickFormatter={tick} tickLine={false} axisLine={{ stroke: GRID }} tick={{ fill: AXIS_TEXT, fontSize: 12 }} minTickGap={4} />
                                 <YAxis tickLine={false} axisLine={false} tick={{ fill: AXIS_TEXT, fontSize: 12 }} width={52} />
@@ -310,10 +317,10 @@ export default function DashboardOverviewPage() {
                                         key={p}
                                         dataKey={p}
                                         stackId="pax"
-                                        fill={color(stats.platforms.indexOf(p))}
+                                        fill={gradFill(stats.platforms.indexOf(p))}
                                         stroke={SURFACE}
                                         strokeWidth={2}
-                                        radius={p === visible[visible.length - 1] ? [4, 4, 0, 0] : undefined}
+                                        radius={p === visible[visible.length - 1] ? [6, 6, 0, 0] : undefined}
                                         isAnimationActive={false}
                                     />
                                 ))}
@@ -343,7 +350,7 @@ export default function DashboardOverviewPage() {
                     </div>
 
                     {/* 4. 상세 표 */}
-                    <section className="rounded-xl border border-slate-200 bg-white">
+                    <section className={CARD}>
                         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
                             <h2 className="text-base font-bold text-slate-900">
                                 월별 플랫폼 상세 ({tableMetric === 'pax' ? '인원' : '건수'})
@@ -376,7 +383,7 @@ export default function DashboardOverviewPage() {
                                         const isActive = m === activeMonth;
                                         return (
                                             <tr key={m} className={`border-t border-slate-100 ${isActive ? 'bg-indigo-50/60' : ''}`}>
-                                                <td className={`sticky left-0 z-10 px-5 py-2.5 ${isActive ? 'bg-indigo-50 font-semibold text-indigo-700' : 'bg-white text-slate-600'}`}>
+                                                <td className={`sticky left-0 z-10 whitespace-nowrap px-5 py-2.5 ${isActive ? 'bg-indigo-50 font-semibold text-indigo-700' : 'bg-white text-slate-600'}`}>
                                                     {m}
                                                 </td>
                                                 {stats.platforms.map(p => {
@@ -421,6 +428,23 @@ export default function DashboardOverviewPage() {
 // 작은 조각들
 // ---------------------------------------------------------------------------
 
+/**
+ * 막대용 세로 그라디언트 정의. 색상(hue)은 팔레트 그대로 두고 아래로 갈수록 옅어지게만 한다 —
+ * 큰 단색 블록의 답답함을 덜면서 CVD 안전성은 팔레트 원본을 유지한다.
+ */
+function BarGradients({ count }: { count: number }) {
+    return (
+        <defs>
+            {Array.from({ length: count }, (_, i) => (
+                <linearGradient key={i} id={gradId(i)} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={color(i)} stopOpacity={1} />
+                    <stop offset="100%" stopColor={color(i)} stopOpacity={0.45} />
+                </linearGradient>
+            ))}
+        </defs>
+    );
+}
+
 /** 한 달치를 플랫폼끼리 나란히. 가로축 = 플랫폼, 세로축 = 값. */
 function PlatformBars({ cells, platforms, metric, title, unit }: {
     cells: PlatformCell[];
@@ -440,6 +464,7 @@ function PlatformBars({ cells, platforms, metric, title, unit }: {
             <div className="h-96">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={sorted} margin={{ top: 24, right: 8, left: -16, bottom: 16 }}>
+                        <BarGradients count={SERIES_COLORS.length} />
                         <CartesianGrid stroke={GRID} vertical={false} />
                         <XAxis
                             dataKey="platform"
@@ -457,9 +482,9 @@ function PlatformBars({ cells, platforms, metric, title, unit }: {
                             cursor={{ fill: '#f8fafc' }}
                             formatter={(v) => [`${comma(Number(v) || 0)}${unit}`, title]}
                         />
-                        <Bar dataKey={metric} radius={[4, 4, 0, 0]} isAnimationActive={false} maxBarSize={64}>
+                        <Bar dataKey={metric} radius={[6, 6, 2, 2]} isAnimationActive={false} maxBarSize={56}>
                             {sorted.map((c, i) => (
-                                <Cell key={c.platform} fill={color(platforms.indexOf(c.platform) < 0 ? i : platforms.indexOf(c.platform))} />
+                                <Cell key={c.platform} fill={gradFill(platforms.indexOf(c.platform) < 0 ? i : platforms.indexOf(c.platform))} />
                             ))}
                             <LabelList
                                 dataKey={metric}
@@ -549,7 +574,7 @@ function MonthPicker({ year, month, onYear, onMonth }: {
 
 function Stat({ label, value, unit, small }: { label: string; value: string; unit?: string; small?: boolean }) {
     return (
-        <div className="rounded-xl border border-slate-200 bg-white px-5 py-4">
+        <div className={`${CARD} px-5 py-4`}>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
             <p className="mt-2 flex items-baseline gap-1.5">
                 <span className={`font-bold text-slate-900 ${small ? 'text-xl' : 'text-3xl'}`}>{value}</span>
@@ -561,7 +586,7 @@ function Stat({ label, value, unit, small }: { label: string; value: string; uni
 
 function ChartCard({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactElement }) {
     return (
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <section className={`${CARD} p-5`}>
             <div className="mb-4 flex items-baseline gap-2">
                 <h2 className="text-base font-bold text-slate-900">{title}</h2>
                 <span className="text-sm text-slate-400">{subtitle}</span>
