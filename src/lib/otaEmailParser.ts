@@ -228,7 +228,8 @@ function detectKind(platform: OtaPlatform, subject: string, text: string): OtaEm
             if (/부분\s*취소/.test(subject)) return 'partial_cancel';
             return /Klook Canceled|예약\s*취소/i.test(subject) ? 'cancel' : 'new';
         case 'viator':
-            return /Cancelled Booking/i.test(subject) || /Booking Canceled/i.test(text) ? 'cancel' : 'new';
+            // 제목이 "Cancelled Booking" 과 "Canceled Booking" 두 철자로 온다.
+            return /Cancell?ed Booking/i.test(subject) || /Booking Cancell?ed/i.test(text) ? 'cancel' : 'new';
         case 'gyg':
             // "Booking detail change: - S… - GYG…" 는 기존 예약의 픽업/인원/날짜가 바뀐 것이다.
             // 신규로 오인하면 가짜 예약이 하나 더 생긴다.

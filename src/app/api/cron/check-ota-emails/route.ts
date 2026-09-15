@@ -11,7 +11,7 @@ import { simpleParser } from 'mailparser';
 
 /**
  * OTA(클룩·GetYourGuide·Viator·여기어때) 예약 메일 자동 수집 Cron.
- * - 5분마다 Gmail IMAP 의 UNSEEN 메일을 플랫폼별로 검색
+ * - 5분마다 Gmail IMAP 에서 아직 처리하지 않은 메일을 플랫폼별로 검색
  * - 신규 예약 → reservations INSERT (상태 '안내필요')  ← 운영자가 직접 안내 후 '예약확정' 으로 변경
  * - 취소     → 기존 예약 UPDATE (상태 '취소요청')      ← '취소' 로 바로 바꾸지 않는다. 눈으로 확인 후 마감.
  * - 부분취소 → 인원만 '남은 수량' 으로 줄이고 상태 '안내필요' ← 남은 손님이 있으므로 취소요청으로 보내지 않는다.
@@ -19,10 +19,19 @@ import { simpleParser } from 'mailparser';
  * - 픽업이 호텔 주소로만 오면 가장 가까운 픽업 장소로 치환 (원문 주소는 note 에 보존)
  * - 날짜·인원·픽업 변경, 부분취소, 취소는 **투어일과 무관하게 항상 Discord 알림**
  *   (무엇이 어떻게 바뀌었는지까지 알림에 싣는다. 놓치면 손님이 엉뚱한 시간에 기다린다)
- * - 파싱/매칭 실패 시 \Seen 을 붙이지 않아 메일이 안읽음으로 남는다 (수동 대응 가능)
+ * - 처리한 메일에는 `OceanstarDone` 키워드를 붙이고 다음부터 그 키워드로 걸러낸다.
+ *   (읽음 여부로 거르면 사람이 먼저 열어본 메일을 놓친다)
+ * - 파싱/매칭 실패 시 표식을 붙이지 않아 메일이 안읽음으로 남는다 (수동 대응 가능)
  */
 
 const PLATFORMS: OtaPlatform[] = ['klook', 'gyg', 'viator', 'yeogi'];
+
+/**
+ * 처리 완료 표식. `\Seen`(읽음)에 기대면 **사람이 Gmail 에서 먼저 열어본 메일을 영원히 건너뛴다.**
+ * Gmail 은 permanentFlags 에 `\*` 를 주므로 임의 키워드를 붙일 수 있다(실측 확인).
+ * 읽음 처리도 그대로 유지해서 받은편지함이 보이던 대로 보이게 둔다.
+ */
+const PROCESSED = 'OceanstarDone';
 
 export async function GET(request: Request) {
     try {
@@ -102,7 +111,7 @@ export async function GET(request: Request) {
 
                         if (await notify(booking, outcome, detail)) alertsSent++;
 
-                        await client.messageFlagsAdd(msg.uid, ['\\Seen'], { uid: true });
+                        await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
                     } catch (msgError) {
                         console.error(`[OTA Cron] ${platform} 처리 중 오류:`, msgError);
                         errors++;
@@ -308,6 +317,9 @@ async function handlePartialCancel(b: OtaBooking): Promise<Result> {
     const remaining = b.adultCount + b.childCount;
     if (remaining === 0) return handleCancel(b, target);
 
+    // 같은 메일을 다시 읽어도 두 번 쓰거나 두 번 알리지 않는다.
+    if (target.pax === b.pax) return { outcome: 'duplicate' };
+
     const cancelledQty = b.note.match(/취소수량: ([^/]+)/)?.[1]?.trim();
     const stamp = `[${b.source} 부분취소 수신: ${getHawaiiDateStr()}`
         + `${cancelledQty ? ` / 취소 ${cancelledQty}` : ''}`
@@ -373,7 +385,7 @@ async function notify(b: OtaBooking, outcome: Outcome, detail?: string): Promise
 }
 
 /**
- * UNSEEN + 발신자 + 제목 + 최근 2일 (시간대 차이 고려).
+ * 아직 처리 표식이 없는 메일 + 발신자 + 제목 + 최근 2일 (시간대 차이 고려).
  * 제목 검색어는 플랫폼마다 여러 개일 수 있어서(GYG) 합집합을 만든다.
  */
 async function searchEmails(
@@ -386,7 +398,7 @@ async function searchEmails(
 
     const uidSet = new Set<number>();
     for (const subject of subjects) {
-        const found = await client.search({ seen: false, from, subject, since }, { uid: true });
+        const found = await client.search({ unKeyword: PROCESSED, from, subject, since }, { uid: true });
         for (const uid of found || []) uidSet.add(uid);
     }
 

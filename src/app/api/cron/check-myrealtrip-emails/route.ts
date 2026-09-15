@@ -10,13 +10,20 @@ import { simpleParser } from 'mailparser';
 
 /**
  * 마이리얼트립 이메일 자동 수집 Cron Job
- * - 5분마다 Gmail IMAP에 접속하여 UNSEEN 이메일 검색
+ * - 5분마다 Gmail IMAP에 접속하여 **아직 처리 표식이 없는** 이메일 검색
+ *   (읽음 여부로 거르면 사람이 Gmail 에서 먼저 열어본 메일을 영원히 놓친다)
  * - [확정대기] → reservations INSERT (예약대기)
  * - [확정완료] → reservations UPDATE (예약확정)
  * - [예약취소] / 예약 취소 요청 접수 → reservations UPDATE (취소요청) + **항상 Discord 알림**
  *   ('취소' 로 바로 닫지 않는다. 취소요청 화면에서 눈으로 확인하고 마감한다)
  * - 당일/전날 투어이면 Discord 긴급 알림 발송
  */
+/**
+ * 처리 완료 표식. Gmail 은 permanentFlags 에 `\*` 를 주므로 임의 키워드를 붙일 수 있다(실측 확인).
+ * 읽음 처리는 그대로 유지해서 받은편지함이 보이던 대로 보이게 둔다.
+ */
+const PROCESSED = 'OceanstarDone';
+
 export async function GET(request: Request) {
     try {
         // 인증 확인
@@ -77,7 +84,7 @@ export async function GET(request: Request) {
 
                     if (existing) {
                         console.log(`[MRT Cron] 이미 존재하는 예약: ${reservation.orderNumber}`);
-                        await client.messageFlagsAdd(msg.uid, ['\\Seen'], { uid: true });
+                        await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
                         continue;
                     }
 
@@ -116,7 +123,7 @@ export async function GET(request: Request) {
                     }
 
                     // 이메일 SEEN 처리
-                    await client.messageFlagsAdd(msg.uid, ['\\Seen'], { uid: true });
+                    await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
 
                 } catch (msgError) {
                     console.error(`[MRT Cron] 확정대기 처리 중 오류:`, msgError);
@@ -146,18 +153,22 @@ export async function GET(request: Request) {
                         .maybeSingle();
 
                     if (existing) {
-                        // UPDATE (예약확정)
-                        if (existing.status !== '예약확정') {
-                            const { error: updateError } = await supabaseServer
-                                .from('reservations')
-                                .update({ status: '예약확정' })
-                                .eq('id', existing.id);
+                        // 같은 메일을 다시 읽어도 두 번 세거나 두 번 알리지 않는다.
+                        // 취소된 건은 확정완료 메일을 다시 읽어도 **되살리지 않는다.**
+                        if (existing.status !== '예약대기' && existing.status !== '대기') {
+                            await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
+                            continue;
+                        }
 
-                            if (updateError) {
-                                console.error(`[MRT Cron] UPDATE 실패:`, updateError);
-                                errors++;
-                                continue;
-                            }
+                        const { error: updateError } = await supabaseServer
+                            .from('reservations')
+                            .update({ status: '예약확정' })
+                            .eq('id', existing.id);
+
+                        if (updateError) {
+                            console.error(`[MRT Cron] UPDATE 실패:`, updateError);
+                            errors++;
+                            continue;
                         }
                     } else {
                         // 확정대기를 놓친 경우 → INSERT (예약확정)
@@ -196,7 +207,7 @@ export async function GET(request: Request) {
                     }
 
                     // 이메일 SEEN 처리
-                    await client.messageFlagsAdd(msg.uid, ['\\Seen'], { uid: true });
+                    await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
 
                 } catch (msgError) {
                     console.error(`[MRT Cron] 확정완료 처리 중 오류:`, msgError);
@@ -249,14 +260,14 @@ export async function GET(request: Request) {
                                 orderNumber: r.orderNumber || '(메일에 예약번호 없음)',
                                 detail: `${parsed.type === 'cancel_request' ? '취소 요청 접수' : '예약취소'} / 후보 ${candidates.length}건`,
                             });
-                            await client.messageFlagsAdd(msg.uid, ['\\Seen'], { uid: true });
+                            await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
                             continue;
                         }
 
                         const target = candidates[0];
                         // 이미 마감했거나 접수된 건은 다시 흔들지 않는다.
                         if (target.status === '취소' || target.status === '취소요청') {
-                            await client.messageFlagsAdd(msg.uid, ['\\Seen'], { uid: true });
+                            await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
                             continue;
                         }
 
@@ -294,7 +305,7 @@ export async function GET(request: Request) {
                         if (sent) slackAlertsSent++;
                         else console.error(`[MRT Cron] ⚠️ Discord 알림 실패 — 취소 ${r.travelerName} ${r.tourDate}`);
 
-                        await client.messageFlagsAdd(msg.uid, ['\\Seen'], { uid: true });
+                        await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
                     } catch (msgError) {
                         console.error('[MRT Cron] 취소 처리 중 오류:', msgError);
                         errors++;
@@ -333,9 +344,9 @@ async function searchEmails(
 ): Promise<Array<{ uid: number; subject: string; html: string }>> {
     const results: Array<{ uid: number; subject: string; html: string }> = [];
 
-    // IMAP SEARCH: UNSEEN + FROM myrealtrip + SUBJECT 키워드 + 최근 2일 이내 (시간대 차이 고려)
+    // IMAP SEARCH: 미처리 + FROM myrealtrip + SUBJECT 키워드 + 최근 2일 이내 (시간대 차이 고려)
     const uids = await client.search({
-        seen: false,
+        unKeyword: PROCESSED,
         from: 'myrealtrip',
         subject: subjectKeyword,
         since: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 최근 2일

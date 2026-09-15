@@ -278,6 +278,13 @@ assert.equal(viatorCancel.tourDate, '2026-09-08');
 assert.equal(viatorCancel.option, '2부');              // 10:30 = 2부 픽업 시각
 assert.equal(viatorCancel.name, 'Jillian Lane');
 
+// Viator 는 "Canceled Booking"(L 하나) 으로도 보낸다.
+assert.equal(
+    parseOtaEmail('<p>Booking Reference: BR-1447442765</p><p>Travel Date: Thu, Jan 28, 2027</p><p>Lead Traveler Name: Jazmine Passley-Jones</p>',
+        'Canceled Booking: Thu, Jan 28, 2027', 'Viator <booking@t1.viator.com>')?.kind,
+    'cancel',
+);
+
 // Viator 가 싣는 시각은 출항 시각이 아니라 **픽업 시각** 이다 (07:30 / 10:30 / 15:30).
 const viatorGrade = (code: string) => parseOtaEmail(
     `<div>
@@ -327,4 +334,4 @@ assert.equal(
     '여기어때 취소 메일은 아직 null 이어야 한다',
 );
 
-console.log('OK — 16건 파싱 + 여기어때 취소 보류 확인');
+console.log('OK — 17건 파싱 + 여기어때 취소 보류 확인');
