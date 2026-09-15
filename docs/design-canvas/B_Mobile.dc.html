@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #0b5566; text-decoration: none; }
+    a:hover { color: #06333e; }
+    .s { font-family: 'Nanum Myeongjo', 'Apple SD Gothic Neo', serif; word-break: keep-all; text-wrap: balance; }
+    .b { font-family: 'Noto Sans KR', 'Pretendard', system-ui, sans-serif; word-break: keep-all; text-wrap: pretty; }
+    .num { font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<div class="b" style="width: 375px; background: #faf7f2; color: #3d4a52; font-size: 15px; line-height: 1.7; padding-bottom: 80px;">
+
+  <!-- HEADER 60px -->
+  <div style="height: 60px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e5ddd2;">
+    <span class="s" style="font-size: 19px; font-weight: 800; color: #16232e;">오션스타</span>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 13px; font-weight: 700; color: #8a8073; letter-spacing: 0.08em;">EN</span>
+      <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16232e" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO: 활자 먼저, 사진 아래 -->
+  <div style="padding: 40px 16px 28px; display: flex; flex-direction: column; gap: 18px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="width: 28px; height: 1px; background: #0b5566;"></span>
+      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: #0b5566;">SINCE 2019 · 한인 최초</span>
+    </div>
+    <div>
+      <div class="s" style="font-size: 20px; font-weight: 400; color: #5b6771; line-height: 1.5; margin-bottom: 8px;">평생토록 기억에 남을 스노클링</div>
+      <div class="s" style="font-size: 34px; font-weight: 800; color: #16232e; line-height: 1.25;">지금,<br>오션스타에서</div>
+    </div>
+    <p style="margin: 0; font-size: 15px; line-height: 1.8; color: #5b6771;">함께 즐기는 그룹 스노클링부터 우리 가족만의 프라이빗 투어까지, 오션스타와 함께하세요.</p>
+    <span style="display: flex; align-items: center; justify-content: center; height: 52px; font-size: 16px; font-weight: 700; color: #faf7f2; background: #0b3a52;">바로 예약하기</span>
+  </div>
+  <img src="hero.jpg" alt="와이키키 바다거북 스노클링" style="width: 375px; height: 260px; object-fit: cover; display: block;">
+
+  <!-- 숫자 밴드 -->
+  <div style="background: #0b3a52; color: #faf7f2; padding: 28px 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 16px;">
+    <div><div class="s num" style="font-size: 26px; font-weight: 800; line-height: 1.1;">14,000+</div><div style="font-size: 12px; color: #9dc0cf; margin-top: 4px;">누적 리뷰</div></div>
+    <div><div class="s num" style="font-size: 26px; font-weight: 800; line-height: 1.1;">100%</div><div style="font-size: 12px; color: #9dc0cf; margin-top: 4px;">자연산 거북이 보장</div></div>
+    <div><div class="s num" style="font-size: 26px; font-weight: 800; line-height: 1.1;">51인승</div><div style="font-size: 12px; color: #9dc0cf; margin-top: 4px;">유일한 루프탑 보트</div></div>
+    <div><div class="s num" style="font-size: 26px; font-weight: 800; line-height: 1.1;">4시간</div><div style="font-size: 12px; color: #9dc0cf; margin-top: 4px;">1시간 더 여유롭게</div></div>
+  </div>
+
+  <!-- 강점 리스트 -->
+  <div style="padding: 56px 16px 0;">
+    <h2 class="s" style="margin: 0 0 24px; font-size: 26px; font-weight: 800; color: #16232e; line-height: 1.3;">왜 수천 명이<br>오션스타를 택했을까</h2>
+    <div style="display: grid; grid-template-columns: 36px 1fr; gap: 16px; padding: 20px 0; border-top: 1px solid #e5ddd2;">
+      <span class="s num" style="font-size: 13px; font-weight: 700; color: #0b5566; padding-top: 4px;">01</span>
+      <div><h3 class="s" style="margin: 0 0 5px; font-size: 18px; font-weight: 700; color: #16232e;">Since 2019, 최초</h3><p style="margin: 0; font-size: 15px; color: #5b6771;">하와이 최초로 설립된 한국인 전용 와이키키 거북이 스노클링</p></div>
+    </div>
+    <div style="display: grid; grid-template-columns: 36px 1fr; gap: 16px; padding: 20px 0; border-top: 1px solid #e5ddd2;">
+      <span class="s num" style="font-size: 13px; font-weight: 700; color: #0b5566; padding-top: 4px;">02</span>
+      <div><h3 class="s" style="margin: 0 0 5px; font-size: 18px; font-weight: 700; color: #16232e;">14,000+ 리뷰</h3><p style="margin: 0; font-size: 15px; color: #5b6771;">업계 최대의 누적 리뷰가 증명하는 압도적인 신뢰와 만족</p></div>
+    </div>
+    <div style="display: grid; grid-template-columns: 36px 1fr; gap: 16px; padding: 20px 0; border-top: 1px solid #e5ddd2;">
+      <span class="s num" style="font-size: 13px; font-weight: 700; color: #0b5566; padding-top: 4px;">03</span>
+      <div><h3 class="s" style="margin: 0 0 5px; font-size: 18px; font-weight: 700; color: #16232e;">100% 거북이 보장</h3><p style="margin: 0; font-size: 15px; color: #5b6771;">오션스타가 보장하는 와이키키 자연산 바다 거북이와의 만남</p></div>
+    </div>
+    <div style="display: grid; grid-template-columns: 36px 1fr; gap: 16px; padding: 20px 0; border-top: 1px solid #e5ddd2;">
+      <span class="s num" style="font-size: 13px; font-weight: 700; color: #0b5566; padding-top: 4px;">04</span>
+      <div><h3 class="s" style="margin: 0 0 5px; font-size: 18px; font-weight: 700; color: #16232e;">51인승, 루프탑 보트</h3><p style="margin: 0; font-size: 15px; color: #5b6771;">와이키키 유일의 나무 지붕으로 자외선, 비, 멀미 완벽히 차단</p></div>
+    </div>
+    <div style="display: grid; grid-template-columns: 36px 1fr; gap: 16px; padding: 20px 0; border-top: 1px solid #e5ddd2; border-bottom: 1px solid #e5ddd2;">
+      <span class="s num" style="font-size: 13px; font-weight: 700; color: #0b5566; padding-top: 4px;">05</span>
+      <div><h3 class="s" style="margin: 0 0 5px; font-size: 18px; font-weight: 700; color: #16232e;">한국인 크루 상주</h3><p style="margin: 0; font-size: 15px; color: #5b6771;">수영을 못해도, 영어를 못해도 걱정없이 편하게 즐기는 투어</p></div>
+    </div>
+  </div>
+
+  <!-- 투어 -->
+  <div style="padding: 56px 16px 0;">
+    <h2 class="s" style="margin: 0 0 6px; font-size: 26px; font-weight: 800; color: #16232e; line-height: 1.3;">오션스타 추천 프로그램</h2>
+    <p style="margin: 0 0 24px; font-size: 15px; color: #8a8073;">당신의 완벽한 하와이 여행을 위한 최고의 선택</p>
+
+    <div style="padding: 24px 0; border-top: 1px solid #e5ddd2; display: flex; flex-direction: column; gap: 14px;">
+      <img src="snorkel.jpg" alt="와이키키 거북이 스노클링" style="width: 100%; height: 190px; object-fit: cover;">
+      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; color: #0b5566;">가장 인기있는 상품</span>
+      <h3 class="s" style="margin: 0; font-size: 22px; font-weight: 800; color: #16232e; line-height: 1.35;">와이키키 거북이 스노클링</h3>
+      <p style="margin: 0; font-size: 15px; color: #5b6771; line-height: 1.8;">거북이 스노클링 + 해양 4종 · 장비와 간식 제공<br>1부 08:00 - 11:00 · 2부 11:00 - 14:00</p>
+      <div class="s num" style="font-size: 26px; font-weight: 800; color: #16232e;">₩151,570 <span class="b" style="font-size: 12px; font-weight: 400; color: #8a8073;">성인가 기준</span></div>
+      <span style="display: flex; align-items: center; justify-content: center; height: 52px; font-size: 15px; font-weight: 700; color: #faf7f2; background: #0b3a52;">예약하기</span>
+    </div>
+
+    <div style="padding: 24px 0; border-top: 1px solid #e5ddd2; display: flex; flex-direction: column; gap: 14px;">
+      <img src="sunset.jpg" alt="선셋 와인 크루즈" style="width: 100%; height: 190px; object-fit: cover;">
+      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; color: #0b5566;">커플·신혼 여행객 추천</span>
+      <h3 class="s" style="margin: 0; font-size: 22px; font-weight: 800; color: #16232e; line-height: 1.35;">선셋·와인 &amp; 와이키키 거북이 스노클링</h3>
+      <p style="margin: 0; font-size: 15px; color: #5b6771; line-height: 1.8;">치즈보드와 와인 제공 · 시즌별 시간 변동</p>
+      <div class="s num" style="font-size: 26px; font-weight: 800; color: #16232e;">₩206,690</div>
+      <span style="display: flex; align-items: center; justify-content: center; height: 52px; font-size: 15px; font-weight: 700; color: #16232e; border: 1px solid #16232e;">예약하기</span>
+    </div>
+
+    <div style="padding: 24px 0; border-top: 1px solid #e5ddd2; border-bottom: 1px solid #e5ddd2; display: flex; flex-direction: column; gap: 12px;">
+      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; color: #0b5566;">VVIP 단독 보트 대관</span>
+      <h3 class="s" style="margin: 0; font-size: 22px; font-weight: 800; color: #16232e; line-height: 1.35;">[단독] 프라이빗 와이키키 거북이 스노클링</h3>
+      <p style="margin: 0; font-size: 15px; color: #5b6771; line-height: 1.8;">배를 통째로 대여하여 프라이빗 하게 즐기는 스노클링 투어</p>
+      <div class="s num" style="font-size: 24px; font-weight: 800; color: #16232e;">₩1,700,000 ~</div>
+      <div style="font-size: 12px; color: #8a8073;">1~4인 기준 (인원별 상이)</div>
+    </div>
+  </div>
+
+  <!-- 후기 -->
+  <div style="padding: 56px 16px 0;">
+    <h2 class="s" style="margin: 0 0 6px; font-size: 26px; font-weight: 800; color: #16232e; line-height: 1.3;">생생한 리얼 후기</h2>
+    <p style="margin: 0 0 24px; font-size: 15px; color: #8a8073;">당일 취소, 노쇼 없이 검증된 고객님들의 찐 후기입니다.</p>
+    <div style="padding: 4px 0 20px 20px; border-left: 2px solid #0b5566; margin-bottom: 20px;">
+      <p class="s" style="margin: 0 0 12px; font-size: 18px; color: #16232e; line-height: 1.75;">[실제 후기 본문이 들어갑니다 — DB `reviews` 연동]</p>
+      <div style="font-size: 13px; color: #8a8073;">김*션 · 2026. 8. 21.</div>
+    </div>
+    <div style="padding: 20px 0 0; border-top: 1px solid #e5ddd2; margin-bottom: 24px;">
+      <p style="margin: 0 0 12px; font-size: 15px; color: #3d4a52; line-height: 1.8;">[실제 후기 본문이 들어갑니다 — DB `reviews` 연동]</p>
+      <div style="font-size: 13px; color: #8a8073;">이*우 · 2026. 8. 17.</div>
+    </div>
+    <span style="font-size: 15px; font-weight: 700; color: #16232e; border-bottom: 1px solid #16232e; padding-bottom: 3px;">전체 후기 보기</span>
+  </div>
+
+  <!-- 하단 고정 CTA -->
+  <div style="position: sticky; bottom: 0; margin-top: 44px; height: 64px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #faf7f2; border-top: 1px solid #e5ddd2;">
+    <div>
+      <div style="font-size: 11px; color: #8a8073; letter-spacing: 0.08em;">하와이 단연 1위</div>
+      <div class="s" style="font-size: 15px; font-weight: 800; color: #16232e;">최고의 스노클링 투어</div>
+    </div>
+    <span style="display: inline-flex; align-items: center; height: 44px; padding: 0 24px; font-size: 15px; font-weight: 700; color: #faf7f2; background: #0b3a52;">예약하기</span>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>4안 · 하루의 항로 (모바일)</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+  <style>
+:root{
+  --navy:#0a3f66; --primary:#0077a8; --primary-hover:#00648f;
+  --cyan:#00a0d0; --sky:#6fd0ee; --sky-pale:#dcf0f9; --badge:#e4f3fa;
+  --surface:#ffffff; --soft:#f4fafd;
+  --text:#44586a; --soft-text:#52697c; --muted:#7b8fa0; --on-navy:#a8cee2;
+  --border:#e3edf4; --inner:#eef4f8; --outline:#bcdcec;
+  --sh-card:0 8px 24px rgba(0,119,168,.08);
+  --sh-cta:0 14px 30px rgba(0,119,168,.28);
+  --sh-float:0 20px 44px rgba(0,119,168,.16);
+  --sh-navy:0 12px 28px rgba(10,63,102,.22);
+  --d:'Do Hyeon', system-ui, sans-serif;
+  --b:'Pretendard','Noto Sans KR', system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface);font-family:var(--b);color:var(--text);
+     word-break:keep-all;-webkit-font-smoothing:antialiased}
+a{color:var(--primary);text-decoration:none}
+a:hover{color:var(--primary-hover)}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+.d{font-family:var(--d);color:var(--navy);letter-spacing:-.01em}
+.num{font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+     border:0;border-radius:12px;font-family:var(--b);font-weight:700;cursor:pointer}
+.btn-fill{background:var(--primary);color:#fff;box-shadow:var(--sh-cta)}
+.btn-fill:hover{background:var(--primary-hover)}
+.btn-line{background:transparent;color:var(--primary);border:1.5px solid var(--outline)}
+.btn-line:hover{background:var(--badge)}
+.pill{display:inline-flex;align-items:center;border-radius:9999px;background:var(--badge);
+      color:var(--primary);font-size:12px;font-weight:700;letter-spacing:.18em;padding:8px 16px}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+
+.mrow{display:flex;align-items:center;justify-content:space-between}
+.bar{position:absolute;left:0;right:0;bottom:0;height:64px;background:var(--surface);
+  border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 16px;
+  box-shadow:0 -8px 24px rgba(0,119,168,.10)}
+
+@keyframes glidem{0%{transform:translateY(0)}100%{transform:translateY(-10px)}}
+.boat{animation:glidem 6s ease-in-out infinite alternate}
+</style>
+</helmet>
+<div style="width:375px;min-height:4020px;position:relative;background:var(--surface);padding-bottom:80px">
+
+<header class="mrow" style="height:60px;padding:0 16px;border-bottom:1px solid var(--border);
+  background:var(--surface);position:relative;z-index:6">
+  <span class="d" style="font-size:21px;color:var(--navy)">OCEAN STAR</span>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="btn" style="height:44px;min-width:44px;padding:0 14px;font-size:14px;
+      background:var(--soft);color:var(--navy);border:1px solid var(--border)">EN</button>
+    <button class="btn" aria-label="메뉴 열기" style="width:44px;height:44px;padding:0;
+      background:var(--soft);border:1px solid var(--border)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</header>
+<section style="padding:26px 16px 0;background:linear-gradient(180deg,#fff 0%,#eef8fc 100%)">
+  <span class="pill" style="font-size:11px;padding:7px 14px">SINCE 2019 · 하와이 한인 최초</span>
+  <h1 class="d" style="font-size:46px;line-height:1.06;margin-top:16px">
+    몇 시 배를<br>타시겠어요?</h1>
+  <p style="font-size:15px;line-height:1.75;color:var(--soft-text);margin-top:14px">
+    아침 8시부터 저녁 6시까지 하루 세 번 출항합니다. 시간표를 보고 고르세요.</p>
+  <button class="btn btn-fill" style="width:100%;height:52px;margin-top:20px;font-size:16px">예약하기</button>
+  <button class="btn btn-line" style="width:100%;height:52px;margin-top:10px;font-size:16px">투어 코스 보기</button>
+  <img class="boat" src="boat.jpg" alt="오션스타 51인승 루프탑 보트"
+    style="width:100%;height:200px;object-fit:cover;border-radius:20px;margin-top:24px;
+    box-shadow:0 18px 40px rgba(0,119,168,.20)">
+</section>
+<div style="padding:24px 16px 0"><div style="background:var(--navy);border:none;border-radius:20px;padding:24px 22px;display:grid;grid-template-columns:1fr 1fr;gap:22px 14px"><div><div class="d num" style="font-size:26px;line-height:1.1;color:var(--sky)">14,000+</div><div style="font-size:13px;color:var(--on-navy);margin-top:4px">누적 리뷰</div></div><div><div class="d num" style="font-size:26px;line-height:1.1;color:#fff">100%</div><div style="font-size:13px;color:var(--on-navy);margin-top:4px">거북이 보장</div></div><div><div class="d num" style="font-size:26px;line-height:1.1;color:#fff">51인승</div><div style="font-size:13px;color:var(--on-navy);margin-top:4px">루프탑 보트</div></div><div><div class="d num" style="font-size:26px;line-height:1.1;color:#fff">4시간</div><div style="font-size:13px;color:var(--on-navy);margin-top:4px">넉넉한 운영</div></div></div></div>
+<section style="padding:44px 16px 0">
+  <h2 class="d" style="font-size:32px;line-height:1.2">하루의 <span style="color:var(--primary)">항로</span></h2><p style="font-size:15px;line-height:1.7;color:var(--soft-text);margin-top:10px">출항 시각 순서대로 여섯 가지.</p>
+  <div style="margin-top:22px;position:relative">
+    <div style="position:absolute;left:27px;top:20px;bottom:40px;width:3px;border-radius:2px;
+      background:linear-gradient(180deg,var(--sky),var(--primary) 46%,var(--navy))"></div>
+    
+<div style="display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:start">
+  <div style="display:flex;flex-direction:column;align-items:center;padding-top:8px">
+    <span class="d num" style="font-size:16px;color:var(--sky)">08:00</span>
+    <span style="width:12px;height:12px;border-radius:50%;background:var(--sky);margin-top:8px;
+      box-shadow:0 0 0 4px #fff,0 0 0 6px var(--sky)"></span>
+  </div>
+  <div style="padding-bottom:18px">
+<article style="background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--sh-card);overflow:hidden">
+  <div style="position:relative;height:170px">
+    <img src="turtle.jpg" alt="1부 거북이 스노클링" style="width:100%;height:100%;object-fit:cover;display:block">
+    <span style="position:absolute;top:12px;left:12px;background:var(--primary);color:#fff;font-size:12px;
+      font-weight:700;padding:6px 10px;border-radius:8px">가장 인기있는 상품</span>
+  </div>
+  <div style="padding:20px">
+    <h3 class="d" style="font-size:19px;line-height:1.35;color:var(--navy)">1부 거북이 스노클링</h3>
+    <p class="num" style="font-size:14px;line-height:1.6;color:var(--muted);margin-top:6px">08:00 - 11:00 · 최대 45인</p>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--inner)">
+      <div class="mrow">
+        <div><div class="d num" style="font-size:26px;line-height:1.15;color:var(--navy)">₩151,570</div>
+          <div class="num" style="font-size:12px;color:var(--muted);margin-top:2px">아동 ₩106,100</div></div>
+      </div>
+      <button class="btn" style="width:100%;height:52px;margin-top:14px;font-size:16px;background:var(--primary);color:#fff;box-shadow:var(--sh-cta)">예약하기</button>
+    </div>
+  </div>
+</article></div>
+</div>
+<div style="display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:start">
+  <div style="display:flex;flex-direction:column;align-items:center;padding-top:8px">
+    <span class="d num" style="font-size:16px;color:#4cc3e6">11:00</span>
+    <span style="width:12px;height:12px;border-radius:50%;background:#4cc3e6;margin-top:8px;
+      box-shadow:0 0 0 4px #fff,0 0 0 6px #4cc3e6"></span>
+  </div>
+  <div style="padding-bottom:18px">
+<article style="background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--sh-card);overflow:hidden">
+  <div style="position:relative;height:170px">
+    <img src="dive.jpg" alt="2부 거북이 스노클링" style="width:100%;height:100%;object-fit:cover;display:block">
+    <span style="position:absolute;top:12px;left:12px;background:var(--surface);color:var(--navy);font-size:12px;
+      font-weight:700;padding:6px 10px;border-radius:8px">여유로운 출발시간</span>
+  </div>
+  <div style="padding:20px">
+    <h3 class="d" style="font-size:19px;line-height:1.35;color:var(--navy)">2부 거북이 스노클링</h3>
+    <p class="num" style="font-size:14px;line-height:1.6;color:var(--muted);margin-top:6px">11:00 - 14:00 · 최대 45인</p>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--inner)">
+      <div class="mrow">
+        <div><div class="d num" style="font-size:26px;line-height:1.15;color:var(--navy)">₩151,570</div>
+          <div class="num" style="font-size:12px;color:var(--muted);margin-top:2px">아동 ₩106,100</div></div>
+      </div>
+      <button class="btn" style="width:100%;height:52px;margin-top:14px;font-size:16px;background:var(--primary);color:#fff;box-shadow:var(--sh-cta)">예약하기</button>
+    </div>
+  </div>
+</article></div>
+</div>
+<div style="display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:start">
+  <div style="display:flex;flex-direction:column;align-items:center;padding-top:8px">
+    <span class="d num" style="font-size:16px;color:var(--primary)">15:00</span>
+    <span style="width:12px;height:12px;border-radius:50%;background:var(--primary);margin-top:8px;
+      box-shadow:0 0 0 4px #fff,0 0 0 6px var(--primary)"></span>
+  </div>
+  <div style="padding-bottom:18px">
+<article style="background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--sh-card);overflow:hidden">
+  <div style="position:relative;height:170px">
+    <img src="sunset.jpg" alt="선셋 거북이 스노클링" style="width:100%;height:100%;object-fit:cover;display:block">
+    <span style="position:absolute;top:12px;left:12px;background:var(--surface);color:var(--navy);font-size:12px;
+      font-weight:700;padding:6px 10px;border-radius:8px">로맨틱 선셋 뷰</span>
+  </div>
+  <div style="padding:20px">
+    <h3 class="d" style="font-size:19px;line-height:1.35;color:var(--navy)">선셋 거북이 스노클링</h3>
+    <p class="num" style="font-size:14px;line-height:1.6;color:var(--muted);margin-top:6px">15:00 - 18:00 · 최대 38인</p>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--inner)">
+      <div class="mrow">
+        <div><div class="d num" style="font-size:26px;line-height:1.15;color:var(--navy)">₩206,690</div>
+          <div class="num" style="font-size:12px;color:var(--muted);margin-top:2px">아동 ₩130,900</div></div>
+      </div>
+      <button class="btn" style="width:100%;height:52px;margin-top:14px;font-size:16px;background:var(--primary);color:#fff;box-shadow:var(--sh-cta)">예약하기</button>
+    </div>
+  </div>
+</article></div>
+</div>
+<div style="display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:start">
+  <div style="display:flex;flex-direction:column;align-items:center;padding-top:8px">
+    <span class="d num" style="font-size:16px;color:#0d6f9e">종일</span>
+    <span style="width:12px;height:12px;border-radius:50%;background:#0d6f9e;margin-top:8px;
+      box-shadow:0 0 0 4px #fff,0 0 0 6px #0d6f9e"></span>
+  </div>
+  <div style="padding-bottom:18px">
+<article style="background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--sh-card);overflow:hidden">
+  <div style="position:relative;height:170px">
+    <img src="kayak.jpg" alt="스노클링 + 패러세일링" style="width:100%;height:100%;object-fit:cover;display:block">
+    <span style="position:absolute;top:12px;left:12px;background:var(--surface);color:var(--navy);font-size:12px;
+      font-weight:700;padding:6px 10px;border-radius:8px">짜릿한 콤보</span>
+  </div>
+  <div style="padding:20px">
+    <h3 class="d" style="font-size:19px;line-height:1.35;color:var(--navy)">스노클링 + 패러세일링</h3>
+    <p class="num" style="font-size:14px;line-height:1.6;color:var(--muted);margin-top:6px">거북이를 보고 하늘까지 오릅니다</p>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--inner)">
+      <div class="mrow">
+        <div><div class="d num" style="font-size:26px;line-height:1.15;color:var(--navy)">₩289,360</div>
+          <div class="num" style="font-size:12px;color:var(--muted);margin-top:2px">아동 동일</div></div>
+      </div>
+      <button class="btn" style="width:100%;height:52px;margin-top:14px;font-size:16px;background:var(--primary);color:#fff;box-shadow:var(--sh-cta)">예약하기</button>
+    </div>
+  </div>
+</article></div>
+</div>
+<div style="display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:start">
+  <div style="display:flex;flex-direction:column;align-items:center;padding-top:8px">
+    <span class="d num" style="font-size:16px;color:var(--navy)">단독</span>
+    <span style="width:12px;height:12px;border-radius:50%;background:var(--navy);margin-top:8px;
+      box-shadow:0 0 0 4px #fff,0 0 0 6px var(--navy)"></span>
+  </div>
+  <div style="padding-bottom:18px">
+<article style="background:var(--navy);border:none;border-radius:20px;box-shadow:var(--sh-navy);overflow:hidden">
+  <div style="position:relative;height:170px">
+    <img src="board.jpg" alt="프라이빗 차터" style="width:100%;height:100%;object-fit:cover;display:block">
+    <span style="position:absolute;top:12px;left:12px;background:var(--sky);color:var(--navy);font-size:12px;
+      font-weight:700;padding:6px 10px;border-radius:8px">VVIP 단독 대관</span>
+  </div>
+  <div style="padding:20px">
+    <h3 class="d" style="font-size:19px;line-height:1.35;color:#fff">프라이빗 차터</h3>
+    <p class="num" style="font-size:14px;line-height:1.6;color:var(--on-navy);margin-top:6px">단독 대관 2시간 · 최대 30인</p>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.16)">
+      <div class="mrow">
+        <div><div class="d num" style="font-size:26px;line-height:1.15;color:#fff">₩2,066,850</div>
+          <div class="num" style="font-size:12px;color:var(--on-navy);margin-top:2px">인원 구간별 재계산</div></div>
+      </div>
+      <button class="btn" style="width:100%;height:52px;margin-top:14px;font-size:16px;background:var(--sky);color:var(--navy)">예약하기</button>
+    </div>
+  </div>
+</article></div>
+</div>
+<div style="display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:start">
+  <div style="display:flex;flex-direction:column;align-items:center;padding-top:8px">
+    <span class="d num" style="font-size:16px;color:#1a86b5">오전</span>
+    <span style="width:12px;height:12px;border-radius:50%;background:#1a86b5;margin-top:8px;
+      box-shadow:0 0 0 4px #fff,0 0 0 6px #1a86b5"></span>
+  </div>
+  <div style="padding-bottom:18px">
+<article style="background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--sh-card);overflow:hidden">
+  <div style="position:relative;height:170px">
+    <img src="surf.jpg" alt="스노클링 + 서핑" style="width:100%;height:100%;object-fit:cover;display:block">
+    <span style="position:absolute;top:12px;left:12px;background:var(--surface);color:var(--navy);font-size:12px;
+      font-weight:700;padding:6px 10px;border-radius:8px">신규</span>
+  </div>
+  <div style="padding:20px">
+    <h3 class="d" style="font-size:19px;line-height:1.35;color:var(--navy)">스노클링 + 서핑</h3>
+    <p class="num" style="font-size:14px;line-height:1.6;color:var(--muted);margin-top:6px">와이키키 명물 서핑까지 한번에</p>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--inner)">
+      <div class="mrow">
+        <div><div class="d num" style="font-size:26px;line-height:1.15;color:var(--navy)">₩261,018</div>
+          <div class="num" style="font-size:12px;color:var(--muted);margin-top:2px">[원화 정가 확정 필요]</div></div>
+      </div>
+      <button class="btn" style="width:100%;height:52px;margin-top:14px;font-size:16px;background:var(--primary);color:#fff;box-shadow:var(--sh-cta)">예약하기</button>
+    </div>
+  </div>
+</article></div>
+</div>
+  </div>
+</section>
+<div class="bar">
+  <div style="flex:1">
+    <div class="d num" style="font-size:19px;color:var(--navy);line-height:1.1">₩151,570~</div>
+    <div style="font-size:12px;color:var(--muted)">1인 · 세금 포함</div>
+  </div>
+  <button class="btn btn-fill" style="height:48px;padding:0 26px;font-size:16px">예약하기</button>
+</div></div>
+</x-dc>
+</body>
+</html>

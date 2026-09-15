@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>새-5 · 씨글래스</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+  <style>
+*{box-sizing:border-box}
+body{margin:0}
+h1,h2,h3,h4,p,ul,li{margin:0;padding:0}
+li{list-style:none}
+a{text-decoration:none}
+button{border:0;cursor:pointer;font:inherit}
+img{display:block;max-width:100%}
+.n{font-variant-numeric:tabular-nums}
+
+body{background:#EEF4F1;color:#1F3A34;font-family:'Noto Sans KR',sans-serif;
+     word-break:keep-all}
+.d{font-family:'Gowun Dodum',sans-serif;font-weight:400}
+.tag{font-size:11.5px;font-weight:700;letter-spacing:.14em;color:#C4643C}
+.btn-t{background:#C4643C;color:#FFF7F3;border-radius:999px;height:52px;padding:0 30px;
+       font-size:16px;font-weight:700}
+.btn-o{background:transparent;color:#2F6B5F;border:1.5px solid #9CBDB3;border-radius:999px;
+       height:52px;padding:0 28px;font-size:16px;font-weight:700}
+.blob{border-radius:180px 28px 180px 28px;overflow:hidden}
+
+  </style>
+</helmet>
+
+<div style="width:1440px;background:#EEF4F1">
+  <header style="display:flex;align-items:center;justify-content:space-between;
+    padding:26px 120px">
+    <img src="logo_full.png" alt="오션스타" style="height:48px;width:auto">
+    <nav style="display:flex;gap:30px"><a href="#" style="font-size:15px;color:#1F3A34">Home</a><a href="#" style="font-size:15px;color:#7E9990">고객후기</a><a href="#" style="font-size:15px;color:#7E9990">FAQ</a><a href="#" style="font-size:15px;color:#7E9990">블로그</a></nav>
+<div style="display:flex;align-items:center;gap:10px">
+      <a href="#" style="font-size:13.5px;font-weight:700;color:#2F6B5F;border:1.5px solid #A9C6BC;border-radius:999px;padding:10px 16px">EN</a>
+      <a href="#" style="font-size:13.5px;font-weight:700;color:#2F6B5F;border:1.5px solid #A9C6BC;border-radius:999px;padding:10px 16px">내 예약 관리</a>
+      <button class="btn-t" style="height:44px;padding:0 22px;font-size:14px">투어 예약하기</button>
+    </div>
+  </header>
+  <section style="display:grid;grid-template-columns:1fr 660px;gap:48px;align-items:center;
+    padding:44px 120px 0">
+    <div>
+      <div class="tag">Hawaii's Best Tour</div>
+      <h1 class="d" style="font-size:62px;line-height:1.28;margin-top:18px">평생토록 기억에 남을 스노클링<br>지금, 오션스타에서</h1>
+      <p style="font-size:17px;line-height:1.95;color:#5C7A72;max-width:470px;
+        margin-top:20px">함께 즐기는 그룹 스노클링부터 우리 가족만의 프라이빗 투어까지, 오션스타와 함께하세요.</p>
+      <div style="display:flex;gap:12px;margin-top:32px">
+        <button class="btn-t">바로 예약하기</button><button class="btn-o">자세히 보기</button>
+      </div>
+    </div>
+    <div class="blob" style="height:520px"><img src="hero_boat.webp" alt="와이키키 앞바다의 오션스타 51인승 루프탑 보트"
+      style="width:100%;height:100%;object-fit:cover"></div>
+  </section>
+  <svg viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true"
+    style="width:100%;height:90px;margin-top:46px;display:block">
+    <path fill="#FFFFFF" d="M0 46c220-40 420 26 720 26s500-66 720-26v44H0Z"/>
+  </svg>
+  <div style="background:#FFFFFF;padding:0 120px 42px">
+    <div style="display:flex;gap:34px"><div style="flex:1"><div class="d n" style="font-size:32px;color:#2F6B5F">Since 2019</div><div style="font-size:13px;color:#7E9990;margin-top:6px">최초</div></div><div style="flex:1"><div class="d n" style="font-size:32px;color:#2F6B5F">14,000+</div><div style="font-size:13px;color:#7E9990;margin-top:6px">리뷰</div></div><div style="flex:1"><div class="d n" style="font-size:32px;color:#2F6B5F">100%</div><div style="font-size:13px;color:#7E9990;margin-top:6px">거북이 보장</div></div><div style="flex:1"><div class="d n" style="font-size:32px;color:#2F6B5F">51인승</div><div style="font-size:13px;color:#7E9990;margin-top:6px">루프탑 보트</div></div></div>
+  </div>
+  <section style="background:#FFFFFF;padding:34px 120px 96px">
+    <h2 class="d" style="font-size:44px;line-height:1.32">오션스타 추천 프로그램</h2>
+    <p style="font-size:16px;color:#5C7A72;margin-top:12px">당신의 완벽한 하와이 여행을 위한 최고의 선택</p>
+    <div style="margin-top:18px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;padding:46px 0;border-bottom:1px solid #D8E4DF"><div style="border-radius:150px 24px 150px 24px;overflow:hidden;height:250px"><img src="turtle.jpg" alt="와이키키 거북이 스노클링" style="width:100%;height:100%;object-fit:cover"></div>
+<div style="padding:0 46px 0 0">
+  <div class="tag">가장 인기있는 상품</div>
+  <h3 class="d" style="font-size:28px;line-height:1.4;margin-top:12px">와이키키 거북이 스노클링</h3>
+  <p style="font-size:14.5px;line-height:1.9;color:#5C7A72;margin-top:12px">와이키키 최고의 투어를 오션스타와 함께하세요. 전문가의 안내로 안전하고 즐거운 시간을 보장합니다.</p>
+  <ul style="display:grid;gap:9px;margin-top:16px"><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>거북이 스노클링 + 해양 4종</span></li><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>스노클 장비/구명조끼, 음료/간식</span></li><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>1부 08:00 - 11:00</span></li><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>2부 11:00 - 14:00</span></li></ul>
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:18px;
+    margin-top:22px">
+    <div><div class="n" style="font-size:12px;color:#7E9990">성인가 기준 (24개월 미만 무료)</div>
+      <div class="d n" style="font-size:28px;margin-top:2px">₩151,570</div></div>
+    <button class="btn-t" style="height:46px;padding:0 24px;font-size:15px">예약하기</button>
+  </div>
+</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;padding:46px 0;border-bottom:1px solid #D8E4DF">
+<div style="padding:0 0 0 46px">
+  <div class="tag">로맨틱 선셋 뷰</div>
+  <h3 class="d" style="font-size:28px;line-height:1.4;margin-top:12px">선셋·와인 & 와이키키 거북이 스노클링</h3>
+  <p style="font-size:14.5px;line-height:1.9;color:#5C7A72;margin-top:12px">와이키키 최고의 투어를 오션스타와 함께하세요. 전문가의 안내로 안전하고 즐거운 시간을 보장합니다.</p>
+  <ul style="display:grid;gap:9px;margin-top:16px"><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>거북이 스노클링 + 해양 4종</span></li><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>스노클 장비/구명조끼, 음료/간식</span></li><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>치즈보드와 와인 제공</span></li><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>시즌별 시간 변동</span></li></ul>
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:18px;
+    margin-top:22px">
+    <div><div class="n" style="font-size:12px;color:#7E9990">성인가 기준 (24개월 미만 무료)</div>
+      <div class="d n" style="font-size:28px;margin-top:2px">₩206,690</div></div>
+    <button class="btn-o" style="height:46px;padding:0 24px;font-size:15px">예약하기</button>
+  </div>
+</div><div style="border-radius:24px 150px 24px 150px;overflow:hidden;height:250px"><img src="sunset.jpg" alt="선셋·와인 & 와이키키 거북이 스노클링" style="width:100%;height:100%;object-fit:cover"></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;padding:46px 0;border-bottom:1px solid #D8E4DF"><div style="border-radius:150px 24px 150px 24px;overflow:hidden;height:250px"><img src="kayak.jpg" alt="거북이 스노클링 + 패러세일링 / 제트스키" style="width:100%;height:100%;object-fit:cover"></div>
+<div style="padding:0 46px 0 0">
+  <div class="tag">프리미엄 투어</div>
+  <h3 class="d" style="font-size:28px;line-height:1.4;margin-top:12px">거북이 스노클링 + 패러세일링 / 제트스키</h3>
+  <p style="font-size:14.5px;line-height:1.9;color:#5C7A72;margin-top:12px">거북이 스노클링과 함께 패러세일링 또는 제트스키를 짜릿하게 즐겨보세요.</p>
+  <ul style="display:grid;gap:9px;margin-top:16px"><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>거북이 스노클링 + 해양 4종</span></li><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>스노클 장비/구명조끼, 음료/간식</span></li><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>07:30 - 14:30</span></li></ul>
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:18px;
+    margin-top:22px">
+    <div><div class="n" style="font-size:12px;color:#7E9990">성인가 기준 (24개월 미만 무료)</div>
+      <div class="d n" style="font-size:28px;margin-top:2px">₩289,360</div></div>
+    <button class="btn-o" style="height:46px;padding:0 24px;font-size:15px">예약하기</button>
+  </div>
+</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;padding:46px 0;border-bottom:1px solid #D8E4DF">
+<div style="padding:0 0 0 46px">
+  <div class="tag">VVIP 단독 보트 대관</div>
+  <h3 class="d" style="font-size:28px;line-height:1.4;margin-top:12px">[단독] 프라이빗 와이키키 거북이 스노클링</h3>
+  <p style="font-size:14.5px;line-height:1.9;color:#5C7A72;margin-top:12px">배를 통째로 대여하여 프라이빗 하게 즐기는 스노클링 투어. 우리끼리 즐기는 여유로운 시간과 특별한 추억.</p>
+  <ul style="display:grid;gap:9px;margin-top:16px"><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>우리 일행 단독 탑승 (최대 30인)</span></li><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>원하는 옵션 커스터마이징 가능</span></li><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>인원수 연동 맞춤형 요금 적용</span></li></ul>
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:18px;
+    margin-top:22px">
+    <div><div class="n" style="font-size:12px;color:#7E9990">1~4인 기준 (인원별 상이) / 팀</div>
+      <div class="d n" style="font-size:28px;margin-top:2px">₩2,066,850 ~</div></div>
+    <button class="btn-o" style="height:46px;padding:0 24px;font-size:15px">예약하기</button>
+  </div>
+</div><div style="border-radius:24px 150px 24px 150px;overflow:hidden;height:250px"><img src="board.jpg" alt="[단독] 프라이빗 와이키키 거북이 스노클링" style="width:100%;height:100%;object-fit:cover"></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;padding:46px 0;border-bottom:1px solid #D8E4DF"><div style="border-radius:150px 24px 150px 24px;overflow:hidden;height:250px"><img src="surf.jpg" alt="거북이 스노클링 + 서핑" style="width:100%;height:100%;object-fit:cover"></div>
+<div style="padding:0 46px 0 0">
+  <div class="tag">커플/신혼 여행객 추천</div>
+  <h3 class="d" style="font-size:28px;line-height:1.4;margin-top:12px">거북이 스노클링 + 서핑</h3>
+  <p style="font-size:14.5px;line-height:1.9;color:#5C7A72;margin-top:12px">거북이 스노클링에 와이키키 명물 서핑 강습까지 한번에 즐기는 구성입니다.</p>
+  <ul style="display:grid;gap:9px;margin-top:16px"><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>거북이 스노클링 + 서핑 강습</span></li><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>스노클 장비/구명조끼, 음료/간식</span></li><li style="display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.6;color:#5C7A72"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2F8C7A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none" aria-hidden="true"><path d="m4.5 12.5 5 5 10-11"/></svg><span>[운영 시간 확정 필요]</span></li></ul>
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:18px;
+    margin-top:22px">
+    <div><div class="n" style="font-size:12px;color:#7E9990">[원화 정가 확정 필요]</div>
+      <div class="d n" style="font-size:28px;margin-top:2px">₩261,018</div></div>
+    <button class="btn-o" style="height:46px;padding:0 24px;font-size:15px">예약하기</button>
+  </div>
+</div></div></div>
+  </section>
+</div>
+</x-dc>
+</body>
+</html>

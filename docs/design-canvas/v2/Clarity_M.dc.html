@@ -1,0 +1,175 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>5안 · 정리된 여백 (모바일)</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+  <style>
+:root{
+  --navy:#0a3f66; --primary:#0077a8; --primary-hover:#00648f;
+  --cyan:#00a0d0; --sky:#6fd0ee; --sky-pale:#dcf0f9; --badge:#e4f3fa;
+  --surface:#ffffff; --soft:#f4fafd;
+  --text:#44586a; --soft-text:#52697c; --muted:#7b8fa0; --on-navy:#a8cee2;
+  --border:#e3edf4; --inner:#eef4f8; --outline:#bcdcec;
+  --sh-card:0 8px 24px rgba(0,119,168,.08);
+  --sh-cta:0 14px 30px rgba(0,119,168,.28);
+  --sh-float:0 20px 44px rgba(0,119,168,.16);
+  --sh-navy:0 12px 28px rgba(10,63,102,.22);
+  --d:'Do Hyeon', system-ui, sans-serif;
+  --b:'Pretendard','Noto Sans KR', system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface);font-family:var(--b);color:var(--text);
+     word-break:keep-all;-webkit-font-smoothing:antialiased}
+a{color:var(--primary);text-decoration:none}
+a:hover{color:var(--primary-hover)}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+.d{font-family:var(--d);color:var(--navy);letter-spacing:-.01em}
+.num{font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+     border:0;border-radius:12px;font-family:var(--b);font-weight:700;cursor:pointer}
+.btn-fill{background:var(--primary);color:#fff;box-shadow:var(--sh-cta)}
+.btn-fill:hover{background:var(--primary-hover)}
+.btn-line{background:transparent;color:var(--primary);border:1.5px solid var(--outline)}
+.btn-line:hover{background:var(--badge)}
+.pill{display:inline-flex;align-items:center;border-radius:9999px;background:var(--badge);
+      color:var(--primary);font-size:12px;font-weight:700;letter-spacing:.18em;padding:8px 16px}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+
+.mrow{display:flex;align-items:center;justify-content:space-between}
+.bar{position:absolute;left:0;right:0;bottom:0;height:64px;background:var(--surface);
+  border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 16px;
+  box-shadow:0 -8px 24px rgba(0,119,168,.10)}
+
+@keyframes risem{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.r{animation:risem .7s cubic-bezier(.16,1,.3,1) both}.r2{animation-delay:.09s}.r3{animation-delay:.18s}
+</style>
+</helmet>
+<div style="width:375px;min-height:2280px;position:relative;background:var(--surface);padding-bottom:80px">
+
+<header class="mrow" style="height:60px;padding:0 16px;border-bottom:1px solid var(--border);
+  background:var(--surface);position:relative;z-index:6">
+  <span class="d" style="font-size:21px;color:var(--navy)">OCEAN STAR</span>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="btn" style="height:44px;min-width:44px;padding:0 14px;font-size:14px;
+      background:var(--soft);color:var(--navy);border:1px solid var(--border)">EN</button>
+    <button class="btn" aria-label="메뉴 열기" style="width:44px;height:44px;padding:0;
+      background:var(--soft);border:1px solid var(--border)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</header>
+<section style="padding:30px 16px 0">
+  <span class="r" style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:.16em;
+    color:var(--primary);border-bottom:2px solid var(--cyan);padding-bottom:7px">SINCE 2019 · 하와이 한인 최초</span>
+  <h1 class="r r2 d" style="font-size:46px;line-height:1.06;margin-top:18px">
+    바다거북을<br>만나는 시간</h1>
+  <p class="r r3" style="font-size:15px;line-height:1.75;color:var(--soft-text);margin-top:14px">
+    와이키키 앞바다, 51인승 루프탑 보트. 2019년부터 14,000명이 이 배를 탔습니다.</p>
+  <button class="btn btn-fill" style="width:100%;height:52px;margin-top:20px;font-size:16px">예약하기</button>
+  <button class="btn btn-line" style="width:100%;height:52px;margin-top:10px;font-size:16px">투어 코스 보기</button>
+</section>
+<img src="couple.jpg" alt="오션스타 보트 위에서 바라본 다이아몬드 헤드"
+  style="width:100%;height:230px;object-fit:cover;display:block;margin-top:28px">
+<div style="padding:26px 16px 0"><div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px 22px;display:grid;grid-template-columns:1fr 1fr;gap:22px 14px"><div><div class="d num" style="font-size:26px;line-height:1.1;color:var(--primary)">14,000+</div><div style="font-size:13px;color:var(--muted);margin-top:4px">누적 리뷰</div></div><div><div class="d num" style="font-size:26px;line-height:1.1;color:var(--navy)">100%</div><div style="font-size:13px;color:var(--muted);margin-top:4px">거북이 보장</div></div><div><div class="d num" style="font-size:26px;line-height:1.1;color:var(--navy)">51인승</div><div style="font-size:13px;color:var(--muted);margin-top:4px">루프탑 보트</div></div><div><div class="d num" style="font-size:26px;line-height:1.1;color:var(--navy)">4시간</div><div style="font-size:13px;color:var(--muted);margin-top:4px">넉넉한 운영</div></div></div></div>
+<section style="padding:44px 16px 0">
+  <div class="mrow" style="align-items:flex-end">
+    <h2 class="d" style="font-size:32px;line-height:1.2">여섯 가지 <span style="color:var(--primary)">프로그램</span></h2>
+    <a href="#" style="font-size:14px;font-weight:700;padding-bottom:4px">전체 일정</a>
+  </div>
+  <div style="margin-top:14px;border-top:1px solid var(--border)">
+<div style="display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center;
+  padding:18px 0;border-bottom:1px solid var(--border);">
+  <img src="turtle.jpg" alt="1부 거북이 스노클링" style="width:96px;height:76px;object-fit:cover;border-radius:12px;display:block">
+  <div>
+    <h3 class="d" style="font-size:18px;line-height:1.3">1부 거북이 스노클링</h3>
+    <p class="num" style="font-size:13px;color:var(--muted);margin-top:4px">08:00 - 11:00 · 최대 45인</p>
+    <div class="mrow" style="margin-top:8px">
+      <span class="d num" style="font-size:20px;color:var(--navy)">₩151,570</span>
+      <a href="#" style="font-size:14px;font-weight:700;min-height:44px;display:flex;
+        align-items:center">예약하기</a>
+    </div>
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center;
+  padding:18px 0;border-bottom:1px solid var(--border);">
+  <img src="dive.jpg" alt="2부 거북이 스노클링" style="width:96px;height:76px;object-fit:cover;border-radius:12px;display:block">
+  <div>
+    <h3 class="d" style="font-size:18px;line-height:1.3">2부 거북이 스노클링</h3>
+    <p class="num" style="font-size:13px;color:var(--muted);margin-top:4px">11:00 - 14:00 · 최대 45인</p>
+    <div class="mrow" style="margin-top:8px">
+      <span class="d num" style="font-size:20px;color:var(--navy)">₩151,570</span>
+      <a href="#" style="font-size:14px;font-weight:700;min-height:44px;display:flex;
+        align-items:center">예약하기</a>
+    </div>
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center;
+  padding:18px 0;border-bottom:1px solid var(--border);">
+  <img src="sunset.jpg" alt="선셋 거북이 스노클링" style="width:96px;height:76px;object-fit:cover;border-radius:12px;display:block">
+  <div>
+    <h3 class="d" style="font-size:18px;line-height:1.3">선셋 거북이 스노클링</h3>
+    <p class="num" style="font-size:13px;color:var(--muted);margin-top:4px">15:00 - 18:00 · 최대 38인</p>
+    <div class="mrow" style="margin-top:8px">
+      <span class="d num" style="font-size:20px;color:var(--navy)">₩206,690</span>
+      <a href="#" style="font-size:14px;font-weight:700;min-height:44px;display:flex;
+        align-items:center">예약하기</a>
+    </div>
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center;
+  padding:18px 0;border-bottom:1px solid var(--border);">
+  <img src="kayak.jpg" alt="스노클링 + 패러세일링" style="width:96px;height:76px;object-fit:cover;border-radius:12px;display:block">
+  <div>
+    <h3 class="d" style="font-size:18px;line-height:1.3">스노클링 + 패러세일링</h3>
+    <p class="num" style="font-size:13px;color:var(--muted);margin-top:4px">거북이를 보고 하늘까지 오릅니다</p>
+    <div class="mrow" style="margin-top:8px">
+      <span class="d num" style="font-size:20px;color:var(--navy)">₩289,360</span>
+      <a href="#" style="font-size:14px;font-weight:700;min-height:44px;display:flex;
+        align-items:center">예약하기</a>
+    </div>
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center;
+  padding:18px 0;border-bottom:1px solid var(--border);">
+  <img src="board.jpg" alt="프라이빗 차터" style="width:96px;height:76px;object-fit:cover;border-radius:12px;display:block">
+  <div>
+    <h3 class="d" style="font-size:18px;line-height:1.3">프라이빗 차터</h3>
+    <p class="num" style="font-size:13px;color:var(--muted);margin-top:4px">단독 대관 2시간 · 최대 30인</p>
+    <div class="mrow" style="margin-top:8px">
+      <span class="d num" style="font-size:20px;color:var(--navy)">₩2,066,850</span>
+      <a href="#" style="font-size:14px;font-weight:700;min-height:44px;display:flex;
+        align-items:center">예약하기</a>
+    </div>
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center;
+  padding:18px 0;border-bottom:1px solid var(--border);border-bottom:0;">
+  <img src="surf.jpg" alt="스노클링 + 서핑" style="width:96px;height:76px;object-fit:cover;border-radius:12px;display:block">
+  <div>
+    <h3 class="d" style="font-size:18px;line-height:1.3">스노클링 + 서핑</h3>
+    <p class="num" style="font-size:13px;color:var(--muted);margin-top:4px">와이키키 명물 서핑까지 한번에</p>
+    <div class="mrow" style="margin-top:8px">
+      <span class="d num" style="font-size:20px;color:var(--navy)">₩261,018</span>
+      <a href="#" style="font-size:14px;font-weight:700;min-height:44px;display:flex;
+        align-items:center">예약하기</a>
+    </div>
+  </div>
+</div></div>
+</section>
+<div class="bar">
+  <div style="flex:1">
+    <div class="d num" style="font-size:19px;color:var(--navy);line-height:1.1">₩151,570~</div>
+    <div style="font-size:12px;color:var(--muted)">1인 · 세금 포함</div>
+  </div>
+  <button class="btn btn-fill" style="height:48px;padding:0 26px;font-size:16px">예약하기</button>
+</div></div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gothic+A1:wght@500;700;800;900&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #0077a8; text-decoration: none; }
+    a:hover { color: #0a3f66; }
+    .d { font-family: 'Do Hyeon', 'Gothic A1', system-ui, sans-serif; word-break: keep-all; }
+    .h { font-family: 'Gothic A1', 'SUIT', system-ui, sans-serif; word-break: keep-all; text-wrap: balance; }
+    .b { font-family: 'Noto Sans KR', 'Pretendard', system-ui, sans-serif; word-break: keep-all; text-wrap: pretty; }
+    .sw { height: 56px; border-radius: 10px; display: flex; align-items: flex-end; padding: 8px; box-sizing: border-box; font-size: 11px; font-weight: 700; }
+  </style>
+</helmet>
+
+<div class="b" style="width: 1200px; background: #ffffff; color: #44586a; font-size: 15px; line-height: 1.7; padding: 40px;">
+
+  <h1 class="d" style="margin: 0 0 8px; font-size: 40px; color: #0a3f66; line-height: 1.2;">색상 3안 비교</h1>
+  <p style="margin: 0 0 36px; font-size: 16px; color: #7b8fa0;">전부 로고에서 뽑은 파란 계열입니다. 배경은 셋 다 흰색이고, 파랑을 얼마나 밝게 / 어디에 쓰는지가 다릅니다.</p>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px;">
+
+    <!-- P1 -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div>
+        <h2 class="h" style="margin: 0 0 4px; font-size: 22px; font-weight: 900; color: #0a3f66;">1 · 딥 네이비</h2>
+        <p style="margin: 0; font-size: 14px; color: #7b8fa0; line-height: 1.6;">네이비를 주인공으로. 차분하고 신뢰감 있지만 무겁습니다. (지난 시안이 이것)</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px;">
+        <div class="sw" style="background: #003060; color: #ffffff;">003060</div>
+        <div class="sw" style="background: #006090; color: #ffffff;">006090</div>
+        <div class="sw" style="background: #00a0d0; color: #ffffff;">00a0d0</div>
+        <div class="sw" style="background: #f2f8fc; color: #7b8fa0; border: 1px solid #dbe8f1;">f2f8fc</div>
+      </div>
+      <div style="border: 1px solid #dbe8f1; border-radius: 16px; overflow: hidden;">
+        <div style="background: #ffffff; padding: 22px;">
+          <div class="d" style="font-size: 34px; color: #003060; line-height: 1.1;">지금,<br><span style="color: #00a0d0;">오션스타</span>에서</div>
+          <div style="display: inline-flex; align-items: center; height: 44px; padding: 0 22px; margin-top: 16px; font-size: 14px; font-weight: 700; color: #ffffff; background: #006090; border-radius: 10px;">바로 예약하기</div>
+        </div>
+        <div style="background: #f2f8fc; border-top: 1px solid #dbe8f1; padding: 18px;">
+          <div class="h" style="font-size: 16px; font-weight: 900; color: #003060;">1부 거북이 스노클링</div>
+          <div style="font-size: 13px; color: #7b8fa0; margin: 4px 0 8px;">08:00 - 11:00</div>
+          <div class="d" style="font-size: 22px; color: #003060; font-variant-numeric: tabular-nums;">₩151,570</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P2 -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div>
+        <h2 class="h" style="margin: 0 0 4px; font-size: 22px; font-weight: 900; color: #0a3f66;">2 · 밝은 오션 <span style="font-size: 12px; font-weight: 700; color: #0077a8; background: #e4f3fa; border-radius: 6px; padding: 4px 8px; vertical-align: middle;">현재 적용</span></h2>
+        <p style="margin: 0; font-size: 14px; color: #7b8fa0; line-height: 1.6;">흰 여백을 늘리고 파랑을 한 단계 밝게. 네이비는 제목에만. 가장 하와이답습니다.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px;">
+        <div class="sw" style="background: #0a3f66; color: #ffffff;">0a3f66</div>
+        <div class="sw" style="background: #0077a8; color: #ffffff;">0077a8</div>
+        <div class="sw" style="background: #00a0d0; color: #ffffff;">00a0d0</div>
+        <div class="sw" style="background: #f4fafd; color: #7b8fa0; border: 1px solid #e3edf4;">f4fafd</div>
+      </div>
+      <div style="border: 1px solid #e3edf4; border-radius: 16px; overflow: hidden;">
+        <div style="background: #ffffff; padding: 22px;">
+          <div class="d" style="font-size: 34px; color: #0a3f66; line-height: 1.1;">지금,<br><span style="color: #0077a8;">오션스타</span>에서</div>
+          <div style="display: inline-flex; align-items: center; height: 44px; padding: 0 22px; margin-top: 16px; font-size: 14px; font-weight: 700; color: #ffffff; background: #0077a8; border-radius: 10px;">바로 예약하기</div>
+        </div>
+        <div style="background: #ffffff; border-top: 1px solid #e3edf4; padding: 18px;">
+          <div class="h" style="font-size: 16px; font-weight: 900; color: #0a3f66;">1부 거북이 스노클링</div>
+          <div style="font-size: 13px; color: #7b8fa0; margin: 4px 0 8px;">08:00 - 11:00</div>
+          <div class="d" style="font-size: 22px; color: #0a3f66; font-variant-numeric: tabular-nums;">₩151,570</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P3 -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div>
+        <h2 class="h" style="margin: 0 0 4px; font-size: 22px; font-weight: 900; color: #0a3f66;">3 · 시안 팝</h2>
+        <p style="margin: 0; font-size: 14px; color: #7b8fa0; line-height: 1.6;">로고의 밝은 시안을 버튼에 씁니다. 가장 활기차지만 흰 글자 대비가 약해 버튼 글자를 네이비로 둡니다.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px;">
+        <div class="sw" style="background: #0a3f66; color: #ffffff;">0a3f66</div>
+        <div class="sw" style="background: #00a0d0; color: #06364f;">00a0d0</div>
+        <div class="sw" style="background: #6fd0ee; color: #06364f;">6fd0ee</div>
+        <div class="sw" style="background: #eef9fd; color: #7b8fa0; border: 1px solid #d8eef7;">eef9fd</div>
+      </div>
+      <div style="border: 1px solid #d8eef7; border-radius: 16px; overflow: hidden;">
+        <div style="background: #ffffff; padding: 22px;">
+          <div class="d" style="font-size: 34px; color: #0a3f66; line-height: 1.1;">지금,<br><span style="color: #00a0d0;">오션스타</span>에서</div>
+          <div style="display: inline-flex; align-items: center; height: 44px; padding: 0 22px; margin-top: 16px; font-size: 14px; font-weight: 700; color: #06364f; background: #00a0d0; border-radius: 10px;">바로 예약하기</div>
+        </div>
+        <div style="background: #eef9fd; border-top: 1px solid #d8eef7; padding: 18px;">
+          <div class="h" style="font-size: 16px; font-weight: 900; color: #0a3f66;">1부 거북이 스노클링</div>
+          <div style="font-size: 13px; color: #7b8fa0; margin: 4px 0 8px;">08:00 - 11:00</div>
+          <div class="d" style="font-size: 22px; color: #0a3f66; font-variant-numeric: tabular-nums;">₩151,570</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 폰트 비교 -->
+  <div style="margin-top: 48px; padding-top: 36px; border-top: 1px solid #e3edf4;">
+    <h2 class="h" style="margin: 0 0 6px; font-size: 24px; font-weight: 900; color: #0a3f66;">대제목 서체 비교</h2>
+    <p style="margin: 0 0 24px; font-size: 15px; color: #7b8fa0;">Black Han Sans가 깨져 보인다고 하셔서, 비슷한 굵기의 다른 서체로 바꿨습니다.</p>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px;">
+      <div style="border: 1px solid #e3edf4; border-radius: 16px; padding: 24px;">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.1em; color: #7b8fa0; margin-bottom: 14px;">이전 · BLACK HAN SANS</div>
+        <div style="font-family: 'Black Han Sans', sans-serif; font-size: 40px; color: #b9c7d2; line-height: 1.1;">지금, 오션스타에서</div>
+        <p style="margin: 14px 0 0; font-size: 13px; color: #7b8fa0; line-height: 1.6;">획이 매우 굵고 자간이 좁아 큰 크기에서 뭉개져 보입니다.</p>
+      </div>
+      <div style="border: 2px solid #0077a8; border-radius: 16px; padding: 24px; background: #f4fafd;">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.1em; color: #0077a8; margin-bottom: 14px;">적용 · DO HYEON</div>
+        <div class="d" style="font-size: 40px; color: #0a3f66; line-height: 1.1;">지금, 오션스타에서</div>
+        <p style="margin: 14px 0 0; font-size: 13px; color: #52697c; line-height: 1.6;">같은 계열의 굵은 제목용 서체인데 획이 정리돼 있어 큰 크기에서도 또렷합니다.</p>
+      </div>
+      <div style="border: 1px solid #e3edf4; border-radius: 16px; padding: 24px;">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.1em; color: #7b8fa0; margin-bottom: 14px;">대안 · GOTHIC A1 900</div>
+        <div class="h" style="font-size: 40px; font-weight: 900; color: #0a3f66; line-height: 1.1;">지금, 오션스타에서</div>
+        <p style="margin: 14px 0 0; font-size: 13px; color: #7b8fa0; line-height: 1.6;">가장 무난하고 본문 서체와 한 가족입니다. 다만 개성은 약합니다.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
