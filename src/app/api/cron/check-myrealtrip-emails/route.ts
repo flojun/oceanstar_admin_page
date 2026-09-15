@@ -48,7 +48,9 @@ async function mergeIntoExisting(
         .eq('source', 'M')
         .eq('name', name)
         .eq('tour_date', tourDate)
-        .neq('status', '취소');
+        // 취소/취소요청 행은 살아있는 예약이 아니다. 손님이 취소하고 같은 날로 다시 잡으면
+        // 새 예약이 취소된 행에 흡수돼서 재예약이 통째로 사라진다.
+        .not('status', 'in', '("취소","취소요청")');
 
     if (!rows || rows.length !== 1) return false;   // 0건이면 새 예약, 2건 이상이면 사람이 판단
 
@@ -315,9 +317,12 @@ export async function GET(request: Request) {
                             candidates = data || [];
                         }
                         if (candidates.length === 0 && r.travelerName) {
+                            // 예약번호가 이미 붙어 있는 행은 **다른 예약**이다.
+                            // 같은 손님이 같은 날 두 번 예약한 경우 엉뚱한 쪽을 취소시킬 수 있다.
                             const { data } = await supabaseServer
                                 .from('reservations').select(cols)
-                                .eq('source', 'M').eq('name', r.travelerName).eq('tour_date', r.tourDate);
+                                .eq('source', 'M').eq('name', r.travelerName).eq('tour_date', r.tourDate)
+                                .is('order_id', null);
                             candidates = data || [];
                         }
 

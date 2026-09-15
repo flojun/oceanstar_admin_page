@@ -162,9 +162,12 @@ async function findTarget(b: OtaBooking): Promise<Target | null> {
 
     if (!b.name) return null;
 
+    // 예약번호가 이미 붙어 있는 행은 다른 예약이다. 같은 손님이 같은 날 두 번 예약했을 때
+    // 엉뚱한 쪽을 취소·변경하지 않도록 번호가 빈 행만 본다.
     const { data: byName } = await supabaseServer
         .from('reservations').select(cols)
         .eq('source', b.source).eq('name', b.name).eq('tour_date', b.tourDate)
+        .is('order_id', null)
         .maybeSingle();
     return (byName as Target) ?? null;
 }
