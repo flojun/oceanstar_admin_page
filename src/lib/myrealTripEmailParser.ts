@@ -10,9 +10,11 @@
  *   여행자      최원철
  */
 
-export type MRTEmailType = 'pending' | 'confirmed'; // 확정대기 | 확정완료
+export type MRTEmailType = 'pending' | 'confirmed' | 'cancelled' | 'cancel_request';
+// 확정대기 | 확정완료 | [예약취소] | 예약 취소 요청 접수
 
 export interface MRTReservation {
+    // 취소 요청 접수 메일에는 예약번호가 없다. 그때만 빈 문자열.
     orderNumber: string;     // "EXP-20260802-00006122"
     productName: string;     // 상품명 전체
     optionName: string;      // "아동, 거북이 스노클링+해양 액티비티"
@@ -31,6 +33,10 @@ export interface MRTParseResult {
 export function detectEmailType(subject: string): MRTEmailType | null {
     if (subject.includes('[확정대기]') || subject.includes('확정대기')) return 'pending';
     if (subject.includes('[확정완료]') || subject.includes('확정완료')) return 'confirmed';
+    // "예약 취소 요청 접수 - ..." 는 손님이 취소를 요청한 단계. 예약번호가 없다.
+    if (subject.includes('취소 요청 접수')) return 'cancel_request';
+    // "[예약취소] 2026-09-24 / ... 상품 예약이 취소되었습니다." 는 취소 확정.
+    if (subject.includes('[예약취소]') || subject.includes('예약이 취소')) return 'cancelled';
     return null;
 }
 
@@ -112,9 +118,9 @@ export function parseMyRealTripEmail(html: string, subject: string): MRTParseRes
     if (!type) return null;
 
     try {
-        // 예약번호 추출 (필수)
-        const orderNumber = extractOrderNumber(html);
-        if (!orderNumber) {
+        // 예약번호 추출 (취소 요청 접수 메일에는 아예 없다)
+        const orderNumber = extractOrderNumber(html) || '';
+        if (!orderNumber && type !== 'cancel_request') {
             console.error('[MRT Parser] 예약번호를 찾을 수 없습니다.');
             return null;
         }

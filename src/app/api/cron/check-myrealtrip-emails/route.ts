@@ -13,6 +13,8 @@ import { simpleParser } from 'mailparser';
  * - 5분마다 Gmail IMAP에 접속하여 UNSEEN 이메일 검색
  * - [확정대기] → reservations INSERT (예약대기)
  * - [확정완료] → reservations UPDATE (예약확정)
+ * - [예약취소] / 예약 취소 요청 접수 → reservations UPDATE (취소요청) + **항상 Discord 알림**
+ *   ('취소' 로 바로 닫지 않는다. 취소요청 화면에서 눈으로 확인하고 마감한다)
  * - 당일/전날 투어이면 Discord 긴급 알림 발송
  */
 export async function GET(request: Request) {
@@ -43,6 +45,8 @@ export async function GET(request: Request) {
 
         let pendingProcessed = 0;
         let confirmedProcessed = 0;
+        let cancelProcessed = 0;
+        let cancelUnmatched = 0;
         let slackAlertsSent = 0;
         let errors = 0;
 
@@ -200,6 +204,104 @@ export async function GET(request: Request) {
                 }
             }
 
+            // ============================================
+            // Step 3: 취소 메일 처리 ([예약취소] / 예약 취소 요청 접수)
+            // ============================================
+            for (const keyword of ['예약취소', '취소 요청 접수']) {
+                const cancelMessages = await searchEmails(client, keyword);
+
+                for (const msg of cancelMessages) {
+                    try {
+                        const parsed = parseMyRealTripEmail(msg.html, msg.subject);
+                        if (!parsed || (parsed.type !== 'cancelled' && parsed.type !== 'cancel_request')) {
+                            console.log(`[MRT Cron] 파싱 스킵 (취소): ${msg.subject}`);
+                            continue; // SEEN 처리하지 않음 → 사람 눈에 띄게 남긴다
+                        }
+
+                        const r = parsed.reservation;
+                        const cols = 'id, status, note, name, tour_date';
+
+                        // 1순위 예약번호. '취소 요청 접수' 메일에는 예약번호가 없어서 이름+여행일로 찾는다.
+                        let candidates: Array<{ id: string; status: string; note: string | null }> = [];
+                        if (r.orderNumber) {
+                            const { data } = await supabaseServer
+                                .from('reservations').select(cols).eq('order_id', r.orderNumber);
+                            candidates = data || [];
+                        }
+                        if (candidates.length === 0 && r.travelerName) {
+                            const { data } = await supabaseServer
+                                .from('reservations').select(cols)
+                                .eq('source', 'M').eq('name', r.travelerName).eq('tour_date', r.tourDate);
+                            candidates = data || [];
+                        }
+
+                        // 0건이면 만들지 않고, 2건 이상이면 어느 쪽인지 알 수 없으니 손대지 않는다.
+                        if (candidates.length !== 1) {
+                            cancelUnmatched++;
+                            await sendDiscordUrgentAlert({
+                                title: candidates.length === 0
+                                    ? '⚠️ [취소] 매칭되는 예약을 못 찾음'
+                                    : '⚠️ [취소] 후보가 여러 건 — 수동 확인 필요',
+                                customerName: r.travelerName || '(이름 없음)',
+                                tourDate: r.tourDate,
+                                option: r.optionName,
+                                source: '마이리얼트립',
+                                orderNumber: r.orderNumber || '(메일에 예약번호 없음)',
+                                detail: `${parsed.type === 'cancel_request' ? '취소 요청 접수' : '예약취소'} / 후보 ${candidates.length}건`,
+                            });
+                            await client.messageFlagsAdd(msg.uid, ['\\Seen'], { uid: true });
+                            continue;
+                        }
+
+                        const target = candidates[0];
+                        // 이미 마감했거나 접수된 건은 다시 흔들지 않는다.
+                        if (target.status === '취소' || target.status === '취소요청') {
+                            await client.messageFlagsAdd(msg.uid, ['\\Seen'], { uid: true });
+                            continue;
+                        }
+
+                        const label = parsed.type === 'cancel_request' ? '취소요청 접수' : '예약취소';
+                        const stamp = `[마이리얼트립 ${label} 수신: ${getHawaiiDateStr()}${r.orderNumber ? ` / ${r.orderNumber}` : ''}]`;
+
+                        const { error: cancelError } = await supabaseServer
+                            .from('reservations')
+                            .update({
+                                status: '취소요청',
+                                cancel_requested_at: new Date().toISOString(),
+                                is_admin_checked: false,
+                                note: `${target.note || ''} ${stamp}`.trim(),
+                            })
+                            .eq('id', target.id);
+
+                        if (cancelError) {
+                            console.error('[MRT Cron] 취소 UPDATE 실패:', cancelError);
+                            errors++;
+                            continue; // SEEN 안 붙임 → 다음 실행에서 재시도
+                        }
+
+                        cancelProcessed++;
+
+                        // 투어일과 무관하게 항상 알린다. 놓치면 빈 자리로 출항한다.
+                        const sent = await sendDiscordUrgentAlert({
+                            title: `❌ [취소요청] 마이리얼트립 ${label}`,
+                            customerName: r.travelerName,
+                            tourDate: r.tourDate,
+                            option: r.optionName,
+                            source: '마이리얼트립',
+                            orderNumber: r.orderNumber || undefined,
+                            detail: `${target.status} → 취소요청 (${label})`,
+                        });
+                        if (sent) slackAlertsSent++;
+                        else console.error(`[MRT Cron] ⚠️ Discord 알림 실패 — 취소 ${r.travelerName} ${r.tourDate}`);
+
+                        await client.messageFlagsAdd(msg.uid, ['\\Seen'], { uid: true });
+                    } catch (msgError) {
+                        console.error('[MRT Cron] 취소 처리 중 오류:', msgError);
+                        errors++;
+                    }
+                }
+            }
+
         } finally {
             await client.logout();
         }
@@ -208,6 +310,8 @@ export async function GET(request: Request) {
             success: true,
             pendingProcessed,
             confirmedProcessed,
+            cancelProcessed,
+            cancelUnmatched,
             slackAlertsSent,
             errors,
             timestamp: new Date().toISOString(),
