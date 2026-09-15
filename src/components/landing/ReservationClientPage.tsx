@@ -78,6 +78,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCurrencyModalOpen, setIsCurrencyModalOpen] = useState(false);
+  // 결제/예약 흐름의 오류는 브라우저 alert 대신 화면 안에서 보여준다.
+  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
   const [pendingBookingData, setPendingBookingData] = useState<z.infer<typeof formSchema> | null>(null);
   const infoSectionRef = useRef<HTMLElement>(null);
   const paxSectionRef = useRef<HTMLElement>(null);
@@ -137,6 +141,12 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
     setPreviewUrls(urls);
     return () => urls.forEach(url => URL.revokeObjectURL(url));
   }, [reviewForm.images]);
+
+  useEffect(() => {
+    if (!reviewSuccess) return;
+    const timer = setTimeout(() => setReviewSuccess(false), 8000);
+    return () => clearTimeout(timer);
+  }, [reviewSuccess]);
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
@@ -207,6 +217,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
   const onReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setReviewError(null);
     setIsSubmittingReview(true);
     try {
       const formData = new FormData();
@@ -237,15 +248,15 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
       });
       const data = await res.json();
       if (data.success) {
-        alert(lang === 'en' ? "Review submitted successfully. Thank you!" : "리뷰가 성공적으로 등록되었습니다. 감사합니다!");
         setReviewForm({ order_id: '', author_name: '', rating: 5, content: '', images: [] });
         setIsReviewOpen(false);
+        setReviewSuccess(true);
         fetchReviews();
       } else {
-        alert(data.error || (lang === 'en' ? "An error occurred while submitting." : "리뷰 등록 중 오류가 발생했습니다."));
+        setReviewError(data.error || (lang === 'en' ? "An error occurred while submitting." : "리뷰 등록 중 오류가 발생했습니다."));
       }
     } catch (e) {
-      alert(lang === 'en' ? "Communication error with server." : "서버와 통신 중 오류가 발생했습니다.");
+      setReviewError(lang === 'en' ? "Communication error with server." : "서버와 통신 중 오류가 발생했습니다.");
     } finally {
       setIsSubmittingReview(false);
     }
@@ -454,27 +465,39 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   }
 
 
+  // zod 검증에서 막히면 onSubmit 이 아예 실행되지 않는다. 그대로 두면 결제 버튼이
+  // 아무 반응 없이 죽으므로, 실패한 첫 필드를 배너로 끌어올린다.
+  const onInvalid = (errors: Record<string, { message?: string }>) => {
+    if (errors.tourDate) {
+      setBookingError(lang === 'en' ? 'Please select a tour date.' : '투어 날짜를 선택해주세요.');
+      return;
+    }
+    const first = Object.values(errors).find((e) => e?.message);
+    setBookingError(first?.message || (lang === 'en' ? 'Please fill in all required fields.' : '필수 항목을 모두 입력해주세요.'));
+  };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setBookingError(null);
     if (!selectedTour) {
-      alert(t('bookingModal.alert_selectTour'));
+      setBookingError(t('bookingModal.alert_selectTour'));
       return;
     }
 
     if (selectedTour === 'combo_marine') {
       if (!comboOption) {
-        alert(lang === 'en' ? 'Please select a combo option.' : '패러세일링/제트스키 옵션을 선택해주세요.');
+        setBookingError(lang === 'en' ? 'Please select a combo option.' : '패러세일링/제트스키 옵션을 선택해주세요.');
         return;
       }
       if (!comboTimeOption) {
-        alert(lang === 'en' ? 'Please select a snorkeling time.' : '거북이 스노클링 시간을 선택해주세요.');
+        setBookingError(lang === 'en' ? 'Please select a snorkeling time.' : '거북이 스노클링 시간을 선택해주세요.');
         return;
       }
       if (!values.secondaryDate) {
-         alert(lang === 'en' ? 'Please select a date for the second activity.' : '패러세일링/제트스키 날짜를 선택해주세요.');
+         setBookingError(lang === 'en' ? 'Please select a date for the second activity.' : '패러세일링/제트스키 날짜를 선택해주세요.');
          return;
       }
       if (!secondaryClosestPickup?.location?.id && (!values.secondaryPickupLocationName || values.secondaryPickupLocationName.trim() === '')) {
-         alert(lang === 'en' ? 'Please enter pickup location for the second activity.' : '패러세일링/제트스키 픽업 장소를 입력해주세요.');
+         setBookingError(lang === 'en' ? 'Please enter pickup location for the second activity.' : '패러세일링/제트스키 픽업 장소를 입력해주세요.');
          return;
       }
     }
@@ -495,6 +518,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
   const processPayment = async (type: 'KRW' | 'USD') => {
     if (!pendingBookingData || !selectedTour) return;
 
+    setBookingError(null);
     setIsSubmitting(true);
     setIsCurrencyModalOpen(false);
     try {
@@ -529,11 +553,11 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
         // Stripe Checkout 세션으로 이동
         window.location.href = data.url;
       } else {
-        alert((lang === 'en' ? "Payment error: " : "결제 준비 중 오류가 발생했습니다: ") + (data.error || "Unknown error"));
+        setBookingError((lang === 'en' ? "Payment error: " : "결제 준비 중 오류가 발생했습니다: ") + (data.error || "Unknown error"));
       }
     } catch (e) {
       console.error(e);
-      alert(lang === 'en' ? "Server communication error." : "서버 통신 중 오류가 발생했습니다.");
+      setBookingError(lang === 'en' ? "Server communication error." : "서버 통신 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
     }
@@ -913,12 +937,21 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                    <p className="text-lg text-slate-500">{t('review.subtitle')}</p>
                 </div>
                 <button
-                   onClick={() => setIsReviewOpen(true)}
+                   onClick={() => { setReviewError(null); setReviewSuccess(false); setIsReviewOpen(true); }}
                    className="bg-blue-600 hover:bg-blue-700 text-white w-full md:w-auto px-8 py-4 md:py-3 rounded-2xl font-black text-base md:text-lg shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
                    <MessageSquare size={20} />
                    {t('review.writeBtn')}
                 </button>
             </Reveal>
+
+            {reviewSuccess && (
+                <div role="status" className="mb-6 flex items-start gap-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl px-5 py-4 animate-in fade-in slide-in-from-top-1 duration-300">
+                    <Check size={18} className="shrink-0 mt-0.5 text-emerald-600" />
+                    <p className="text-sm font-semibold leading-relaxed flex-1 break-keep">
+                        {lang === 'en' ? 'Your review has been posted. Thank you for sharing.' : '후기가 등록되었습니다. 소중한 경험 나눠주셔서 감사합니다.'}
+                    </p>
+                </div>
+            )}
 
             {isLoadingReviews ? (
                 <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-blue-500 w-10 h-10" /></div>
@@ -1649,6 +1682,15 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
               {/* Wizard Navigation Footer */}
               <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/40 backdrop-blur-xl border-t border-white/50 shadow-[0_-20px_40px_rgba(0,0,0,0.1)] z-[110] animate-in slide-in-from-bottom duration-300">
+                  {bookingError && (
+                    <div role="alert" className="max-w-[700px] mx-auto mb-3 flex items-start gap-2.5 bg-red-50 border border-red-200 text-red-800 rounded-xl px-4 py-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                        <AlertTriangle size={18} className="shrink-0 mt-0.5 text-red-500" />
+                        <p className="text-sm font-semibold leading-relaxed flex-1 break-keep">{bookingError}</p>
+                        <button type="button" onClick={() => setBookingError(null)} aria-label={lang === 'en' ? 'Dismiss' : '닫기'} className="shrink-0 text-red-400 hover:text-red-600 transition-colors">
+                            <X size={16} />
+                        </button>
+                    </div>
+                  )}
                   <div className="max-w-[700px] mx-auto flex justify-between items-center">
                     <div></div>
                     <div className="flex items-center gap-4">
@@ -1658,7 +1700,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         </div>
                         <button
                             type="button"
-                            onClick={() => form.handleSubmit(onSubmit)()}
+                            onClick={() => form.handleSubmit(onSubmit, onInvalid)()}
                             disabled={isSubmitting}
                             className="px-6 py-3 sm:px-8 sm:py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/30 active:scale-95 flex justify-center items-center gap-2"
                         >
@@ -1688,6 +1730,12 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
 
               <div className="p-6">
                 <form onSubmit={onReviewSubmit} className="flex flex-col gap-5">
+                    {reviewError && (
+                        <div role="alert" className="flex items-start gap-2.5 bg-red-50 border border-red-200 text-red-800 rounded-xl px-4 py-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                            <AlertTriangle size={18} className="shrink-0 mt-0.5 text-red-500" />
+                            <p className="text-sm font-semibold leading-relaxed flex-1 break-keep">{reviewError}</p>
+                        </div>
+                    )}
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1">{t('reviewModal.order_id')}</label>
                         <input
@@ -1750,9 +1798,10 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                 if (e.target.files) {
                                     const files = Array.from(e.target.files);
                                     if (files.length > 5) {
-                                        alert(lang === 'en' ? "You can select up to 5 photos." : "사진은 최대 5장까지만 선택할 수 있습니다.");
+                                        setReviewError(lang === 'en' ? "You can select up to 5 photos." : "사진은 최대 5장까지만 선택할 수 있습니다.");
                                         e.target.value = '';
                                     } else {
+                                        setReviewError(null);
                                         setReviewForm({ ...reviewForm, images: files });
                                     }
                                 }
