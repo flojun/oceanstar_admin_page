@@ -24,6 +24,60 @@ import { simpleParser } from 'mailparser';
  */
 const PROCESSED = 'OceanstarDone';
 
+/**
+ * 마이리얼트립은 **인원 1명당 예약번호(EXP)를 따로 발급**한다.
+ * 성인 2 + 아동 1 이면 메일이 3통 오고, 그대로 두면 행이 3개 생긴다.
+ * 운영자가 한 행으로 합치고 나머지를 지우면, 남은 예약번호의 확정 메일이
+ * order_id 로 매칭되지 않아 지웠던 행이 다시 살아난다. (같은 뿌리의 두 증상)
+ *
+ * 그래서 INSERT 하기 전에 **같은 이름·같은 여행일의 살아있는 M 예약**이 있는지 본다.
+ * 있으면 행을 만들지 않고 note 에 예약번호만 덧붙인 뒤 Discord 로 알린다.
+ * (같은 이름·같은 날의 별개 예약일 가능성이 있으므로 조용히 버리지 않고 반드시 알린다)
+ *
+ * @returns 합쳐 넣은 경우 true. 그러면 INSERT 하지 않는다.
+ */
+async function mergeIntoExisting(
+    name: string,
+    tourDate: string,
+    orderNumber: string,
+    optionName: string,
+): Promise<boolean> {
+    const { data: rows } = await supabaseServer
+        .from('reservations')
+        .select('id, note, pax, option, status')
+        .eq('source', 'M')
+        .eq('name', name)
+        .eq('tour_date', tourDate)
+        .neq('status', '취소');
+
+    if (!rows || rows.length !== 1) return false;   // 0건이면 새 예약, 2건 이상이면 사람이 판단
+
+    const target = rows[0];
+    if ((target.note || '').includes(orderNumber)) return true;   // 이미 붙여 둔 번호
+
+    await supabaseServer
+        .from('reservations')
+        .update({
+            note: `${target.note || ''} [동일 예약 합침: ${orderNumber}${optionName ? ` (${optionName})` : ''}]`.trim(),
+            is_admin_checked: false,
+        })
+        .eq('id', target.id);
+
+    await sendDiscordUrgentAlert({
+        title: '🧩 [인원 추가] 같은 예약의 다른 예약번호 — 인원 확인 필요',
+        customerName: name,
+        tourDate,
+        option: target.option || optionName,
+        pax: target.pax || undefined,
+        source: '마이리얼트립',
+        orderNumber,
+        detail: `기존 ${target.status} 행에 합쳤습니다 (현재 인원 ${target.pax || '미입력'}). 마이리얼트립은 1인당 예약번호가 따로 발급되니 인원이 맞는지 확인해주세요.`,
+    });
+
+    console.log(`[MRT Cron] 기존 행에 합침: ${orderNumber} → ${name} ${tourDate}`);
+    return true;
+}
+
 export async function GET(request: Request) {
     try {
         // 인증 확인
@@ -53,6 +107,7 @@ export async function GET(request: Request) {
         let pendingProcessed = 0;
         let confirmedProcessed = 0;
         let cancelProcessed = 0;
+        let mergedIntoExisting = 0;
         let cancelUnmatched = 0;
         let slackAlertsSent = 0;
         let errors = 0;
@@ -84,6 +139,16 @@ export async function GET(request: Request) {
 
                     if (existing) {
                         console.log(`[MRT Cron] 이미 존재하는 예약: ${reservation.orderNumber}`);
+                        await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
+                        continue;
+                    }
+
+                    // 같은 이름·여행일의 예약이 이미 있으면 행을 늘리지 않는다.
+                    if (await mergeIntoExisting(
+                        reservation.travelerName, reservation.tourDate,
+                        reservation.orderNumber, reservation.optionName,
+                    )) {
+                        mergedIntoExisting++;
                         await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
                         continue;
                     }
@@ -171,6 +236,16 @@ export async function GET(request: Request) {
                             continue;
                         }
                     } else {
+                        // 합쳐진 예약의 다른 예약번호일 수 있다. 그러면 행을 새로 만들지 않는다.
+                        if (await mergeIntoExisting(
+                            reservation.travelerName, reservation.tourDate,
+                            reservation.orderNumber, reservation.optionName,
+                        )) {
+                            mergedIntoExisting++;
+                            await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
+                            continue;
+                        }
+
                         // 확정대기를 놓친 경우 → INSERT (예약확정)
                         const { error: insertError } = await supabaseServer
                             .from('reservations')
@@ -322,6 +397,7 @@ export async function GET(request: Request) {
             pendingProcessed,
             confirmedProcessed,
             cancelProcessed,
+            mergedIntoExisting,
             cancelUnmatched,
             slackAlertsSent,
             errors,
