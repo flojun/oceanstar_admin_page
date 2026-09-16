@@ -1,5 +1,15 @@
 export type ReservationStatus = '예약확정' | '취소' | '대기' | '취소요청' | '예약대기' | string;
 
+/**
+ * 명단 복사·공유에서 제외하는 상태.
+ * 취소 건은 지우지 않고 상태로만 닫아 두기 때문에(예약번호가 남아 있어야
+ * 나중에 오는 취소·변경 메일이 제 짝을 찾는다) 복사할 때 걸러 내야 한다.
+ */
+export const EXCLUDED_FROM_MANIFEST: ReservationStatus[] = ['취소', '취소요청'];
+
+export const isInManifest = (status: string | null | undefined) =>
+    !EXCLUDED_FROM_MANIFEST.includes(status ?? '');
+
 export interface Reservation {
   id: string;
   created_at: string;

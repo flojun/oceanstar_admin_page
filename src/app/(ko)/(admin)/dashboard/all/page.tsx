@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import { DataGrid, RenderEditCellProps, FillEvent, DataGridHandle } from "react-data-grid";
 import { Save, Settings, Plus, Undo, Redo } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { Reservation, ReservationInsert } from "@/types/reservation";
+import { Reservation, ReservationInsert, isInManifest } from "@/types/reservation";
 import { smartParseRow } from "@/lib/smartParser";
 import { cn } from "@/lib/utils";
 import { getHawaiiDateStr, formatDateDisplay, getKoreanDay, getKoreanDayShort , getReceiptDateStr } from '@/lib/timeUtils';
@@ -1159,8 +1159,18 @@ function AllReservationsContent() {
             return;
         }
 
+        // 취소·취소요청은 명단에서 뺀다. 취소 건을 지우지 않고 상태로만 닫아 두므로
+        // 걸러 주지 않으면 붙여넣는 명단에 그대로 섞여 나간다.
+        const copyRows = targetRows.filter((r) => isInManifest(r.status));
+        const excludedCount = targetRows.length - copyRows.length;
+
+        if (copyRows.length === 0) {
+            alert("선택한 범위가 전부 취소/취소요청 건입니다.");
+            return;
+        }
+
         // Create a copy to sort
-        const sortedRows = [...targetRows].sort((a: any, b: any) => {
+        const sortedRows = [...copyRows].sort((a: any, b: any) => {
             const dateA = a.tour_date || "";
             const dateB = b.tour_date || "";
             const optionA = a.option || "";
@@ -1232,7 +1242,8 @@ function AllReservationsContent() {
 
         try {
             await navigator.clipboard.writeText(textToCopy);
-            alert(`${sortedRows.length}건의 명단이 복사되었습니다.\n(여행일 기준 그룹화)`);
+            alert(`${sortedRows.length}건의 명단이 복사되었습니다.\n(여행일 기준 그룹화)`
+                + (excludedCount > 0 ? `\n취소/취소요청 ${excludedCount}건은 제외했습니다.` : ''));
             setShowCopyModal(false);
             setCopyStartRow('');
             setCopyEndRow('');

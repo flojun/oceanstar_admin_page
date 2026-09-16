@@ -23,7 +23,7 @@ import {
     verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { supabase } from '@/lib/supabase';
-import { Reservation } from '@/types/reservation';
+import { Reservation, isInManifest } from '@/types/reservation';
 import { calculateTotalPax, cn, parseSplitPickup } from '@/lib/utils';
 import { getHawaiiTomorrowStr, getKoreanDay } from '@/lib/timeUtils';
 import { Vehicle, Driver, VehicleState } from '@/types/vehicle';
@@ -687,17 +687,30 @@ export default function VehiclePage() {
             const v = vehicles[key];
             if (v.items.length === 0) return;
 
+            // 취소·취소요청은 명단에 올리지 않는다.
+            const items = v.items.filter(item => isInManifest(item.status));
+            if (items.length === 0) return;
+
             const driverName = v.driverId ? drivers.find(d => d.id === v.driverId)?.name : "미지정";
             text += `🔹 ${v.name} (${driverName})\n`;
-            v.items.forEach(item => {
+            items.forEach(item => {
                 text += `  ${item.pickup_location} | ${item.name} | ${item.pax?.replace("명", "")}명 | ${item.contact}\n`;
             });
             text += '\n';
         });
 
-        const unassigned = vehicles['unassigned'];
-        if (unassigned.items.length > 0) {
-            text += `Please Note: 미배정 ${unassigned.items.length}팀 있음\n`;
+        const unassigned = vehicles['unassigned'].items.filter(item => isInManifest(item.status));
+        if (unassigned.length > 0) {
+            text += `Please Note: 미배정 ${unassigned.length}팀 있음\n`;
+        }
+
+        // 여기까지 문자열만 만들고 클립보드에 쓰지 않아서 버튼이 아무 동작도 하지 않았다.
+        try {
+            await navigator.clipboard.writeText(text);
+            alert('배차 명단이 복사되었습니다. (취소/취소요청 제외)');
+        } catch (err) {
+            console.error('클립보드 복사 실패:', err);
+            alert('클립보드 복사에 실패했습니다.');
         }
     };
 
