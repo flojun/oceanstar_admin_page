@@ -84,32 +84,22 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
 .hero-foot .book-pill{margin-top:18px;width:100%;justify-content:space-between}
 
 /* ── 지표 띠 ──────────────────────────────────────────────────────── */
-/* 데스크탑과 같은 뜻이다 - 카드는 경계를 덮는 구조물이라 그대로 두고 안쪽만
-   다시 짰다. 데스크탑에서 리뷰를 앞에 크게 세운 계층을 375 에서도 지킨다.
+/* 데스크탑과 같은 뜻이다 - 카드와 겹침을 걷어 내고 히어로 아래 전폭 톤
+   밴드로 앉혔다.
 
-   전에는 2×2 격자에 십자로 줄을 그어 표처럼 읽혔다. 335px 에서 네 칸을
-   나누면 한 칸이 약 150px 이라 숫자도 라벨도 갈 곳이 없다. 그래서 리뷰만
-   한 줄을 통으로 쓰고 - 숫자와 라벨을 베이스라인에 나란히 놓아 높이를
-   아낀다 - 나머지 셋을 아래 한 줄로 내렸다. 가로줄 하나만 둘을 가른다.
-
-   라벨은 97px 폭에서 두 줄까지 접힐 수 있어 line-height 를 1.45 로 연다. */
-.strip{position:relative;z-index:1;
-  margin:-48px var(--pad) 0;padding:22px 22px 20px;border-radius:20px;background:#fff;
-  border:1px solid rgba(26,22,16,.05);
-  box-shadow:0 2px 6px rgba(26,22,16,.06),0 16px 30px rgba(26,22,16,.16)}
-.strip b{font-family:'SUIT',system-ui,sans-serif;font-weight:800;line-height:1}
-.strip i{font-style:normal;font-weight:600}
-.strip .rule{display:none}
-.strip .lead{display:flex;align-items:baseline;gap:11px}
-.strip .lead b{font-size:38px;color:var(--deep);letter-spacing:-.02em}
-.strip .lead i{font-size:13.5px;color:var(--text)}
-.strip .facts{margin-top:17px;padding-top:16px;border-top:1px solid var(--line);
-  display:grid;grid-template-columns:repeat(3,1fr);column-gap:10px}
-.strip .facts b{display:block;font-size:19px;color:var(--ink);letter-spacing:-.01em}
-.strip .facts b em{font-style:normal;font-size:.44em;font-weight:700;
-  color:var(--muted);margin-right:.32em;letter-spacing:0}
-.strip .facts i{display:block;font-size:11.5px;line-height:1.45;color:var(--muted);
-  margin-top:7px}
+   375 에서 넷을 한 줄로 펴면 한 칸이 84px 이라 'Since 2019' 도 '하와이 최초
+   개설' 도 들어가지 않는다. 그래서 2×2 로 접는다. 전에 이 격자가 표처럼
+   읽혔던 건 칸마다 십자로 줄을 그었기 때문이지 격자 자체 때문이 아니다.
+   줄을 전부 걷고 행간을 넉넉히 두면 격자는 보이지 않고 항목만 남는다. */
+.strip{background:var(--soft);border-bottom:1px solid var(--line);
+  padding:30px var(--pad) 28px;
+  display:grid;grid-template-columns:1fr 1fr;column-gap:16px;row-gap:24px}
+.strip b{font-family:'SUIT',system-ui,sans-serif;font-size:25px;font-weight:800;
+  line-height:1;letter-spacing:-.01em;color:var(--ink);display:block}
+.strip b em{font-style:normal;font-size:.44em;font-weight:700;color:var(--muted);
+  margin-right:.32em;letter-spacing:0}
+.strip i{display:block;font-size:12.5px;font-style:normal;font-weight:600;
+  color:var(--text);margin-top:9px}
 /* ── 공통 섹션 ────────────────────────────────────────────────────── */
 .sect{padding:56px var(--pad) 0}
 .center{text-align:center}
@@ -255,16 +245,15 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
       animation-timing-function:cubic-bezier(.22,.61,.36,1);
       animation-range:entry 4% cover 26%}
     @keyframes rise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
-    /* 지표 띠 - 원장이 왼쪽부터 채워지듯 읽히게 한다. 앞머리(리뷰 수)가 먼저
-       서고 받쳐 주는 셋이 차례로 따라온다. 같은 rise 키프레임을 쓰되 진입
-       구간만 조금씩 밀어 순서를 만든다. 카드 자체는 움직이지 않는다 -
-       사진과 종이의 경계를 덮는 구조물이라 움직이면 경계가 드러난다. */
-    .strip .lead,.strip .facts>span{animation-name:rise;animation-timeline:view();
+    /* 지표 띠 - 왼쪽부터 차례로 선다. 같은 rise 키프레임을 쓰되 진입 구간만
+       조금씩 민다. 밴드(배경)는 움직이지 않는다 - 색 층이 흔들리면 사진과
+       종이 사이가 벌어져 보인다. */
+    .strip>span{animation-name:rise;animation-timeline:view();
       animation-fill-mode:both;animation-timing-function:cubic-bezier(.22,.61,.36,1)}
-    .strip .lead{animation-range:entry 8% cover 24%}
-    .strip .facts>span:nth-child(1){animation-range:entry 13% cover 29%}
-    .strip .facts>span:nth-child(2){animation-range:entry 16% cover 32%}
-    .strip .facts>span:nth-child(3){animation-range:entry 19% cover 35%}
+    .strip>span:nth-child(1){animation-range:entry 6% cover 22%}
+    .strip>span:nth-child(2){animation-range:entry 9% cover 25%}
+    .strip>span:nth-child(3){animation-range:entry 12% cover 28%}
+    .strip>span:nth-child(4){animation-range:entry 15% cover 31%}
   }
 }
 </style>
@@ -297,7 +286,7 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
     </div>
     <a href="#" class="book-pill">바로 예약하기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a>
   </div>
-</section><section class="strip"><div class="lead"><b>14,000+</b><i>누적 리뷰</i></div><span class="rule"></span><div class="facts"><span><b><em>Since</em>2019</b><i>하와이 최초 개설</i></span><span><b>100%</b><i>거북이 관찰 보장</i></span><span><b>51인승</b><i>루프탑 보트</i></span></div></section>
+</section><section class="strip"><span><b><em>Since</em>2019</b><i>하와이 최초 개설</i></span><span><b>14,000+</b><i>누적 리뷰</i></span><span><b>100%</b><i>거북이 관찰 보장</i></span><span><b>51인승</b><i>루프탑 보트</i></span></section>
 <section class="sect center">
   <span class="pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> 투어 프로그램</span>
   <h2>오션스타 추천 프로그램<br><span class="hl">당신의 완벽한 하와이 여행을 위한 최고의 선택</span></h2>
