@@ -228,19 +228,37 @@ em{font-style:italic;font-weight:400}
 
 /* ── 지표 띠 ──────────────────────────────────────────────────────── */
 /* 히어로 바닥에 걸쳐 올라앉는 흰 카드. 어두운 사진과 종이가 맞닿는 선 위에
-   카드를 얹으면 그 선이 보이지 않고, 대신 숫자 네 개가 두 섹션을 잇는 손잡이가
-   된다. 전에는 종이색 띠라 지나치게 조용해서 그냥 여백처럼 지나쳤다. */
-.strip{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);
-  margin:-64px var(--pad) 0;padding:34px 20px;border-radius:22px;background:#fff;
+   카드를 얹으면 그 선이 보이지 않고, 대신 숫자들이 두 섹션을 잇는 손잡이가
+   된다. 카드는 그대로 두고 안쪽만 다시 짰다.
+
+   전에는 네 칸을 똑같이 나누고 칸마다 세로줄을 그었다. 그러면 성격이 다른
+   넷 - 창업 사실 · 사회적 증거 · 보장 · 장비 - 이 같은 무게로 읽혀,
+   가장 강한 증거인 누적 리뷰가 좌석 수와 같은 크기가 된다. 그래서 리뷰를
+   앞에 크게 세우고 나머지 셋을 오른쪽에 묶었다. 줄은 둘을 가르는 하나만
+   남긴다. 셋 사이는 줄 대신 여백으로 가른다.
+
+   'Since 2019' 만 라틴+숫자라 다른 숫자들과 베이스라인이 어긋났다.
+   Since 를 0.42em 으로 내려 2019 가 100% · 51 과 같은 줄에 서게 했다. */
+.strip{position:relative;z-index:1;display:grid;
+  grid-template-columns:auto 1px 1fr;align-items:baseline;
+  column-gap:clamp(44px,4.6vw,66px);
+  margin:-64px var(--pad) 0;padding:36px 46px;border-radius:22px;background:#fff;
   border:1px solid rgba(26,22,16,.05);
   box-shadow:0 2px 6px rgba(26,22,16,.06),0 18px 36px rgba(26,22,16,.16)}
-.strip span{display:flex;flex-direction:column;align-items:center;gap:8px;
-  padding:4px 16px;border-left:1px solid var(--line)}
-.strip span:first-child{border-left:none}
-.strip b{font-family:'SUIT',system-ui,sans-serif;font-size:34px;font-weight:800;
-  color:var(--ink);line-height:1}
-.strip i{font-size:14.5px;font-style:normal;font-weight:600;color:var(--text)}
-
+.strip .rule{height:62px;align-self:center;background:var(--line)}
+.strip b{font-family:'SUIT',system-ui,sans-serif;font-weight:800;line-height:1;
+  display:block}
+.strip i{font-style:normal;font-weight:600;display:block}
+/* 앞머리 - 이 판에서 가장 강한 증거. 페이지 강조색을 그대로 쓴다. */
+.strip .lead b{font-size:58px;color:var(--deep);letter-spacing:-.02em}
+.strip .lead i{font-size:15px;color:var(--text);margin-top:11px}
+/* 받쳐 주는 셋 - 줄 없이 여백으로만 가른다. */
+.strip .facts{display:grid;grid-template-columns:repeat(3,max-content);
+  justify-content:space-between;column-gap:clamp(20px,2.2vw,34px)}
+.strip .facts b{font-size:27px;color:var(--ink);letter-spacing:-.01em}
+.strip .facts b em{font-style:normal;font-size:.42em;font-weight:700;
+  color:var(--muted);margin-right:.34em;letter-spacing:0}
+.strip .facts i{font-size:13.5px;color:var(--muted);margin-top:9px}
 /* ── 영상 섹션 ────────────────────────────────────────────────────── */
 .film{padding:112px var(--pad)}
 .film-card{position:relative;display:block;margin-top:52px;border-radius:24px;
@@ -303,6 +321,16 @@ em{font-style:italic;font-weight:400}
       animation-timing-function:cubic-bezier(.22,.61,.36,1);
       animation-range:entry 6% cover 30%}
     @keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+    /* 지표 띠 - 원장이 왼쪽부터 채워지듯 읽히게 한다. 앞머리(리뷰 수)가 먼저
+       서고 받쳐 주는 셋이 차례로 따라온다. 같은 rise 키프레임을 쓰되 진입
+       구간만 조금씩 밀어 순서를 만든다. 카드 자체는 움직이지 않는다 -
+       사진과 종이의 경계를 덮는 구조물이라 움직이면 경계가 드러난다. */
+    .strip .lead,.strip .facts>span{animation-name:rise;animation-timeline:view();
+      animation-fill-mode:both;animation-timing-function:cubic-bezier(.22,.61,.36,1)}
+    .strip .lead{animation-range:entry 10% cover 26%}
+    .strip .facts>span:nth-child(1){animation-range:entry 16% cover 32%}
+    .strip .facts>span:nth-child(2){animation-range:entry 20% cover 36%}
+    .strip .facts>span:nth-child(3){animation-range:entry 24% cover 40%}
     .ac img{animation:pan linear both;animation-timeline:view();
       animation-range:cover 0% cover 100%}
     @keyframes pan{from{transform:scale(1.1) translateY(1.8%)}
@@ -345,7 +373,7 @@ em{font-style:italic;font-weight:400}
       <a href="#" class="book-pill light">바로 예약하기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a>
     </div>
   </div>
-</section><section class="strip"><span><b class="n">Since 2019</b><i>최초</i></span><span><b class="n">14,000+</b><i>리뷰</i></span><span><b class="n">100%</b><i>거북이 보장</i></span><span><b class="n">51인승</b><i>루프탑 보트</i></span></section>
+</section><section class="strip"><div class="lead"><b>14,000+</b><i>누적 리뷰</i></div><span class="rule"></span><div class="facts"><span><b><em>Since</em>2019</b><i>하와이 최초 개설</i></span><span><b>100%</b><i>거북이 관찰 보장</i></span><span><b>51인승</b><i>루프탑 보트</i></span></div></section>
 <section class="sect center">
   <div class="rise">
     <span class="pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> 투어 프로그램</span>
