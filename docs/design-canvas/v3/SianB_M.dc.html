@@ -138,15 +138,16 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
 
    파이어폭스는 webkit 의사요소가 없어 이 규칙이 통하지 않는다. 거기서는
    표준 속성으로 얇게만 잡아 준다 - 파이어폭스는 기본값에 화살표가 없다. */
-.hscroll::-webkit-scrollbar,.cmp::-webkit-scrollbar{height:6px}
-.hscroll::-webkit-scrollbar-button,.cmp::-webkit-scrollbar-button{
-  display:none;width:0;height:0}
-.hscroll::-webkit-scrollbar-track,.cmp::-webkit-scrollbar-track{
+.hscroll::-webkit-scrollbar,.cmp::-webkit-scrollbar,.rv-list::-webkit-scrollbar{height:6px}
+.hscroll::-webkit-scrollbar-button,.cmp::-webkit-scrollbar-button,
+.rv-list::-webkit-scrollbar-button{display:none;width:0;height:0}
+.hscroll::-webkit-scrollbar-track,.cmp::-webkit-scrollbar-track,
+.rv-list::-webkit-scrollbar-track{
   margin:0 var(--pad);border-radius:99px;background:rgba(16,20,24,.12)}
-.hscroll::-webkit-scrollbar-thumb,.cmp::-webkit-scrollbar-thumb{
-  border-radius:99px;background:var(--ink)}
+.hscroll::-webkit-scrollbar-thumb,.cmp::-webkit-scrollbar-thumb,
+.rv-list::-webkit-scrollbar-thumb{border-radius:99px;background:var(--ink)}
 @supports not selector(::-webkit-scrollbar){
-  .hscroll,.cmp{scrollbar-width:thin;scrollbar-color:var(--ink) rgba(16,20,24,.12)}
+  .hscroll,.cmp,.rv-list{scrollbar-width:thin;scrollbar-color:var(--ink) rgba(16,20,24,.12)}
 }
 .tc{flex:0 0 268px;scroll-snap-align:start;border-radius:18px;overflow:hidden;
   display:flex;flex-direction:column;
@@ -239,12 +240,21 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
 .stars{display:inline-flex;gap:3px;color:var(--sea)}
 .rv-n{display:block;margin:12px 0 18px;font-size:13.5px;color:var(--text)}
 .rv-n b{font-family:'SUIT',system-ui,sans-serif;font-weight:800;color:var(--ink)}
-.rv-list{display:grid;gap:12px;margin-top:22px}
-.rv-c{padding:20px 20px 18px;background:#fff;border-radius:16px;
+/* 후기도 투어 카드와 같은 가로 스크롤이다. 바깥 여백을 음수로 빼서 화면
+   끝까지 밀고, 안쪽 padding 으로 첫 장을 제자리에 둔다. 스크롤바 규칙은
+   .hscroll 과 같은 선언을 공유한다. */
+.rv-list{display:flex;gap:12px;margin:22px calc(var(--pad) * -1) 0;
+  padding:2px var(--pad) 14px;overflow-x:auto;scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;scroll-padding-left:var(--pad)}
+.rv-c{flex:0 0 278px;scroll-snap-align:start;display:flex;flex-direction:column;
+  padding:18px 18px 16px;background:#fff;border-radius:16px;
   border:1px solid var(--line)}
-.rv-c blockquote{margin-top:12px;font-size:13.5px;line-height:1.85;color:var(--text)}
-.rv-c figcaption{display:flex;align-items:baseline;gap:9px;margin-top:16px;
-  font-size:13px;font-weight:700;color:var(--ink)}
+/* 후기 본문은 길이가 제각각이라, 가로로 세우면 한 줄의 높이를 가장 긴 글이
+   정한다. 여덟 줄에서 끊고 전문은 '구글 리뷰 전체 보기' 로 보낸다. */
+.rv-c blockquote{margin-top:12px;font-size:13.5px;line-height:1.85;color:var(--text);
+  display:-webkit-box;-webkit-line-clamp:8;-webkit-box-orient:vertical;overflow:hidden}
+.rv-c figcaption{display:flex;align-items:baseline;gap:9px;margin-top:auto;
+  padding-top:16px;font-size:13px;font-weight:700;color:var(--ink)}
 .rv-c figcaption i{font-style:normal;font-size:11.5px;font-weight:600;
   color:var(--muted)}
 
