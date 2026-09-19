@@ -238,6 +238,27 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
   border-top:1px solid rgba(255,255,255,.18);font-size:12px;
   color:rgba(255,255,255,.8)}
 
+/* ── 자주 묻는 질문 ───────────────────────────────────────────────── */
+/* 데스크탑과 같은 자리, 같은 여섯 줄이다. 375 에서는 두 단을 펼 수 없어
+   제목 · 질문 · 버튼을 세로로 쌓는다.
+
+   버튼은 목록 아래로 내렸다. 위에 두면 질문을 읽기도 전에 나가는 길이
+   먼저 보인다. 폭을 꽉 채워 두 손가락 어디로 눌러도 닿게 했다.
+
+   질문이 두 줄로 접히므로 화살표는 가운데가 아니라 첫 줄에 맞춰 붙인다.
+   가운데에 두면 두 줄짜리와 한 줄짜리의 화살표 높이가 제각각이 된다. */
+.faq{padding-bottom:64px}
+.faq p{font-size:14.5px;line-height:1.8;color:var(--text);margin-top:14px}
+.faq-list{list-style:none;margin:22px 0 0;padding:0}
+.faq-list li+li{border-top:1px solid var(--line)}
+.faq-list a{display:flex;align-items:flex-start;justify-content:space-between;
+  gap:14px;padding:17px 2px;color:var(--ink);text-decoration:none}
+.faq-list span{font-size:15px;font-weight:700;line-height:1.5;letter-spacing:-.01em}
+.faq-list svg{flex:none;width:28px;height:28px;padding:7.5px;border-radius:50%;
+  border:1px solid var(--line);color:var(--muted);box-sizing:border-box;
+  margin-top:-1px}
+.faq-all{display:flex;justify-content:center;margin-top:24px;padding:0 16px}
+
 /* ── 스크롤 연출. 쉬는 상태가 기본값 ──────────────────────────────── */
 @media (prefers-reduced-motion: no-preference){
   @supports (animation-timeline: view()){
@@ -245,6 +266,10 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
       animation-timing-function:cubic-bezier(.22,.61,.36,1);
       animation-range:entry 4% cover 26%}
     @keyframes rise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+    /* FAQ - 질문이 위에서부터 한 줄씩 놓인다. */
+    .faq-list li{animation-name:rise;animation-timeline:view();
+      animation-fill-mode:both;animation-timing-function:cubic-bezier(.22,.61,.36,1);
+      animation-range:entry 3% cover 24%}
     /* 지표 띠 - 왼쪽부터 차례로 선다. 같은 rise 키프레임을 쓰되 진입 구간만
        조금씩 민다. 밴드(배경)는 움직이지 않는다 - 색 층이 흔들리면 사진과
        종이 사이가 벌어져 보인다. */
@@ -393,6 +418,13 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
     <span class="play"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 7.5l7.5 4.5-7.5 4.5z" fill="currentColor" stroke="none"></path></svg></span>
     <span class="film-cap"><b>야노시호 · 추사랑 모녀가 다녀간 날</b><i>유튜브 야노시호 YanoShiho</i></span>
   </a>
+</section>
+<section class="sect faq">
+  <span class="pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> 자주 묻는 질문</span>
+  <h2>예약 전에<br><span class="hl">가장 많이 묻는 것</span></h2>
+  <p>여섯 가지만 추렸습니다. 나머지 질문과 답은 FAQ 페이지에 전부 있습니다.</p>
+  <ul class="faq-list"><li><a href="/kr/faq"><span>수영을 전혀 못해도 참여할 수 있나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>거북이를 정말 100% 볼 수 있나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>아이들도 탈 수 있나요? 몇 살부터 가능한가요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>픽업은 어디서 하나요? 호텔까지 와주나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>날씨가 나쁘면 어떻게 되나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>취소 및 환불 규정이 어떻게 되나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li></ul>
+  <a href="/kr/faq" class="dark-pill faq-all">FAQ 전체 보기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a>
 </section>
 <footer class="foot">
   <h2>지금 바다로 나가 볼까요</h2>
