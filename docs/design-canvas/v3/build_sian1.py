@@ -264,6 +264,13 @@ CSS_D = """
 .cols{display:grid;grid-template-columns:1fr 372px}
 .left{padding:26px 28px 30px}
 """ + BASE.replace("__GAP__","26").replace("__LAB__","15") + """
+/* 인원 - 데스크탑은 왼쪽 칸이 652px 라 한 줄에 하나씩 두면 라벨과 스테퍼
+   사이가 450px 가까이 빈다. 두 줄을 좌우로 나눠 그 여백을 없앤다.
+   모바일은 폭이 좁아 위아래 그대로가 맞다. */
+.pax{display:grid;grid-template-columns:1fr 1fr}
+.prow{padding:11px 10px 11px 16px}
+.prow+.prow{border-top:none;border-left:1px solid var(--line)}
+
 /* 요약 레일 - 이 판의 핵심. 인원을 바꾸면 여기 금액이 바로 바뀐다. */
 .side{background:var(--soft);border-left:1px solid var(--line);padding:26px 24px 28px}
 .s-tour{display:flex;gap:11px;align-items:center}
