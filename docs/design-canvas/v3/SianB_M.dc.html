@@ -99,9 +99,15 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
    개설' 도 들어가지 않는다. 그래서 2×2 로 접는다. 전에 이 격자가 표처럼
    읽혔던 건 칸마다 십자로 줄을 그었기 때문이지 격자 자체 때문이 아니다.
    줄을 전부 걷고 행간을 넉넉히 두면 격자는 보이지 않고 항목만 남는다. */
+/* 2×2 는 가운데 정렬이다. 왼쪽 정렬로 두면 오른쪽 칸이 정확히 50% 지점에서
+   시작하는데 그 자리가 글자 중간에 걸려 기준선이 없어 보였다. 모바일 보드의
+   다른 섹션 머리도 전부 가운데라 리듬도 여기서만 어긋났다.
+   세로 간격도 24 에서 30 으로 열었다. 붙여 두면 네 항목이 한 덩이로
+   뭉쳐 읽히고, 이 띠는 훑고 지나가는 자리라 덩이가 아니라 넷으로 보여야
+   한다. 선은 긋지 않는다 - 그으면 방금 걷어낸 표가 돌아온다. */
 .strip{background:var(--soft);border-bottom:1px solid var(--line);
-  padding:30px var(--pad) 28px;
-  display:grid;grid-template-columns:1fr 1fr;column-gap:16px;row-gap:24px}
+  padding:34px var(--pad) 32px;text-align:center;
+  display:grid;grid-template-columns:1fr 1fr;column-gap:16px;row-gap:30px}
 .strip b{font-family:'SUIT',system-ui,sans-serif;font-size:25px;font-weight:800;
   line-height:1;letter-spacing:-.01em;color:var(--ink);display:block}
 .strip b em{font-style:normal;font-size:.44em;font-weight:700;color:var(--muted);
@@ -177,7 +183,12 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
 .crow:nth-child(2n+1) .cc.lead{background:#E7E5E1}
 .cc.on{background:#fff}
 .cc > svg{color:var(--sea)}
-.chead .cc{justify-content:flex-end;align-items:flex-start;text-align:left;
+/* 머리 칸은 가운데 정렬이다. 이 표의 본문(체크)이 칸 한가운데 서므로,
+   머리만 왼쪽에 붙이면 한 열이 축을 둘 갖는다. 상품명은 칸 왼쪽 끝,
+   체크는 한가운데로 칸 폭의 약 42% 가 어긋났다(데스크탑 86/204,
+   모바일 57/138). 제목이 여러 줄일 때 줄 시작점이 달라지는 비용은
+   있지만, 실제 렌더에서 재 보니 축이 맞는 이득이 더 컸다. */
+.chead .cc{justify-content:flex-end;align-items:center;text-align:center;
   min-height:142px;padding:16px 12px 14px;
   border-bottom:1px solid rgba(16,20,24,.14)}
 .chead .cc.on{border-bottom-color:var(--sea);border-radius:14px 14px 0 0}

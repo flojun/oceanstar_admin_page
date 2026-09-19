@@ -175,8 +175,13 @@ em{font-style:italic;font-weight:400}
 .cc.on{background:#fff}
 .cc > svg{color:var(--sea)}
 
-.chead .cc{align-items:flex-start;flex-direction:column;justify-content:flex-end;
-  gap:0;padding:22px 16px 18px;text-align:left;min-height:168px;
+/* 머리 칸은 가운데 정렬이다. 이 표의 본문(체크)이 칸 한가운데 서므로,
+   머리만 왼쪽에 붙이면 한 열이 축을 둘 갖는다. 상품명은 칸 왼쪽 끝,
+   체크는 한가운데로 칸 폭의 약 42% 가 어긋났다(데스크탑 86/204,
+   모바일 57/138). 제목이 여러 줄일 때 줄 시작점이 달라지는 비용은
+   있지만, 실제 렌더에서 재 보니 축이 맞는 이득이 더 컸다. */
+.chead .cc{align-items:center;flex-direction:column;justify-content:flex-end;
+  gap:0;padding:22px 16px 18px;text-align:center;min-height:168px;
   border-bottom:1px solid rgba(16,20,24,.14)}
 .chead .cc.on{border-bottom-color:var(--sea);border-radius:16px 16px 0 0}
 .ctag{display:inline-block;margin-bottom:10px;padding:4px 10px;border-radius:999px;
