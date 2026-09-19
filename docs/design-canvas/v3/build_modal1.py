@@ -6,12 +6,12 @@ from _modal_base import (T, TOURS, page, I_X, I_ARROW, I_MINUS, I_PLUS, I_LOCK, 
 
 CSS_D = """
 .wrap{position:relative;z-index:2;padding:50px 0;display:flex;justify-content:center}
-.modal{width:1080px;background:#fff;border-radius:24px;box-shadow:var(--e3);overflow:hidden}
+.modal{width:1080px;background:#fff;border-radius:22px;box-shadow:var(--e3);overflow:hidden}
 .m-top{display:flex;align-items:center;justify-content:space-between;
   padding:20px 28px;border-bottom:1px solid var(--line)}
 .m-top h1{font-family:'SUIT',system-ui,sans-serif;font-size:20px;font-weight:800;
   color:var(--ink);letter-spacing:-.02em}
-.x{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+.x{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
   justify-content:center;color:var(--muted);background:var(--paper)}
 .cols{display:grid;grid-template-columns:1fr 372px}
 .left{padding:26px 28px 30px}
@@ -39,9 +39,9 @@ CSS_D = """
 .pbox{border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .pbox span{display:block;font-size:12.5px;font-weight:700;color:var(--text)}
 .prow{display:flex;align-items:center;justify-content:space-between;margin-top:9px}
-.stp{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);
+.stp{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
   display:flex;align-items:center;justify-content:center;color:var(--ink);background:#fff}
-.stp.off{color:var(--line)}
+.stp.off{color:#9AA0A6}
 .prow b{font-family:'SUIT',system-ui,sans-serif;font-size:20px;font-weight:800;
   color:var(--ink)}
 
@@ -52,7 +52,7 @@ CSS_D = """
 .cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
 .cgrid .dow{font-size:11px;font-weight:700;color:var(--muted);padding:4px 0 6px}
 .cgrid .d{height:34px;display:flex;align-items:center;justify-content:center;
-  font-size:13px;font-weight:600;color:var(--ink);border-radius:9px}
+  font-size:13px;font-weight:600;color:var(--ink);border-radius:10px}
 /* 비활성 날짜도 읽혀야 한다. 흐리게만 두면 며칠이 마감인지 알 수 없어
    '인원에 맞는 날짜만 활성화' 라는 규칙 자체가 전달되지 않는다.
    회색은 읽히는 값으로 올리고, 못 고르는 날이라는 건 취소선이 말한다. */
@@ -73,7 +73,7 @@ CSS_D = """
 .side{background:var(--soft);border-left:1px solid var(--line);padding:26px 24px 28px;
   display:flex;flex-direction:column}
 .s-tour{display:flex;gap:11px;align-items:center}
-.s-tour img{width:52px;height:52px;border-radius:12px;object-fit:cover}
+.s-tour img{width:52px;height:52px;border-radius:10px;object-fit:cover}
 .s-tour b{font-family:'SUIT',system-ui,sans-serif;font-size:14px;font-weight:800;
   color:var(--ink);line-height:1.35}
 .s-list{margin-top:18px}
@@ -90,7 +90,7 @@ CSS_D = """
 .s-total b{font-family:'SUIT',system-ui,sans-serif;font-size:27px;font-weight:800;
   color:var(--ink);letter-spacing:-.02em}
 .cur{display:flex;gap:6px;margin-top:14px}
-.cur a{flex:1;height:34px;border-radius:99px;border:1px solid var(--line);background:#fff;
+.cur a{flex:1;height:44px;border-radius:99px;border:1px solid var(--line);background:#fff;
   display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;
   color:var(--muted)}
 .cur a.on{background:var(--ink);border-color:var(--ink);color:#fff}
@@ -175,7 +175,7 @@ BODY_D = f"""
         <b>{TOURS[0][0]}</b></div>
       <ul class="s-list">
         <li><span>날짜</span><b>2026-10-17 (토)</b></li>
-        <li><span>시간</span><b>1부 08:00–11:00</b></li>
+        <li><span>시간</span><b>1부 08:00-11:00</b></li>
         <li><span>인원</span><b>성인 2 · 아동 0</b></li>
         <li><span>픽업</span><b>하얏트 리젠시 앞</b></li>
       </ul>
@@ -200,12 +200,12 @@ print("Modal1.dc.html")
 # ───────────────────────────── 모바일 375 ─────────────────────────────
 CSS_M = """
 .wrap{position:relative;z-index:2;padding:64px 0 0}
-.sheet{background:#fff;border-radius:24px 24px 0 0;box-shadow:var(--e3);overflow:hidden}
+.sheet{background:#fff;border-radius:22px 22px 0 0;box-shadow:var(--e3);overflow:hidden}
 .m-top{display:flex;align-items:center;justify-content:space-between;
   padding:16px 18px;border-bottom:1px solid var(--line)}
 .m-top h1{font-family:'SUIT',system-ui,sans-serif;font-size:17px;font-weight:800;
   color:var(--ink)}
-.x{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;
+.x{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
   justify-content:center;color:var(--muted);background:var(--paper)}
 .body{padding:20px 18px 24px}
 .grp+.grp{margin-top:24px}
@@ -227,9 +227,9 @@ CSS_M = """
 .pbox{border:1px solid var(--line);border-radius:14px;padding:11px 12px}
 .pbox span{display:block;font-size:12px;font-weight:700;color:var(--text)}
 .prow{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
-.stp{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+.stp{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
   display:flex;align-items:center;justify-content:center;color:var(--ink);background:#fff}
-.stp.off{color:var(--line)}
+.stp.off{color:#9AA0A6}
 .prow b{font-family:'SUIT',system-ui,sans-serif;font-size:19px;font-weight:800;color:var(--ink)}
 
 .cal{border:1px solid var(--line);border-radius:14px;padding:12px 12px 14px}
@@ -238,7 +238,7 @@ CSS_M = """
 .cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;text-align:center}
 .cgrid .dow{font-size:10.5px;font-weight:700;color:var(--muted);padding:3px 0 5px}
 .cgrid .d{height:38px;display:flex;align-items:center;justify-content:center;
-  font-size:13px;font-weight:600;color:var(--ink);border-radius:9px}
+  font-size:13px;font-weight:600;color:var(--ink);border-radius:10px}
 /* 비활성 날짜도 읽혀야 한다. 흐리게만 두면 며칠이 마감인지 알 수 없어
    '인원에 맞는 날짜만 활성화' 라는 규칙 자체가 전달되지 않는다.
    회색은 읽히는 값으로 올리고, 못 고르는 날이라는 건 취소선이 말한다. */
@@ -263,7 +263,7 @@ CSS_M = """
   color:var(--ink);letter-spacing:-.02em}
 .bsub{margin-top:2px;font-size:11.5px;color:var(--muted)}
 .cur{display:flex;gap:6px;margin-top:10px}
-.cur a{flex:1;height:34px;border-radius:99px;border:1px solid var(--line);background:#fff;
+.cur a{flex:1;height:44px;border-radius:99px;border:1px solid var(--line);background:#fff;
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
   color:var(--muted)}
 .cur a.on{background:var(--ink);border-color:var(--ink);color:#fff}

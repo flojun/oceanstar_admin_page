@@ -21,7 +21,7 @@ CSS = """
 .m-top{display:flex;align-items:center;justify-content:space-between;
   padding:16px 22px;border-bottom:1px solid var(--line)}
 .m-top h1{font-family:'SUIT',system-ui,sans-serif;font-size:17px;font-weight:800;color:var(--ink)}
-.x{width:34px;height:34px;border-radius:50%%;display:flex;align-items:center;
+.x{width:44px;height:44px;border-radius:50%%;display:flex;align-items:center;
   justify-content:center;color:var(--muted);background:var(--paper)}
 
 /* 진행 막대 - 몇 개 중 몇 번째인지, 무엇이 남았는지 한눈에 */
@@ -41,9 +41,9 @@ CSS = """
 .pbox{border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .pbox span{display:block;font-size:12.5px;font-weight:700;color:var(--text)}
 .prow{display:flex;align-items:center;justify-content:space-between;margin-top:9px}
-.stp{width:36px;height:36px;border-radius:50%%;border:1px solid var(--line);
+.stp{width:44px;height:44px;border-radius:50%%;border:1px solid var(--line);
   display:flex;align-items:center;justify-content:center;color:var(--ink);background:#fff}
-.stp.off{color:var(--line)}
+.stp.off{color:#9AA0A6}
 .prow b{font-family:'SUIT',system-ui,sans-serif;font-size:21px;font-weight:800;color:var(--ink)}
 
 .cal{border:1px solid var(--line);border-radius:14px;padding:13px 14px 15px;margin-top:14px}
@@ -52,7 +52,7 @@ CSS = """
 .cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
 .cgrid .dow{font-size:11px;font-weight:700;color:var(--muted);padding:3px 0 5px}
 .cgrid .d{height:%(cell)dpx;display:flex;align-items:center;justify-content:center;
-  font-size:13px;font-weight:600;color:var(--ink);border-radius:9px}
+  font-size:13px;font-weight:600;color:var(--ink);border-radius:10px}
 /* 비활성 날짜도 읽혀야 한다. 흐리게만 두면 며칠이 마감인지 알 수 없어
    '인원에 맞는 날짜만 활성화' 라는 규칙 자체가 전달되지 않는다.
    회색은 읽히는 값으로 올리고, 못 고르는 날이라는 건 취소선이 말한다. */
@@ -67,7 +67,7 @@ CSS = """
   border:1px solid var(--line);background:#fff;min-height:72px}
 .tr.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:var(--paper)}
 .tr.off{opacity:.5}
-.tr img{width:50px;height:50px;border-radius:11px;object-fit:cover}
+.tr img{width:50px;height:50px;border-radius:10px;object-fit:cover}
 .tr .tt{flex:1;min-width:0}
 .tr b{display:block;font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.35}
 .tr i{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:3px}
@@ -91,7 +91,7 @@ CSS = """
 .tot span{font-size:13px;font-weight:700;color:var(--ink)}
 .tot b{font-family:'SUIT',system-ui,sans-serif;font-size:24px;font-weight:800;color:var(--ink)}
 .cur{display:flex;gap:6px;margin-top:10px}
-.cur a{flex:1;height:34px;border-radius:99px;border:1px solid var(--line);background:#fff;
+.cur a{flex:1;height:44px;border-radius:99px;border:1px solid var(--line);background:#fff;
   display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:var(--muted)}
 .cur a.on{background:var(--ink);border-color:var(--ink);color:#fff}
 .safe{display:flex;gap:7px;margin-top:11px;font-size:11.5px;color:var(--muted);line-height:1.55}
@@ -180,8 +180,8 @@ def step3():
     return f"""
   {prog(2)}
   <div class="body">
-    <h2 class="q">어디로 모시러 갈까요?</h2>
-    <p class="qs">{TOURS[0][0]} · 2026-10-17 (토) · 성인 2</p>
+    <h2 class="q">픽업 장소와 연락처를 알려주세요</h2>
+    <p class="qs">{TOURS[0][0]} · 2026-10-17 (토) 성인 2명</p>
     <div class="fields">
       {field(T['hotel_label'], T['hotel_placeholder'], True, T['hotel_helper'])}
       {field(T['pickup_label'], '와이키키 · 하얏트 리젠시 앞', ic=I_PIN)}
@@ -200,7 +200,7 @@ def build(width, mw, padtop, padbot, gap, cap, q, cell, title, out):
     css = CSS % dict(padtop=padtop, padbot=padbot, gap=gap, cap=cap, mw=mw, q=q, cell=cell)
     body = ""
     for i, mk in enumerate((step1, step2, step3)):
-        body += (f'<p class="cap">{i+1}단계 · {STEPS[i]}</p>'
+        body += (f'<p class="cap">{i+1}단계 {STEPS[i]}</p>'
                  f'<div class="modal"><div class="m-top"><h1>{T["title"]}</h1>'
                  f'<span class="x">{I_X}</span></div>{mk()}</div>')
     io.open(out,"w",encoding="utf-8").write(

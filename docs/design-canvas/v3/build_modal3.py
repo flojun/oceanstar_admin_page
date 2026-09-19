@@ -24,14 +24,14 @@ CSS = """
 .p-top{display:flex;align-items:center;justify-content:space-between;
   padding:16px 20px;border-bottom:1px solid var(--line)}
 .p-top h1{font-family:'SUIT',system-ui,sans-serif;font-size:16.5px;font-weight:800;color:var(--ink)}
-.x{width:34px;height:34px;border-radius:50%%;display:flex;align-items:center;
+.x{width:44px;height:44px;border-radius:50%%;display:flex;align-items:center;
   justify-content:center;color:var(--muted);background:var(--paper)}
 .body{padding:18px 20px 20px;flex:1}
 
 /* 이미 고른 상품. 다시 고르게 하지 않고, 바꿀 길만 작게 남긴다. */
 .chosen{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;
   background:var(--soft)}
-.chosen img{width:54px;height:54px;border-radius:12px;object-fit:cover}
+.chosen img{width:54px;height:54px;border-radius:10px;object-fit:cover}
 .chosen .ct{flex:1;min-width:0}
 .chosen b{display:block;font-family:'SUIT',system-ui,sans-serif;font-size:14px;
   font-weight:800;color:var(--ink);line-height:1.35}
@@ -47,9 +47,9 @@ CSS = """
 .pbox{border:1px solid var(--line);border-radius:14px;padding:11px 13px}
 .pbox span{display:block;font-size:12px;font-weight:700;color:var(--text)}
 .prow{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
-.stp{width:34px;height:34px;border-radius:50%%;border:1px solid var(--line);
+.stp{width:44px;height:44px;border-radius:50%%;border:1px solid var(--line);
   display:flex;align-items:center;justify-content:center;color:var(--ink);background:#fff}
-.stp.off{color:var(--line)}
+.stp.off{color:#9AA0A6}
 .prow b{font-family:'SUIT',system-ui,sans-serif;font-size:19px;font-weight:800;color:var(--ink)}
 
 /* 달력 한 장을 펼치지 않고 가까운 날짜만 띠로 민다. 여행자는 보통 이번 주
@@ -63,7 +63,7 @@ CSS = """
 @supports not selector(::-webkit-scrollbar){
   .strip{scrollbar-width:thin;scrollbar-color:var(--ink) rgba(16,20,24,.12)}
 }
-.day{flex:0 0 auto;width:52px;height:64px;border-radius:13px;border:1px solid var(--line);
+.day{flex:0 0 auto;width:52px;height:64px;border-radius:14px;border:1px solid var(--line);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
   background:#fff}
 .day u{text-decoration:none;font-size:11px;font-weight:700;color:var(--muted)}
@@ -90,7 +90,7 @@ CSS = """
 .fline b{font-family:'SUIT',system-ui,sans-serif;font-size:23px;font-weight:800;color:var(--ink)}
 .fsub{margin-top:3px;font-size:11.5px;color:var(--muted)}
 .cur{display:flex;gap:6px;margin-top:10px}
-.cur a{flex:1;height:32px;border-radius:99px;border:1px solid var(--line);background:#fff;
+.cur a{flex:1;height:44px;border-radius:99px;border:1px solid var(--line);background:#fff;
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--muted)}
 .cur a.on{background:var(--ink);border-color:var(--ink);color:#fff}
 .row{display:flex;gap:9px;margin-top:11px}
@@ -166,12 +166,12 @@ def screen2():
 
 def build(width, pw, pr, wrap, cap, title, out):
     css = CSS % dict(pw=pw, pr=pr, wrap=wrap, cap=cap)
-    body = (f'<div class="col"><p class="cap">1 · 언제 · 몇 명</p>{screen1()}</div>'
-            f'<div class="col"><p class="cap">2 · 예약 정보</p>{screen2()}</div>')
+    body = (f'<div class="col"><p class="cap">1단계 언제 · 몇 명</p>{screen1()}</div>'
+            f'<div class="col"><p class="cap">2단계 예약 정보</p>{screen2()}</div>')
     io.open(out,"w",encoding="utf-8").write(page(title, css, f'<div class="wrap">{body}</div>', width))
     print(out)
 
-build(1440, 460, "20px", "justify-content:center;gap:56px;padding:48px 0 84px;align-items:flex-start",
+build(1440, 460, "22px", "justify-content:center;gap:56px;padding:48px 0 84px;align-items:flex-start",
       16, "시안 3 · 카드에서 바로 — 데스크탑", "Modal3.dc.html")
-build(375, 339, "20px", "flex-direction:column;align-items:center;gap:26px;padding:30px 0 66px",
+build(375, 339, "22px", "flex-direction:column;align-items:center;gap:26px;padding:30px 0 66px",
       13, "시안 3 · 카드에서 바로 — 모바일", "Modal3_M.dc.html")
