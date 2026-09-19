@@ -58,11 +58,18 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
   display:flex;align-items:center;justify-content:space-between}
 .logo{height:36px;width:auto;filter:brightness(0) invert(1)}
 .nav-r{display:flex;gap:8px;align-items:center}
+/* 밝은 알약으로 바꾸되 흰 글자는 쓰지 않는다. 모바일은 사진을 375x640 으로
+   잘라 쓰는 탓에 헤더 뒤가 와이키키 하늘이라 데스크탑보다 밝다. 실측에서
+   흰 글자는 평균 3.93:1, 최악 1.87:1 로 읽히지 않았다(AA 는 4.5:1).
+   그래서 판을 흰색 72% 로 올려 바탕을 밝히고 글자를 먹으로 뒤집는다. */
 .lang{display:inline-flex;align-items:center;height:44px;padding:0 16px;
-  border-radius:999px;background:rgba(9,16,22,.42);color:#fff;font-size:13px;
-  font-weight:700;letter-spacing:.06em}
+  border-radius:999px;background:rgba(255,255,255,.72);color:var(--ink);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  font-size:13px;font-weight:700;letter-spacing:.06em}
+.burger svg{stroke:var(--ink)}
 .burger{display:inline-flex;align-items:center;justify-content:center;width:44px;
-  height:44px;border-radius:999px;background:rgba(9,16,22,.42)}
+  height:44px;border-radius:999px;background:rgba(255,255,255,.72);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 /* 배지와 대제목은 가운데. 아래 정보 블록은 데스크탑과 같이 왼쪽에 둔다. */
 .hero-in{position:absolute;left:var(--pad);right:var(--pad);top:104px;z-index:3;
   color:#fff;text-align:center}
@@ -122,15 +129,16 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
   background:rgba(26,22,16,.07)}
 .hscroll::-webkit-scrollbar-thumb{border-radius:99px;background:rgba(26,22,16,.46)}
 .tc{flex:0 0 268px;scroll-snap-align:start;border-radius:18px;overflow:hidden;
+  display:flex;flex-direction:column;
   background:#fff;border:1px solid rgba(26,22,16,.05);text-align:left;
   box-shadow:0 2px 6px rgba(26,22,16,.06),0 10px 20px rgba(26,22,16,.10)}
 .tc img{width:100%;aspect-ratio:3/2;object-fit:cover}
-.tc-in{padding:14px 14px 13px}
+.tc-in{padding:14px 14px 13px;flex:1;display:flex;flex-direction:column}
 .tc-in > b{display:block;font-family:'SUIT',system-ui,sans-serif;font-size:14.5px;
   font-weight:700;color:var(--ink);line-height:1.4}
 .tc-in em{display:block;margin-top:5px;font-size:12px;font-style:normal;
   color:var(--muted)}
-.tc-p{margin-top:12px}
+.tc-p{margin-top:auto;padding-top:12px}
 .tc-p b{font-family:'SUIT',system-ui,sans-serif;font-size:19px;font-weight:800;
   color:var(--ink)}
 .tc-p i{display:block;margin-top:3px;font-size:11px;font-style:normal;
