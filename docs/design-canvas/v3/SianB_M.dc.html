@@ -128,13 +128,26 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
   /* 스냅은 padding 을 건너뛰고 스크롤포트 끝에 카드를 붙인다. 이게 없으면
      브라우저가 첫 장을 화면 왼쪽 끝까지 끌어와 여백이 0 이 된다. */
   scroll-padding-left:var(--pad);
-  /* 스크롤바도 페이지 것으로. 잉크를 섞은 회색이라 카드 그림자와 같은 계열이다.
-     막대 46%(종이 대비 2.98:1)는 손잡이가 눈에 들어오는 최소선이다. */
-  scrollbar-width:thin;scrollbar-color:rgba(26,22,16,.46) rgba(26,22,16,.07)}
-.hscroll::-webkit-scrollbar{height:6px}
-.hscroll::-webkit-scrollbar-track{margin:0 var(--pad);border-radius:99px;
-  background:rgba(26,22,16,.07)}
-.hscroll::-webkit-scrollbar-thumb{border-radius:99px;background:rgba(26,22,16,.46)}
+}
+/* 스크롤바는 막대만 남긴다.
+   scrollbar-width / scrollbar-color(표준 속성)를 선언하면 크로미움이 자기
+   방식으로 그리면서 양끝에 화살표 버튼을 붙이고, ::-webkit-scrollbar 규칙은
+   통째로 무시한다. 그래서 표준 속성을 걷고 webkit 쪽으로만 그린다.
+   버튼은 display:none 만으로는 자리를 남기므로 폭·높이도 0 으로 눌러 둔다.
+   트랙은 좌우를 페이지 여백만큼 들여 본문 기둥과 끝을 맞춘다.
+
+   파이어폭스는 webkit 의사요소가 없어 이 규칙이 통하지 않는다. 거기서는
+   표준 속성으로 얇게만 잡아 준다 - 파이어폭스는 기본값에 화살표가 없다. */
+.hscroll::-webkit-scrollbar,.cmp::-webkit-scrollbar{height:6px}
+.hscroll::-webkit-scrollbar-button,.cmp::-webkit-scrollbar-button{
+  display:none;width:0;height:0}
+.hscroll::-webkit-scrollbar-track,.cmp::-webkit-scrollbar-track{
+  margin:0 var(--pad);border-radius:99px;background:rgba(16,20,24,.12)}
+.hscroll::-webkit-scrollbar-thumb,.cmp::-webkit-scrollbar-thumb{
+  border-radius:99px;background:var(--ink)}
+@supports not selector(::-webkit-scrollbar){
+  .hscroll,.cmp{scrollbar-width:thin;scrollbar-color:var(--ink) rgba(16,20,24,.12)}
+}
 .tc{flex:0 0 268px;scroll-snap-align:start;border-radius:18px;overflow:hidden;
   display:flex;flex-direction:column;
   background:#fff;border:1px solid rgba(26,22,16,.05);text-align:left;
