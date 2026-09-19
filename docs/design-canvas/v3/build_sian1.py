@@ -389,7 +389,7 @@ def single_body(mobile, picked):
     if picked:
         first = (f'<div class="grp">{glab(T["step1"])}'
                  + chip(0, '1부 07:30-11:30 · 2부 10:30-14:30') + '</div>'
-                 + f'<div class="grp">{glab("거북이 스노클링 시간 선택")}'
+                 + f'<div class="grp">{glab("거북이 스노클링 시간 선택", "픽업 포함 시간")}'
                  + combo_times() + '</div>')
     else:
         first = (f'<div class="grp">{glab(T["step1"], "성인 2명 기준 총액")}'
@@ -433,7 +433,7 @@ def combo_body(mobile, kind="marine"):
 
     return f"""
       {head}
-      <div class="grp">{glab('거북이 스노클링 시간 선택')}{combo_times()}</div>
+      <div class="grp">{glab('거북이 스노클링 시간 선택', '픽업 포함 시간')}{combo_times()}</div>
       <div class="grp">{glab(T['step2'], '24개월 미만 무료')}{pax_block()}</div>
       <div class="grp">{glab('날짜와 픽업', '활동마다 따로 받습니다')}
         <div class="act">
