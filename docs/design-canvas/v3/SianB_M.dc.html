@@ -181,7 +181,12 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
   background:var(--sky);color:var(--ink);font-size:10px;font-weight:800}
 .chead b{font-family:'SUIT',system-ui,sans-serif;font-size:12.5px;font-weight:700;
   color:#fff;line-height:1.4}
-.chead em{display:block;margin-top:9px;font-family:'SUIT',system-ui,sans-serif;
+/* 가격은 접히면 안 된다. 138px 칸에서 '₩2,066,850 ~' 만 두 줄로 접혀,
+   바닥 정렬이라 마지막 줄은 맞는데 눈이 읽는 첫 줄이 18px 위로 올라가
+   그 칸만 어긋나 보였다(상단 90 vs 나머지 108). 한 줄로 두면 90px 이
+   필요하고 칸 안쪽이 114px 이라 들어간다. 데스크탑은 칸이 204px 라
+   원래 접히지 않는다. */
+.chead em{display:block;white-space:nowrap;margin-top:9px;font-family:'SUIT',system-ui,sans-serif;
   font-size:17px;font-weight:800;font-style:normal;color:#fff;line-height:1.1}
 .cfoot .cc{padding:16px 10px 18px}
 .cfoot .cc.on{border-radius:0 0 14px 14px}
