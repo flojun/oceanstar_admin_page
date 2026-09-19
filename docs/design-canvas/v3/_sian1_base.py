@@ -38,7 +38,7 @@ T = dict(
     step1="투어 선택", step2="인원 입력", step3="날짜 선택", step4="예약 정보 입력",
     totalPax="총 탑승 인원", adultPax="성인", childPax="아동 (만3-6세)",
     pax_notice="선택하신 {pax}명 인원에 맞춰 예약 가능한 날짜만 활성화됩니다.",
-    hotel_label="숙소입력 (가장 가까운 픽업 장소 자동 추천)",
+    hotel_label="숙소주소 입력 (주소 입력시 가장 가까운 픽업장소 자동 추천)",
     hotel_placeholder="머무시는 숙소/호텔 주소 입력",
     hotel_helper="※ 구글 자동완성으로 숙소를 치시면 가장 가까운 장소를 추천해 드립니다.",
     pickup_label="픽업 장소 선택",

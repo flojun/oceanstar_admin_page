@@ -22,8 +22,9 @@ from _sian1_base import (T, TOURS, TOTALS, PICK_CSS, pick_row, page, icon,
                          I_X, I_ARROW, I_MINUS, I_PLUS, I_LOCK, I_CHECK,
                          I_LEFT, I_RIGHT, I_DOWN)
 
-# 1차 투어와 같은 날임을 알리는 작은 x. 마감일의 취소선과 구분된다.
-I_CLASH = icon('<path d="M6 6l12 12M18 6L6 18"></path>', 10, 3.4)
+# 1차 투어와 같은 날임을 알리는 x. 칸 전체를 가로지른다. 크기는 CSS 가
+# 칸에 맞춰 늘리므로 여기 숫자는 자리표시일 뿐이다.
+I_CLASH = icon('<path d="M4 4l16 16M20 4L4 20"></path>', 24, 1.8)
 
 # ────────────────────────────── 공통 조각 ──────────────────────────────
 
@@ -46,14 +47,16 @@ def month_grid(sel=None, blocked=(), note=None, cell=34, year=2026, month=10,
     cells = ['<span class="d"></span>'] * LEAD
     for d in range(1, 32):
         cls, mark = "d", ""
+        num = str(d)
         if d == clash:
             cls += " clash"
             mark = f"<i>{I_CLASH}</i>"
+            num = f"<em>{d}</em>"
         elif d in blocked:
             cls += " no"
         if d == sel:
             cls += " on"
-        cells.append(f'<span class="{cls}">{d}{mark}</span>')
+        cells.append(f'<span class="{cls}">{num}{mark}</span>')
     return (f'<div class="cal" style="--cell:{cell}px">'
             + cal_head(year, month) +
             f'<div class="cgrid">{dows}{"".join(cells)}</div>'
@@ -235,7 +238,11 @@ BASE = """
    다르다. 숫자는 읽히게 두고 x 를 모서리에 올린다. */
 .cgrid .d.clash{position:relative;color:var(--text);font-weight:700;
   background:rgba(210,89,26,.11)}
-.cgrid .d.clash i{position:absolute;top:1px;right:2px;display:flex;color:var(--food)}
+.cgrid .d.clash i{position:absolute;inset:0;display:block;color:var(--food);
+  pointer-events:none}
+.cgrid .d.clash i svg{width:100%;height:100%;display:block}
+/* 숫자를 x 위로. 칸을 채운 x 아래 깔리면 며칠인지 읽히지 않는다. */
+.cgrid .d.clash em{position:relative;z-index:1;font-style:normal}
 .cgrid .d.on{background:var(--ink);color:#fff;font-weight:800}
 .chelp{margin-top:9px;font-size:11.5px;color:var(--muted);line-height:1.5}
 
