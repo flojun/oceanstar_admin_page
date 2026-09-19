@@ -4,10 +4,17 @@
 인원과 날짜를 한 단계로 묶은 것은 취향이 아니라 실제 의존 관계다. 예약
 가능한 날짜가 인원 수에 따라 달라지므로(ko.ts pax_notice), 따로 물으면
 날짜를 고른 뒤 인원을 바꿨을 때 고른 날짜가 무효가 된다.
+
+재검토 반영
+- 상품별 총액은 _modal_base.TOTALS 로 옮겨 세 안이 같은 값을 쓴다.
+- 숙소와 픽업 두 칸을 한 칸으로 합쳤다. 입력 항목 9개 -> 8개.
+- 3단계 총액이 입력칸 아래에 묻혀 있었다. 버튼과 같은 바닥 칸으로 올려,
+  채우는 동안 금액이 계속 보이게 했다.
 """
 import io, sys
 sys.path.insert(0, ".")
-from _modal_base import (T, TOURS, page, I_X, I_ARROW, I_MINUS, I_PLUS, I_LOCK,
+from _modal_base import (T, TOURS, TOTALS, PICK_CSS, pick_row, page,
+                         I_X, I_ARROW, I_MINUS, I_PLUS, I_LOCK,
                          I_PIN, I_LEFT, I_CHECK)
 
 STEPS = ["언제 · 몇 명", "어떤 투어", "예약 정보"]
@@ -96,7 +103,26 @@ CSS = """
 .cur a.on{background:var(--ink);border-color:var(--ink);color:#fff}
 .safe{display:flex;gap:7px;margin-top:11px;font-size:11.5px;color:var(--muted);line-height:1.55}
 
+/* 마지막 단계의 바닥 칸 - 금액과 버튼을 한 덩어리로 둔다.
+   입력칸 아래에 금액을 두면 다 채우기 전까지 얼마인지 안 보인다. */
+.foot{border-top:1px solid var(--line);padding:14px 22px 18px}
+.fline{display:flex;align-items:baseline;justify-content:space-between}
+.fline span{font-size:13px;font-weight:700;color:var(--text)}
+.fline b{font-family:'SUIT',system-ui,sans-serif;font-size:24px;font-weight:800;
+  color:var(--ink);letter-spacing:-.02em}
+.foot .nav{padding:11px 0 0}
 .nav{display:flex;gap:10px;align-items:center;padding:0 22px 20px}
+.pick{margin-top:8px;display:flex;align-items:center;gap:9px;padding:7px 12px;
+  border-radius:12px;background:var(--soft)}
+.pick>svg{color:var(--sea)}
+.pk{flex:1;min-width:0}
+.pk i{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:var(--muted)}
+.pk u{display:block;text-decoration:none;font-size:12.5px;font-weight:700;
+  color:var(--ink);line-height:1.35;margin-top:1px}
+.pick a{display:flex;align-items:center;min-height:44px;padding:0 2px;font-size:11.5px;
+  font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px;
+  white-space:nowrap}
+
 .back{height:52px;padding:0 20px;border-radius:99px;border:1px solid var(--line);
   display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:var(--ink);
   background:#fff}
@@ -131,23 +157,20 @@ def field(label, value, ph=False, help=None, ic=""):
             f'<div class="{"in" if ph else "in filled"}">{ic}{value}</div>'
             + (f'<p class="help">{help}</p>' if help else "") + "</div>")
 
-# 2단계 목록 - 성인 2명 기준 총액. 값이 없는 상품은 지어내지 않고 그대로 노출한다.
-ROWS = [
-    (0, "₩303,140", "성인 2명 · ₩151,570 / 인", "on"),
-    (1, "₩413,380", "성인 2명 · ₩206,690 / 인", ""),
-    (2, "₩578,720", "성인 2명 · ₩289,360 / 인", ""),
-    (3, "₩2,066,850 ~", "팀 단위 · 인원별 상이", ""),
-    (4, "[원화 정가 확정 필요]", "성인 2명", "off"),
-]
+# 2단계 목록 - 성인 2명 기준 총액(_modal_base.TOTALS). 값이 없는 상품은
+# 지어내지 않고 그대로 노출한다.
+STATE = {0: "on", 4: "off"}
 
 def tour_rows():
     out=[]
-    for idx,total,sub,state in ROWS:
+    for idx in range(len(TOURS)):
         name,when,_,img = TOURS[idx]
+        total, per = TOTALS[idx]
+        state = STATE.get(idx, "")
         tick = f'<span class="tick">{I_CHECK}</span>' if state=="on" else ""
         out.append(f'<li><div class="tr {state}"><img src="{img}" alt="">'
                    f'<span class="tt"><b>{name}</b><i>{when}</i></span>'
-                   f'<span class="pr"><em>{total}</em><u>{sub}</u></span>{tick}</div></li>')
+                   f'<span class="pr"><em>{total}</em><u>{per}</u></span>{tick}</div></li>')
     return "".join(out)
 
 def step1():
@@ -183,18 +206,20 @@ def step3():
     <h2 class="q">픽업 장소와 연락처를 알려주세요</h2>
     <p class="qs">{TOURS[0][0]} · 2026-10-17 (토) 성인 2명</p>
     <div class="fields">
-      {field(T['hotel_label'], T['hotel_placeholder'], True, T['hotel_helper'])}
-      {field(T['pickup_label'], '와이키키 · 하얏트 리젠시 앞', ic=I_PIN)}
+      {field(T['hotel_label'], '하얏트 리젠시 와이키키 비치 리조트', help=T['hotel_helper'])}
+      {pick_row()}
       {field(T['name_label'], '김오션')}
       {field(T['email_label'], 'hioceanstar@gmail.com')}
       {field(T['phone_label'], 'hioceanstar')}
     </div>
-    <div class="tot"><span>{T['total_payment']}</span><b class="n">₩303,140</b></div>
-    <div class="cur"><a class="on">KRW</a><a>USD</a></div>
     <p class="safe">{I_LOCK}<span>{T['safe_notice']}</span></p>
   </div>
-  <div class="nav"><div class="back">{I_LEFT} 이전</div>
-    <div class="next">{T['checkout_btn']} {I_ARROW}</div></div>"""
+  <div class="foot">
+    <div class="fline"><span>{T['total_payment']}</span><b class="n">₩303,140</b></div>
+    <div class="cur"><a class="on">KRW</a><a>USD</a></div>
+    <div class="nav"><div class="back">{I_LEFT} 이전</div>
+      <div class="next">{T['checkout_btn']} {I_ARROW}</div></div>
+  </div>"""
 
 def build(width, mw, padtop, padbot, gap, cap, q, cell, title, out):
     css = CSS % dict(padtop=padtop, padbot=padbot, gap=gap, cap=cap, mw=mw, q=q, cell=cell)

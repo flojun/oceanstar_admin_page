@@ -44,8 +44,10 @@ svg{flex:none}
   justify-content:center;color:var(--muted);background:var(--paper)}
 .body{padding:20px 18px 24px}
 .grp+.grp{margin-top:24px}
+.glab{display:flex;align-items:baseline;gap:8px;margin-bottom:11px;flex-wrap:wrap}
 .glab b{font-family:'SUIT',system-ui,sans-serif;font-size:14.5px;font-weight:800;
-  color:var(--ink);display:block;margin-bottom:11px}
+  color:var(--ink)}
+.glab i{font-style:normal;font-size:11.5px;color:var(--muted)}
 
 .tours li+li{margin-top:8px}
 .t{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;
@@ -55,8 +57,10 @@ svg{flex:none}
 .t .tt{flex:1;min-width:0}
 .t b{display:block;font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.35}
 .t i{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:3px}
-.t em{font-style:normal;font-family:'SUIT',system-ui,sans-serif;font-size:13px;
-  font-weight:800;color:var(--ink);white-space:nowrap}
+.t .pr{text-align:right;white-space:nowrap}
+.t .pr em{display:block;font-style:normal;font-family:'SUIT',system-ui,sans-serif;
+  font-size:13px;font-weight:800;color:var(--ink)}
+.t .pr u{display:block;text-decoration:none;font-size:10.5px;color:var(--muted);margin-top:2px}
 
 .pax{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pbox{border:1px solid var(--line);border-radius:14px;padding:11px 12px}
@@ -80,6 +84,9 @@ svg{flex:none}
 .cgrid .d.no{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
 .cgrid .d.on{background:var(--ink);color:#fff;font-weight:800}
 .chelp{margin-top:9px;font-size:11px;color:var(--muted);line-height:1.5}
+.recalc{display:flex;align-items:center;gap:7px;margin-bottom:9px;padding:8px 11px;
+  border-radius:12px;background:var(--soft);font-size:11.5px;color:var(--ink);line-height:1.45}
+.recalc b{font-weight:800}
 
 .f+.f{margin-top:12px}
 .f label{display:block;font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px}
@@ -87,6 +94,17 @@ svg{flex:none}
   display:flex;align-items:center;gap:8px;padding:0 13px;font-size:13.5px;color:var(--muted)}
 .f .in.filled{color:var(--ink);font-weight:600}
 .f .help{margin-top:6px;font-size:11px;color:var(--muted);line-height:1.5}
+
+.pick{margin-top:8px;display:flex;align-items:center;gap:9px;padding:7px 12px;
+  border-radius:12px;background:var(--soft)}
+.pick>svg{color:var(--sea)}
+.pk{flex:1;min-width:0}
+.pk i{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:var(--muted)}
+.pk u{display:block;text-decoration:none;font-size:12.5px;font-weight:700;
+  color:var(--ink);line-height:1.35;margin-top:1px}
+.pick a{display:flex;align-items:center;min-height:44px;padding:0 2px;font-size:11.5px;
+  font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px;
+  white-space:nowrap}
 
 /* 금액을 늘 보이게 하는 바. 실제로는 화면 아래에 고정돼 스크롤과 무관하게
    남는다. 보드는 정지 화면이라 여기서는 문서 끝에 놓아 모양만 보인다. */
@@ -116,8 +134,6 @@ svg{flex:none}
 <div class="wrap"><div class="sheet">
   <div class="m-top"><h1>투어 예약</h1><span class="x"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></span></div>
   <div class="body">
-    <div class="grp"><div class="glab"><b>투어 선택</b></div>
-      <ul class="tours"><li><div class="t on"><img src="turtle.jpg" alt=""><span class="tt"><b>와이키키 거북이 스노클링</b><i>1부 08:00-11:00 · 2부 11:00-14:00</i></span><em>₩151,570</em></div></li><li><div class="t"><img src="sunset.jpg" alt=""><span class="tt"><b>선셋·와인 & 와이키키 거북이 스노클링</b><i>시즌별 시간 변동</i></span><em>₩206,690</em></div></li><li><div class="t"><img src="parasail.jpg" alt=""><span class="tt"><b>거북이 스노클링 + 패러세일링 / 제트스키</b><i>패러/제트 9:30-2:00</i></span><em>₩289,360</em></div></li><li><div class="t"><img src="board.jpg" alt=""><span class="tt"><b>[단독] 프라이빗 와이키키 거북이 스노클링</b><i>1~4인 기준 (인원별 상이) / 팀</i></span><em>₩2,066,850 ~</em></div></li><li><div class="t"><img src="surf.jpg" alt=""><span class="tt"><b>거북이 스노클링 + 서핑</b><i>[원화 정가 확정 필요]</i></span><em>₩261,018</em></div></li></ul></div>
     <div class="grp"><div class="glab"><b>인원 입력</b></div>
       <div class="pax">
         <div class="pbox"><span>성인</span><div class="prow">
@@ -127,10 +143,12 @@ svg{flex:none}
           <span class="stp off"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg></span><b class="n">0</b><span class="stp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></span>
         </div></div>
       </div></div>
-    <div class="grp"><div class="glab"><b>날짜 선택</b></div><div class="cal"><div class="cmon"><b>2026년 10월</b><span style="color:var(--muted);font-size:12px">← →</span></div><div class="cgrid"><span class="dow">일</span><span class="dow">월</span><span class="dow">화</span><span class="dow">수</span><span class="dow">목</span><span class="dow">금</span><span class="dow">토</span><span class="d"></span><span class="d"></span><span class="d no">1</span><span class="d no">2</span><span class="d no">3</span><span class="d no">4</span><span class="d no">5</span><span class="d no">6</span><span class="d no">7</span><span class="d no">8</span><span class="d no">9</span><span class="d no">10</span><span class="d no">11</span><span class="d">12</span><span class="d">13</span><span class="d">14</span><span class="d">15</span><span class="d">16</span><span class="d on">17</span><span class="d no">18</span><span class="d">19</span><span class="d">20</span><span class="d">21</span><span class="d">22</span><span class="d no">23</span><span class="d">24</span><span class="d">25</span><span class="d">26</span><span class="d">27</span><span class="d">28</span><span class="d">29</span><span class="d no">30</span><span class="d">31</span></div><p class="chelp">선택하신 2명 인원에 맞춰 예약 가능한 날짜만 활성화됩니다.</p></div></div>
+    <div class="grp"><div class="glab"><b>투어 선택</b><i>성인 2명 기준 총액</i></div>
+      <ul class="tours"><li><div class="t on"><img src="turtle.jpg" alt=""><span class="tt"><b>와이키키 거북이 스노클링</b><i>1부 08:00-11:00 · 2부 11:00-14:00</i></span><span class="pr"><em>₩303,140</em><u>1인 ₩151,570</u></span></div></li><li><div class="t"><img src="sunset.jpg" alt=""><span class="tt"><b>선셋·와인 & 와이키키 거북이 스노클링</b><i>시즌별 시간 변동</i></span><span class="pr"><em>₩413,380</em><u>1인 ₩206,690</u></span></div></li><li><div class="t"><img src="parasail.jpg" alt=""><span class="tt"><b>거북이 스노클링 + 패러세일링 / 제트스키</b><i>패러/제트 9:30-2:00</i></span><span class="pr"><em>₩578,720</em><u>1인 ₩289,360</u></span></div></li><li><div class="t"><img src="board.jpg" alt=""><span class="tt"><b>[단독] 프라이빗 와이키키 거북이 스노클링</b><i>1~4인 기준 (인원별 상이) / 팀</i></span><span class="pr"><em>₩2,066,850 ~</em><u>팀 단위 · 인원별 상이</u></span></div></li><li><div class="t"><img src="surf.jpg" alt=""><span class="tt"><b>거북이 스노클링 + 서핑</b><i>[운영 시간 확정 필요]</i></span><span class="pr"><em>[원화 정가 확정 필요]</em><u>1인 ₩261,018 상당</u></span></div></li></ul></div>
+    <div class="grp"><div class="glab"><b>날짜 선택</b></div><p class="recalc">성인 2명 기준으로 10월에 고를 수 있는 날짜는 <b>17개</b>입니다.</p><div class="cal"><div class="cmon"><b>2026년 10월</b><span style="color:var(--muted);font-size:12px">← →</span></div><div class="cgrid"><span class="dow">일</span><span class="dow">월</span><span class="dow">화</span><span class="dow">수</span><span class="dow">목</span><span class="dow">금</span><span class="dow">토</span><span class="d"></span><span class="d"></span><span class="d no">1</span><span class="d no">2</span><span class="d no">3</span><span class="d no">4</span><span class="d no">5</span><span class="d no">6</span><span class="d no">7</span><span class="d no">8</span><span class="d no">9</span><span class="d no">10</span><span class="d no">11</span><span class="d">12</span><span class="d">13</span><span class="d">14</span><span class="d">15</span><span class="d">16</span><span class="d on">17</span><span class="d no">18</span><span class="d">19</span><span class="d">20</span><span class="d">21</span><span class="d">22</span><span class="d no">23</span><span class="d">24</span><span class="d">25</span><span class="d">26</span><span class="d">27</span><span class="d">28</span><span class="d">29</span><span class="d no">30</span><span class="d">31</span></div></div></div>
     <div class="grp"><div class="glab"><b>예약 정보 입력</b></div>
-      <div class="f"><label>숙소입력 (가장 가까운 픽업 장소 자동 추천)</label><div class="in">머무시는 숙소/호텔 주소 입력</div><p class="help">※ 구글 자동완성으로 숙소를 치시면 가장 가까운 장소를 추천해 드립니다.</p></div>
-      <div class="f"><label>픽업 장소 선택</label><div class="in filled"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"></path><circle cx="12" cy="10" r="2.6"></circle></svg>와이키키 · 하얏트 리젠시 앞</div></div>
+      <div class="f"><label>숙소입력 (가장 가까운 픽업 장소 자동 추천)</label><div class="in filled">하얏트 리젠시 와이키키 비치 리조트</div><p class="help">※ 구글 자동완성으로 숙소를 치시면 가장 가까운 장소를 추천해 드립니다.</p></div>
+      <div class="pick"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"></path><circle cx="12" cy="10" r="2.6"></circle></svg><span class="pk"><i>픽업 장소</i><u>와이키키 하얏트 리젠시 앞</u></span><a>다른 곳으로</a></div>
       <div class="f"><label>예약자 성함(한국어)</label><div class="in filled">김오션</div></div>
       <div class="f"><label>이메일 (바우처 수신용)</label><div class="in filled">hioceanstar@gmail.com</div></div>
       <div class="f"><label>연락처 (카카오톡 ID 또는 연락처)</label><div class="in filled">hioceanstar</div></div>
@@ -138,7 +156,7 @@ svg{flex:none}
   </div>
   <div class="bar">
     <div class="bline"><span>총 결제 금액</span><b class="n">₩303,140</b></div>
-    <p class="bsub">와이키키 거북이 스노클링 · 2026-10-17 (토) · 성인 2</p>
+    <p class="bsub">와이키키 거북이 스노클링 · 2026-10-17 (토) 성인 2명</p>
     <div class="cur"><a class="on">KRW</a><a>USD</a></div>
     <div class="pay">결제하기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></div>
     <p class="safe"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10V8a6 6 0 0 1 12 0v2"></path><rect x="4" y="10" width="16" height="10" rx="2.5"></rect></svg><span>안전하게 온라인 예약이 완료되며 현장 결제는 지원하지 않습니다.</span></p>

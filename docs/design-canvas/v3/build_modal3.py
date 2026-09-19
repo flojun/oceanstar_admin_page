@@ -4,13 +4,21 @@
 추천 프로그램 카드의 '예약하기' 를 눌러 들어오면 어떤 투어인지는 이미
 정해져 있다. 지금 모달은 그 상태에서도 1단계에서 상품을 다시 고르게 한다.
 그 단계를 없애고, 남은 것을 '언제 · 몇 명' 과 '예약 정보' 둘로 묶었다.
+
+재검토 반영
+- 숙소와 픽업 두 칸을 한 칸으로 합쳤다. 입력 항목 9개 -> 8개.
+- 고른 상품 칸의 금액을 '1인 ...' 으로 분명히 적었다. 바닥 칸의 총액과
+  같은 수로 보여 헷갈리던 자리다.
+- 날짜 띠는 그대로 둔다. 투어 업계 권고가 '예약 불가한 날짜는 보이지
+  말 것' 인데, 띠는 가까운 날만 싣기 때문에 이미 그 모양이다.
 """
 import io, sys
 sys.path.insert(0, ".")
-from _modal_base import (T, TOURS, page, I_X, I_ARROW, I_MINUS, I_PLUS, I_LOCK,
-                         I_PIN, I_LEFT)
+from _modal_base import (T, TOURS, TOTALS, PICK_CSS, pick_row, page,
+                         I_X, I_ARROW, I_MINUS, I_PLUS, I_LOCK, I_PIN, I_LEFT)
 
 NAME, WHEN, PRICE, IMG = TOURS[0]
+TOTAL, PER = TOTALS[0]
 
 CSS = """
 .wrap{position:relative;z-index:2;display:flex;%(wrap)s}
@@ -36,6 +44,7 @@ CSS = """
 .chosen b{display:block;font-family:'SUIT',system-ui,sans-serif;font-size:14px;
   font-weight:800;color:var(--ink);line-height:1.35}
 .chosen i{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:4px}
+.chosen i.pz{color:var(--ink);font-weight:700;margin-top:2px}
 /* 링크지만 손가락으로 누르는 것이라 글자 크기가 아니라 타깃 크기를 맞춘다. */
 .chg{display:flex;align-items:center;min-height:44px;padding:0 6px;
   font-size:12.5px;font-weight:700;color:var(--ink);text-decoration:underline;
@@ -84,6 +93,17 @@ CSS = """
 .f .in.filled{color:var(--ink);font-weight:600}
 .f .help{margin-top:6px;font-size:11.5px;color:var(--muted);line-height:1.5}
 
+.pick{margin-top:8px;display:flex;align-items:center;gap:9px;padding:7px 12px;
+  border-radius:12px;background:var(--soft)}
+.pick>svg{color:var(--sea)}
+.pk{flex:1;min-width:0}
+.pk i{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:var(--muted)}
+.pk u{display:block;text-decoration:none;font-size:12.5px;font-weight:700;
+  color:var(--ink);line-height:1.35;margin-top:1px}
+.pick a{display:flex;align-items:center;min-height:44px;padding:0 2px;font-size:11.5px;
+  font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px;
+  white-space:nowrap}
+
 .foot{border-top:1px solid var(--line);padding:14px 20px 18px;background:#fff}
 .fline{display:flex;align-items:baseline;justify-content:space-between}
 .fline span{font-size:13px;font-weight:700;color:var(--text)}
@@ -120,7 +140,7 @@ def screen1():
   <div class="p-top"><h1>{T['title']}</h1><span class="x">{I_X}</span></div>
   <div class="body">
     <div class="chosen"><img src="{IMG}" alt="">
-      <span class="ct"><b>{NAME}</b><i>{WHEN} · {PRICE} / 인</i></span>
+      <span class="ct"><b>{NAME}</b><i>{WHEN}</i><i class="pz">{PER}</i></span>
       <span class="chg">바꾸기</span></div>
     <span class="lab">{T['step2']}</span>
     <div class="pax">
@@ -134,7 +154,7 @@ def screen1():
     <p class="dhelp">{T['pax_notice'].replace('{pax}','2')}</p>
   </div>
   <div class="foot">
-    <div class="fline"><span>{T['total_payment']}</span><b class="n">₩303,140</b></div>
+    <div class="fline"><span>{T['total_payment']}</span><b class="n">{TOTAL}</b></div>
     <p class="fsub">성인 2 × ₩151,570</p>
     <div class="row"><div class="go">다음 {I_ARROW}</div></div>
   </div>
@@ -149,14 +169,14 @@ def screen2():
       <span class="ct"><b>{NAME}</b><i>2026-10-17 (토) · 성인 2</i></span>
       <span class="chg">바꾸기</span></div>
     <span class="lab">{T['step4']}</span>
-    {field(T['hotel_label'], T['hotel_placeholder'], True, T['hotel_helper'])}
-    {field(T['pickup_label'], '와이키키 · 하얏트 리젠시 앞', ic=I_PIN)}
+    {field(T['hotel_label'], '하얏트 리젠시 와이키키 비치 리조트', help=T['hotel_helper'])}
+    {pick_row()}
     {field(T['name_label'], '김오션')}
     {field(T['email_label'], 'hioceanstar@gmail.com')}
     {field(T['phone_label'], 'hioceanstar')}
   </div>
   <div class="foot">
-    <div class="fline"><span>{T['total_payment']}</span><b class="n">₩303,140</b></div>
+    <div class="fline"><span>{T['total_payment']}</span><b class="n">{TOTAL}</b></div>
     <div class="cur"><a class="on">KRW</a><a>USD</a></div>
     <div class="row"><div class="back">{I_LEFT} 이전</div>
       <div class="go">{T['checkout_btn']} {I_ARROW}</div></div>

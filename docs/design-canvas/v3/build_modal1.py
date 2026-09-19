@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
-"""시안 1 - 한 장에 다 보기. 단계를 없애고 금액을 처음부터 옆에 세운다."""
+"""시안 1 - 한 장에 다 보기. 단계를 없애고 금액을 처음부터 옆에 세운다.
+
+재검토 반영
+- 상품 가격을 1인 요금이 아니라 고른 인원 기준 총액으로 바꿨다. 그래서
+  인원 칸이 상품 칸보다 위로 올라왔다. 인원을 모르면 총액을 쓸 수 없다.
+- 숙소와 픽업 두 칸을 한 칸으로 합쳤다. 입력 항목 9개 -> 8개.
+- 인원을 바꾸면 달력 위에 무엇이 다시 계산됐는지 한 줄로 알린다.
+"""
 import io, sys
 sys.path.insert(0, ".")
-from _modal_base import (T, TOURS, page, I_X, I_ARROW, I_MINUS, I_PLUS, I_LOCK, I_PIN)
+from _modal_base import (T, TOURS, TOTALS, PICK_CSS, pick_row, page,
+                         I_X, I_ARROW, I_MINUS, I_PLUS, I_LOCK, I_PIN)
 
 CSS_D = """
 .wrap{position:relative;z-index:2;padding:50px 0;display:flex;justify-content:center}
@@ -31,8 +39,10 @@ CSS_D = """
 .t .tt{flex:1;min-width:0}
 .t b{display:block;font-size:13px;font-weight:700;color:var(--ink);line-height:1.35}
 .t i{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:3px}
-.t em{font-style:normal;font-family:'SUIT',system-ui,sans-serif;font-size:14px;
-  font-weight:800;color:var(--ink);white-space:nowrap}
+.t .pr{text-align:right;white-space:nowrap}
+.t .pr em{display:block;font-style:normal;font-family:'SUIT',system-ui,sans-serif;
+  font-size:14px;font-weight:800;color:var(--ink)}
+.t .pr u{display:block;text-decoration:none;font-size:10.5px;color:var(--muted);margin-top:2px}
 
 /* 인원 - 숫자를 직접 치는 대신 누르는 단추로. 오타가 안 난다. */
 .pax{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -59,6 +69,11 @@ CSS_D = """
 .cgrid .d.no{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
 .cgrid .d.on{background:var(--ink);color:#fff;font-weight:800}
 .chelp{margin-top:10px;font-size:11.5px;color:var(--muted);line-height:1.5}
+/* 인원을 바꾸면 달력이 조용히 바뀐다. 그걸 못 보는 게 한 장짜리 폼의
+   고전적인 실패다. 무엇이 다시 계산됐는지 달력 위에서 먼저 말한다. */
+.recalc{display:flex;align-items:center;gap:7px;margin-bottom:9px;padding:8px 12px;
+  border-radius:12px;background:var(--soft);font-size:12px;color:var(--ink);line-height:1.45}
+.recalc b{font-weight:800}
 
 /* 예약 정보 */
 .f+.f{margin-top:12px}
@@ -68,6 +83,17 @@ CSS_D = """
 .f .in.filled{color:var(--ink);font-weight:600}
 .f .help{margin-top:6px;font-size:11.5px;color:var(--muted);line-height:1.5}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pick{margin-top:8px;display:flex;align-items:center;gap:9px;padding:7px 12px;
+  border-radius:12px;background:var(--soft)}
+.pick>svg{color:var(--sea)}
+.pk{flex:1;min-width:0}
+.pk i{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:var(--muted)}
+.pk u{display:block;text-decoration:none;font-size:12.5px;font-weight:700;
+  color:var(--ink);line-height:1.35;margin-top:1px}
+.pick a{display:flex;align-items:center;min-height:44px;padding:0 2px;font-size:11.5px;
+  font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px;
+  white-space:nowrap}
+
 
 /* 요약 - 이 판의 핵심. 인원을 바꾸면 여기 금액이 바로 바뀐다. */
 .side{background:var(--soft);border-left:1px solid var(--line);padding:26px 24px 28px;
@@ -105,11 +131,12 @@ CSS_D = """
 def tour_items(sel=0):
     out = []
     for i, (name, when, price, img) in enumerate(TOURS):
+        total, per = TOTALS[i]
         out.append(
             f'<li><div class="t{" on" if i==sel else ""}">'
             f'<img src="{img}" alt="">'
             f'<span class="tt"><b>{name}</b><i>{when}</i></span>'
-            f'<em>{price}</em></div></li>')
+            f'<span class="pr"><em>{total}</em><u>{per}</u></span></div></li>')
     return "".join(out)
 
 def calendar(sel=17):
@@ -123,10 +150,10 @@ def calendar(sel=17):
         if d < 12 or d in FULL: cls += " no"
         if d == sel: cls += " on"
         cells.append(f'<span class="{cls}">{d}</span>')
-    return (f'<div class="cal"><div class="cmon"><b>2026년 10월</b>'
+    return ('<p class="recalc">성인 2명 기준으로 10월에 고를 수 있는 날짜는 <b>17개</b>입니다.</p>'
+            f'<div class="cal"><div class="cmon"><b>2026년 10월</b>'
             f'<span style="color:var(--muted);font-size:12px">← →</span></div>'
-            f'<div class="cgrid">{dows}{"".join(cells)}</div>'
-            f'<p class="chelp">{T["pax_notice"].replace("{pax}","2")}</p></div>')
+            f'<div class="cgrid">{dows}{"".join(cells)}</div></div>')
 
 def field(label, value, placeholder=False, help=None, ic=""):
     cls = "in" if placeholder else "in filled"
@@ -140,11 +167,7 @@ BODY_D = f"""
   <div class="cols">
     <div class="left">
       <div class="grp">
-        <div class="glab"><b>{T['step1']}</b></div>
-        <ul class="tours">{tour_items()}</ul>
-      </div>
-      <div class="grp">
-        <div class="glab"><b>{T['step2']}</b></div>
+        <div class="glab"><b>{T['step2']}</b><i>인원이 정해져야 금액과 가능한 날짜가 나옵니다</i></div>
         <div class="pax">
           <div class="pbox"><span>{T['adultPax']}</span><div class="prow">
             <span class="stp">{I_MINUS}</span><b class="n">2</b><span class="stp">{I_PLUS}</span>
@@ -155,13 +178,17 @@ BODY_D = f"""
         </div>
       </div>
       <div class="grp">
+        <div class="glab"><b>{T['step1']}</b><i>성인 2명 기준 총액</i></div>
+        <ul class="tours">{tour_items()}</ul>
+      </div>
+      <div class="grp">
         <div class="glab"><b>{T['step3']}</b></div>
         {calendar()}
       </div>
       <div class="grp">
         <div class="glab"><b>{T['step4']}</b></div>
-        {field(T['hotel_label'], T['hotel_placeholder'], True, T['hotel_helper'])}
-        {field(T['pickup_label'], '와이키키 · 하얏트 리젠시 앞', ic=I_PIN)}
+        {field(T['hotel_label'], '하얏트 리젠시 와이키키 비치 리조트', help=T['hotel_helper'])}
+        {pick_row()}
         <div class="two" style="margin-top:12px">
           {field(T['name_label'], '김오션')}
           {field(T['email_label'], 'hioceanstar@gmail.com')}
@@ -209,8 +236,10 @@ CSS_M = """
   justify-content:center;color:var(--muted);background:var(--paper)}
 .body{padding:20px 18px 24px}
 .grp+.grp{margin-top:24px}
+.glab{display:flex;align-items:baseline;gap:8px;margin-bottom:11px;flex-wrap:wrap}
 .glab b{font-family:'SUIT',system-ui,sans-serif;font-size:14.5px;font-weight:800;
-  color:var(--ink);display:block;margin-bottom:11px}
+  color:var(--ink)}
+.glab i{font-style:normal;font-size:11.5px;color:var(--muted)}
 
 .tours li+li{margin-top:8px}
 .t{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;
@@ -220,8 +249,10 @@ CSS_M = """
 .t .tt{flex:1;min-width:0}
 .t b{display:block;font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.35}
 .t i{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:3px}
-.t em{font-style:normal;font-family:'SUIT',system-ui,sans-serif;font-size:13px;
-  font-weight:800;color:var(--ink);white-space:nowrap}
+.t .pr{text-align:right;white-space:nowrap}
+.t .pr em{display:block;font-style:normal;font-family:'SUIT',system-ui,sans-serif;
+  font-size:13px;font-weight:800;color:var(--ink)}
+.t .pr u{display:block;text-decoration:none;font-size:10.5px;color:var(--muted);margin-top:2px}
 
 .pax{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pbox{border:1px solid var(--line);border-radius:14px;padding:11px 12px}
@@ -245,6 +276,9 @@ CSS_M = """
 .cgrid .d.no{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
 .cgrid .d.on{background:var(--ink);color:#fff;font-weight:800}
 .chelp{margin-top:9px;font-size:11px;color:var(--muted);line-height:1.5}
+.recalc{display:flex;align-items:center;gap:7px;margin-bottom:9px;padding:8px 11px;
+  border-radius:12px;background:var(--soft);font-size:11.5px;color:var(--ink);line-height:1.45}
+.recalc b{font-weight:800}
 
 .f+.f{margin-top:12px}
 .f label{display:block;font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px}
@@ -252,6 +286,17 @@ CSS_M = """
   display:flex;align-items:center;gap:8px;padding:0 13px;font-size:13.5px;color:var(--muted)}
 .f .in.filled{color:var(--ink);font-weight:600}
 .f .help{margin-top:6px;font-size:11px;color:var(--muted);line-height:1.5}
+
+.pick{margin-top:8px;display:flex;align-items:center;gap:9px;padding:7px 12px;
+  border-radius:12px;background:var(--soft)}
+.pick>svg{color:var(--sea)}
+.pk{flex:1;min-width:0}
+.pk i{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:var(--muted)}
+.pk u{display:block;text-decoration:none;font-size:12.5px;font-weight:700;
+  color:var(--ink);line-height:1.35;margin-top:1px}
+.pick a{display:flex;align-items:center;min-height:44px;padding:0 2px;font-size:11.5px;
+  font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px;
+  white-space:nowrap}
 
 /* 금액을 늘 보이게 하는 바. 실제로는 화면 아래에 고정돼 스크롤과 무관하게
    남는다. 보드는 정지 화면이라 여기서는 문서 끝에 놓아 모양만 보인다. */
@@ -277,16 +322,16 @@ CSS_M = """
 def tour_items_m(sel=0):
     out=[]
     for i,(name,when,price,img) in enumerate(TOURS):
+        total, per = TOTALS[i]
         out.append(f'<li><div class="t{" on" if i==sel else ""}"><img src="{img}" alt="">'
-                   f'<span class="tt"><b>{name}</b><i>{when}</i></span><em>{price}</em></div></li>')
+                   f'<span class="tt"><b>{name}</b><i>{when}</i></span>'
+                   f'<span class="pr"><em>{total}</em><u>{per}</u></span></div></li>')
     return "".join(out)
 
 BODY_M = f"""
 <div class="wrap"><div class="sheet">
   <div class="m-top"><h1>{T['title']}</h1><span class="x">{I_X}</span></div>
   <div class="body">
-    <div class="grp"><div class="glab"><b>{T['step1']}</b></div>
-      <ul class="tours">{tour_items_m()}</ul></div>
     <div class="grp"><div class="glab"><b>{T['step2']}</b></div>
       <div class="pax">
         <div class="pbox"><span>{T['adultPax']}</span><div class="prow">
@@ -296,10 +341,12 @@ BODY_M = f"""
           <span class="stp off">{I_MINUS}</span><b class="n">0</b><span class="stp">{I_PLUS}</span>
         </div></div>
       </div></div>
+    <div class="grp"><div class="glab"><b>{T['step1']}</b><i>성인 2명 기준 총액</i></div>
+      <ul class="tours">{tour_items_m()}</ul></div>
     <div class="grp"><div class="glab"><b>{T['step3']}</b></div>{calendar()}</div>
     <div class="grp"><div class="glab"><b>{T['step4']}</b></div>
-      {field(T['hotel_label'], T['hotel_placeholder'], True, T['hotel_helper'])}
-      {field(T['pickup_label'], '와이키키 · 하얏트 리젠시 앞', ic=I_PIN)}
+      {field(T['hotel_label'], '하얏트 리젠시 와이키키 비치 리조트', help=T['hotel_helper'])}
+      {pick_row()}
       {field(T['name_label'], '김오션')}
       {field(T['email_label'], 'hioceanstar@gmail.com')}
       {field(T['phone_label'], 'hioceanstar')}
@@ -307,7 +354,7 @@ BODY_M = f"""
   </div>
   <div class="bar">
     <div class="bline"><span>{T['total_payment']}</span><b class="n">₩303,140</b></div>
-    <p class="bsub">{TOURS[0][0]} · 2026-10-17 (토) · 성인 2</p>
+    <p class="bsub">{TOURS[0][0]} · 2026-10-17 (토) 성인 2명</p>
     <div class="cur"><a class="on">KRW</a><a>USD</a></div>
     <div class="pay">{T['checkout_btn']} {I_ARROW}</div>
     <p class="safe">{I_LOCK}<span>{T['safe_notice']}</span></p>

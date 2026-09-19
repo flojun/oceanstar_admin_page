@@ -56,7 +56,7 @@ TOURS = [
     ("선셋·와인 & 와이키키 거북이 스노클링",   "시즌별 시간 변동",                   "₩206,690", "sunset.jpg"),
     ("거북이 스노클링 + 패러세일링 / 제트스키", "패러/제트 9:30-2:00",               "₩289,360", "parasail.jpg"),
     ("[단독] 프라이빗 와이키키 거북이 스노클링", "1~4인 기준 (인원별 상이) / 팀",      "₩2,066,850 ~", "board.jpg"),
-    ("거북이 스노클링 + 서핑",                "[원화 정가 확정 필요]",              "₩261,018", "surf.jpg"),
+    ("거북이 스노클링 + 서핑",                "[운영 시간 확정 필요]",              "₩261,018", "surf.jpg"),
 ]
 
 def icon(path, size=18, sw=1.7, fill="none"):
@@ -75,6 +75,38 @@ I_LOCK   = icon('<path d="M6 10V8a6 6 0 0 1 12 0v2"></path>'
                 '<rect x="4" y="10" width="16" height="10" rx="2.5"></rect>', 14)
 I_PIN    = icon('<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"></path>'
                 '<circle cx="12" cy="10" r="2.6"></circle>', 16)
+
+
+# 성인 2명 기준 총액. 1인 요금이 아니라 실제 낼 돈으로 고르게 한다.
+# Baymard: 한 장이냐 여러 단계냐보다 무엇을 얼마나 묻느냐가 전환을 가른다.
+TOTALS = {
+    0: ("\u20a9303,140",     "1인 \u20a9151,570"),
+    1: ("\u20a9413,380",     "1인 \u20a9206,690"),
+    2: ("\u20a9578,720",     "1인 \u20a9289,360"),
+    3: ("\u20a92,066,850 ~", "팀 단위 · 인원별 상이"),
+    4: ("[원화 정가 확정 필요]", "1인 \u20a9261,018 상당"),
+}
+
+# 숙소 한 칸에서 픽업 장소가 따라 나온다. ko.ts 의 hotel_helper 가 이미
+# '가장 가까운 장소를 추천해 드립니다' 라고 약속하므로, 픽업을 따로 고르게
+# 하는 칸은 그 약속을 스스로 부정하는 칸이다. 결과로 보여 주고 고칠 길만 남긴다.
+PICK_CSS = """
+.pick{margin-top:8px;display:flex;align-items:center;gap:9px;padding:7px 12px;
+  border-radius:12px;background:var(--soft)}
+.pick>svg{color:var(--sea)}
+.pk{flex:1;min-width:0}
+.pk i{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:var(--muted)}
+.pk u{display:block;text-decoration:none;font-size:12.5px;font-weight:700;
+  color:var(--ink);line-height:1.35;margin-top:1px}
+.pick a{display:flex;align-items:center;min-height:44px;padding:0 2px;font-size:11.5px;
+  font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px;
+  white-space:nowrap}
+"""
+
+def pick_row(place="와이키키 하얏트 리젠시 앞"):
+    return (f'<div class="pick">{I_PIN}'
+            f'<span class="pk"><i>픽업 장소</i><u>{place}</u></span>'
+            f'<a>다른 곳으로</a></div>')
 
 
 def page(title, css, body, width, bg="rgba(16,20,24,.58)"):
