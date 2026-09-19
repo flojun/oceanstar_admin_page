@@ -19,7 +19,8 @@
 import io, sys
 sys.path.insert(0, ".")
 from _sian1_base import (T, TOURS, TOTALS, PICK_CSS, pick_row, page,
-                         I_X, I_ARROW, I_MINUS, I_PLUS, I_LOCK, I_CHECK)
+                         I_X, I_ARROW, I_MINUS, I_PLUS, I_LOCK, I_CHECK,
+                         I_LEFT, I_RIGHT, I_DOWN)
 
 # ────────────────────────────── 공통 조각 ──────────────────────────────
 
@@ -31,7 +32,7 @@ FULL = {18, 23, 30}               # 남은 자리가 선택 인원보다 적은 
 WEEKEND = {3, 4, 10, 11, 17, 18, 24, 25, 31}   # 토·일
 
 
-def month_grid(sel=None, blocked=(), note=None, cell=34):
+def month_grid(sel=None, blocked=(), note=None, cell=34, year=2026, month=10):
     """블록 처리한 날은 취소선으로 남긴다. 흐리게만 두면 며칠이 막혔는지
     읽히지 않아 '인원에 맞는 날짜만' 이라는 규칙 자체가 전달되지 않는다."""
     dows = "".join(f'<span class="dow">{d}</span>' for d in "일월화수목금토")
@@ -44,10 +45,20 @@ def month_grid(sel=None, blocked=(), note=None, cell=34):
             cls += " on"
         cells.append(f'<span class="{cls}">{d}</span>')
     return (f'<div class="cal" style="--cell:{cell}px">'
-            f'<div class="cmon"><b>2026년 10월</b>'
-            f'<span class="nav2">← →</span></div>'
+            + cal_head(year, month) +
             f'<div class="cgrid">{dows}{"".join(cells)}</div>'
             + (f'<p class="chelp">{note}</p>' if note else "") + '</div>')
+
+
+def cal_head(year=2026, month=10):
+    """년·월을 직접 고른다. 화살표만 두면 내년 일정을 잡는 사람이 열두 번을
+    눌러야 한다. 화살표는 옆 달로 한 칸씩 갈 때만 쓰도록 남긴다."""
+    return (f'<div class="cmon">'
+            f'<span class="sels">'
+            f'<span class="sel"><b>{year}년</b>{I_DOWN}</span>'
+            f'<span class="sel"><b>{month}월</b>{I_DOWN}</span></span>'
+            f'<span class="mnav"><span class="marr">{I_LEFT}</span>'
+            f'<span class="marr">{I_RIGHT}</span></span></div>')
 
 
 def field(label, value, ph=False, help=None):
@@ -56,15 +67,21 @@ def field(label, value, ph=False, help=None):
             + (f'<p class="help">{help}</p>' if help else "") + "</div>")
 
 
+def pax_row(label, sub, count, minus_off=False):
+    off = " off" if minus_off else ""
+    return (f'<div class="prow"><span class="plab"><b>{label}</b>'
+            + (f'<i>{sub}</i>' if sub else "") + "</span>"
+            f'<span class="stepper"><span class="stp{off}">{I_MINUS}</span>'
+            f'<b class="n">{count}</b><span class="stp">{I_PLUS}</span></span></div>')
+
+
 def pax_block():
-    return f"""<div class="pax">
-      <div class="pbox"><span>{T['adultPax']}</span><div class="prow">
-        <span class="stp">{I_MINUS}</span><b class="n">2</b><span class="stp">{I_PLUS}</span>
-      </div></div>
-      <div class="pbox"><span>{T['childPax']}</span><div class="prow">
-        <span class="stp off">{I_MINUS}</span><b class="n">0</b><span class="stp">{I_PLUS}</span>
-      </div></div>
-    </div>"""
+    """라벨 왼쪽, 스테퍼 오른쪽. 한 줄에 축이 하나다. 상자도 하나로 합쳐
+    두 줄 사이를 실선으로만 나눈다."""
+    return ('<div class="pax">'
+            + pax_row(T['adultPax'], None, 2)
+            + pax_row(T['childPax'], '[아동 요금 확정 필요]', 0, minus_off=True)
+            + "</div>")
 
 
 def tour_list(sel=0, mobile=False):
@@ -170,19 +187,35 @@ BASE = """
   font-weight:800;color:var(--ink);white-space:nowrap}
 .opt svg{color:var(--ink)}
 
-.pax{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.pbox{border:1px solid var(--line);border-radius:14px;padding:12px 14px}
-.pbox span{display:block;font-size:12.5px;font-weight:700;color:var(--text)}
-.prow{display:flex;align-items:center;justify-content:space-between;margin-top:9px}
+/* 인원 - 라벨과 스테퍼를 한 줄에, 상자는 하나. 라벨은 위, 숫자는 가운데,
+   버튼은 양 끝으로 벌려 두면 눈이 좇을 축이 셋이 되어 흩어져 보인다. */
+.pax{border:1px solid var(--line);border-radius:14px}
+.prow{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 8px 9px 15px}
+.prow+.prow{border-top:1px solid var(--line)}
+.plab{min-width:0}
+.plab b{display:block;font-size:13.5px;font-weight:700;color:var(--ink)}
+.plab i{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:2px}
+.stepper{display:flex;align-items:center;gap:2px;flex:none}
 .stp{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
   display:flex;align-items:center;justify-content:center;color:var(--ink);background:#fff}
 .stp.off{color:#9AA0A6}
-.prow b{font-family:'SUIT',system-ui,sans-serif;font-size:20px;font-weight:800;color:var(--ink)}
+.stepper .n{min-width:36px;text-align:center;font-family:'SUIT',system-ui,sans-serif;
+  font-size:19px;font-weight:800;color:var(--ink)}
 
 .cal{border:1px solid var(--line);border-radius:14px;padding:13px 15px 15px}
-.cmon{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
-.cmon b{font-family:'SUIT',system-ui,sans-serif;font-size:13.5px;font-weight:800;color:var(--ink)}
-.nav2{color:var(--muted);font-size:12px}
+.cmon{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-bottom:10px;flex-wrap:wrap}
+.sels{display:flex;gap:6px;min-width:0}
+/* 실제로는 select 다. 보드에서는 모양만 세운다. */
+.sel{display:flex;align-items:center;gap:5px;height:44px;padding:0 11px 0 13px;
+  border:1px solid var(--line);border-radius:12px;background:#fff}
+.sel b{font-family:'SUIT',system-ui,sans-serif;font-size:13.5px;font-weight:800;
+  color:var(--ink);white-space:nowrap}
+.sel svg{color:var(--muted)}
+.mnav{display:flex;gap:2px;flex:none}
+.marr{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;color:var(--ink);background:var(--paper)}
 .cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
 .cgrid .dow{font-size:11px;font-weight:700;color:var(--muted);padding:3px 0 5px}
 .cgrid .d{height:var(--cell);display:flex;align-items:center;justify-content:center;
@@ -333,7 +366,7 @@ def single_body(mobile, picked):
                  + tour_list(sel=None, mobile=mobile) + '</div>')
     return f"""
       {first}
-      <div class="grp">{glab(T['step2'])}{pax_block()}</div>
+      <div class="grp">{glab(T['step2'], '24개월 미만 무료')}{pax_block()}</div>
       <div class="grp">{glab(T['step3'])}
         {RECALC}{month_grid(sel=17 if picked else None,
                             blocked=PAST | FULL, cell=cell)}</div>
@@ -352,7 +385,7 @@ def combo_body(mobile):
         {chip(2, '두 활동이 서로 다른 날에 열립니다')}</div>
       <div class="grp">{glab('콤보 세부 옵션 선택')}{combo_opts()}</div>
       <div class="grp">{glab('거북이 스노클링 시간 선택')}{combo_times()}</div>
-      <div class="grp">{glab(T['step2'])}{pax_block()}</div>
+      <div class="grp">{glab(T['step2'], '24개월 미만 무료')}{pax_block()}</div>
       <div class="grp">{glab('날짜와 픽업', '활동마다 따로 받습니다')}
         <div class="act">
           <div class="ahead"><span class="ano">1</span>

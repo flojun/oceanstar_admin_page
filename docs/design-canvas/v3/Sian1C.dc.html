@@ -93,19 +93,35 @@ svg{flex:none}
   font-weight:800;color:var(--ink);white-space:nowrap}
 .opt svg{color:var(--ink)}
 
-.pax{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.pbox{border:1px solid var(--line);border-radius:14px;padding:12px 14px}
-.pbox span{display:block;font-size:12.5px;font-weight:700;color:var(--text)}
-.prow{display:flex;align-items:center;justify-content:space-between;margin-top:9px}
+/* 인원 - 라벨과 스테퍼를 한 줄에, 상자는 하나. 라벨은 위, 숫자는 가운데,
+   버튼은 양 끝으로 벌려 두면 눈이 좇을 축이 셋이 되어 흩어져 보인다. */
+.pax{border:1px solid var(--line);border-radius:14px}
+.prow{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 8px 9px 15px}
+.prow+.prow{border-top:1px solid var(--line)}
+.plab{min-width:0}
+.plab b{display:block;font-size:13.5px;font-weight:700;color:var(--ink)}
+.plab i{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:2px}
+.stepper{display:flex;align-items:center;gap:2px;flex:none}
 .stp{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
   display:flex;align-items:center;justify-content:center;color:var(--ink);background:#fff}
 .stp.off{color:#9AA0A6}
-.prow b{font-family:'SUIT',system-ui,sans-serif;font-size:20px;font-weight:800;color:var(--ink)}
+.stepper .n{min-width:36px;text-align:center;font-family:'SUIT',system-ui,sans-serif;
+  font-size:19px;font-weight:800;color:var(--ink)}
 
 .cal{border:1px solid var(--line);border-radius:14px;padding:13px 15px 15px}
-.cmon{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
-.cmon b{font-family:'SUIT',system-ui,sans-serif;font-size:13.5px;font-weight:800;color:var(--ink)}
-.nav2{color:var(--muted);font-size:12px}
+.cmon{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-bottom:10px;flex-wrap:wrap}
+.sels{display:flex;gap:6px;min-width:0}
+/* 실제로는 select 다. 보드에서는 모양만 세운다. */
+.sel{display:flex;align-items:center;gap:5px;height:44px;padding:0 11px 0 13px;
+  border:1px solid var(--line);border-radius:12px;background:#fff}
+.sel b{font-family:'SUIT',system-ui,sans-serif;font-size:13.5px;font-weight:800;
+  color:var(--ink);white-space:nowrap}
+.sel svg{color:var(--muted)}
+.mnav{display:flex;gap:2px;flex:none}
+.marr{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;color:var(--ink);background:var(--paper)}
 .cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
 .cgrid .dow{font-size:11px;font-weight:700;color:var(--muted);padding:3px 0 5px}
 .cgrid .d{height:var(--cell);display:flex;align-items:center;justify-content:center;
@@ -194,20 +210,13 @@ svg{flex:none}
         <div class="chip"><img src="parasail.jpg" alt=""><span class="ct"><b>거북이 스노클링 + 패러세일링 / 제트스키</b><i>두 활동이 서로 다른 날에 열립니다</i></span><span class="chg">바꾸기</span></div></div>
       <div class="grp"><div class="glab"><b>콤보 세부 옵션 선택</b></div><ul class="opts"><li><div class="opt on"><span>거북이 스노클링 + 패러세일링</span><em>$210</em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"></path></svg></div></li><li><div class="opt"><span>거북이 스노클링 + 제트 스키</span><em>$210</em></div></li><li><div class="opt"><span>거북이 스노클링 + 패러세일링 + 제트스키</span><em>$310</em></div></li></ul></div>
       <div class="grp"><div class="glab"><b>거북이 스노클링 시간 선택</b></div><ul class="opts two-up"><li><div class="opt on"><span>1부</span><em>08:00 AM</em><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"></path></svg></div></li><li><div class="opt"><span>2부</span><em>11:00 AM</em></div></li></ul></div>
-      <div class="grp"><div class="glab"><b>인원 입력</b></div><div class="pax">
-      <div class="pbox"><span>성인</span><div class="prow">
-        <span class="stp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg></span><b class="n">2</b><span class="stp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></span>
-      </div></div>
-      <div class="pbox"><span>아동 (만3-6세)</span><div class="prow">
-        <span class="stp off"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg></span><b class="n">0</b><span class="stp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></span>
-      </div></div>
-    </div></div>
+      <div class="grp"><div class="glab"><b>인원 입력</b><i>24개월 미만 무료</i></div><div class="pax"><div class="prow"><span class="plab"><b>성인</b></span><span class="stepper"><span class="stp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg></span><b class="n">2</b><span class="stp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></span></span></div><div class="prow"><span class="plab"><b>아동 (만3-6세)</b><i>[아동 요금 확정 필요]</i></span><span class="stepper"><span class="stp off"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg></span><b class="n">0</b><span class="stp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></span></span></div></div></div>
       <div class="grp"><div class="glab"><b>날짜와 픽업</b><i>활동마다 따로 받습니다</i></div>
         <div class="act">
           <div class="ahead"><span class="ano">1</span>
             <b>거북이 스노클링</b><i>1부 08:00-11:00</i></div>
           <div class="abody">
-            <p class="recalc">성인 2명 기준으로 10월에 고를 수 있는 날짜는 <b>17개</b>입니다.</p><div class="cal" style="--cell:30px"><div class="cmon"><b>2026년 10월</b><span class="nav2">← →</span></div><div class="cgrid"><span class="dow">일</span><span class="dow">월</span><span class="dow">화</span><span class="dow">수</span><span class="dow">목</span><span class="dow">금</span><span class="dow">토</span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d no">1</span><span class="d no">2</span><span class="d no">3</span><span class="d no">4</span><span class="d no">5</span><span class="d no">6</span><span class="d no">7</span><span class="d no">8</span><span class="d no">9</span><span class="d no">10</span><span class="d no">11</span><span class="d">12</span><span class="d">13</span><span class="d">14</span><span class="d">15</span><span class="d">16</span><span class="d on">17</span><span class="d no">18</span><span class="d">19</span><span class="d">20</span><span class="d">21</span><span class="d">22</span><span class="d no">23</span><span class="d">24</span><span class="d">25</span><span class="d">26</span><span class="d">27</span><span class="d">28</span><span class="d">29</span><span class="d no">30</span><span class="d">31</span></div></div>
+            <p class="recalc">성인 2명 기준으로 10월에 고를 수 있는 날짜는 <b>17개</b>입니다.</p><div class="cal" style="--cell:30px"><div class="cmon"><span class="sels"><span class="sel"><b>2026년</b><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></span><span class="sel"><b>10월</b><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></span></span><span class="mnav"><span class="marr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg></span><span class="marr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg></span></span></div><div class="cgrid"><span class="dow">일</span><span class="dow">월</span><span class="dow">화</span><span class="dow">수</span><span class="dow">목</span><span class="dow">금</span><span class="dow">토</span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d no">1</span><span class="d no">2</span><span class="d no">3</span><span class="d no">4</span><span class="d no">5</span><span class="d no">6</span><span class="d no">7</span><span class="d no">8</span><span class="d no">9</span><span class="d no">10</span><span class="d no">11</span><span class="d">12</span><span class="d">13</span><span class="d">14</span><span class="d">15</span><span class="d">16</span><span class="d on">17</span><span class="d no">18</span><span class="d">19</span><span class="d">20</span><span class="d">21</span><span class="d">22</span><span class="d no">23</span><span class="d">24</span><span class="d">25</span><span class="d">26</span><span class="d">27</span><span class="d">28</span><span class="d">29</span><span class="d no">30</span><span class="d">31</span></div></div>
             <div class="asub"><div class="f"><label>숙소입력 (가장 가까운 픽업 장소 자동 추천)</label><div class="in filled">하얏트 리젠시 와이키키 비치 리조트</div><p class="help">※ 구글 자동완성으로 숙소를 치시면 가장 가까운 장소를 추천해 드립니다.</p></div><div class="pick"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"></path><circle cx="12" cy="10" r="2.6"></circle></svg><span class="pk"><i>픽업 장소</i><u>와이키키 하얏트 리젠시 앞</u></span><a>다른 곳으로</a></div></div>
           </div>
         </div>
@@ -216,7 +225,7 @@ svg{flex:none}
             <b>패러세일링 / 제트스키</b><i>주말 및 공휴일 불가</i></div>
           <div class="abody">
             <p class="recalc">스노클링 날짜(10월 17일)와 <b>같은 날은 고를 수 없습니다.</b></p>
-            <div class="cal" style="--cell:30px"><div class="cmon"><b>2026년 10월</b><span class="nav2">← →</span></div><div class="cgrid"><span class="dow">일</span><span class="dow">월</span><span class="dow">화</span><span class="dow">수</span><span class="dow">목</span><span class="dow">금</span><span class="dow">토</span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d no">1</span><span class="d no">2</span><span class="d no">3</span><span class="d no">4</span><span class="d no">5</span><span class="d no">6</span><span class="d no">7</span><span class="d no">8</span><span class="d no">9</span><span class="d no">10</span><span class="d no">11</span><span class="d">12</span><span class="d">13</span><span class="d">14</span><span class="d">15</span><span class="d">16</span><span class="d no">17</span><span class="d no">18</span><span class="d">19</span><span class="d on">20</span><span class="d">21</span><span class="d">22</span><span class="d">23</span><span class="d no">24</span><span class="d no">25</span><span class="d">26</span><span class="d">27</span><span class="d">28</span><span class="d">29</span><span class="d">30</span><span class="d no">31</span></div><p class="chelp">※ 픽업 장소가 스노클링과 다를 수 있어 숙소를 한 번 더 확인합니다.</p></div>
+            <div class="cal" style="--cell:30px"><div class="cmon"><span class="sels"><span class="sel"><b>2026년</b><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></span><span class="sel"><b>10월</b><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></span></span><span class="mnav"><span class="marr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg></span><span class="marr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg></span></span></div><div class="cgrid"><span class="dow">일</span><span class="dow">월</span><span class="dow">화</span><span class="dow">수</span><span class="dow">목</span><span class="dow">금</span><span class="dow">토</span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d no">1</span><span class="d no">2</span><span class="d no">3</span><span class="d no">4</span><span class="d no">5</span><span class="d no">6</span><span class="d no">7</span><span class="d no">8</span><span class="d no">9</span><span class="d no">10</span><span class="d no">11</span><span class="d">12</span><span class="d">13</span><span class="d">14</span><span class="d">15</span><span class="d">16</span><span class="d no">17</span><span class="d no">18</span><span class="d">19</span><span class="d on">20</span><span class="d">21</span><span class="d">22</span><span class="d">23</span><span class="d no">24</span><span class="d no">25</span><span class="d">26</span><span class="d">27</span><span class="d">28</span><span class="d">29</span><span class="d">30</span><span class="d no">31</span></div><p class="chelp">※ 픽업 장소가 스노클링과 다를 수 있어 숙소를 한 번 더 확인합니다.</p></div>
             <div class="asub"><div class="f"><label>숙소입력 (가장 가까운 픽업 장소 자동 추천)</label><div class="in filled">하얏트 리젠시 와이키키 비치 리조트</div><p class="help">※ 구글 자동완성으로 숙소를 치시면 가장 가까운 장소를 추천해 드립니다.</p></div><div class="pick"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"></path><circle cx="12" cy="10" r="2.6"></circle></svg><span class="pk"><i>픽업 장소</i><u>와이키키 하얏트 리젠시 앞</u></span><a>다른 곳으로</a></div></div>
           </div>
         </div>

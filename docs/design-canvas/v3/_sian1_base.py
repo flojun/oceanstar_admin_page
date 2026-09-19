@@ -69,6 +69,7 @@ I_CHECK  = icon('<path d="M4 12.5l5 5L20 6.5"></path>', 16, 2.2)
 I_ARROW  = icon('<path d="M7 17L17 7M17 7H9M17 7v8"></path>', 15)
 I_RIGHT  = icon('<path d="M9 6l6 6-6 6"></path>', 16, 2)
 I_LEFT   = icon('<path d="M15 6l-6 6 6 6"></path>', 16, 2)
+I_DOWN   = icon('<path d="M6 9l6 6 6-6"></path>', 15, 2)
 I_MINUS  = icon('<path d="M5 12h14"></path>', 16, 2)
 I_PLUS   = icon('<path d="M12 5v14M5 12h14"></path>', 16, 2)
 I_LOCK   = icon('<path d="M6 10V8a6 6 0 0 1 12 0v2"></path>'
