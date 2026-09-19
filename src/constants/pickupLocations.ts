@@ -4,7 +4,6 @@ export const PICKUP_LOCATIONS = [
     "카라이",
     "HM",
     "녹색천막",
-    "소화전",
     "WR",
     "HP",
     "HGI",
@@ -20,7 +19,7 @@ export type PickupLocation = typeof PICKUP_LOCATIONS[number];
 export const PICKUP_MAPPINGS: Record<string, string> = {
     'HP': 'Hyatt Place',
     '녹색천막': 'A Green Tent (located behind the Hyatt Regency Hotel)',
-    '소화전': '소화전',
+    '소화전': 'A Green Tent (located behind the Hyatt Regency Hotel)', // 폐지: 옛 예약만 남아 있어 녹색천막으로 안내
     'WR': 'Waikiki Resort',
     'HGI': 'Hilton Garden Inn',
     'HM': 'H&M',
@@ -37,7 +36,7 @@ export const PICKUP_MAPPINGS: Record<string, string> = {
 export const PICKUP_MAPPINGS_EN: Record<string, string> = {
     'HP': 'Hyatt Place',
     '녹색천막': 'A Green Tent (located behind the Hyatt Regency Hotel)',
-    '소화전': 'Sohwajeon (Fire Hydrant)',
+    '소화전': 'A Green Tent (located behind the Hyatt Regency Hotel)', // 폐지: 옛 예약만 남아 있어 녹색천막으로 안내
     'WR': 'Waikiki Resort',
     'HGI': 'Hilton Garden Inn',
     'HM': 'H&M',
