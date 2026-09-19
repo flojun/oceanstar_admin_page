@@ -18,9 +18,12 @@
 """
 import io, sys
 sys.path.insert(0, ".")
-from _sian1_base import (T, TOURS, TOTALS, PICK_CSS, pick_row, page,
+from _sian1_base import (T, TOURS, TOTALS, PICK_CSS, pick_row, page, icon,
                          I_X, I_ARROW, I_MINUS, I_PLUS, I_LOCK, I_CHECK,
                          I_LEFT, I_RIGHT, I_DOWN)
+
+# 1차 투어와 같은 날임을 알리는 작은 x. 마감일의 취소선과 구분된다.
+I_CLASH = icon('<path d="M6 6l12 12M18 6L6 18"></path>', 10, 3.4)
 
 # ────────────────────────────── 공통 조각 ──────────────────────────────
 
@@ -32,18 +35,25 @@ FULL = {18, 23, 30}               # 남은 자리가 선택 인원보다 적은 
 WEEKEND = {3, 4, 10, 11, 17, 18, 24, 25, 31}   # 토·일
 
 
-def month_grid(sel=None, blocked=(), note=None, cell=34, year=2026, month=10):
+def month_grid(sel=None, blocked=(), note=None, cell=34, year=2026, month=10,
+               clash=None):
     """블록 처리한 날은 취소선으로 남긴다. 흐리게만 두면 며칠이 막혔는지
-    읽히지 않아 '인원에 맞는 날짜만' 이라는 규칙 자체가 전달되지 않는다."""
+    읽히지 않아 '인원에 맞는 날짜만' 이라는 규칙 자체가 전달되지 않는다.
+
+    clash 는 1차 투어와 같은 날이라 막힌 날이다. 마감된 날과 막힌 이유가
+    다르므로 표시도 달라야 한다. 취소선 대신 x 를 올린다."""
     dows = "".join(f'<span class="dow">{d}</span>' for d in "일월화수목금토")
     cells = ['<span class="d"></span>'] * LEAD
     for d in range(1, 32):
-        cls = "d"
-        if d in blocked:
+        cls, mark = "d", ""
+        if d == clash:
+            cls += " clash"
+            mark = f"<i>{I_CLASH}</i>"
+        elif d in blocked:
             cls += " no"
         if d == sel:
             cls += " on"
-        cells.append(f'<span class="{cls}">{d}</span>')
+        cells.append(f'<span class="{cls}">{d}{mark}</span>')
     return (f'<div class="cal" style="--cell:{cell}px">'
             + cal_head(year, month) +
             f'<div class="cgrid">{dows}{"".join(cells)}</div>'
@@ -221,12 +231,17 @@ BASE = """
 .cgrid .d{height:var(--cell);display:flex;align-items:center;justify-content:center;
   font-size:13px;font-weight:600;color:var(--ink);border-radius:10px}
 .cgrid .d.no{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+/* 1차 투어와 같은 날. 자리가 없어 막힌 날(취소선)과 이유가 달라 표시도
+   다르다. 숫자는 읽히게 두고 x 를 모서리에 올린다. */
+.cgrid .d.clash{position:relative;color:var(--text);font-weight:700;
+  background:rgba(210,89,26,.11)}
+.cgrid .d.clash i{position:absolute;top:1px;right:2px;display:flex;color:var(--food)}
 .cgrid .d.on{background:var(--ink);color:#fff;font-weight:800}
 .chelp{margin-top:9px;font-size:11.5px;color:var(--muted);line-height:1.5}
 
 /* 인원을 바꾸면 달력이 조용히 바뀐다. 무엇이 다시 계산됐는지 먼저 말한다. */
-.recalc{display:flex;gap:7px;margin-bottom:9px;padding:8px 12px;border-radius:12px;
-  background:var(--soft);font-size:12px;color:var(--ink);line-height:1.45}
+.recalc{display:block;margin-bottom:9px;padding:8px 12px;border-radius:12px;
+  background:var(--soft);font-size:12px;color:var(--ink);line-height:1.5}
 .recalc b{font-weight:800}
 
 /* 활동별 묶음 - 콤보는 '날짜 + 숙소' 가 두 벌이다. 순서대로 늘어놓으면
@@ -398,7 +413,7 @@ def combo_body(mobile, kind="marine"):
         head = (f'<div class="grp">{glab(T["step1"])}'
                 + chip(4, "두 활동이 서로 다른 날에 열립니다") + "</div>")
         sec_name, sec_rule = "서핑 강습", "[운영 시간 확정 필요]"
-        sec_sel, sec_blocked = 21, PAST | {17}
+        sec_sel, sec_blocked = 21, PAST
         sec_note = ("※ 서핑의 운휴 요일은 아직 받지 못했습니다. 지금은 스노클링과 "
                     "같은 날만 막아 두었습니다.")
     else:
@@ -406,7 +421,7 @@ def combo_body(mobile, kind="marine"):
                 + chip(2, "두 활동이 서로 다른 날에 열립니다") + "</div>"
                 + f'<div class="grp">{glab("콤보 세부 옵션 선택")}{combo_opts()}</div>')
         sec_name, sec_rule = "패러세일링 / 제트스키", "주말 및 공휴일 불가"
-        sec_sel, sec_blocked = 20, PAST | WEEKEND | {17}
+        sec_sel, sec_blocked = 20, PAST | WEEKEND
         sec_note = "※ 픽업 장소가 스노클링과 다를 수 있어 숙소를 한 번 더 확인합니다."
 
     return f"""
@@ -426,8 +441,10 @@ def combo_body(mobile, kind="marine"):
           <div class="ahead"><span class="ano">2</span>
             <b>{sec_name}</b><i>{sec_rule}</i></div>
           <div class="abody">
-            <p class="recalc">스노클링 날짜(10월 17일)와 <b>같은 날은 고를 수 없습니다.</b></p>
-            {month_grid(sel=sec_sel, blocked=sec_blocked, cell=cell, note=sec_note)}
+            <p class="recalc">스노클링 날짜와 <b>같은 날은 고를 수 없습니다.</b>
+              달력에서 ✕ 로 표시한 10월 17일입니다.</p>
+            {month_grid(sel=sec_sel, blocked=sec_blocked, cell=cell, note=sec_note,
+                        clash=17)}
             <div class="asub">{stay_fields()}</div>
           </div>
         </div>
