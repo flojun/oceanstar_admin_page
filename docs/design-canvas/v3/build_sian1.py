@@ -9,7 +9,7 @@
 콤보 규칙은 지어낸 것이 아니라 ReservationClientPage.tsx 의 combo_marine
 분기 그대로다.
   - 콤보 세부 옵션 3가지 ($210 / $210 / $310)
-  - 거북이 스노클링 시간 1부(08:00) / 2부(11:00)
+  - 거북이 스노클링 시간 1부(07:30) / 2부(10:30)
   - secondaryDate: 주말·공휴일 불가, 1차 투어 날짜와 같은 날 불가
   - secondaryPickupLocationName + 픽업 장소를 한 번 더 받는다
 
@@ -115,7 +115,7 @@ COMBO_OPTS = [
     ("거북이 스노클링 + 제트 스키", "$210", False),
     ("거북이 스노클링 + 패러세일링 + 제트스키", "$310", False),
 ]
-COMBO_TIMES = [("1부", "08:00 AM", True), ("2부", "11:00 AM", False)]
+COMBO_TIMES = [("1부", "07:30 AM", True), ("2부", "10:30 AM", False)]
 
 
 def combo_opts():
@@ -366,7 +366,7 @@ def single_body(mobile, picked):
     cell = 38 if mobile else 34
     if picked:
         first = (f'<div class="grp">{glab(T["step1"])}'
-                 + chip(0, '1부 08:00-11:00 · 2부 11:00-14:00') + '</div>'
+                 + chip(0, '1부 07:30-11:30 · 2부 10:30-14:30') + '</div>'
                  + f'<div class="grp">{glab("거북이 스노클링 시간 선택")}'
                  + combo_times() + '</div>')
     else:
@@ -416,7 +416,7 @@ def combo_body(mobile, kind="marine"):
       <div class="grp">{glab('날짜와 픽업', '활동마다 따로 받습니다')}
         <div class="act">
           <div class="ahead"><span class="ano">1</span>
-            <b>거북이 스노클링</b><i>1부 08:00-11:00</i></div>
+            <b>거북이 스노클링</b><i>1부 07:30-11:30</i></div>
           <div class="abody">
             {RECALC}{month_grid(sel=17, blocked=PAST | FULL, cell=cell)}
             <div class="asub">{stay_fields()}</div>
@@ -449,7 +449,7 @@ def side(state):
     </aside>"""
     if state == "B":
         rows = """<li><span>날짜</span><b>2026-10-17 (토)</b></li>
-        <li><span>시간</span><b>1부 08:00-11:00</b></li>
+        <li><span>시간</span><b>1부 07:30-11:30</b></li>
         <li><span>인원</span><b>성인 2 · 아동 0</b></li>
         <li><span>픽업</span><b>하얏트 리젠시 앞</b></li>"""
         return f"""<aside class="side">
