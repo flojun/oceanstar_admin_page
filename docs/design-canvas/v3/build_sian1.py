@@ -300,6 +300,7 @@ CSS_D = """
 .pay.wait{background:var(--line);color:var(--text)}
 .safe{display:flex;gap:7px;margin-top:12px;font-size:11.5px;color:var(--muted);line-height:1.55}
 .safe svg{margin-top:2px}
+.s-note{margin-top:6px;font-size:11.5px;color:var(--text);line-height:1.5}
 .s-empty{margin-top:16px;padding:14px;border-radius:12px;background:#fff;
   border:1px dashed var(--line);font-size:12.5px;color:var(--muted);line-height:1.6}
 """
@@ -381,16 +382,35 @@ def single_body(mobile, picked):
         {stay_fields()}{guest}</div>"""
 
 
-def combo_body(mobile):
-    """C - 두 활동이 다른 날에 열린다. 날짜와 숙소를 활동별로 두 벌 받는다."""
+def combo_body(mobile, kind="marine"):
+    """C·D - 두 활동이 다른 날에 열린다. 날짜와 숙소를 활동별로 두 벌 받는다.
+
+    marine  패러세일링/제트스키. ReservationClientPage 의 combo_marine 분기 그대로.
+    surf    서핑. 코드에는 아직 분기가 없어 marine 의 구조만 그대로 따르되,
+            marine 에만 있는 것(세부 옵션 3가지, 주말·공휴일 불가)은 넣지 않는다.
+            서핑의 운휴 규칙은 아직 못 받았으므로 확인 문구로 남긴다.
+    """
     guest = GUEST_M if mobile else GUEST
     cell = 34 if mobile else 30
-    # 2차 활동: 주말·공휴일 불가 + 1차 투어 날짜(17일)와 같은 날 불가
-    sec_blocked = PAST | WEEKEND | {17}
+    surf = kind == "surf"
+
+    if surf:
+        head = (f'<div class="grp">{glab(T["step1"])}'
+                + chip(4, "두 활동이 서로 다른 날에 열립니다") + "</div>")
+        sec_name, sec_rule = "서핑 강습", "[운영 시간 확정 필요]"
+        sec_sel, sec_blocked = 21, PAST | {17}
+        sec_note = ("※ 서핑의 운휴 요일은 아직 받지 못했습니다. 지금은 스노클링과 "
+                    "같은 날만 막아 두었습니다.")
+    else:
+        head = (f'<div class="grp">{glab(T["step1"])}'
+                + chip(2, "두 활동이 서로 다른 날에 열립니다") + "</div>"
+                + f'<div class="grp">{glab("콤보 세부 옵션 선택")}{combo_opts()}</div>')
+        sec_name, sec_rule = "패러세일링 / 제트스키", "주말 및 공휴일 불가"
+        sec_sel, sec_blocked = 20, PAST | WEEKEND | {17}
+        sec_note = "※ 픽업 장소가 스노클링과 다를 수 있어 숙소를 한 번 더 확인합니다."
+
     return f"""
-      <div class="grp">{glab(T['step1'])}
-        {chip(2, '두 활동이 서로 다른 날에 열립니다')}</div>
-      <div class="grp">{glab('콤보 세부 옵션 선택')}{combo_opts()}</div>
+      {head}
       <div class="grp">{glab('거북이 스노클링 시간 선택')}{combo_times()}</div>
       <div class="grp">{glab(T['step2'], '24개월 미만 무료')}{pax_block()}</div>
       <div class="grp">{glab('날짜와 픽업', '활동마다 따로 받습니다')}
@@ -404,11 +424,10 @@ def combo_body(mobile):
         </div>
         <div class="act">
           <div class="ahead"><span class="ano">2</span>
-            <b>패러세일링 / 제트스키</b><i>주말 및 공휴일 불가</i></div>
+            <b>{sec_name}</b><i>{sec_rule}</i></div>
           <div class="abody">
             <p class="recalc">스노클링 날짜(10월 17일)와 <b>같은 날은 고를 수 없습니다.</b></p>
-            {month_grid(sel=20, blocked=sec_blocked, cell=cell,
-                        note='※ 픽업 장소가 스노클링과 다를 수 있어 숙소를 한 번 더 확인합니다.')}
+            {month_grid(sel=sec_sel, blocked=sec_blocked, cell=cell, note=sec_note)}
             <div class="asub">{stay_fields()}</div>
           </div>
         </div>
@@ -443,18 +462,32 @@ def side(state):
       <div class="pay">{T['checkout_btn']} {I_ARROW}</div>
       <p class="safe">{I_LOCK}<span>{T['safe_notice']}</span></p>
     </aside>"""
-    rows = """<li><span>옵션</span><b>패러세일링 ($210)</b></li>
+    if state == "D":
+        # 서핑 정가가 아직 없다. ₩261,018 은 $190 환산값이고 시안 B 비교표에도
+        # 같은 값이 쓰인다. 지어낸 수가 아니라 환산값이라는 것을 옆에 적는다.
+        rows = """<li><span>인원</span><b>성인 2 · 아동 0</b></li>
+        <li><span>스노클링 날짜</span><b>10-17 (토) 1부</b></li>
+        <li><span>스노클링 픽업</span><b>하얏트 리젠시 앞</b></li>
+        <li><span>서핑 날짜</span><b>10-21 (수)</b></li>
+        <li><span>서핑 픽업</span><b>하얏트 리젠시 앞</b></li>"""
+        idx, per, tot = 4, "성인 2 × ₩261,018", "₩522,036"
+        note = '<p class="s-note">환산값입니다. 원화 정가 확정 전.</p>'
+    else:
+        rows = """<li><span>옵션</span><b>패러세일링 ($210)</b></li>
         <li><span>인원</span><b>성인 2 · 아동 0</b></li>
         <li><span>스노클링 날짜</span><b>10-17 (토) 1부</b></li>
         <li><span>스노클링 픽업</span><b>하얏트 리젠시 앞</b></li>
         <li><span>패러세일링 날짜</span><b>10-20 (화)</b></li>
         <li><span>패러세일링 픽업</span><b>하얏트 리젠시 앞</b></li>"""
+        idx, per, tot = 2, "성인 2 × ₩289,360", "₩578,720"
+        note = ""
     return f"""<aside class="side">
-      <div class="s-tour"><img src="{TOURS[2][3]}" alt=""><b>{TOURS[2][0]}</b></div>
+      <div class="s-tour"><img src="{TOURS[idx][3]}" alt=""><b>{TOURS[idx][0]}</b></div>
       <ul class="s-list">{rows}</ul>
       <div class="s-rule"></div>
-      <ul class="s-sum"><li><span>성인 2 × ₩289,360</span><b class="n">₩578,720</b></li></ul>
-      <div class="s-total"><span>{T['total_payment']}</span><b class="n">₩578,720</b></div>
+      <ul class="s-sum"><li><span>{per}</span><b class="n">{tot}</b></li></ul>
+      <div class="s-total"><span>{T['total_payment']}</span><b class="n">{tot}</b></div>
+      {note}
       <div class="cur"><a class="on">KRW</a><a>USD</a></div>
       <div class="pay">{T['checkout_btn']} {I_ARROW}</div>
       <p class="safe">{I_LOCK}<span>{T['safe_notice']}</span></p>
@@ -473,6 +506,9 @@ def bar(state):
     if state == "B":
         sub = f"{TOURS[0][0]} · 2026-10-17 (토) 성인 2명"
         tot = "₩303,140"
+    elif state == "D":
+        sub = "서핑 · 스노클링 10-17 (토), 서핑 10-21 (수) · 환산값, 정가 확정 전"
+        tot = "₩522,036"
     else:
         sub = "패러세일링 · 스노클링 10-17 (토), 패러세일링 10-20 (화)"
         tot = "₩578,720"
@@ -488,7 +524,10 @@ def bar(state):
 # ────────────────────────────── 조립 ──────────────────────────────
 
 def build(state, mobile, title, out):
-    body = combo_body(mobile) if state == "C" else single_body(mobile, state == "B")
+    if state in ("C", "D"):
+        body = combo_body(mobile, "surf" if state == "D" else "marine")
+    else:
+        body = single_body(mobile, state == "B")
     top = (f'<div class="m-top"><h1>{T["title"]}</h1>'
            f'<span class="x">{I_X}</span></div>')
     if mobile:
@@ -508,5 +547,7 @@ build("A", False, "시안 1 · 투어 미선택 — 데스크탑", "Sian1A.dc.ht
 build("A", True,  "시안 1 · 투어 미선택 — 모바일",   "Sian1A_M.dc.html")
 build("B", False, "시안 1 · 단품 선택됨 — 데스크탑", "Sian1B.dc.html")
 build("B", True,  "시안 1 · 단품 선택됨 — 모바일",   "Sian1B_M.dc.html")
-build("C", False, "시안 1 · 콤보 상품 — 데스크탑",   "Sian1C.dc.html")
-build("C", True,  "시안 1 · 콤보 상품 — 모바일",     "Sian1C_M.dc.html")
+build("C", False, "시안 1 · 콤보 · 패러세일링/제트스키 — 데스크탑", "Sian1C.dc.html")
+build("C", True,  "시안 1 · 콤보 · 패러세일링/제트스키 — 모바일",   "Sian1C_M.dc.html")
+build("D", False, "시안 1 · 콤보 · 서핑 — 데스크탑", "Sian1D.dc.html")
+build("D", True,  "시안 1 · 콤보 · 서핑 — 모바일",   "Sian1D_M.dc.html")
