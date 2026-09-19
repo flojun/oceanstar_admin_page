@@ -109,7 +109,7 @@ em{font-style:italic;font-weight:400}
 /* ── 공통 섹션 ────────────────────────────────────────────────────── */
 .sect{padding:104px var(--pad) 0}
 .center{text-align:center}
-.sect h2,.dark h2{font-size:46px;line-height:1.26;margin-top:20px}
+.sect h2,.panel h2{font-size:46px;line-height:1.26;margin-top:20px}
 .filters{display:inline-flex;gap:6px;margin-top:28px;background:#fff;
   border:1px solid var(--line);border-radius:999px;padding:5px}
 .fp{display:inline-flex;align-items:center;height:38px;padding:0 18px;border-radius:999px;
@@ -150,44 +150,50 @@ em{font-style:italic;font-weight:400}
 .detail{display:flex;align-items:center;justify-content:center;height:30px;margin-top:4px;
   font-size:12.5px;font-weight:700;color:var(--text);white-space:nowrap}
 
-/* ── 검은 비교 섹션 ───────────────────────────────────────────────── */
-.dark{background:var(--ink);color:rgba(255,255,255,.72);margin-top:104px;
+/* ── 비교 섹션 ────────────────────────────────────────────────────── */
+/* 전에는 먹색 판이었는데 흰 본문 사이에서 갑자기 검어져 구멍처럼 보였다.
+   지금은 본문 종이보다 한 톤 깊은 아이보리(--soft) 다. 히어로 아래 지표
+   띠와 같은 값이라, 페이지가 어두워지는 게 아니라 같은 종이에서 한 칸
+   들어간 것으로 읽힌다. 글자 · 선 · 줄무늬 · 체크 · 버튼을 전부 먹 쪽으로
+   뒤집었다. 배경만 바꾸면 흰 글자가 흰 바탕에 얹혀 사라진다. */
+.panel{background:var(--soft);color:rgba(16,20,24,.72);margin-top:104px;
   padding:96px var(--pad) 104px}
-.dark h2{color:#fff}
-.dark .pill{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);
-  color:#fff}
+.panel h2{color:var(--ink)}
+.panel .pill{background:#fff;border-color:var(--line);
+  color:var(--ink)}
 
 /* 표는 줄 단위로 쌓는다. 한 줄이 한 grid 라 칸이 저절로 맞고,
    추천 칸에만 배경을 주는 것도 칸마다 class 하나로 끝난다. */
 .cmp{margin-top:56px}
 .crow{display:grid;grid-template-columns:268px repeat(5,1fr);align-items:center}
 /* 줄마다 선을 긋지 않는다. 옅은 줄무늬만으로 가로로 읽힌다. */
-.crow:nth-child(2n+1) .cc:not(.on){background:rgba(255,255,255,.028)}
+.crow:nth-child(2n+1) .cc:not(.on){background:rgba(16,20,24,.035)}
 .cc{padding:15px 14px;text-align:center;min-height:56px;display:flex;
   align-items:center;justify-content:center}
 .cc.lead{justify-content:center;text-align:center;font-size:15px;
-  font-weight:600;color:#fff;line-height:1.45}
-.cc.on{background:rgba(255,255,255,.07)}
-.cc > svg{color:var(--sky)}
+  font-weight:600;color:var(--ink);line-height:1.45}
+.cc.on{background:#fff}
+.cc > svg{color:var(--sea)}
 
 .chead .cc{align-items:flex-start;flex-direction:column;justify-content:flex-end;
   gap:0;padding:22px 16px 18px;text-align:left;min-height:168px;
-  border-bottom:1px solid rgba(255,255,255,.14)}
-.chead .cc.on{border-bottom-color:var(--sky);border-radius:16px 16px 0 0}
+  border-bottom:1px solid rgba(16,20,24,.14)}
+.chead .cc.on{border-bottom-color:var(--sea);border-radius:16px 16px 0 0}
 .ctag{display:inline-block;margin-bottom:10px;padding:4px 10px;border-radius:999px;
-  background:var(--sky);color:var(--ink);font-size:10.5px;font-weight:800}
+  background:var(--deep);color:#fff;font-size:10.5px;font-weight:800}
 .chead b{font-family:'SUIT',system-ui,sans-serif;font-size:15px;font-weight:700;
-  color:#fff;line-height:1.4}
+  color:var(--ink);line-height:1.4}
 .chead em{display:block;margin-top:12px;font-family:'SUIT',system-ui,sans-serif;
-  font-size:21px;font-weight:800;font-style:normal;color:#fff;line-height:1.1}
+  font-size:21px;font-weight:800;font-style:normal;color:var(--ink);line-height:1.1}
 .chead i{display:block;margin-top:5px;font-size:10.5px;font-style:normal;
-  color:rgba(255,255,255,.5);line-height:1.45}
+  color:var(--text);line-height:1.45}  /* 아이보리 위에서 .55 먹은 4.08:1 로
+     미달이라 --text 로 올렸다(7.07:1). 10.5px 캡션이라 여유가 필요하다. */
 
 .cfoot .cc{flex-direction:column;justify-content:center;padding:20px 14px 22px}
 .cfoot .cc.on{border-radius:0 0 16px 16px}
-.cfoot .lead{font-size:15px;font-weight:600;color:#fff}
-.dark .book{margin-top:0;background:var(--sky);color:var(--ink);padding:0 18px}
-.dark .detail{color:rgba(255,255,255,.66)}
+.cfoot .lead{font-size:15px;font-weight:600;color:var(--ink)}
+.panel .book{margin-top:0;background:var(--ink);color:#fff;padding:0 18px}
+.panel .detail{color:rgba(16,20,24,.66)}
 
 /* ── 리뷰 섹션 ────────────────────────────────────────────────────── */
 /* 머리줄: 제목과 점수 블록이 바닥선을 맞추고, 선 하나로 아래 카드와 나뉜다.
@@ -490,7 +496,7 @@ em{font-style:italic;font-weight:400}
   </span>
 </div></div>
 </section>
-<section class="dark">
+<section class="panel">
   <div class="center rise">
     <span class="pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> 상품 고르기</span>
     <h2>다섯 가지 바다,<br><span class="hl">당신에게 맞는 하나</span></h2>

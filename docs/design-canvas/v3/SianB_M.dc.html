@@ -151,12 +151,16 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
 .detail{display:flex;align-items:center;justify-content:center;height:38px;
   font-size:13px;font-weight:700;color:var(--text);white-space:nowrap}
 
-/* ── 검은 상품 고르기 ─────────────────────────────────────────────── */
-.dark{background:var(--ink);color:rgba(255,255,255,.8);margin-top:60px;
+/* ── 상품 고르기 ──────────────────────────────────────────────────── */
+/* 데스크탑과 같다 - 먹색 판을 본문 종이보다 한 톤 깊은 아이보리(--soft) 로
+   바꾸고 안의 색을 전부 뒤집었다. 모바일은 줄 이름 칸이 sticky 라 배경이
+   비치면 안 되는데, 그 칸의 줄무늬는 투명도를 못 쓰므로 아이보리 위에 먹
+   3.5% 를 미리 섞은 #E7E5E1 로 다시 계산해 넣었다. */
+.panel{background:var(--soft);color:rgba(16,20,24,.76);margin-top:60px;
   padding:56px var(--pad) 60px}
-.dark h2{color:#fff;font-size:27px;line-height:1.35;margin-top:14px}
-.dark .pill{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);
-  color:#fff}
+.panel h2{color:var(--ink);font-size:27px;line-height:1.35;margin-top:14px}
+.panel .pill{background:#fff;border-color:var(--line);
+  color:var(--ink)}
 /* 가로로 미는 표. 줄 이름 칸만 sticky 로 왼쪽에 붙는다.
    sticky 칸은 배경이 비치면 안 되므로 줄무늬를 투명도가 아니라 같은 값을
    미리 섞은 불투명 색(#171B1E)으로 준다. */
@@ -167,35 +171,35 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
 .cc{display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:12px 10px;min-height:52px;text-align:center}
 .cc.lead{position:sticky;left:0;z-index:2;text-align:center;padding:12px 12px;
-  font-size:12.5px;font-weight:600;line-height:1.45;color:#fff;background:var(--ink);
-  box-shadow:10px 0 14px -10px rgba(0,0,0,.6)}
-.crow:nth-child(2n+1) .cc:not(.on){background:rgba(255,255,255,.028)}
-.crow:nth-child(2n+1) .cc.lead{background:#171B1E}
-.cc.on{background:rgba(255,255,255,.07)}
-.cc > svg{color:var(--sky)}
+  font-size:12.5px;font-weight:600;line-height:1.45;color:var(--ink);background:var(--soft);
+  box-shadow:10px 0 14px -10px rgba(16,20,24,.28)}
+.crow:nth-child(2n+1) .cc:not(.on){background:rgba(16,20,24,.035)}
+.crow:nth-child(2n+1) .cc.lead{background:#E7E5E1}
+.cc.on{background:#fff}
+.cc > svg{color:var(--sea)}
 .chead .cc{justify-content:flex-end;align-items:flex-start;text-align:left;
   min-height:142px;padding:16px 12px 14px;
-  border-bottom:1px solid rgba(255,255,255,.14)}
-.chead .cc.on{border-bottom-color:var(--sky);border-radius:14px 14px 0 0}
+  border-bottom:1px solid rgba(16,20,24,.14)}
+.chead .cc.on{border-bottom-color:var(--sea);border-radius:14px 14px 0 0}
 .ctag{display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:999px;
-  background:var(--sky);color:var(--ink);font-size:10px;font-weight:800}
+  background:var(--deep);color:#fff;font-size:10px;font-weight:800}
 .chead b{font-family:'SUIT',system-ui,sans-serif;font-size:12.5px;font-weight:700;
-  color:#fff;line-height:1.4}
+  color:var(--ink);line-height:1.4}
 /* 가격은 접히면 안 된다. 138px 칸에서 '₩2,066,850 ~' 만 두 줄로 접혀,
    바닥 정렬이라 마지막 줄은 맞는데 눈이 읽는 첫 줄이 18px 위로 올라가
    그 칸만 어긋나 보였다(상단 90 vs 나머지 108). 한 줄로 두면 90px 이
    필요하고 칸 안쪽이 114px 이라 들어간다. 데스크탑은 칸이 204px 라
    원래 접히지 않는다. */
 .chead em{display:block;white-space:nowrap;margin-top:9px;font-family:'SUIT',system-ui,sans-serif;
-  font-size:17px;font-weight:800;font-style:normal;color:#fff;line-height:1.1}
+  font-size:17px;font-weight:800;font-style:normal;color:var(--ink);line-height:1.1}
 .cfoot .cc{padding:16px 10px 18px}
 .cfoot .cc.on{border-radius:0 0 14px 14px}
-.cfoot .lead{font-size:12.5px;font-weight:600;color:#fff}
+.cfoot .lead{font-size:12.5px;font-weight:600;color:var(--ink)}
 .cfoot .book{width:100%;height:42px;margin-top:0;font-size:13px}
-.cfoot .book{background:rgba(255,255,255,.14);color:#fff}
-.cfoot .cc.on .book{background:var(--sky);color:var(--ink)}
+.cfoot .book{background:rgba(16,20,24,.07);color:var(--ink)}
+.cfoot .cc.on .book{background:var(--ink);color:#fff}
 .cfoot .detail{background:none;height:32px;font-size:12px;
-  color:rgba(255,255,255,.7)}
+  color:rgba(16,20,24,.66)}
 
 /* ── 리뷰 ─────────────────────────────────────────────────────────── */
 .rv-sum{margin-top:24px;padding-bottom:24px;border-bottom:1px solid var(--line)}
@@ -407,7 +411,7 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
   </div>
 </div></div>
 </section>
-<section class="dark">
+<section class="panel">
   <div class="center">
     <span class="pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> 상품 고르기</span>
     <h2>다섯 가지 바다,<br><span class="hl">당신에게 맞는 하나</span></h2>
