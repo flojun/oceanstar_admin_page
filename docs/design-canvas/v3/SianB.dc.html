@@ -346,7 +346,11 @@ em{font-style:italic;font-weight:400}
   white-space:nowrap}
 .ct-ig{background:#fff;color:var(--ink)}
 .ct-kakao{background:#FFD400;color:#191600}
-.ct-food{background:var(--sky);color:var(--ink)}
+/* 맛집은 남의 채널이 아니라 우리 것이라 우리 색을 입힌다. 연한 --sky 는
+   카카오 노랑 옆에서 바래 보였고, 보드가 강조색으로 쓰는 값이라 3순위 링크가
+   강조색을 입고 있었다. --deep 은 같은 파랑 계열의 가장 깊은 단으로, 노랑과
+   채도가 맞붙지 않아 뒤로 물러나면서도 눌리는 판으로 읽힌다. 흰 글자 7.8:1. */
+.ct-food{background:var(--deep);color:#fff}
 /* ── 스크롤 연출. 쉬는 상태가 기본값, 키프레임은 '숨김 → 보임' 방향뿐 ──── */
 @media (prefers-reduced-motion: no-preference){
   @supports (animation-timeline: view()){
