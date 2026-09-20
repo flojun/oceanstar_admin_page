@@ -1296,8 +1296,8 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                         </h2>
                         <div className="flex flex-col gap-3">
                           {[
-                            { id: 'morning1', label: lang === 'en' ? '1st Trip (08:00 AM)' : '1부 (08:00 AM)' },
-                            { id: 'morning2', label: lang === 'en' ? '2nd Trip (11:00 AM)' : '2부 (11:00 AM)' }
+                            { id: 'morning1', label: lang === 'en' ? '1st Trip (07:30 AM pickup)' : '1부 (픽업 07:30)' },
+                            { id: 'morning2', label: lang === 'en' ? '2nd Trip (10:30 AM pickup)' : '2부 (픽업 10:30)' }
                           ].map(opt => (
                             <div 
                                key={opt.id}

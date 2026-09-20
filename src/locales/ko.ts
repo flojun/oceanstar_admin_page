@@ -62,8 +62,8 @@ const ko = {
       customizable: "원하는 옵션 커스터마이징 가능",
       equip_snacks: "스노클 장비/구명조끼, 음료/간식",
       cheese_wine: "치즈보드와 와인 제공",
-      time_1: "1부 08:00 - 11:00",
-      time_2: "2부 11:00 - 14:00",
+      time_1: "1부 07:30 - 11:30 (픽업 포함)",
+      time_2: "2부 10:30 - 14:30 (픽업 포함)",
       time_format: "{start} - {end}",
       custom_price: "인원수 연동 맞춤형 요금 적용"
     }

@@ -63,8 +63,8 @@ const en = {
       equip_snacks: "Snorkeling gear/Life jackets, Beverage/Snacks provided",
       cheese_wine: "Cheese board and wine provided",
       pickup_service: "Complimentary pickup service",
-      time_1: "Session 1: 08:00 - 11:00",
-      time_2: "Session 2: 11:00 - 14:00",
+      time_1: "Session 1: 07:30 - 11:30 (incl. pickup)",
+      time_2: "Session 2: 10:30 - 14:30 (incl. pickup)",
       time_format: "{start} - {end}",
       custom_price: "Custom tiered pricing based on pax count"
     }
