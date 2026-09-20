@@ -178,6 +178,14 @@ em{font-style:italic;font-weight:400}
    두고, 본문 줄에만 가는 선을 그어 옆 칸 줄무늬가 끊기는 자리와 맞춘다. */
 .crow:not(.chead):not(.cfoot) .cc.on{box-shadow:inset 0 -1px 0 rgba(16,20,24,.11)}
 .cc > svg{color:var(--sea)}
+/* 본문 줄은 높이를 하나로 맞춘다. 라벨이 한 줄인 줄과 두 줄인 줄이 섞이면
+   체크가 세로로 흔들리고, 짧은 칸이 줄 한가운데 떠서 줄무늬에 위아래로 틈이
+   생긴다. stretch 로 칸을 줄 높이만큼 늘리고, 이 판에서 가장 큰 줄을 최소값으로
+   준다. 한 줄 라벨 15px * 1.45 + 여백 30px = 51.8 이라 .cc 의 56px 이 그대로 바닥이다.
+   값은 판마다 다르다. 영문판은 라벨이 더 길어 build_en.py 가 덮어쓴다. */
+.crow:not(.chead):not(.cfoot){align-items:stretch}
+.crow:not(.chead):not(.cfoot) .cc{min-height:56px}
+
 
 /* 머리 칸은 가운데 정렬이다. 이 표의 본문(체크)이 칸 한가운데 서므로,
    머리만 왼쪽에 붙이면 한 열이 축을 둘 갖는다. 상품명은 칸 왼쪽 끝,

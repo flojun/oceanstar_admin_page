@@ -53,6 +53,10 @@ EN_CSS_DESK = """
 .ac-p b,.cc em,.strip b,.rv-score b,.rv-n b{font-variant-numeric:tabular-nums;
   letter-spacing:-.01em}
 .strip i{letter-spacing:.005em}
+/* 비교표 본문 줄 높이. 한글판은 56px 이지만 영문은 'Sunset cruise /
+   with wine and cheese' 가 두 줄이라 74px 이 가장 큰 줄이다. */
+.crow:not(.chead):not(.cfoot) .cc{min-height:74px}
+
 .lab{letter-spacing:.1em}
 """
 
@@ -75,6 +79,10 @@ EN_CSS_MOB = """
 .tc-p b,.cc em,.strip b,.rv-score b,.rv-n b{font-variant-numeric:tabular-nums;
   letter-spacing:-.01em}
 .strip i{letter-spacing:.005em}
+/* 비교표 본문 줄 높이. 124px 칸에서 '100% turtle sighting guarantee' 와
+   'Sunset cruise / with wine and cheese' 가 석 줄이라 77px 이 가장 큰 줄이다. */
+.crow:not(.chead):not(.cfoot) .cc{min-height:77px}
+
 """
 
 # ── 문안 ─────────────────────────────────────────────────────────────
@@ -161,7 +169,7 @@ REPL = [
     ('해양 전문 한국인 크루', 'English-speaking ocean crew'),
     ('수영 못해도 참여 가능', 'Non-swimmers welcome'),
     ('해양 액티비티 4종', 'Four water activities'),
-    ('선셋 크루즈 · 와인과 치즈보드', 'Sunset cruise with wine and cheese'),
+    ('선셋 크루즈 · 와인과 치즈보드', 'Sunset cruise<br>with wine and cheese'),
     ('패러세일링 / 제트스키', 'Parasailing / jet ski'),
     ('서핑 강습', 'Surf lesson'),
     ('보트 단독 대관 · 옵션 커스터마이징', 'Whole boat to your group'),
