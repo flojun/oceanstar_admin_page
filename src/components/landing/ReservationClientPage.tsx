@@ -26,6 +26,32 @@ import GoogleReviews from "@/components/GoogleReviews";
 import Reveal from "@/components/landing/Reveal";
 
 // Helper to format HH:mm:ss string to "hh:mm a"
+/**
+ * 고객에게 보이는 대표 시간은 픽업까지 포함한 시각이다.
+ * 픽업은 출항 30분 전, 드롭 완료는 항구 복귀 30분 뒤라 앞뒤로 30분씩 벌린다.
+ *
+ * tour_settings.start_time / end_time 은 출항·복귀 시각 그대로 둔다.
+ * 그 값을 당기면 두 곳이 깨진다.
+ *   - api/pickup 이 (선셋 출항 - 1부 출항) 차이로 선셋 픽업을 계산한다
+ *   - voucherFiles 의 START_TIME_TO_SET 이 선셋 출항 시각으로 바우처 PDF 세트를
+ *     고른다. 15:00 -> '300' 처럼 값이 그대로 파일과 묶여 있다
+ * 그래서 DB 가 아니라 보여 줄 때만 벌린다.
+ */
+const PICKUP_LEAD_MIN = 30;
+
+const shiftTime = (timeString: string | null | undefined, minutes: number) => {
+  if (!timeString) return '';
+  const [h, m] = timeString.slice(0, 5).split(':').map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return timeString.slice(0, 5);
+  const total = (h * 60 + m + minutes + 24 * 60) % (24 * 60);
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+};
+
+/** 출항 시각 -> 픽업 시각 */
+const pickupStart = (startTime: string | null | undefined) => shiftTime(startTime, -PICKUP_LEAD_MIN);
+/** 항구 복귀 시각 -> 드롭 완료 시각 */
+const dropEnd = (endTime: string | null | undefined) => shiftTime(endTime, PICKUP_LEAD_MIN);
+
 const formatTimeAMPM = (timeString: string | null | undefined) => {
   if (!timeString) return '';
   try {
@@ -876,7 +902,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                                       {tour.is_flat_rate ? (
                                         <span>{t('tour.features.custom_price')}</span>
                                       ) : (
-                                        <span>{isSunset ? t('tour.details.time_variable') : t('tour.features.time_format').replace('{start}', tour.start_time?.slice(0,5) || '07:30').replace('{end}', tour.end_time?.slice(0,5) || '14:30')}</span>
+                                        <span>{isSunset ? t('tour.details.time_variable') : t('tour.features.time_format').replace('{start}', pickupStart(tour.start_time) || '07:30').replace('{end}', dropEnd(tour.end_time) || '14:30')}</span>
                                       )}
                                     </div>
                                   </li>
@@ -1231,7 +1257,7 @@ export default function ReservationClientPage({ lang }: { lang: Language }) {
                               {getTourNameByLang(tour.tour_id, tour.name, lang)}
                             </h3>
                             <p className="text-xs text-slate-500 mb-3">
-                              {tour.is_flat_rate ? t('bookingModal.flatRate_sub').replace('{max}', tour.max_capacity) : (tour.tour_id?.toLowerCase().includes('sunset') ? t('tour.details.time_variable') : t('bookingModal.normalRate_sub').replace('{start}', tour.start_time || 'AM').replace('{end}', tour.end_time || ''))}
+                              {tour.is_flat_rate ? t('bookingModal.flatRate_sub').replace('{max}', tour.max_capacity) : (tour.tour_id?.toLowerCase().includes('sunset') ? t('tour.details.time_variable') : t('bookingModal.normalRate_sub').replace('{start}', pickupStart(tour.start_time) || 'AM').replace('{end}', dropEnd(tour.end_time) || ''))}
                             </p>
                             <div className="flex flex-col">
                               <p className="font-extrabold text-blue-700 text-sm">

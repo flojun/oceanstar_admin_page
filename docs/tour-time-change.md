@@ -1,70 +1,70 @@
-# 대표 시간을 픽업 포함으로 바꿀 때 손댈 곳
+# 대표 시간을 픽업 포함으로 (1부 07:30-11:30 / 2부 10:30-14:30)
 
-대표(고객용) 시간을 **1부 07:30-11:30 / 2부 10:30-14:30** 으로 통일했다.
-순수 투어시간(1부 08:00-11:00 / 2부 11:00-14:00)은 상세페이지로 간다.
+운영 기준
+- 픽업은 **출항 30분 전**, 드롭 완료는 **항구 복귀 30분 뒤**.
+- 선셋(현재): 15:00 픽업 시작 → 15:30 출항 → 18:00 항구 복귀 → 18:30 드롭 완료.
+- 1부: 07:30 픽업 → 08:00 출항 → 11:00 복귀 → 11:30 드롭.
+- 2부: 10:30 픽업 → 11:00 출항 → 14:00 복귀 → 14:30 드롭.
 
-## 1. 코드 - 완료
+순수 투어시간(08:00-11:00 / 11:00-14:00)은 상세페이지로 간다.
 
-| 파일 | 바뀐 값 |
-|---|---|
-| `src/locales/ko.ts` `tour.features.time_1/2` | `1부 07:30 - 11:30 (픽업 포함)` / `2부 10:30 - 14:30 (픽업 포함)` |
-| `src/locales/en.ts` 같은 키 | `Session 1: 07:30 - 11:30 (incl. pickup)` 외 |
-| `ReservationClientPage.tsx` 콤보 시간 선택 라벨 | `1부 (픽업 07:30)` / `2부 (픽업 10:30)` |
+## 결론: DB 는 건드리지 않는다
 
-`FAQSection.tsx` 는 이미 07:30-11:30 / 10:30-14:30 이라 손대지 않았다.
+`tour_settings.start_time / end_time` 은 **출항·복귀 시각** 그대로 두고,
+고객에게 보여 줄 때만 앞뒤로 30분씩 벌린다.
 
-## 2. DB - 손대지 않았다. 아래를 먼저 읽을 것
+### 왜 DB 를 못 바꾸는가
 
-`tour_settings.start_time / end_time` 은 **고객용 표기가 아니라 출항 시각**이다.
-morning1 = 08:00, sunset = 15:00 처럼 들어 있다.
+`start_time` 을 30분 당기면 두 곳이 깨진다. 한 곳만 옮겨도, 셋을 같이
+옮겨도 둘 중 하나는 깨진다.
 
-morning1 을 07:30 으로 바꾸면 **선셋 픽업 시각이 30분 밀린다.**
-`src/app/api/pickup/route.ts` 가 이렇게 계산하기 때문이다.
+**1) 선셋 픽업 계산** - `src/app/api/pickup/route.ts`
 
 ```
-tour3Offset = sunset.start_time - morning1.start_time   // 지금 7시간
+tour3Offset = sunset.start_time - morning1.start_time
 time_3      = 픽업장소.time_1 + tour3Offset
 ```
 
-morning1 만 30분 당기면 offset 이 7시간 30분이 되어, 모든 장소의 선셋
-픽업 시각이 30분 늦게 계산된다.
+차이로 계산하므로 **셋을 같이** 옮기면 이건 안 깨진다.
+morning1 만 옮기면 offset 이 30분 늘어 모든 장소의 선셋 픽업이 밀린다.
 
-또 `src/lib/otaEmailParser.ts` 의 주석이 `tour_settings 출항 시각 08:00 /
-11:00 / 15:00` 을 전제로 한다. 파싱 자체는 경계가 10시·14시라 07:30 이 와도
-1부로 떨어지므로 깨지지 않지만, 필드의 뜻이 달라진다.
+**2) 바우처 PDF 선택** - `src/lib/voucherFiles.ts`
 
-### 권하는 방향
-
-start_time 은 **출항 시각 그대로 두고**, 고객에게 보이는 자리에서만
-픽업 포함 시각을 쓴다. 픽업 시각은 이미
-`pickup_locations.time_1 = '07:30'` 로 DB 에 따로 있다.
-
-굳이 DB 를 바꾸겠다면 morning1 만 바꾸면 안 되고 셋을 같이 옮겨야
-offset 이 유지된다.
-
-```sql
--- 이 방향으로 갈 경우에만. 셋을 같이 옮긴다.
-update tour_settings set start_time = '07:30', end_time = '11:30' where tour_id = 'morning1';
-update tour_settings set start_time = '10:30', end_time = '14:30' where tour_id = 'morning2';
-update tour_settings set start_time = '14:30'                     where tour_id = 'sunset';
+```ts
+const START_TIME_TO_SET = { '13:30':'130', '14:30':'230', '15:00':'300', '15:30':'330' };
 ```
 
-바꾼 뒤에는 선셋 픽업 시각(`/api/pickup` 의 time_3)이 예전과 같은지
-장소 몇 곳으로 확인할 것.
+선셋 `start_time` 을 **절대값 그대로** 써서 첨부할 PDF 세트를 고른다.
+셋을 같이 30분 당기면 선셋이 한 세트 아래로 떨어져(예: '300' -> '230')
+**모든 선셋 예약에 다른 시간표가 인쇄된 바우처가 첨부된다.**
 
-## 3. 이메일 - 시간이 들어 있지 않다
+PDF 는 건드리지 않기로 했으므로, 이 매핑이 맞으려면 선셋 `start_time` 은
+지금 값을 유지해야 한다. 따라서 DB 변경은 선택지에서 빠진다.
 
-`src/lib/email.ts` -> `src/emails/VoucherEmail.tsx` 가 보내는 확정 메일에는
-**시각이 한 줄도 없다.** 표에 들어가는 것은 예약번호 / 투어 날짜 / 투어 상품 /
-예약 옵션(`1부` 같은 문자열) / 예약 인원 / 픽업 장소뿐이고, 시간은
+## 한 일
 
-> 자세한 픽업 시간 및 안내 사항은 첨부된 바우처 파일(PDF)을 반드시 확인해 주시기 바랍니다.
+### 코드 - 완료
 
-로 넘긴다.
+| 파일 | 내용 |
+|---|---|
+| `ko.ts` / `en.ts` `tour.features.time_1,time_2` | `1부 07:30 - 11:30 (픽업 포함)` / `2부 10:30 - 14:30 (픽업 포함)` |
+| `ReservationClientPage.tsx` | `pickupStart()` / `dropEnd()` 헬퍼 추가. 상품 카드와 예약 모달의 시간 표기를 `start_time - 30분` ~ `end_time + 30분` 으로 |
+| `ReservationClientPage.tsx` 콤보 시간 선택 | `1부 (픽업 07:30)` / `2부 (픽업 10:30)` |
 
-즉 **고객이 메일에서 보는 시각은 첨부 PDF 안에 인쇄되어 있다.**
-그 PDF 는 Supabase 스토리지 `vouchers` 버킷에 장소별·언어별로 올라가 있는
-파일이고(`src/lib/voucherFiles.ts`), 코드에서 생성하지 않는다.
+`FAQSection.tsx` 는 이미 07:30-11:30 / 10:30-14:30 이라 그대로 뒀다.
 
-시간을 고치려면 그 PDF 들을 다시 만들어 같은 이름으로 올려야 한다.
-이 저장소에서는 할 수 없다.
+선셋은 `time_variable`("시즌별 시간 변동") 분기로 빠져 있어 이 계산을 타지
+않는다. 프라이빗도 `is_flat_rate` 분기라 해당 없다.
+
+### 손대지 않은 것
+
+- **DB** `tour_settings` - 위 이유
+- **바우처 PDF** - 그대로 두기로 함. 확정 메일에는 시각이 없고
+  (`VoucherEmail.tsx` 는 예약번호·날짜·상품·옵션·인원·픽업 장소만 싣는다)
+  시간은 첨부 PDF 안에 인쇄돼 있다. PDF 는 Supabase `vouchers` 버킷 파일이다.
+
+## 나중에 DB 를 정말 바꾸려면
+
+`voucherFiles.START_TIME_TO_SET` 을 출항 시각이 아니라 별도 컬럼
+(예: `tour_settings.voucher_set`)으로 끊어낸 다음에야 안전하다.
+그 전까지는 선셋 `start_time` 이 PDF 파일명과 묶여 있다.
