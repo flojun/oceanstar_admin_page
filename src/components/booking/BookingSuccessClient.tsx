@@ -86,9 +86,8 @@ function SuccessContent({ lang }: { lang: Language }) {
     if (pickupData && reservation?.option) {
         if (reservation.option.includes('1부') && pickupData.time_1) finalTime = pickupData.time_1;
         else if (reservation.option.includes('2부') && pickupData.time_2) finalTime = pickupData.time_2;
+        // 3부(선셋) time_3 은 api/pickup 이 바우처 PDF 와 같은 표에서 채워 준다.
         else if (reservation.option.includes('3부') && pickupData.time_3) finalTime = pickupData.time_3;
-        // Fallback for '직접' 3부 in case time_3 column doesn't exist yet
-        else if (reservation.option.includes('3부') && pickupData.name === '직접') finalTime = '14:50:00';
     }
 
     // Format "07:40:00" to "07:40 AM"

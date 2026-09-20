@@ -2,65 +2,16 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import { supabaseServer } from '@/lib/supabaseServer';
+import {
+    SUNSET_PICKUP,
+    type SunsetSet,
+    locationKey,
+    sunsetPickupTo24h,
+    sunsetSetOf,
+} from '@/lib/sunsetPickup';
 
 const BUCKET = 'vouchers';
 const CACHE_ROOT = path.join(os.tmpdir(), 'oceanstar-vouchers');
-
-/**
- * DB의 pickup_location 값 -> 바우처 파일 키.
- * 키는 한/영 공통이라 폴더(en/ko)만 갈아끼우면 된다.
- */
-const LOCATION_KEYS: Record<string, string> = {
-    'HM': 'HM',
-    'H&M': 'HM',
-    '녹색천막': 'GreenTent',
-    '소화전': 'GreenTent',
-    '알라모아나': 'Alamoana',
-    '알모': 'Alamoana',
-    '직접': 'Harbor',
-    'DIRECT': 'Harbor',
-    '카라이': 'KaLai',
-    '리츠칼튼': 'Ritz',
-    '르네상스': 'Renaissance',
-    '프린스': 'Prince',
-    '카할라': 'Kahala',
-    'IHOP': 'IHOP',
-    'HGI': 'HGI',
-    'HIE': 'HIE',
-    'HP': 'HP',
-    'WR': 'WR',
-};
-
-/**
- * 선셋은 계절에 따라 출항 시각이 바뀌고, 장소마다 픽업 시각이 다르다.
- * 아래 표는 업로드된 파일명에서 그대로 뽑은 것이라 파일과 항상 일치한다.
- * 바깥 키는 선셋 세트(= 출항 시각), 안쪽 값은 그 장소의 픽업 시각.
- */
-type SunsetSet = '130' | '230' | '300' | '330';
-const SUNSET_PICKUP: Record<string, Record<SunsetSet, string>> = {
-    Alamoana: { '130': '145', '230': '245', '300': '315', '330': '345' },
-    GreenTent: { '130': '130', '230': '230', '300': '300', '330': '330' },
-    HGI: { '130': '130', '230': '230', '300': '300', '330': '330' },
-    HIE: { '130': '140', '230': '240', '300': '310', '330': '340' },
-    HM: { '130': '135', '230': '235', '300': '305', '330': '335' },
-    HP: { '130': '120', '230': '220', '300': '250', '330': '320' },
-    Harbor: { '130': '150', '230': '250', '300': '320', '330': '350' },
-    IHOP: { '130': '140', '230': '240', '300': '310', '330': '340' },
-    KaLai: { '130': '140', '230': '240', '300': '310', '330': '340' },
-    Kahala: { '130': '110', '230': '210', '300': '240', '330': '310' },
-    Prince: { '130': '145', '230': '245', '300': '315', '330': '345' },
-    Renaissance: { '130': '145', '230': '245', '300': '315', '330': '345' },
-    Ritz: { '130': '140', '230': '240', '300': '310', '330': '340' },
-    WR: { '130': '130', '230': '230', '300': '300', '330': '330' },
-};
-
-/** tour_settings.start_time("15:00") -> 선셋 세트("300") */
-const START_TIME_TO_SET: Record<string, SunsetSet> = {
-    '13:30': '130',
-    '14:30': '230',
-    '15:00': '300',
-    '15:30': '330',
-};
 
 type Session = '1' | '2' | '3';
 
@@ -72,13 +23,7 @@ function parsePickup(pickupLocation: string): { key: string | null; time: string
     const t = raw.match(/\((\d{1,2})[;:](\d{2})\)/);
     const time = t ? `${t[1]}${t[2]}` : null;
 
-    const name = raw.replace(/\(.*?\)/g, '').trim();
-    let key = LOCATION_KEYS[name] ?? null;
-    if (!key) {
-        const hit = Object.keys(LOCATION_KEYS).find(k => name.startsWith(k));
-        if (hit) key = LOCATION_KEYS[hit];
-    }
-    return { key, time };
+    return { key: locationKey(raw), time };
 }
 
 function parseSession(option: string): Session {
@@ -97,12 +42,12 @@ async function currentSunsetSet(): Promise<SunsetSet | null> {
         .single();
 
     if (error || !data?.start_time) {
-        console.error('[voucher] 선셋 출항 시각을 읽지 못했습니다:', error?.message);
+        console.error('[voucher] 선셋 기준 픽업 시각을 읽지 못했습니다:', error?.message);
         return null;
     }
-    const set = START_TIME_TO_SET[String(data.start_time).slice(0, 5)];
+    const set = sunsetSetOf(data.start_time);
     if (!set) {
-        console.error(`[voucher] 선셋 세트가 없는 출항 시각: ${data.start_time}`);
+        console.error(`[voucher] 선셋 세트가 없는 기준 픽업 시각: ${data.start_time}`);
         return null;
     }
     return set;
@@ -129,6 +74,40 @@ export async function resolveVoucherFile(pickupLocation: string, option: string)
         return null;
     }
     return `${key}_3_${fallback}.pdf`;
+}
+
+/**
+ * 예약 한 건의 픽업 시각을 "HH:MM" 으로 정한다. 못 정하면 null.
+ *
+ * 1·2부는 pickup_locations 의 time_1 / time_2 가 곧 픽업 시각이다.
+ * 3부(선셋)는 계절 세트마다 장소별 시각이 달라서 바우처 PDF 와 같은 표에서 찾는다.
+ * 예약 문자열에 "프린스 (3;15)" 처럼 시각이 박혀 있으면 그 값이 가장 정확하다.
+ */
+export async function resolvePickupTime(pickupLocation: string, option: string): Promise<string | null> {
+    const { key, time } = parsePickup(pickupLocation);
+    if (!key) return null;
+
+    const session = parseSession(option);
+
+    if (session === '3') {
+        if (time) return sunsetPickupTo24h(time);
+        const set = await currentSunsetSet();
+        const compact = set ? SUNSET_PICKUP[key]?.[set] : null;
+        return compact ? sunsetPickupTo24h(compact) : null;
+    }
+
+    const { data, error } = await supabaseServer
+        .from('pickup_locations')
+        .select('name, time_1, time_2');
+
+    if (error || !data) {
+        console.error('[voucher] 픽업 시각을 읽지 못했습니다:', error?.message);
+        return null;
+    }
+
+    const row = data.find((loc: { name: string }) => locationKey(loc.name) === key);
+    const raw = session === '2' ? row?.time_2 : row?.time_1;
+    return raw ? String(raw).slice(0, 5) : null;
 }
 
 /** Storage에서 받아 임시폴더에 캐시한다. 실패하면 null. */

@@ -30,12 +30,13 @@ import Reveal from "@/components/landing/Reveal";
  * 고객에게 보이는 대표 시간은 픽업까지 포함한 시각이다.
  * 픽업은 출항 30분 전, 드롭 완료는 항구 복귀 30분 뒤라 앞뒤로 30분씩 벌린다.
  *
- * tour_settings.start_time / end_time 은 출항·복귀 시각 그대로 둔다.
- * 그 값을 당기면 두 곳이 깨진다.
- *   - api/pickup 이 (선셋 출항 - 1부 출항) 차이로 선셋 픽업을 계산한다
- *   - voucherFiles 의 START_TIME_TO_SET 이 선셋 출항 시각으로 바우처 PDF 세트를
- *     고른다. 15:00 -> '300' 처럼 값이 그대로 파일과 묶여 있다
- * 그래서 DB 가 아니라 보여 줄 때만 벌린다.
+ * tour_settings.start_time / end_time 은 출항·복귀 시각 그대로 둔다. 상세 페이지의
+ * 순수 투어 시간(8:00-11:00)이 그 값이고, 대표 시간은 여기서 벌려서 만든다.
+ *
+ * 선셋(3부)은 여기를 타지 않는다. sunset 의 start_time 은 출항이 아니라 그 계절의
+ * 기준 픽업 시각이라(15:00 = 3:00 픽업, 3:30 출항) 30분을 더 당기면 안 된다.
+ * 그 값은 voucherFiles 의 START_TIME_TO_SET 이 바우처 PDF 세트를 고르는 키이기도
+ * 하다. 그래서 선셋은 두 자리 모두 time_variable 문구로 빠진다.
  */
 const PICKUP_LEAD_MIN = 30;
 

@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import { render } from '@react-email/render';
 import VoucherEmail from '@/emails/VoucherEmail';
-import { resolveVoucherFile, getVoucherAttachment } from '@/lib/voucherFiles';
+import { resolveVoucherFile, getVoucherAttachment, resolvePickupTime } from '@/lib/voucherFiles';
 import { getTranslation, type Language } from '@/lib/translations';
 import React from 'react';
 
@@ -38,13 +38,19 @@ export async function sendVoucherEmail(booking: VoucherMail) {
   // 선셋 시간 조회가 들어 있어 언어당 한 번씩 하지 않고 한 번만 푼다.
   const fileName = await resolveVoucherFile(pickup_location, option);
 
+  // 픽업 시각은 메일 본문에서 바로 보이는 게 낫다. 못 구하면 그 줄만 빠진다.
+  const pickup_time = await resolvePickupTime(pickup_location, option).catch(err => {
+    console.error('Failed to resolve pickup time:', order_id, err);
+    return null;
+  });
+
   const results = await Promise.allSettled(
     LANGS.map(async (lang) => {
       const t = getTranslation(lang);
       const attachment = fileName ? await getVoucherAttachment(lang, fileName) : null;
 
       const html = await render(
-        React.createElement(VoucherEmail, { lang, hasVoucher: Boolean(attachment), ...booking })
+        React.createElement(VoucherEmail, { lang, hasVoucher: Boolean(attachment), pickup_time, ...booking })
       );
 
       await transporter.sendMail({

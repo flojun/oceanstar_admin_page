@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
+import { sunsetPickupTime, sunsetSetOf } from '@/lib/sunsetPickup';
 
 export const dynamic = 'force-dynamic';
+
+/** 픽업은 출항 30분 전. */
+const PICKUP_LEAD_MIN = 30;
 
 // Helper function to add a time offset (in minutes) to a "HH:MM" string
 function addMinutesToTimeString(timeStr: string | null, minutesToAdd: number): string | null {
@@ -21,6 +25,13 @@ function addMinutesToTimeString(timeStr: string | null, minutesToAdd: number): s
 function timeStringToMinutes(timeStr: string): number {
     const [hours, minutes] = timeStr.split(':');
     return parseInt(hours) * 60 + parseInt(minutes);
+}
+
+/** "07:30:00" 처럼 초가 붙어 오는 값을 "07:30" 으로 맞춘다. */
+function toHHMM(timeStr: string | null | undefined): string | null {
+    if (!timeStr) return null;
+    const s = String(timeStr);
+    return s.length > 5 ? s.substring(0, 5) : s;
 }
 
 export async function GET() {
@@ -55,35 +66,35 @@ export async function GET() {
             ];
         }
 
-        // Determine offset for Tour 3
-        let tour3OffsetMinutes = 7 * 60; // Default +7 hours
-        if (tourSettings) {
-            const tour1 = tourSettings.find((s: any) => s.tour_id === 'morning1');
-            const tour3 = tourSettings.find((s: any) => s.tour_id === 'sunset');
+        const sunset = tourSettings?.find((s: { tour_id?: string }) => s.tour_id === 'sunset');
+        const morning1 = tourSettings?.find((s: { tour_id?: string }) => s.tour_id === 'morning1');
 
-            if (tour1?.start_time && tour3?.start_time) {
-                const tour1Min = timeStringToMinutes(tour1.start_time);
-                const tour3Min = timeStringToMinutes(tour3.start_time);
-                tour3OffsetMinutes = tour3Min - tour1Min;
-            }
+        // 선셋은 계절마다 픽업 시각 세트가 통째로 바뀐다. tour_settings.sunset.start_time
+        // 이 그 세트의 기준 픽업 시각이라 여기서 세트를 고르면 고객이 받는 바우처 PDF 와
+        // 화면 시각이 항상 같아진다.
+        const sunsetSet = sunsetSetOf(sunset?.start_time);
+
+        // 표에 없는 장소만을 위한 마지막 수단.
+        // 주의: 같은 start_time 컬럼인데 의미가 다르다.
+        //   morning1.start_time = 출항 시각(08:00). 기준 픽업은 그 30분 전이다.
+        //   sunset.start_time   = 기준 픽업 시각(15:00). 출항은 그 30분 뒤다.
+        // 그래서 오전 픽업(time_1)에 더할 오프셋은 (선셋 기준 픽업 - 오전 기준 픽업)이다.
+        let tour3OffsetMinutes = 7 * 60 + 30;
+        if (morning1?.start_time && sunset?.start_time) {
+            const morningPickupBase = timeStringToMinutes(morning1.start_time) - PICKUP_LEAD_MIN;
+            tour3OffsetMinutes = timeStringToMinutes(sunset.start_time) - morningPickupBase;
         }
 
-        // Dynamically compute time_3 if it doesn't exist or override it 
-        // using the start_time offset from tourSettings
-        const finalLocations = locationsToReturn.map((loc: any) => {
-            // Take the base time_1 string (format: HH:MM or HH:MM:SS)
-            let baseTimeStr = loc.time_1;
-
-            // Just normalise if the db provides seconds e.g "07:30:00"
-            if (baseTimeStr && baseTimeStr.length > 5) {
-                baseTimeStr = baseTimeStr.substring(0, 5);
-            }
-
-            return {
-                ...loc,
-                time_3: addMinutesToTimeString(baseTimeStr, tour3OffsetMinutes)
-            };
-        });
+        const finalLocations = locationsToReturn.map((loc: { name?: string; time_1?: string | null; time_3?: string | null }) => ({
+            ...loc,
+            // 1) 운영자가 관리자 화면에서 직접 넣은 값이 있으면 그 값을 쓴다.
+            // 2) 없으면 바우처 PDF 와 같은 선셋 픽업표에서 찾는다.
+            // 3) 그래도 없으면 오전 픽업 시각에 오프셋을 더한다.
+            time_3:
+                toHHMM(loc.time_3) ??
+                sunsetPickupTime(loc.name || '', sunsetSet) ??
+                addMinutesToTimeString(toHHMM(loc.time_1), tour3OffsetMinutes),
+        }));
 
         return NextResponse.json(finalLocations);
     } catch (error) {
@@ -91,4 +102,3 @@ export async function GET() {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
-

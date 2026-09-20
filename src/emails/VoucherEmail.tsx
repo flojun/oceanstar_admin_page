@@ -22,6 +22,7 @@ interface VoucherEmailProps {
   pax: string;
   option: string;
   pickup_location: string;
+  pickup_time?: string | null;
 }
 
 export const VoucherEmail = ({
@@ -34,6 +35,7 @@ export const VoucherEmail = ({
   pax,
   option,
   pickup_location,
+  pickup_time,
 }: VoucherEmailProps) => {
   const t = getTranslation(lang);
   const rows: [string, string][] = [
@@ -44,6 +46,9 @@ export const VoucherEmail = ({
     [t('voucherEmail.label_pax'), pax],
     [t('voucherEmail.label_pickup'), pickup_location],
   ];
+
+  const pickupClock = formatClock(pickup_time, lang);
+  if (pickupClock) rows.push([t('voucherEmail.label_pickup_time'), pickupClock]);
 
   return (
     <Html lang={lang}>
@@ -89,6 +94,20 @@ export const VoucherEmail = ({
 };
 
 export default VoucherEmail;
+
+/** "15:15" -> "오후 3:15" / "3:15 PM". 값이 없거나 형식이 아니면 빈 문자열. */
+function formatClock(time: string | null | undefined, lang: Language) {
+  if (!time) return '';
+  const m = /^(\d{1,2}):(\d{2})/.exec(time);
+  if (!m) return '';
+  const hour24 = Number(m[1]);
+  const minute = m[2];
+  if (hour24 > 23) return '';
+  const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+  return lang === 'ko'
+    ? `${hour24 < 12 ? '오전' : '오후'} ${hour12}:${minute}`
+    : `${hour12}:${minute} ${hour24 < 12 ? 'AM' : 'PM'}`;
+}
 
 const main = {
   backgroundColor: '#f6f9fc',
