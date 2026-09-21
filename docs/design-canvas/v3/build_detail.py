@@ -256,12 +256,16 @@ CSS_D = BASE + """
 .fnote{margin:22px auto 0;text-align:center;font-size:14.5px;font-weight:700;color:var(--ink)}
 
 /* 인증샷 */
-.stars{margin-top:40px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+/* 원본 타일이 133x137 이라 크게 늘릴수록 뭉개진다. 격자 폭을 묶어 한 칸을
+   165px 로 두면 확대가 1.24 배에 그쳐 또렷하다. 사진 열다섯 장짜리 증거 벽은
+   원래 크게 볼 것이 아니라 한눈에 훑는 자리다. */
+.stars{margin:40px auto 0;max-width:880px;display:grid;
+  grid-template-columns:repeat(5,1fr);gap:14px}
 .star-c{border-radius:18px;overflow:hidden;background:#fff;border:1px solid var(--line)}
 /* 잘라 낸 원본이 132x137 이라 그 비율을 그대로 쓴다. 다른 비율로 담으면
    cover 가 얼굴을 잘라 낸다. */
 .star-c img{width:100%;aspect-ratio:132 / 137;object-fit:cover}
-.star-c b{display:block;padding:13px 14px;font-size:13px;font-weight:700;color:var(--ink);
+.star-c b{display:block;padding:11px 10px;font-size:12px;font-weight:700;color:var(--ink);
   text-align:center;line-height:1.4}
 .ig{margin-top:26px;text-align:center;font-size:13.5px;font-weight:700;color:var(--muted)}
 
