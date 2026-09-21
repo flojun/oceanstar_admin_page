@@ -258,8 +258,9 @@ CSS_D = BASE + """
 /* 인증샷 */
 .stars{margin-top:40px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
 .star-c{border-radius:18px;overflow:hidden;background:#fff;border:1px solid var(--line)}
-.star-c .ph{height:168px;border:none;border-radius:0;gap:6px}
-.star-c .ph i{display:none}
+/* 잘라 낸 원본이 132x137 이라 그 비율을 그대로 쓴다. 다른 비율로 담으면
+   cover 가 얼굴을 잘라 낸다. */
+.star-c img{width:100%;aspect-ratio:132 / 137;object-fit:cover}
 .star-c b{display:block;padding:13px 14px;font-size:13px;font-weight:700;color:var(--ink);
   text-align:center;line-height:1.4}
 .ig{margin-top:26px;text-align:center;font-size:13.5px;font-weight:700;color:var(--muted)}
@@ -454,9 +455,7 @@ CSS_M = BASE + """
 
 .stars{margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .star-c{border-radius:14px;overflow:hidden;background:#fff;border:1px solid var(--line)}
-.star-c .ph{height:96px;border:none;border-radius:0;gap:4px}
-.star-c .ph b{font-size:10px}
-.star-c .ph i{display:none}
+.star-c img{width:100%;aspect-ratio:132 / 137;object-fit:cover}
 .star-c b{display:block;padding:9px 7px;font-size:10.5px;font-weight:700;color:var(--ink);
   text-align:center;line-height:1.4}
 .ig{margin-top:20px;text-align:center;font-size:12.5px;font-weight:700;color:var(--muted)}
@@ -621,8 +620,12 @@ def flow(mobile):
 
 
 def stars(mobile):
+    # 올려 주신 상세페이지 이미지에서 타일만 잘라 낸 것이다. 화소는 원본 그대로고
+    # 확대도 보정도 하지 않았다.
     tiles = "".join(
-        f'<div class="star-c">{ph("인증샷")}<b>{n}</b></div>' for n in C.STARS)
+        f'<div class="star-c"><img src="star{i:02d}.webp" alt="{n}">'
+        f'<b>{n}</b></div>'
+        for i, n in enumerate(C.STARS, 1))
     return (f'<section class="sect center"><h2>{C.STAR_H2}</h2>'
             f'<p class="lede">{C.STAR_SUB}</p>'
             f'<span class="pill" style="margin-top:18px">{C.STAR_BADGE}</span>'
