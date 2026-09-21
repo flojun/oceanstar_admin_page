@@ -120,126 +120,38 @@ export async function GET(request: Request) {
                 await client.mailboxOpen('INBOX');
 
                 // ============================================
-                // Step 1: [확정대기] 이메일 처리
+                // 메일은 **도착한 순서대로** 한 통씩 처리한다.
+                // 종류별로 몰아서 처리하면 5분 안에 이어진 사건의 순서가 뒤집힌다.
+                // (취소 → 같은 날짜로 재예약 이면, 아직 취소되지 않은 행에 재예약이 합쳐져 사라진다)
                 // ============================================
-                const pendingMessages = await searchEmails(client, '확정대기');
-                for (const msg of pendingMessages) {
+                const messages = await searchEmails(client, ['확정대기', '확정완료', '예약취소', '취소 요청 접수']);
+                for (const msg of messages) {
                     try {
                         const parsed = parseMyRealTripEmail(msg.html, msg.subject);
-                        if (!parsed || parsed.type !== 'pending') {
-                            console.log(`[MRT Cron] 파싱 스킵 (확정대기): ${msg.subject}`);
-                            continue; // SEEN 처리하지 않음 → 다음 cron에서 재시도
-                        }
-
-                        const { reservation } = parsed;
-
-                        // 중복 체크 (order_id로 검색)
-                        const { data: existing } = await supabaseServer
-                            .from('reservations')
-                            .select('id')
-                            .eq('order_id', reservation.orderNumber)
-                            .maybeSingle();
-
-                        if (existing) {
-                            console.log(`[MRT Cron] 이미 존재하는 예약: ${reservation.orderNumber}`);
-                            await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
+                        if (!parsed) {
+                            // 표식을 붙이지 않는다 → 다음 실행에서 재시도 + 안읽음으로 남아 사람 눈에 띈다.
+                            console.log(`[MRT Cron] 파싱 스킵: ${msg.subject}`);
                             continue;
                         }
 
-                        // 같은 이름·여행일의 예약이 이미 있으면 행을 늘리지 않는다.
-                        if (await mergeIntoExisting(
-                            reservation.travelerName, reservation.tourDate,
-                            reservation.orderNumber, reservation.optionName,
-                        )) {
-                            mergedIntoExisting++;
-                            await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
-                            continue;
-                        }
+                        if (parsed.type === 'pending') {
 
-                        // INSERT (예약대기)
-                        const { error: insertError } = await supabaseServer
-                            .from('reservations')
-                            .insert({
-                                order_id: reservation.orderNumber,
-                                name: reservation.travelerName,
-                                tour_date: reservation.tourDate,
-                                source: 'M',
-                                status: '예약대기',
-                                receipt_date: await getDynamicReceiptDateStr(),
-                                is_admin_checked: false,
-                            });
+                            const { reservation } = parsed;
 
-                        if (insertError) {
-                            console.error(`[MRT Cron] INSERT 실패:`, insertError);
-                            errors++;
-                            continue;
-                        }
+                            // 중복 체크 (order_id로 검색)
+                            const { data: existing } = await supabaseServer
+                                .from('reservations')
+                                .select('id')
+                                .eq('order_id', reservation.orderNumber)
+                                .maybeSingle();
 
-                        pendingProcessed++;
-
-                        // 긴급 판단 → Slack 알림
-                        if (isUrgentTourDate(reservation.tourDate)) {
-                            const sent = await sendDiscordUrgentAlert({
-                                title: '🚨 [확정대기] 마이리얼트립 긴급 예약!',
-                                customerName: reservation.travelerName,
-                                tourDate: reservation.tourDate,
-                                option: reservation.optionName,
-                                source: '마이리얼트립',
-                                orderNumber: reservation.orderNumber,
-                            });
-                            if (sent) slackAlertsSent++;
-                        }
-
-                        // 이메일 SEEN 처리
-                        await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
-
-                    } catch (msgError) {
-                        console.error(`[MRT Cron] 확정대기 처리 중 오류:`, msgError);
-                        errors++;
-                    }
-                }
-
-                // ============================================
-                // Step 2: [확정완료] 이메일 처리
-                // ============================================
-                const confirmedMessages = await searchEmails(client, '확정완료');
-                for (const msg of confirmedMessages) {
-                    try {
-                        const parsed = parseMyRealTripEmail(msg.html, msg.subject);
-                        if (!parsed || parsed.type !== 'confirmed') {
-                            console.log(`[MRT Cron] 파싱 스킵 (확정완료): ${msg.subject}`);
-                            continue;
-                        }
-
-                        const { reservation } = parsed;
-
-                        // 기존 예약 검색 (order_id)
-                        const { data: existing } = await supabaseServer
-                            .from('reservations')
-                            .select('id, status')
-                            .eq('order_id', reservation.orderNumber)
-                            .maybeSingle();
-
-                        if (existing) {
-                            // 같은 메일을 다시 읽어도 두 번 세거나 두 번 알리지 않는다.
-                            // 취소된 건은 확정완료 메일을 다시 읽어도 **되살리지 않는다.**
-                            if (existing.status !== '예약대기' && existing.status !== '대기') {
+                            if (existing) {
+                                console.log(`[MRT Cron] 이미 존재하는 예약: ${reservation.orderNumber}`);
                                 await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
                                 continue;
                             }
 
-                            const { error: updateError } = await supabaseServer
-                                .from('reservations')
-                                .update({ status: '예약확정' })
-                                .eq('id', existing.id);
-
-                            if (updateError) {
-                                console.error(`[MRT Cron] UPDATE 실패:`, updateError);
-                                errors++;
-                                continue;
-                            }
-                        } else {
-                            // 합쳐진 예약의 다른 예약번호일 수 있다. 그러면 행을 새로 만들지 않는다.
+                            // 같은 이름·여행일의 예약이 이미 있으면 행을 늘리지 않는다.
                             if (await mergeIntoExisting(
                                 reservation.travelerName, reservation.tourDate,
                                 reservation.orderNumber, reservation.optionName,
@@ -249,7 +161,7 @@ export async function GET(request: Request) {
                                 continue;
                             }
 
-                            // 확정대기를 놓친 경우 → INSERT (예약확정)
+                            // INSERT (예약대기)
                             const { error: insertError } = await supabaseServer
                                 .from('reservations')
                                 .insert({
@@ -257,55 +169,114 @@ export async function GET(request: Request) {
                                     name: reservation.travelerName,
                                     tour_date: reservation.tourDate,
                                     source: 'M',
-                                    status: '예약확정',
+                                    status: '예약대기',
                                     receipt_date: await getDynamicReceiptDateStr(),
                                     is_admin_checked: false,
                                 });
 
                             if (insertError) {
-                                console.error(`[MRT Cron] 확정완료 INSERT 실패:`, insertError);
+                                console.error(`[MRT Cron] INSERT 실패:`, insertError);
                                 errors++;
                                 continue;
                             }
-                        }
 
-                        confirmedProcessed++;
+                            pendingProcessed++;
 
-                        // 긴급 판단 → Slack 알림
-                        if (isUrgentTourDate(reservation.tourDate)) {
-                            const sent = await sendDiscordUrgentAlert({
-                                title: '🚨 [확정완료] 마이리얼트립 예약 확정!',
-                                customerName: reservation.travelerName,
-                                tourDate: reservation.tourDate,
-                                option: reservation.optionName,
-                                source: '마이리얼트립',
-                                orderNumber: reservation.orderNumber,
-                            });
-                            if (sent) slackAlertsSent++;
-                        }
-
-                        // 이메일 SEEN 처리
-                        await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
-
-                    } catch (msgError) {
-                        console.error(`[MRT Cron] 확정완료 처리 중 오류:`, msgError);
-                        errors++;
-                    }
-                }
-
-                // ============================================
-                // Step 3: 취소 메일 처리 ([예약취소] / 예약 취소 요청 접수)
-                // ============================================
-                for (const keyword of ['예약취소', '취소 요청 접수']) {
-                    const cancelMessages = await searchEmails(client, keyword);
-
-                    for (const msg of cancelMessages) {
-                        try {
-                            const parsed = parseMyRealTripEmail(msg.html, msg.subject);
-                            if (!parsed || (parsed.type !== 'cancelled' && parsed.type !== 'cancel_request')) {
-                                console.log(`[MRT Cron] 파싱 스킵 (취소): ${msg.subject}`);
-                                continue; // SEEN 처리하지 않음 → 사람 눈에 띄게 남긴다
+                            // 긴급 판단 → Slack 알림
+                            if (isUrgentTourDate(reservation.tourDate)) {
+                                const sent = await sendDiscordUrgentAlert({
+                                    title: '🚨 [확정대기] 마이리얼트립 긴급 예약!',
+                                    customerName: reservation.travelerName,
+                                    tourDate: reservation.tourDate,
+                                    option: reservation.optionName,
+                                    source: '마이리얼트립',
+                                    orderNumber: reservation.orderNumber,
+                                });
+                                if (sent) slackAlertsSent++;
                             }
+
+                            // 이메일 SEEN 처리
+                            await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
+
+                        } else if (parsed.type === 'confirmed') {
+
+                            const { reservation } = parsed;
+
+                            // 기존 예약 검색 (order_id)
+                            const { data: existing } = await supabaseServer
+                                .from('reservations')
+                                .select('id, status')
+                                .eq('order_id', reservation.orderNumber)
+                                .maybeSingle();
+
+                            if (existing) {
+                                // 같은 메일을 다시 읽어도 두 번 세거나 두 번 알리지 않는다.
+                                // 취소된 건은 확정완료 메일을 다시 읽어도 **되살리지 않는다.**
+                                if (existing.status !== '예약대기' && existing.status !== '대기') {
+                                    await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
+                                    continue;
+                                }
+
+                                const { error: updateError } = await supabaseServer
+                                    .from('reservations')
+                                    .update({ status: '예약확정' })
+                                    .eq('id', existing.id);
+
+                                if (updateError) {
+                                    console.error(`[MRT Cron] UPDATE 실패:`, updateError);
+                                    errors++;
+                                    continue;
+                                }
+                            } else {
+                                // 합쳐진 예약의 다른 예약번호일 수 있다. 그러면 행을 새로 만들지 않는다.
+                                if (await mergeIntoExisting(
+                                    reservation.travelerName, reservation.tourDate,
+                                    reservation.orderNumber, reservation.optionName,
+                                )) {
+                                    mergedIntoExisting++;
+                                    await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
+                                    continue;
+                                }
+
+                                // 확정대기를 놓친 경우 → INSERT (예약확정)
+                                const { error: insertError } = await supabaseServer
+                                    .from('reservations')
+                                    .insert({
+                                        order_id: reservation.orderNumber,
+                                        name: reservation.travelerName,
+                                        tour_date: reservation.tourDate,
+                                        source: 'M',
+                                        status: '예약확정',
+                                        receipt_date: await getDynamicReceiptDateStr(),
+                                        is_admin_checked: false,
+                                    });
+
+                                if (insertError) {
+                                    console.error(`[MRT Cron] 확정완료 INSERT 실패:`, insertError);
+                                    errors++;
+                                    continue;
+                                }
+                            }
+
+                            confirmedProcessed++;
+
+                            // 긴급 판단 → Slack 알림
+                            if (isUrgentTourDate(reservation.tourDate)) {
+                                const sent = await sendDiscordUrgentAlert({
+                                    title: '🚨 [확정완료] 마이리얼트립 예약 확정!',
+                                    customerName: reservation.travelerName,
+                                    tourDate: reservation.tourDate,
+                                    option: reservation.optionName,
+                                    source: '마이리얼트립',
+                                    orderNumber: reservation.orderNumber,
+                                });
+                                if (sent) slackAlertsSent++;
+                            }
+
+                            // 이메일 SEEN 처리
+                            await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
+
+                        } else if (parsed.type === 'cancelled' || parsed.type === 'cancel_request') {
 
                             const r = parsed.reservation;
                             const cols = 'id, status, note, name, tour_date';
@@ -387,10 +358,13 @@ export async function GET(request: Request) {
                             else console.error(`[MRT Cron] ⚠️ Discord 알림 실패 — 취소 ${r.travelerName} ${r.tourDate}`);
 
                             await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
-                        } catch (msgError) {
-                            console.error('[MRT Cron] 취소 처리 중 오류:', msgError);
-                            errors++;
+                        } else {
+                            console.log(`[MRT Cron] 처리 대상이 아닌 메일: ${msg.subject}`);
+                            continue;
                         }
+                    } catch (msgError) {
+                        console.error('[MRT Cron] 메일 처리 중 오류:', msgError);
+                        errors++;
                     }
                 }
 
@@ -422,23 +396,30 @@ export async function GET(request: Request) {
 }
 
 /**
- * IMAP에서 특정 키워드가 제목에 포함된 UNSEEN 이메일 검색
+ * 아직 처리 표식이 없는 메일을 제목 키워드별로 찾아 **UID 오름차순**(= 도착 순서)으로 돌려준다.
+ * 호출부가 이 순서대로 처리해야 취소 → 재예약 같은 연속 사건이 뒤집히지 않는다.
  */
 async function searchEmails(
     client: ImapFlow,
-    subjectKeyword: string
+    subjectKeywords: string[]
 ): Promise<Array<{ uid: number; subject: string; html: string }>> {
     const results: Array<{ uid: number; subject: string; html: string }> = [];
 
     // IMAP SEARCH: 미처리 + FROM myrealtrip + SUBJECT 키워드 + 최근 2일 이내 (시간대 차이 고려)
-    const uids = await client.search({
-        unKeyword: PROCESSED,
-        from: 'myrealtrip',
-        subject: subjectKeyword,
-        since: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 최근 2일
-    }, { uid: true });
+    const since = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+    const uidSet = new Set<number>();
+    for (const subject of subjectKeywords) {
+        const found = await client.search({
+            unKeyword: PROCESSED,
+            from: 'myrealtrip',
+            subject,
+            since,
+        }, { uid: true });
+        for (const uid of found || []) uidSet.add(uid);
+    }
 
-    if (!uids || uids.length === 0) return results;
+    const uids = [...uidSet].sort((a, b) => a - b);
+    if (uids.length === 0) return results;
 
     for (const uid of uids) {
         try {
