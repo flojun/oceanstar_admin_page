@@ -55,9 +55,12 @@ def main():
         # 너무 크면 아티팩트 용량만 먹는다. 긴 변 640 을 넘으면 줄인다.
         if t.width > 640:
             t = t.resize((640, round(640 * t.height / t.width)), Image.LANCZOS)
-            t.save(p, "WEBP", quality=92, method=6)
-        else:
+        # 원본 화소 그대로인 작은 타일만 무손실로 둔다. 이미 리샘플을 거친
+        # 큰 타일은 무손실로 담아 봐야 용량만 열 배가 된다.
+        if t.width <= 200:
             t.save(p, "WEBP", lossless=True, method=6)
+        else:
+            t.save(p, "WEBP", quality=92, method=6)
         total += os.path.getsize(p)
     print(f"{len(tiles)}장 저장 · 타일 {tiles[0].size} · 합계 {total/1024:.0f}KB")
 
