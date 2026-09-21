@@ -6,6 +6,7 @@ import { sendDiscordUrgentAlert } from '@/lib/discordWebhook';
 import { getHawaiiDateStr } from '@/lib/timeUtils';
 import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
 import { getPickupLocations, resolveNearestPickup } from '@/lib/nearestPickup';
+import { imapAccounts } from '@/lib/imapAccounts';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 
@@ -40,23 +41,10 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // OTA 메일이 별도 계정(hioceanstar)으로 오면 전용 자격증명을 쓰고,
-        // 기존 계정으로 전달(forward)해 두었으면 그대로 IMAP_EMAIL 을 쓴다.
-        const email = process.env.IMAP_EMAIL_OTA || process.env.IMAP_EMAIL;
-        const password = process.env.IMAP_PW_OTA || process.env.IMAP_PW;
-        if (!email || !password) {
+        const accounts = imapAccounts();
+        if (accounts.length === 0) {
             return NextResponse.json({ error: 'Email credentials not configured' }, { status: 500 });
         }
-
-        const client = new ImapFlow({
-            host: 'imap.gmail.com',
-            port: 993,
-            secure: true,
-            auth: { user: email, pass: password },
-            logger: false,
-        });
-
-        await client.connect();
 
         let inserted = 0;
         let cancelled = 0;
@@ -67,59 +55,75 @@ export async function GET(request: Request) {
         let alertsSent = 0;
         let errors = 0;
 
-        try {
-            await client.mailboxOpen('INBOX');
+        // 수신 주소를 옮기는 동안에는 두 메일함을 한 번에 훑는다 (imapAccounts 주석 참고).
+        // 한 계정이 접속에 실패해도 나머지는 계속 돌려야 그 함에 온 예약을 놓치지 않는다.
+        for (const account of accounts) {
+            const client = new ImapFlow({
+                host: 'imap.gmail.com',
+                port: 993,
+                secure: true,
+                auth: account,
+                logger: false,
+            });
 
-            const pickupLocations = await getPickupLocations();
+            try {
+                await client.connect();
+                await client.mailboxOpen('INBOX');
 
-            for (const platform of PLATFORMS) {
-                const messages = await searchEmails(client, OTA_FROM[platform], OTA_SUBJECT[platform]);
+                const pickupLocations = await getPickupLocations();
 
-                for (const msg of messages) {
-                    try {
-                        const booking = parseOtaEmail(msg.html, msg.subject, msg.from);
-                        if (!booking) {
-                            // 안읽음으로 남겨 다음 cron 에서 재시도 + 사람 눈에 띄게 한다.
-                            console.log(`[OTA Cron] 파싱 스킵 (${platform}): ${msg.subject}`);
-                            skipped++;
-                            continue;
-                        }
+                for (const platform of PLATFORMS) {
+                    const messages = await searchEmails(client, OTA_FROM[platform], OTA_SUBJECT[platform]);
 
-                        // OTA 는 픽업 장소가 아니라 묵는 호텔 주소를 준다.
-                        // 가장 가까운 픽업 장소로 바꾸되 원문 주소는 note 에 남긴다.
-                        if ((booking.kind === 'new' || booking.kind === 'update') && booking.pickupLocation) {
-                            const resolved = await resolveNearestPickup(booking.pickupLocation, pickupLocations);
-                            if (resolved !== booking.pickupLocation) {
-                                booking.note = [booking.note, `주소: ${booking.pickupLocation}`]
-                                    .filter(Boolean).join(' / ');
-                                booking.pickupLocation = resolved;
+                    for (const msg of messages) {
+                        try {
+                            const booking = parseOtaEmail(msg.html, msg.subject, msg.from);
+                            if (!booking) {
+                                // 안읽음으로 남겨 다음 cron 에서 재시도 + 사람 눈에 띄게 한다.
+                                console.log(`[OTA Cron] 파싱 스킵 (${platform}): ${msg.subject}`);
+                                skipped++;
+                                continue;
                             }
+
+                            // OTA 는 픽업 장소가 아니라 묵는 호텔 주소를 준다.
+                            // 가장 가까운 픽업 장소로 바꾸되 원문 주소는 note 에 남긴다.
+                            if ((booking.kind === 'new' || booking.kind === 'update') && booking.pickupLocation) {
+                                const resolved = await resolveNearestPickup(booking.pickupLocation, pickupLocations);
+                                if (resolved !== booking.pickupLocation) {
+                                    booking.note = [booking.note, `주소: ${booking.pickupLocation}`]
+                                        .filter(Boolean).join(' / ');
+                                    booking.pickupLocation = resolved;
+                                }
+                            }
+
+                            const { outcome, detail } = booking.kind === 'new' ? await handleNew(booking)
+                                : booking.kind === 'update' ? await handleUpdate(booking)
+                                    : booking.kind === 'partial_cancel' ? await handlePartialCancel(booking)
+                                        : await handleCancel(booking);
+
+                            if (outcome === 'error') { errors++; continue; }
+                            if (outcome === 'inserted') inserted++;
+                            if (outcome === 'cancelled') cancelled++;
+                            if (outcome === 'partial') partial++;
+                            if (outcome === 'updated') updated++;
+                            if (outcome === 'unmatched') unmatched++;
+                            if (outcome === 'duplicate') skipped++;
+
+                            if (await notify(booking, outcome, detail)) alertsSent++;
+
+                            await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
+                        } catch (msgError) {
+                            console.error(`[OTA Cron] ${platform} 처리 중 오류:`, msgError);
+                            errors++;
                         }
-
-                        const { outcome, detail } = booking.kind === 'new' ? await handleNew(booking)
-                            : booking.kind === 'update' ? await handleUpdate(booking)
-                                : booking.kind === 'partial_cancel' ? await handlePartialCancel(booking)
-                                    : await handleCancel(booking);
-
-                        if (outcome === 'error') { errors++; continue; }
-                        if (outcome === 'inserted') inserted++;
-                        if (outcome === 'cancelled') cancelled++;
-                        if (outcome === 'partial') partial++;
-                        if (outcome === 'updated') updated++;
-                        if (outcome === 'unmatched') unmatched++;
-                        if (outcome === 'duplicate') skipped++;
-
-                        if (await notify(booking, outcome, detail)) alertsSent++;
-
-                        await client.messageFlagsAdd(msg.uid, [PROCESSED, '\\Seen'], { uid: true });
-                    } catch (msgError) {
-                        console.error(`[OTA Cron] ${platform} 처리 중 오류:`, msgError);
-                        errors++;
                     }
                 }
+            } catch (accountError) {
+                console.error(`[OTA Cron] ${account.user} 처리 실패:`, accountError);
+                errors++;
+            } finally {
+                await client.logout().catch(() => { });
             }
-        } finally {
-            await client.logout();
         }
 
         return NextResponse.json({
