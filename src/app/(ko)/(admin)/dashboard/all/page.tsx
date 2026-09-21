@@ -95,14 +95,37 @@ const parsePax = (str: string): number => {
 import CancellationRequestsView from "@/components/reservations/CancellationRequestsView";
 import BulkRefundSheet from "@/components/reservations/BulkRefundSheet";
 import RescheduleRequestsView from "@/components/reservations/RescheduleRequestsView";
+import GuidanceNeededView from "@/components/reservations/GuidanceNeededView";
 import { useSearchParams } from "next/navigation";
 
 import { Suspense } from "react";
 
+type TabKey = 'input' | 'guidance' | 'cancellation' | 'reschedule';
+
 function AllReservationsContent() {
     const searchParams = useSearchParams();
-    const initialView = searchParams.get('view') as 'input' | 'cancellation' | 'reschedule' || 'input';
-    const [activeTab, setActiveTab] = useState<'input' | 'cancellation' | 'reschedule'>(initialView);
+    const initialView = searchParams.get('view') as TabKey || 'input';
+    const [activeTab, setActiveTab] = useState<TabKey>(initialView);
+
+    // 탭에 쌓인 건수. 대시보드 어디서 상태를 바꿔도 reservation_status_changed 로 다시 센다.
+    const [tabCounts, setTabCounts] = useState({ guidance: 0, cancellation: 0, reschedule: 0 });
+    useEffect(() => {
+        const fetchTabCounts = async () => {
+            const head = (status: string) =>
+                supabase.from('reservations').select('*', { count: 'exact', head: true }).eq('status', status);
+            const [guidance, cancellation, reschedule] = await Promise.all([
+                head('안내필요'), head('취소요청'), head('변경요청'),
+            ]);
+            setTabCounts({
+                guidance: guidance.count || 0,
+                cancellation: cancellation.count || 0,
+                reschedule: reschedule.count || 0,
+            });
+        };
+        fetchTabCounts();
+        window.addEventListener('reservation_status_changed', fetchTabCounts);
+        return () => window.removeEventListener('reservation_status_changed', fetchTabCounts);
+    }, []);
 
     // Update activeTab when searchParams change (if navigating within same page)
     const highlightId = searchParams.get('highlight');
@@ -114,6 +137,8 @@ function AllReservationsContent() {
             setActiveTab('input');
         } else if (view === 'reschedule') {
             setActiveTab('reschedule');
+        } else if (view === 'guidance') {
+            setActiveTab('guidance');
         }
     }, [searchParams]);
 
@@ -2252,22 +2277,37 @@ function AllReservationsContent() {
                     예약 입력 (전체 관리)
                 </button>
                 <button
+                    onClick={() => setActiveTab('guidance')}
+                    className={`px-4 py-2 font-bold text-sm rounded-t-lg transition-colors flex items-center gap-2 ${activeTab === 'guidance' ? 'bg-purple-50 text-purple-600 border-b-2 border-purple-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                >
+                    안내 필요
+                    {tabCounts.guidance > 0 && (
+                        <span className="bg-purple-100 text-purple-700 text-xs px-1.5 py-0.5 rounded-full">{tabCounts.guidance}</span>
+                    )}
+                </button>
+                <button
                     onClick={() => setActiveTab('cancellation')}
                     className={`px-4 py-2 font-bold text-sm rounded-t-lg transition-colors flex items-center gap-2 ${activeTab === 'cancellation' ? 'bg-orange-50 text-orange-600 border-b-2 border-orange-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
                 >
                     취소 요청
-                    <span className="bg-orange-100 text-orange-700 text-xs px-1.5 py-0.5 rounded-full">New</span>
+                    {tabCounts.cancellation > 0 && (
+                        <span className="bg-orange-100 text-orange-700 text-xs px-1.5 py-0.5 rounded-full">{tabCounts.cancellation}</span>
+                    )}
                 </button>
                 <button
                     onClick={() => setActiveTab('reschedule')}
                     className={`px-4 py-2 font-bold text-sm rounded-t-lg transition-colors flex items-center gap-2 ${activeTab === 'reschedule' ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
                 >
                     변경 요청
-                    <span className="bg-blue-100 text-blue-700 text-xs px-1.5 py-0.5 rounded-full">New</span>
+                    {tabCounts.reschedule > 0 && (
+                        <span className="bg-blue-100 text-blue-700 text-xs px-1.5 py-0.5 rounded-full">{tabCounts.reschedule}</span>
+                    )}
                 </button>
             </div>
 
-            {activeTab === 'cancellation' ? (
+            {activeTab === 'guidance' ? (
+                <GuidanceNeededView />
+            ) : activeTab === 'cancellation' ? (
                 <CancellationRequestsView />
             ) : activeTab === 'reschedule' ? (
                 <RescheduleRequestsView />
