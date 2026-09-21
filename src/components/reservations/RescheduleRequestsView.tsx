@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Reservation } from "@/types/reservation";
 import { formatDateDisplay } from "@/lib/timeUtils";
+import { readRescheduleChange } from "@/lib/rescheduleNote";
 import { Check, X, AlertTriangle, CalendarRange } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -40,21 +41,15 @@ export default function RescheduleRequestsView() {
         fetchRequests();
     }, []);
 
-    const parseNoteForChanges = (note: string | null) => {
-        if (!note) return { date: "", pickup: "" };
-        const dateMatch = note.match(/<NewDate:(.*?)>/);
-        const pickupMatch = note.match(/<NewPickup:(.*?)>/);
-        return {
-            date: dateMatch ? dateMatch[1].trim() : "",
-            pickup: pickupMatch ? pickupMatch[1].trim() : ""
-        };
-    };
+    // 손님이 낸 요청은 아직 안 옮겨진 상태, OTA 변경은 이미 반영된 상태로 들어온다.
+    // readRescheduleChange 가 둘을 같은 "from ➜ to" 로 맞춰 준다.
+    const changeOf = (r: Reservation) => readRescheduleChange(r.note, r.tour_date, r.pickup_location);
 
     const openProcessModal = (reservation: Reservation) => {
         setSelectedReservation(reservation);
-        const parsed = parseNoteForChanges(reservation.note);
-        setNewDate(parsed.date);
-        setNewPickup(parsed.pickup);
+        const change = changeOf(reservation);
+        setNewDate(change.toDate);
+        setNewPickup(change.toPickup);
         setIsModalOpen(true);
     };
 
@@ -114,7 +109,7 @@ export default function RescheduleRequestsView() {
             <h2 className="text-lg font-bold text-gray-700 mb-4">변경 요청 목록 ({requests.length}건)</h2>
             <div className="grid gap-4">
                 {requests.map((request) => {
-                    const parsed = parseNoteForChanges(request.note);
+                    const change = changeOf(request);
                     return (
                         <div 
                             key={request.id} 
@@ -131,12 +126,15 @@ export default function RescheduleRequestsView() {
                             <div className="min-w-0 flex flex-wrap items-center gap-x-2 gap-y-0.5">
                                 <span className="font-bold text-gray-900">{request.name}</span>
                                 <span className="text-[11px] px-1.5 py-0.5 rounded font-medium bg-blue-50 text-blue-700">변경요청</span>
+                                {change.applied && (
+                                    <span className="text-[11px] px-1.5 py-0.5 rounded font-medium bg-amber-50 text-amber-700" title="OTA 에서 이미 확정된 변경이라 날짜는 반영해 두었습니다">반영됨</span>
+                                )}
                                 <span className="text-[11px] text-gray-400">{request.source}</span>
-                                <span className="text-xs text-gray-500 line-through">{formatDateDisplay(request.tour_date)}</span>
+                                <span className="text-xs text-gray-500 line-through">{formatDateDisplay(change.fromDate)}</span>
                                 <span className="text-blue-500 font-bold text-xs">➜</span>
-                                <span className="font-bold text-blue-600 text-xs">{formatDateDisplay(parsed.date)}</span>
+                                <span className="font-bold text-blue-600 text-xs">{formatDateDisplay(change.toDate)}</span>
                                 <span className="text-xs text-gray-500">{request.pax}</span>
-                                <span className="text-xs text-gray-400 truncate max-w-[120px]" title={parsed.pickup}>{parsed.pickup}</span>
+                                <span className="text-xs text-gray-400 truncate max-w-[120px]" title={change.toPickup}>{change.toPickup}</span>
                                 <span className="text-xs text-gray-400 truncate max-w-[100px]" title={request.contact}>{request.contact}</span>
                             </div>
                         </div>
@@ -162,18 +160,25 @@ export default function RescheduleRequestsView() {
 
                             <div className="grid grid-cols-2 gap-4 mt-2">
                                 <div className="p-4 bg-gray-100 rounded-lg text-gray-500">
-                                    <p className="text-xs font-bold mb-2">기존 예약 정보</p>
-                                    <p className="font-medium text-sm mb-1">{selectedReservation.tour_date}</p>
-                                    <p className="text-xs">{selectedReservation.pickup_location}</p>
+                                    <p className="text-xs font-bold mb-2">변경 전</p>
+                                    <p className="font-medium text-sm mb-1">{changeOf(selectedReservation).fromDate}</p>
+                                    <p className="text-xs">{changeOf(selectedReservation).fromPickup}</p>
                                 </div>
                                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 text-blue-800">
-                                    <p className="text-xs font-bold mb-2 text-blue-600">변경 희망 정보</p>
+                                    <p className="text-xs font-bold mb-2 text-blue-600">
+                                        {changeOf(selectedReservation).applied ? "변경 후 (이미 반영됨)" : "변경 희망 정보"}
+                                    </p>
                                     <p className="font-bold text-sm mb-1">{newDate}</p>
                                     <p className="text-xs font-medium">{newPickup}</p>
                                 </div>
                             </div>
-                            
-                            <p className="text-xs text-blue-600 font-bold">※ [승인 완료] 클릭 시, 백엔드에서 오버부킹 여부를 자동으로 검사합니다. 잔여 좌석이 충분할 경우에만 시스템에 반영됩니다.</p>
+
+                            {/* OTA 변경은 이미 그 날짜로 옮겨 둔 상태다. 승인은 '확인했다' 는 도장이다. */}
+                            <p className="text-xs text-blue-600 font-bold">
+                                {changeOf(selectedReservation).applied
+                                    ? "※ OTA 에서 확정된 변경이라 날짜는 이미 반영되어 있습니다. [승인 완료] 를 누르면 정원을 확인한 뒤 예약확정으로 닫습니다."
+                                    : "※ [승인 완료] 클릭 시, 백엔드에서 오버부킹 여부를 자동으로 검사합니다. 잔여 좌석이 충분할 경우에만 시스템에 반영됩니다."}
+                            </p>
                         </div>
                         
                         <div className="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-100">

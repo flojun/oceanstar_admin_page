@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { getAdminUser } from '@/lib/adminAuth';
 import { resolveOptionToTourSetting } from '@/lib/tourUtils';
+import { stripRescheduleMarkers } from '@/lib/rescheduleNote';
 
 export async function POST(req: Request) {
     try {
@@ -41,10 +42,13 @@ export async function POST(req: Request) {
         const newPax = parseInt(newPaxStr.replace(/[^0-9]/g, ''), 10) || 0;
         
         // 해당 변경 희망일(new_date)의 동일한 배(옵션) 승객 수 합산
+        // OTA 변경은 이 행이 **이미 그 날짜에 올라가 있다.** 자기 자신을 빼지 않으면
+        // 제 인원을 두 번 세서 멀쩡한 예약이 만석으로 막힌다.
         const { data: existingReservations, error: existErr } = await supabaseServer
             .from('reservations')
             .select('pax, option')
             .eq('tour_date', new_date)
+            .neq('id', reservation_id)
             .neq('status', '취소');
 
         if (existErr) throw existErr;
@@ -67,8 +71,8 @@ export async function POST(req: Request) {
         }
 
         // 3. 상태 변경 및 업데이트
-        // 예약 요청 태그 [변경요청] 을 제거하고, 정상적인 완료 메모를 남김.
-        const cleanedNote = (current_note || "").replace(/\[변경요청\] <NewDate:.*?> <NewPickup:.*?>/g, '').trim();
+        // 날짜변경 표식을 제거하고(손님 요청/OTA 반영 두 모양 다), 정상적인 완료 메모를 남김.
+        const cleanedNote = stripRescheduleMarkers(current_note);
         const finalNote = cleanedNote + `\n\n[✅투어 변경 자동처리 완료 (관리자)] 변경일: ${new_date} / 장소: ${new_pickup}`;
 
         const { error: updateErr } = await supabaseServer

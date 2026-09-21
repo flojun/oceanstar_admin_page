@@ -4,6 +4,7 @@ import { parseOtaEmail, OTA_FROM, OTA_SUBJECT, type OtaPlatform, type OtaBooking
 import { isUrgentTourDate } from '@/lib/reservationUrgency';
 import { sendDiscordUrgentAlert } from '@/lib/discordWebhook';
 import { getHawaiiDateStr } from '@/lib/timeUtils';
+import { withAppliedDateMarker } from '@/lib/rescheduleNote';
 import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
 import { getPickupLocations, resolveNearestPickup } from '@/lib/nearestPickup';
 import { imapAccounts } from '@/lib/imapAccounts';
@@ -180,11 +181,18 @@ async function findTarget(b: OtaBooking): Promise<Target | null> {
 async function handleNew(b: OtaBooking): Promise<Result> {
     const { data: existing } = await supabaseServer
         .from('reservations')
-        .select('id')
+        .select('id, status, note, pax, pickup_location, tour_date, option')
         .eq('order_id', b.orderId)
         .maybeSingle();
 
     if (existing) {
+        const target = existing as Target;
+        // 클룩·Viator·여기어때는 '변경' 메일이 따로 없고 **같은 예약번호로 확정 메일이 다시** 온다.
+        // 날짜가 다르면 그게 날짜 변경이다. 중복으로 버리면 손님이 엉뚱한 날 배에 없다.
+        if (b.tourDate && b.tourDate !== target.tour_date && target.status !== '취소') {
+            const stamp = `[${b.source} 예약메일 재수신: ${getHawaiiDateStr()} / 투어일 ${target.tour_date || '?'} → ${b.tourDate}]`;
+            return requestDateChange(target, b, stamp, `투어일 ${target.tour_date || '?'} → ${b.tourDate}`);
+        }
         console.log(`[OTA Cron] 이미 존재하는 예약: ${b.orderId}`);
         return { outcome: 'duplicate' };
     }
@@ -250,6 +258,38 @@ async function handleCancel(b: OtaBooking, preloaded?: Target): Promise<Result> 
 }
 
 /**
+ * 날짜가 바뀐 예약. OTA 에서 **이미 확정된 변경**이라 새 날짜를 바로 반영한다.
+ * (안 옮기면 승인 전까지 배 명단이 옛 날짜에 남아 손님이 없는 날 자리를 잡고 있다)
+ *
+ * 다만 상태는 '변경요청' 으로 세워 둔다. 옛 날짜가 뭐였는지는 note 표식에 남기고,
+ * 변경요청 화면에서 "옛 날짜 ➜ 지금 날짜" 를 눈으로 본 뒤 승인으로 '예약확정' 을 찍는다.
+ */
+async function requestDateChange(target: Target, b: OtaBooking, stamp: string, summary: string): Promise<Result> {
+    const { error } = await supabaseServer
+        .from('reservations')
+        .update({
+            tour_date: b.tourDate,
+            pickup_location: b.pickupLocation || undefined,
+            option: b.option || undefined,
+            pax: b.pax || undefined,
+            status: '변경요청',
+            is_admin_checked: false,
+            note: withAppliedDateMarker(
+                `${target.note || ''} ${stamp}`,
+                target.tour_date || '',
+                target.pickup_location || '',
+            ),
+        })
+        .eq('id', target.id);
+
+    if (error) {
+        console.error('[OTA Cron] 날짜변경 UPDATE 실패:', error);
+        return { outcome: 'error' };
+    }
+    return { outcome: 'updated', detail: `${summary} — 반영했습니다. 변경요청 화면에서 확인 후 승인해주세요.` };
+}
+
+/**
  * GYG "Booking detail change" → 기존 예약의 픽업·인원·날짜만 갱신한다.
  *
  * 이 메일에는 고객명·연락처가 없다. 신규로 처리하면 이름 자리에 안내 문장이 들어간
@@ -284,6 +324,10 @@ async function handleUpdate(b: OtaBooking): Promise<Result> {
     if (changes.length === 0) return { outcome: 'duplicate' };
 
     const stamp = `[${b.source} 예약변경 수신: ${getHawaiiDateStr()} / ${changes.join(' / ')}]`;
+
+    if (b.tourDate && b.tourDate !== target.tour_date) {
+        return requestDateChange(target, b, stamp, changes.join(' / '));
+    }
 
     const { error } = await supabaseServer
         .from('reservations')
