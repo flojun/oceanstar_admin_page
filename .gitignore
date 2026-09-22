@@ -55,3 +55,7 @@ public/*.pptx
 
 # claude code worktrees (실수로 gitlink 로 커밋되던 항목)
 .claude/worktrees/
+
+# python bytecode (보드 빌더가 _detail_ko 등을 import 할 때 생긴다)
+__pycache__/
+*.py[cod]
