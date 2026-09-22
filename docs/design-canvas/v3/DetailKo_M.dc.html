@@ -118,23 +118,21 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);letter-spac
 
 /* 375px 에서는 폭을 나눌 수 없다. 한 줄로 쌓되 사진 칸이 리듬을 만든다. */
 .feats{margin-top:28px;display:grid;grid-template-columns:1fr;gap:14px}
-.ft{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);
-  border-radius:20px;overflow:hidden}
-.ft.key{background:var(--deep);border-color:var(--deep)}
+.ft{position:relative;display:flex;flex-direction:column;background:#fff;
+  border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.ft.key::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;
+  z-index:2;background:var(--sea-d)}
 .ft img{width:100%;aspect-ratio:16 / 10;object-fit:cover}
 .ft-b{padding:24px 22px 28px}
 .ft .no{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;
   padding:0 10px;border-radius:999px;background:var(--soft);
   font-family:'SUIT',system-ui,sans-serif;font-size:14.5px;font-weight:800;color:var(--deep)}
-.ft.key .no{background:rgba(255,255,255,.16);color:#fff}
+
 .ft h3{margin-top:16px;font-size:24px;line-height:1.32}
 .ft .sub{margin-top:8px;font-size:16px;font-weight:700;color:var(--deep)}
 .ft p{margin-top:14px;font-size:16px;line-height:1.85;color:var(--text)}
 .ft .em{margin-top:14px;font-size:16px;line-height:1.8;font-weight:700;color:var(--deep)}
-.ft.key h3{color:#fff}
-.ft.key .sub{color:var(--sky-2)}
-.ft.key p{color:rgba(255,255,255,.84)}
-.ft.key .em{color:var(--sky-2)}
+.ft.key .sub{color:var(--sea-d)}
 
 /* 주간 표 — 375px 에 7칸 표를 밀어 넣으면 시각이 12.5px 까지 내려간다.
    회차를 줄로 세우고 요일은 알약 일곱 개로 옮겨, 읽을 값(시각)에 19px 를
