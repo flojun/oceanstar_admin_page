@@ -2,17 +2,28 @@
 """상세페이지(한국어) 보드. 데스크탑 1440 · 모바일 375.
 
 문안은 _detail_ko.py 에 모아 두었다(운영 중인 OTA 상세페이지에서 그대로 옮김).
-꼴은 시안 B 와 같은 토큰·활자·모서리 값을 쓴다. 다만 랜딩과 같은 짜임을 반복하지
-않도록 섹션마다 다른 배치를 썼다. 히어로는 사진 띠 + 겹쳐 올린 예약 카드,
-특장점은 번호 격자, 시간은 주간 띠, 일정은 단계 흐름, 인증샷은 사진 격자다.
+꼴은 시안 B 와 같은 토큰·활자·모서리 값을 쓴다.
 
-사진이 없는 자리는 회색 상자로 비워 두고 무엇이 필요한지 적어 두었다.
-없는 사진을 만들어 넣지 않는다.
+2차 정리에서 고친 것 (taste 점검)
+  1. 여덟 섹션이 전부 가운데 정렬이라 결이 하나였다. 머리를 왼쪽으로 내리고,
+     인증샷과 맺음만 가운데로 남겨 대비를 만들었다.
+  2. 알약(눈썹)이 히어로 포함 넷이었다. 히어로 하나만 남겼다.
+  3. '2단 카드 줄'이 특장점·일정·다른 상품 세 번 나왔다. 특장점은 폭이 다른
+     여섯 칸 벤토로, 일정의 픽업 안내는 카드를 걷고 실선 두 줄로 바꿨다.
+  4. 사진이 히어로 하나뿐이었다. 저장소에 있던 실촬영본을 찾아 히어로를 바꾸고
+     특장점 세 칸에 넣었다.
+  5. 움직임이 없었다. 랜딩과 같은 .rise 스크롤 연출을 넣었다(감속 선호 시 정지).
 """
 import io, os, re
 import _detail_ko as C
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+# 특장점 칸에 들어가는 실촬영본. 저장소 public/ 에 있던 것을 잘라 담았다.
+FEAT_IMG = {"01": ("hero_waikiki.jpg", "와이키키 앞바다의 오션스타 보트와 다이아몬드헤드"),
+            "02": ("feat_roof.webp",   "와이키키 앞바다의 오션스타 루프탑 보트"),
+            "03": ("feat_marine.webp", "패들보드 위의 손님과 물에서 스노클링하는 일행"),
+            "04": ("feat_turtle.webp", "모래바닥에 모여 있는 푸른바다거북")}
 
 
 def fonts():
@@ -97,17 +108,23 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);letter-spac
 
 CSS_D = BASE + """
 .page{width:1440px;--pad:76px}
-.sect{padding:104px var(--pad) 0}
+.sect{padding:112px var(--pad) 0}
 .center{text-align:center}
-.sect h2{font-size:46px;line-height:1.26}
-.lede{margin-top:20px;font-size:16px;line-height:1.85;color:var(--text)}
 
-/* 히어로 — 사진 띠 위에 내비, 그 아래 예약 카드를 겹쳐 올린다. 랜딩의
-   전면 히어로와 달리 상세는 값과 시간이 첫 화면에 있어야 한다. */
-.hero{position:relative;height:560px;overflow:hidden;background:var(--ink)}
-.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.veil{position:absolute;inset:0;background:linear-gradient(180deg,
-  rgba(9,16,22,.56) 0%,rgba(9,16,22,.42) 30%,rgba(9,16,22,.48) 58%,rgba(9,16,22,.72) 100%)}
+/* 섹션 머리. 왼쪽에 놓는다. 여덟 섹션이 모두 가운데였을 때는 어느 섹션을
+   보고 있는지 결이 구분되지 않았다. 가운데는 인증샷과 맺음에만 남겼다. */
+.sh{max-width:760px}
+.sh h2{font-size:46px;line-height:1.24}
+.sh .lede{margin-top:16px;font-size:16px;line-height:1.85;color:var(--text);max-width:52ch}
+.center .sh{max-width:none}
+.center .sh .lede{margin-left:auto;margin-right:auto}
+
+/* 히어로 — 사진 띠 위에 내비, 글은 왼쪽 아래. 그 아래로 예약 패널이 걸친다.
+   랜딩 히어로가 가운데 정렬이라 상세까지 같으면 두 장이 똑같아 보인다. */
+.hero{position:relative;height:620px;overflow:hidden;background:var(--ink)}
+.hero-img{position:absolute;left:0;right:0;top:-6%;width:100%;height:112%;object-fit:cover}
+.veil{position:absolute;inset:0;background:linear-gradient(104deg,
+  rgba(9,16,22,.80) 0%,rgba(9,16,22,.58) 34%,rgba(9,16,22,.24) 62%,rgba(9,16,22,.42) 100%)}
 .nav{position:absolute;left:var(--pad);right:var(--pad);top:26px;z-index:5;
   display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
 .logo{height:44px;width:auto;filter:brightness(0) invert(1)}
@@ -121,20 +138,20 @@ CSS_D = BASE + """
   border:1px solid rgba(255,255,255,.44);color:#fff;font-size:13px;font-weight:700;letter-spacing:.06em}
 .nav-r .book-pill{background:#fff;color:var(--ink)}
 .nav-r .book-pill svg{background:var(--ink);color:#fff}
-.hero-in{position:absolute;left:0;right:0;top:186px;z-index:3;text-align:center;color:#fff}
+.hero-in{position:absolute;left:var(--pad);top:196px;z-index:3;color:#fff;max-width:720px}
 .eyebrow{display:inline-flex;align-items:center;height:32px;padding:0 18px;border-radius:999px;
   background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.34);
   font-size:12.5px;font-weight:600;color:#fff;
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.hero-in h1{margin-top:22px;font-size:66px;line-height:1.16;color:#fff;font-weight:800}
+.hero-in h1{margin-top:22px;font-size:68px;line-height:1.14;color:#fff;font-weight:800}
 .hero-in h1 .hl{color:var(--sky)}
-.hero-in .rev{display:inline-flex;align-items:center;gap:9px;margin-top:22px;height:38px;
+.hero-in .rev{display:inline-flex;align-items:center;gap:9px;margin-top:24px;height:38px;
   padding:0 18px;border-radius:999px;background:rgba(16,20,24,.5);color:#fff;
   font-size:13.5px;font-weight:700;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .hero-in .rev svg{color:var(--sky)}
 
-/* 예약 카드 */
-.buy{position:relative;z-index:6;margin:-96px var(--pad) 0;padding:34px 38px;
+/* 예약 패널 */
+.buy{position:relative;z-index:6;margin:-104px var(--pad) 0;padding:34px 38px;
   background:#fff;border-radius:22px;box-shadow:var(--e2);
   display:grid;grid-template-columns:1fr 344px;gap:0 44px;align-items:center}
 .facts{display:grid;grid-template-columns:1fr 1fr;gap:18px 34px}
@@ -151,27 +168,33 @@ CSS_D = BASE + """
   display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.7;color:var(--text)}
 .pure svg{color:var(--sea);margin-top:1px}
 
-/* 포함 사항 — 한 장짜리 띠. 바로 아래 특장점이 카드 격자라 여기까지 카드로
-   두면 같은 짜임이 두 번 나온다. 짧은 사실 넷은 칸만 나눠도 읽힌다. */
-.inc{margin-top:44px;display:grid;grid-template-columns:repeat(4,1fr);
+/* 포함 사항 — 한 장짜리 띠를 칸으로 나눈다. 카드로 띄울 위계가 아니다. */
+.inc{margin-top:40px;display:grid;grid-template-columns:repeat(4,1fr);
   background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden}
-.inc-c{padding:34px 30px;text-align:left}
+.inc-c{padding:34px 30px}
 .inc-c + .inc-c{border-left:1px solid var(--line)}
 .inc-c .ic{display:flex;align-items:center;justify-content:center;width:50px;height:50px;
   border-radius:14px;background:var(--soft);color:var(--sea)}
 .inc-c h3{margin-top:18px;font-size:19px;line-height:1.35}
 .inc-c p{margin-top:9px;font-size:14px;line-height:1.8;color:var(--text)}
 
-/* 6가지 특장점 — 번호 격자. 첫머리 주장 둘만 색을 준다. */
-.feats{margin-top:44px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.ft{padding:32px 34px 34px;background:#fff;border:1px solid var(--line);border-radius:22px}
+/* 6가지 특장점 — 폭이 다른 여섯 칸. 줄마다 3+3 / 2+4 / 4+2 로 갈라 같은
+   리듬이 반복되지 않게 했다. 사진 셋과 진한 칸 둘이 흰 칸 사이에 섞인다. */
+.feats{margin-top:40px;display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
+.ft{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);
+  border-radius:22px;overflow:hidden}
+.ft.w3{grid-column:span 3} .ft.w4{grid-column:span 4} .ft.w2{grid-column:span 2}
 .ft.key{background:var(--deep);border-color:var(--deep)}
+.ft img{width:100%;object-fit:cover}
+.ft.w2 img{aspect-ratio:1.41 / 1}
+.ft.w3 img{aspect-ratio:2.15 / 1}
+.ft.w4 img{aspect-ratio:2.88 / 1}
+.ft-b{padding:30px 32px 32px}
 .ft .no{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;
   padding:0 10px;border-radius:999px;background:var(--soft);
-  font-family:'SUIT',system-ui,sans-serif;font-size:14px;font-weight:800;color:var(--deep);
-  letter-spacing:.02em}
+  font-family:'SUIT',system-ui,sans-serif;font-size:14px;font-weight:800;color:var(--deep)}
 .ft.key .no{background:rgba(255,255,255,.16);color:#fff}
-.ft h3{margin-top:16px;font-size:24px;line-height:1.3}
+.ft h3{margin-top:16px;font-size:23px;line-height:1.3}
 .ft .sub{margin-top:7px;font-size:15px;font-weight:700;color:var(--deep)}
 .ft p{margin-top:14px;font-size:14.5px;line-height:1.85;color:var(--text)}
 .ft .em{margin-top:14px;font-size:14.5px;line-height:1.8;font-weight:700;color:var(--deep)}
@@ -180,9 +203,10 @@ CSS_D = BASE + """
 .ft.key p{color:rgba(255,255,255,.84)}
 .ft.key .em{color:var(--sky-2)}
 
-/* 투어 시간 — 주간 띠 */
-.week{margin:36px auto 0;max-width:1020px;border-radius:18px;overflow:hidden;
-  border:1px solid var(--line);background:#fff}
+/* 투어 시간 — 머리를 왼쪽에 세우고 표를 오른쪽에 둔다. 오른쪽 칸이 실제
+   내용(주간 표)이라 머리와 설명만 갈라놓는 짜임이 아니다. */
+.time{display:grid;grid-template-columns:340px 1fr;gap:72px;align-items:start}
+.week{border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#fff}
 .wrow{display:grid;grid-template-columns:repeat(7,1fr)}
 .whead span{padding:15px 0;text-align:center;font-size:14px;font-weight:700;color:var(--ink);
   background:var(--soft)}
@@ -197,74 +221,86 @@ CSS_D = BASE + """
 .slot.food{background:var(--food-d)}
 .rest{display:flex;align-items:center;justify-content:center;font-size:12.5px;
   font-weight:700;color:var(--muted);background:var(--soft)}
-.tnote{margin:26px auto 0;max-width:1020px;display:flex;align-items:flex-start;gap:10px;
-  padding:18px 22px;border-radius:14px;background:#fff;border:1px solid var(--line);
+.tnote{margin-top:22px;display:flex;align-items:flex-start;gap:10px;padding:18px 22px;
+  border-radius:14px;background:#fff;border:1px solid var(--line);
   font-size:13.5px;line-height:1.8;color:var(--text)}
 .tnote svg{color:var(--sea);margin-top:2px}
-.tlist{margin:16px auto 0;max-width:1020px;text-align:left}
+.tlist{margin-top:34px}
 .tlist li{position:relative;padding-left:16px;font-size:13.5px;line-height:1.95;color:var(--muted)}
 .tlist li::before{content:"";position:absolute;left:2px;top:12px;width:4px;height:4px;
   border-radius:50%;background:var(--muted)}
 
-/* 일정 — 단계 흐름 */
-.flow{margin:40px auto 0;display:flex;align-items:center;justify-content:center;gap:0}
-.step{display:flex;align-items:center;justify-content:center;width:112px;height:112px;
+/* 일정 — 단계 흐름. 픽업 안내는 카드를 걷고 실선 두 줄로 둔다. */
+.flow{margin-top:44px;display:flex;align-items:center;justify-content:space-between;gap:0}
+.step{display:flex;align-items:center;justify-content:center;width:120px;height:120px;
   border-radius:50%;text-align:center;font-size:14px;font-weight:700;line-height:1.35;
   background:#fff;border:1px solid var(--line);color:var(--ink)}
 .step.on{background:var(--deep);border-color:var(--deep);color:#fff}
-.flow span.sp{width:18px;height:1px;background:var(--line);flex:none}
-.fcards{margin:40px auto 0;max-width:1020px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.fc{display:flex;gap:18px;align-items:flex-start;padding:26px 28px;background:#fff;
-  border:1px solid var(--line);border-radius:22px;text-align:left}
-.fc .ic{display:flex;align-items:center;justify-content:center;width:48px;height:48px;
-  border-radius:14px;background:var(--soft);color:var(--sea);flex:none}
-.fc.back .ic{color:var(--food)}
-.fc h3{font-size:18px}
+.flow span.sp{flex:1;height:1px;background:var(--line);min-width:10px}
+.fnotes{margin-top:52px;border-top:1px solid var(--line);
+  display:grid;grid-template-columns:1fr 1fr;gap:0}
+.fc{display:flex;gap:18px;align-items:flex-start;padding:28px 0}
+.fc + .fc{padding-left:44px;border-left:1px solid var(--line)}
+.fc .ic{display:flex;align-items:center;justify-content:center;width:44px;height:44px;
+  border-radius:13px;background:var(--soft);color:var(--sea);flex:none}
+.fc.back .ic{color:var(--food-d)}
+.fc h3{font-size:17px}
 .fc p{margin-top:7px;font-size:14px;line-height:1.75;color:var(--text)}
-.fnote{margin:22px auto 0;text-align:center;font-size:14.5px;font-weight:700;color:var(--ink)}
+.fnote{margin-top:26px;padding-top:24px;border-top:1px solid var(--line);
+  font-size:14.5px;font-weight:700;color:var(--ink)}
 
-/* 인증샷 */
-/* 타일이 315x327 이라 한 칸 246px 로 담아도 0.78 배 축소다. 늘리지 않으니
-   또렷하고, 증거 벽이 제 크기를 찾는다. (원본 화소 그대로였을 때는 133px
-   짜리를 1.86 배 늘려야 해서 880px 로 묶어 뒀었다.) */
+/* 인증샷 — 이 섹션과 맺음만 가운데다. 계속 왼쪽이면 결이 또 하나가 된다. */
 .stars{margin-top:40px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
 .star-c{border-radius:18px;overflow:hidden;background:#fff;border:1px solid var(--line)}
-/* 잘라 낸 원본이 132x137 이라 그 비율을 그대로 쓴다. 다른 비율로 담으면
-   cover 가 얼굴을 잘라 낸다. */
 .star-c img{width:100%;aspect-ratio:132 / 137;object-fit:cover}
 .star-c b{display:block;padding:13px 14px;font-size:13px;font-weight:700;color:var(--ink);
   text-align:center;line-height:1.4}
 .ig{margin-top:26px;text-align:center;font-size:13.5px;font-weight:700;color:var(--muted)}
 
 /* 다른 상품 */
-.more{margin-top:44px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.mc{display:grid;grid-template-columns:230px 1fr;background:#fff;border:1px solid var(--line);
+.more{margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mc{display:grid;grid-template-columns:250px 1fr;background:#fff;border:1px solid var(--line);
   border-radius:22px;overflow:hidden}
 .mc img{width:100%;height:100%;object-fit:cover}
-.mc .tx{padding:30px 32px;display:flex;flex-direction:column;justify-content:center}
+.mc .tx{padding:32px 34px;display:flex;flex-direction:column;justify-content:center}
 .mc h3{font-size:24px;line-height:1.3}
 .mc p{margin-top:10px;font-size:14.5px;line-height:1.75;color:var(--text)}
 .mc .go{margin-top:12px;display:inline-flex;align-items:center;min-height:44px;gap:7px;
   font-size:13.5px;font-weight:700;color:var(--deep)}
 
-/* 끝맺음 */
-.end{margin:104px 0 0;padding:72px var(--pad);background:var(--ink);color:#fff;text-align:center}
+/* 맺음 */
+.end{margin:112px 0 0;padding:76px var(--pad);background:var(--ink);color:#fff;text-align:center}
 .end h2{font-size:42px;color:#fff}
 .end p{margin-top:14px;font-size:16px;line-height:1.8;color:rgba(255,255,255,.76)}
 .end .book-pill{margin-top:26px}
+
+/* ── 스크롤 연출. 랜딩과 같은 값이다. 긴 페이지에서 섹션이 차례로 놓이는
+   것을 알리는 목적이고, 감속을 선호하면 전부 정지한다. ───────────── */
+@media (prefers-reduced-motion: no-preference){
+  @supports (animation-timeline: view()){
+    .rise{animation-name:rise;animation-timeline:view();animation-fill-mode:both;
+      animation-timing-function:cubic-bezier(.22,.61,.36,1);
+      animation-range:entry 6% cover 30%}
+    @keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+    .hero-img{animation:pan linear both;animation-timeline:view();
+      animation-range:cover 0% cover 100%}
+    @keyframes pan{from{transform:translateY(2.4%)}
+                   to{transform:translateY(-2.4%)}}
+  }
+}
 """
 
 CSS_M = BASE + """
 .page{width:375px;--pad:20px}
-.sect{padding:60px var(--pad) 0}
+.sect{padding:64px var(--pad) 0}
 .center{text-align:center}
-.sect h2{font-size:27px;line-height:1.35}
-.lede{margin-top:14px;font-size:14.5px;line-height:1.8;color:var(--text)}
+.sh h2{font-size:27px;line-height:1.32}
+.sh .lede{margin-top:12px;font-size:14.5px;line-height:1.8;color:var(--text)}
 
-.hero{position:relative;height:430px;overflow:hidden;background:var(--ink)}
-.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.veil{position:absolute;inset:0;background:linear-gradient(180deg,
-  rgba(9,16,22,.58) 0%,rgba(9,16,22,.42) 30%,rgba(9,16,22,.50) 58%,rgba(9,16,22,.74) 100%)}
+.hero{position:relative;height:470px;overflow:hidden;background:var(--ink)}
+.hero-img{position:absolute;left:0;right:0;top:-6%;width:100%;height:112%;object-fit:cover}
+.veil{position:absolute;inset:0;background:linear-gradient(170deg,
+  rgba(9,16,22,.58) 0%,rgba(9,16,22,.34) 34%,rgba(9,16,22,.46) 66%,rgba(9,16,22,.78) 100%)}
 .nav{position:absolute;left:var(--pad);right:var(--pad);top:16px;z-index:5;
   display:flex;align-items:center;justify-content:space-between}
 .logo{height:34px;width:auto;filter:brightness(0) invert(1)}
@@ -275,13 +311,12 @@ CSS_M = BASE + """
 .burger{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;
   border-radius:50%;background:rgba(255,255,255,.22);
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.hero-in{position:absolute;left:var(--pad);right:var(--pad);top:104px;z-index:3;
-  text-align:center;color:#fff}
+.hero-in{position:absolute;left:var(--pad);right:var(--pad);top:124px;z-index:3;color:#fff}
 .eyebrow{display:inline-flex;align-items:center;min-height:30px;padding:5px 14px;
   border-radius:999px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.34);
   font-size:11.5px;font-weight:600;color:#fff;line-height:1.4;
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.hero-in h1{margin-top:14px;font-size:32px;line-height:1.26;color:#fff;font-weight:800}
+.hero-in h1{margin-top:14px;font-size:34px;line-height:1.24;color:#fff;font-weight:800}
 .hero-in h1 .hl{color:var(--sky)}
 .hero-in .rev{display:inline-flex;align-items:center;gap:8px;margin-top:16px;min-height:36px;
   padding:6px 15px;border-radius:999px;background:rgba(16,20,24,.5);color:#fff;
@@ -289,8 +324,7 @@ CSS_M = BASE + """
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .hero-in .rev svg{color:var(--sky)}
 
-/* 모바일은 값과 버튼이 먼저다. 마크업 순서는 데스크탑(설명 왼쪽 · 값 오른쪽)에
-   맞춰 두고 여기서만 순서를 뒤집는다. */
+/* 값과 버튼이 먼저다. 마크업은 데스크탑 순서로 두고 여기서만 뒤집는다. */
 .buy{position:relative;z-index:6;margin:-56px var(--pad) 0;padding:24px 22px;background:#fff;
   border-radius:22px;box-shadow:var(--e2);display:flex;flex-direction:column}
 .buy-r{order:1}
@@ -310,19 +344,22 @@ CSS_M = BASE + """
   align-items:flex-start;gap:8px;font-size:12.5px;line-height:1.7;color:var(--text)}
 .pure svg{color:var(--sea);margin-top:1px}
 
-/* 포함 사항 — 데스크탑과 같은 이유로 한 장짜리 띠. 375px 에서는 세로로 쌓는다. */
 .inc{margin-top:24px;display:grid;grid-template-columns:1fr;
   background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.inc-c{padding:22px 22px 24px;text-align:left}
+.inc-c{padding:22px 22px 24px}
 .inc-c + .inc-c{border-top:1px solid var(--line)}
 .inc-c .ic{display:flex;align-items:center;justify-content:center;width:46px;height:46px;
   border-radius:13px;background:var(--soft);color:var(--sea)}
 .inc-c h3{margin-top:14px;font-size:17px;line-height:1.35}
 .inc-c p{margin-top:8px;font-size:13.5px;line-height:1.8;color:var(--text)}
 
+/* 375px 에서는 폭을 나눌 수 없다. 한 줄로 쌓되 사진 칸이 리듬을 만든다. */
 .feats{margin-top:24px;display:grid;grid-template-columns:1fr;gap:12px}
-.ft{padding:24px 22px 26px;background:#fff;border:1px solid var(--line);border-radius:18px}
+.ft{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);
+  border-radius:18px;overflow:hidden}
 .ft.key{background:var(--deep);border-color:var(--deep)}
+.ft img{width:100%;aspect-ratio:2 / 1;object-fit:cover}
+.ft-b{padding:22px 22px 26px}
 .ft .no{display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:32px;
   padding:0 9px;border-radius:999px;background:var(--soft);
   font-family:'SUIT',system-ui,sans-serif;font-size:13px;font-weight:800;color:var(--deep)}
@@ -353,30 +390,31 @@ CSS_M = BASE + """
   color:var(--muted);background:var(--soft)}
 .tnote{margin-top:18px;display:flex;align-items:flex-start;gap:9px;padding:16px 18px;
   border-radius:14px;background:#fff;border:1px solid var(--line);
-  font-size:12.5px;line-height:1.8;color:var(--text);text-align:left}
+  font-size:12.5px;line-height:1.8;color:var(--text)}
 .tnote svg{color:var(--sea);margin-top:2px}
-.tlist{margin-top:14px;text-align:left}
+.tlist{margin-top:14px}
 .tlist li{position:relative;padding-left:15px;font-size:12.5px;line-height:1.9;color:var(--muted)}
 .tlist li::before{content:"";position:absolute;left:2px;top:11px;width:4px;height:4px;
   border-radius:50%;background:var(--muted)}
 
-/* 단계는 세로로 세운다. 375px 에 일곱 개를 옆으로 늘어놓으면 글자가 안 읽힌다. */
-.flow{margin-top:24px;display:grid;grid-template-columns:1fr;gap:0;text-align:left}
+/* 375px 에 원 일곱 개는 못 넣는다. 세로로 세운다. */
+.flow{margin-top:24px;display:grid;grid-template-columns:1fr;gap:0}
 .step{display:flex;align-items:center;gap:14px;min-height:52px;font-size:14.5px;font-weight:700;
   color:var(--ink)}
 .step::before{content:"";width:11px;height:11px;border-radius:50%;background:#fff;
   border:2.5px solid var(--line);flex:none;margin-left:5px}
 .step.on::before{background:var(--deep);border-color:var(--deep)}
 .flow span.sp{width:1px;height:14px;margin-left:12.5px;background:var(--line)}
-.fcards{margin-top:24px;display:grid;grid-template-columns:1fr;gap:12px}
-.fc{display:flex;gap:14px;align-items:flex-start;padding:20px 20px;background:#fff;
-  border:1px solid var(--line);border-radius:18px;text-align:left}
+.fnotes{margin-top:30px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr}
+.fc{display:flex;gap:14px;align-items:flex-start;padding:22px 0}
+.fc + .fc{border-top:1px solid var(--line)}
 .fc .ic{display:flex;align-items:center;justify-content:center;width:44px;height:44px;
   border-radius:13px;background:var(--soft);color:var(--sea);flex:none}
-.fc.back .ic{color:var(--food)}
+.fc.back .ic{color:var(--food-d)}
 .fc h3{font-size:16px}
 .fc p{margin-top:6px;font-size:13px;line-height:1.75;color:var(--text)}
-.fnote{margin-top:18px;font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.7}
+.fnote{margin-top:22px;padding-top:20px;border-top:1px solid var(--line);
+  font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.7}
 
 .stars{margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .star-c{border-radius:14px;overflow:hidden;background:#fff;border:1px solid var(--line)}
@@ -388,16 +426,25 @@ CSS_M = BASE + """
 .more{margin-top:24px;display:grid;grid-template-columns:1fr;gap:12px}
 .mc{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
 .mc img{width:100%;height:170px;object-fit:cover}
-.mc .tx{padding:22px 20px 24px;text-align:left}
+.mc .tx{padding:22px 20px 24px}
 .mc h3{font-size:20px;line-height:1.35}
 .mc p{margin-top:8px;font-size:13.5px;line-height:1.75;color:var(--text)}
 .mc .go{margin-top:8px;display:inline-flex;align-items:center;min-height:44px;gap:6px;
   font-size:13px;font-weight:700;color:var(--deep)}
 
-.end{margin-top:60px;padding:52px var(--pad);background:var(--ink);color:#fff;text-align:center}
+.end{margin-top:64px;padding:56px var(--pad);background:var(--ink);color:#fff;text-align:center}
 .end h2{font-size:26px;color:#fff;line-height:1.35}
 .end p{margin-top:12px;font-size:14px;line-height:1.8;color:rgba(255,255,255,.76)}
 .end .book-pill{margin-top:22px}
+
+@media (prefers-reduced-motion: no-preference){
+  @supports (animation-timeline: view()){
+    .rise{animation-name:rise;animation-timeline:view();animation-fill-mode:both;
+      animation-timing-function:cubic-bezier(.22,.61,.36,1);
+      animation-range:entry 4% cover 26%}
+    @keyframes rise{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:none}}
+  }
+}
 """
 
 
@@ -418,10 +465,17 @@ def nav(mobile):
             f'<a href="#" class="book-pill">투어 예약하기 {I_ARROW}</a></div></header>')
 
 
+def sh(h2, lede=None, cls=""):
+    """섹션 머리. 왼쪽 정렬이 기본이고, 가운데는 부모가 .center 일 때만."""
+    l = f'<p class="lede">{lede}</p>' if lede else ""
+    c = f" {cls}" if cls else ""
+    return f'<header class="sh{c} rise"><h2>{h2}</h2>{l}</header>'
+
+
 def hero(mobile):
     h = C.HERO
     return f"""<section class="hero">
-  <img src="turtle.jpg" alt="와이키키 앞바다의 푸른바다거북" class="hero-img">
+  <img src="hero_turtle.webp" alt="와이키키 앞바다 산호 위의 푸른바다거북" class="hero-img">
   <span class="veil"></span>
   {nav(mobile)}
   <div class="hero-in">
@@ -430,7 +484,7 @@ def hero(mobile):
     <span class="rev">{I_STAR} {h['badge']}</span>
   </div>
 </section>
-<section class="buy">
+<section class="buy rise">
   <dl class="facts">{''.join(f'<div><dt>{k}</dt><dd>{v}</dd></div>' for k, v in h['facts'])}</dl>
   <div class="buy-r">
     <b class="amt n">{h['price']}</b>
@@ -445,20 +499,26 @@ def perks(mobile):
     cells = "".join(
         f'<div class="inc-c"><span class="ic">{PERK_ICONS[k]}</span>'
         f'<h3>{t}</h3><p>{b}</p></div>' for k, t, b in C.PERKS)
-    return (f'<section class="sect center"><span class="pill">{I_PLUS} 포함 사항</span>'
-            f'<h2 style="margin-top:20px">{C.PERKS_H2}</h2>'
-            f'<div class="inc">{cells}</div></section>')
+    return (f'<section class="sect">{sh(C.PERKS_H2)}'
+            f'<div class="inc rise">{cells}</div></section>')
 
 
 def features(mobile):
+    # 줄마다 폭을 달리한다. 3+3 / 2+4 / 4+2.
+    SPAN = {"01": "w3", "02": "w3", "03": "w2", "04": "w4", "05": "w3", "06": "w3"}
     out = []
     for no, t, sub, paras, em, key in C.FEATURES:
+        img = ""
+        if no in FEAT_IMG:
+            src, alt = FEAT_IMG[no]
+            img = f'<img src="{src}" alt="{alt}">'
         body = "".join(f'<p>{x}</p>' for x in paras)
         emx = f'<p class="em">{em}</p>' if em else ""
-        out.append(f'<div class="ft{" key" if key else ""}"><span class="no">{no}</span>'
-                   f'<h3>{t}</h3><span class="sub">{sub}</span>{body}{emx}</div>')
-    return (f'<section class="sect center"><h2>{C.FEAT_H2}</h2>'
-            f'<div class="feats" style="text-align:left">{"".join(out)}</div></section>')
+        out.append(f'<div class="ft {SPAN[no]}{" key" if key else ""} rise">{img}'
+                   f'<div class="ft-b"><span class="no">{no}</span>'
+                   f'<h3>{t}</h3><span class="sub">{sub}</span>{body}{emx}</div></div>')
+    return (f'<section class="sect">{sh(C.FEAT_H2)}'
+            f'<div class="feats">{"".join(out)}</div></section>')
 
 
 def times(mobile):
@@ -471,53 +531,51 @@ def times(mobile):
         rows.append(f'<div class="wrow"><div class="slot {col}" '
                     f'style="grid-column:1 / span {span}"><b>{name}</b>{tm}</div>{rest}</div>')
     notes = "".join(f"<li>{x}</li>" for x in C.TIME_NOTES)
-    return (f'<section class="sect center"><span class="pill">{I_CLOCK} 시간표</span>'
-            f'<h2 style="margin-top:20px">{C.TIME_H2}</h2>'
-            f'<p class="lede">{C.TIME_SUB}</p>'
-            f'<div class="week">{"".join(rows)}</div>'
-            f'<p class="tnote">{I_CLOCK}<span>{C.TIME_PURE}</span></p>'
-            f'<ul class="tlist">{notes}</ul></section>')
+    table = (f'<div class="rise"><div class="week">{"".join(rows)}</div>'
+             f'<p class="tnote">{I_CLOCK}<span>{C.TIME_PURE}</span></p></div>')
+    if mobile:
+        return (f'<section class="sect">{sh(C.TIME_H2, C.TIME_SUB)}{table}'
+                f'<ul class="tlist">{notes}</ul></section>')
+    # 유의사항은 왼쪽 기둥에 붙인다. 머리만 두면 표 옆이 500px 비어 버린다.
+    left = (f'<div>{sh(C.TIME_H2, C.TIME_SUB)}'
+            f'<ul class="tlist rise">{notes}</ul></div>')
+    return f'<section class="sect"><div class="time">{left}{table}</div></section>'
 
 
 def flow(mobile):
     steps = []
-    for i, s in enumerate(C.FLOW):
+    for i, x in enumerate(C.FLOW):
         if i:
             steps.append('<span class="sp"></span>')
-        steps.append(f'<div class="step{" on" if i % 2 == 0 else ""}">{s}</div>')
+        steps.append(f'<div class="step{" on" if i % 2 == 0 else ""}">{x}</div>')
     ic = {"pickup": PERK_ICONS["van"], "back": I_HOTEL}
     cards = "".join(
         f'<div class="fc{" back" if k == "back" else ""}"><span class="ic">{ic[k]}</span>'
         f'<div><h3>{t}</h3><p>{b}</p></div></div>' for k, t, b in C.FLOW_CARDS)
-    return (f'<section class="sect center"><h2>{C.FLOW_H2}</h2>'
-            f'<div class="flow">{"".join(steps)}</div>'
-            f'<div class="fcards">{cards}</div>'
+    return (f'<section class="sect">{sh(C.FLOW_H2)}'
+            f'<div class="flow rise">{"".join(steps)}</div>'
+            f'<div class="fnotes rise">{cards}</div>'
             f'<p class="fnote">{C.FLOW_NOTE}</p></section>')
 
 
 def stars(mobile):
-    # 올려 주신 상세페이지 이미지에서 타일만 잘라 낸 것이다. 화소는 원본 그대로고
-    # 확대도 보정도 하지 않았다.
     tiles = "".join(
-        f'<div class="star-c"><img src="star{i:02d}.webp" alt="{n}">'
-        f'<b>{n}</b></div>'
+        f'<div class="star-c"><img src="star{i:02d}.webp" alt="{n}"><b>{n}</b></div>'
         for i, n in enumerate(C.STARS, 1))
-    return (f'<section class="sect center"><h2>{C.STAR_H2}</h2>'
-            f'<p class="lede">{C.STAR_SUB}</p>'
+    return (f'<section class="sect center">{sh(C.STAR_H2, C.STAR_SUB)}'
             f'<span class="pill" style="margin-top:18px">{C.STAR_BADGE}</span>'
-            f'<div class="stars">{tiles}</div>'
+            f'<div class="stars rise">{tiles}</div>'
             f'<p class="ig">{C.STAR_TAG}</p></section>')
 
 
 def more(mobile):
     cards = "".join(
-        f'<a class="mc" href="#"><img src="{img}" alt="{t}">'
+        f'<a class="mc rise" href="#"><img src="{img}" alt="{t}">'
         f'<span class="tx"><h3>{t}</h3><p>{b}</p>'
         f'<span class="go">바로가기 {I_ARROW}</span></span></a>'
         for img, t, b in C.MORE)
-    return (f'<section class="sect center"><span class="pill">{I_PLUS} 다른 상품</span>'
-            f'<h2 style="margin-top:20px">{C.MORE_H2}</h2>'
-            f'<div class="more" style="text-align:left">{cards}</div></section>')
+    return (f'<section class="sect">{sh(C.MORE_H2)}'
+            f'<div class="more">{cards}</div></section>')
 
 
 def end():
