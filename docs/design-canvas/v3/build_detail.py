@@ -19,11 +19,22 @@ import _detail_ko as C
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-# 특장점 칸에 들어가는 실촬영본. 저장소 public/ 에 있던 것을 잘라 담았다.
+# 특장점 칸에 들어가는 실촬영본. act_* 는 운영자가 보내 준 원본이고,
+# 나머지는 저장소 public/ 에 있던 것을 잘라 담았다.
 FEAT_IMG = {"01": ("hero_waikiki.jpg", "와이키키 앞바다의 오션스타 보트와 다이아몬드헤드"),
-            "02": ("feat_roof.webp",   "와이키키 앞바다의 오션스타 루프탑 보트"),
-            "03": ("feat_marine.webp", "패들보드 위의 손님과 물에서 스노클링하는 일행"),
+            "02": ("act_roof.webp",    "와이키키 앞바다에 정박한 오션스타 보트와 나무 루프탑"),
             "04": ("feat_turtle.webp", "모래바닥에 모여 있는 푸른바다거북")}
+
+# 03 은 사진 한 장으로 담기지 않는다. '해양 5종 + 인생샷'을 네 장으로 보여 주고
+# 이름표를 단다. 차례는 본문이 나열하는 순서(패들보드·카약·…·다이빙)를 따랐다.
+FEAT_STRIP = {"03": [("act_sup.webp",   "스탠드업 패들보드",
+                      "다이아몬드헤드를 배경으로 패들보드 위에 올라선 손님"),
+                     ("act_kayak.webp", "씨카약",
+                      "씨카약을 탄 두 사람 앞으로 지나가는 푸른바다거북"),
+                     ("act_dive.webp",  "다이빙",
+                      "보트 위에서 바다로 뛰어드는 손님"),
+                     ("act_photo.webp", "인생샷",
+                      "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람")]}
 
 
 def fonts():
@@ -182,18 +193,37 @@ CSS_D = BASE + """
 .inc-c h3{font-size:21px;line-height:1.35}
 .inc-c p{margin-top:12px;font-size:16px;line-height:1.8;color:var(--text)}
 
-/* 6가지 특장점 — 폭이 다른 여섯 칸. 줄마다 3+3 / 2+4 / 4+2 로 갈라 같은
+/* 6가지 특장점 — 폭이 다른 여섯 칸. 줄마다 3+3 / 6 / 4+2 / 6 으로 갈라 같은
    리듬이 반복되지 않게 했다. 칸 꼴은 여섯이 같고, 리듬은 폭과 사진 유무로
    만든다(진한 채움과 강조선은 운영자 의견으로 뺐다). */
 .feats{margin-top:40px;display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
 .ft{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);
   border-radius:22px;overflow:hidden}
-.ft.w3{grid-column:span 3} .ft.w4{grid-column:span 4} .ft.w2{grid-column:span 2}
-.ft img{width:100%;object-fit:cover}
-.ft.w2 img{aspect-ratio:1.41 / 1}
-.ft.w3 img{aspect-ratio:2.15 / 1}
-.ft.w4 img{aspect-ratio:2.88 / 1}
+.ft.w2{grid-column:span 2} .ft.w3{grid-column:span 3}
+.ft.w4{grid-column:span 4} .ft.w6{grid-column:span 6}
+/* 좁은 칸은 옆의 사진 칸 높이까지 늘리지 않는다. 늘리면 글 아래가 300px
+   가까이 비어 버린다. 높이를 달리 두는 것이 벤토의 결이기도 하다. */
+.ft.w2{align-self:start}
+/* 폭이 달라도 사진 띠 높이가 296px 로 같아 한 줄에서 끝선이 맞는다. */
+.ft > img{width:100%;object-fit:cover}
+.ft.w2 > img{aspect-ratio:1.41 / 1}
+.ft.w3 > img{aspect-ratio:2.15 / 1}
+.ft.w4 > img{aspect-ratio:2.88 / 1}
+
+/* 해양 5종은 한 장으로 안 된다. 네 장을 나란히 두고 이름표를 단다.
+   3:2 는 원본 비 그대로라 잘려 나가는 데가 없다. */
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0 3px;
+  background:var(--line);border-bottom:1px solid var(--line)}
+.strip figure{display:flex;flex-direction:column;background:var(--soft)}
+.strip img{width:100%;aspect-ratio:3 / 2;object-fit:cover}
+.strip figcaption{padding:13px 8px;text-align:center;
+  font-size:14.5px;font-weight:700;color:var(--ink)}
+
 .ft-b{padding:30px 32px 32px}
+/* 폭을 다 쓰는 칸은 글줄이 1,200px 를 넘어 읽기 어렵다. 머리와 본문을
+   두 기둥으로 갈라 글줄을 잡아 준다. */
+.ft.w6 .ft-b{display:grid;grid-template-columns:360px 1fr;gap:0 60px;align-items:start}
+.ft.w6 .ft-t > p:first-child{margin-top:5px}
 .ft .no{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;
   padding:0 10px;border-radius:999px;background:var(--soft);
   font-family:'SUIT',system-ui,sans-serif;font-size:15px;font-weight:800;color:var(--deep)}
@@ -365,7 +395,14 @@ CSS_M = BASE + """
 .feats{margin-top:28px;display:grid;grid-template-columns:1fr;gap:14px}
 .ft{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);
   border-radius:20px;overflow:hidden}
-.ft img{width:100%;aspect-ratio:16 / 10;object-fit:cover}
+.ft > img{width:100%;aspect-ratio:16 / 10;object-fit:cover}
+/* 375px 에 넉 장을 나란히 두면 한 장이 79px 다. 두 줄로 접는다. */
+.strip{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;
+  background:var(--line);border-bottom:1px solid var(--line)}
+.strip figure{display:flex;flex-direction:column;background:var(--soft)}
+.strip img{width:100%;aspect-ratio:3 / 2;object-fit:cover}
+.strip figcaption{padding:11px 6px;text-align:center;
+  font-size:14px;font-weight:700;color:var(--ink);line-height:1.4}
 .ft-b{padding:24px 22px 28px}
 .ft .no{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;
   padding:0 10px;border-radius:999px;background:var(--soft);
@@ -538,19 +575,26 @@ def perks(mobile):
 
 
 def features(mobile):
-    # 줄마다 폭을 달리한다. 3+3 / 2+4 / 4+2.
-    SPAN = {"01": "w3", "02": "w3", "03": "w2", "04": "w4", "05": "w3", "06": "w3"}
+    # 줄마다 폭을 달리한다. 3+3 / 6 / 4+2 / 6.
+    SPAN = {"01": "w3", "02": "w3", "03": "w6", "04": "w4", "05": "w2", "06": "w6"}
     out = []
     for no, t, sub, paras, em in C.FEATURES:
         img = ""
         if no in FEAT_IMG:
             src, alt = FEAT_IMG[no]
             img = f'<img src="{src}" alt="{alt}">'
+        elif no in FEAT_STRIP:
+            img = ('<div class="strip">' + "".join(
+                f'<figure><img src="{src}" alt="{alt}">'
+                f'<figcaption>{cap}</figcaption></figure>'
+                for src, cap, alt in FEAT_STRIP[no]) + '</div>')
         body = "".join(f'<p>{x}</p>' for x in paras)
         emx = f'<p class="em">{em}</p>' if em else ""
         out.append(f'<div class="ft {SPAN[no]} rise">{img}'
-                   f'<div class="ft-b"><span class="no">{no}</span>'
-                   f'<h3>{t}</h3><span class="sub">{sub}</span>{body}{emx}</div></div>')
+                   f'<div class="ft-b">'
+                   f'<div class="ft-h"><span class="no">{no}</span>'
+                   f'<h3>{t}</h3><span class="sub">{sub}</span></div>'
+                   f'<div class="ft-t">{body}{emx}</div></div></div>')
     return (f'<section class="sect">{sh(C.FEAT_H2)}'
             f'<div class="feats">{"".join(out)}</div></section>')
 
