@@ -27,7 +27,6 @@ def icon(path, size=18, sw=1.7, fill="none"):
 
 
 I_ARROW = icon('<path d="M7 17L17 7M17 7H9M17 7v8"></path>', 15)
-I_CHECK = icon('<path d="M5 12.5l4.5 4.5L19 7"></path>', 19)
 I_PLUS  = icon('<path d="M12 5v14M5 12h14"></path>', 13)
 I_CLOCK = icon('<circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.3V12l3.2 1.9"></path>')
 I_STAR  = icon('<path d="M12 3.6l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 '
@@ -54,7 +53,6 @@ PERK_ICONS = {
                    'h-14.8a1 1 0 0 1-1-1V9.6a1 1 0 0 1 1-1z"></path>'
                    '<circle cx="12" cy="13.2" r="3.4"></circle>', 24),
 }
-STARS5 = I_STAR * 5
 
 
 # ── 꼴 ────────────────────────────────────────────────────────────────
@@ -95,12 +93,6 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);letter-spac
 .book-pill.light{background:#fff;color:var(--ink)}
 .book-pill.light svg{background:var(--ink);color:#fff}
 
-/* 사진이 아직 없는 자리. 무엇이 들어갈지 적어 둔다. */
-.ph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
-  background:repeating-linear-gradient(135deg,#E6E4DE 0 9px,#EFEDE8 9px 18px);
-  border:1px dashed #C9C6BE;color:var(--text);text-align:center}
-.ph b{font-size:11.5px;font-weight:700;letter-spacing:.02em}
-.ph i{font-style:normal;font-size:10.5px;line-height:1.4;max-width:80%}
 """
 
 CSS_D = BASE + """
@@ -159,40 +151,16 @@ CSS_D = BASE + """
   display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.7;color:var(--text)}
 .pure svg{color:var(--sea);margin-top:1px}
 
-/* 가족 — 사진 오른쪽, 글 왼쪽 */
-.fam{display:grid;grid-template-columns:1fr 520px;gap:80px;align-items:center}
-.fam h2{font-size:42px;line-height:1.3}
-.fam .tag{display:inline-flex;align-items:center;height:34px;margin-bottom:22px;padding:0 16px;
-  border-radius:999px;background:var(--deep);color:#fff;font-size:12.5px;font-weight:700}
-.fam p{margin-top:18px;font-size:17px;font-weight:700;color:var(--ink)}
-.fam .hand{margin-top:10px;font-size:14px;font-weight:600;color:var(--deep)}
-.fam .ph{height:360px;border-radius:22px}
-
-/* 후기 */
-.proof{display:grid;grid-template-columns:420px 1fr;gap:80px;align-items:start}
-.proof h2{font-size:42px;line-height:1.26}
-.score{display:flex;align-items:baseline;gap:12px;margin-top:24px}
-.score b{font-family:'SUIT',system-ui,sans-serif;font-size:54px;font-weight:800;
-  color:var(--ink);line-height:1}
-.score .st{display:flex;gap:2px;color:var(--sea)}
-.score i{font-style:normal;font-size:12.5px;color:var(--text)}
-.rv-list{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.rv-c{padding:22px 24px 20px;background:#fff;border:1px solid var(--line);border-radius:18px;
-  display:flex;flex-direction:column}
-.rv-c .st{display:flex;gap:2px;color:var(--sea)}
-.rv-c blockquote{margin-top:12px;font-size:13.5px;line-height:1.8;color:var(--text);
-  display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
-.rv-c figcaption{margin-top:auto;padding-top:16px;display:flex;gap:10px;align-items:baseline;
-  font-size:12.5px;font-weight:700;color:var(--ink)}
-.rv-c figcaption i{font-style:normal;font-weight:500;color:var(--muted)}
-
-/* 4가지 혜택 — 아이콘 2x2 */
-.perks{margin-top:44px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.perk{padding:30px 32px;background:#fff;border:1px solid var(--line);border-radius:22px}
-.perk .ic{display:flex;align-items:center;justify-content:center;width:52px;height:52px;
+/* 포함 사항 — 한 장짜리 띠. 바로 아래 특장점이 카드 격자라 여기까지 카드로
+   두면 같은 짜임이 두 번 나온다. 짧은 사실 넷은 칸만 나눠도 읽힌다. */
+.inc{margin-top:44px;display:grid;grid-template-columns:repeat(4,1fr);
+  background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.inc-c{padding:34px 30px;text-align:left}
+.inc-c + .inc-c{border-left:1px solid var(--line)}
+.inc-c .ic{display:flex;align-items:center;justify-content:center;width:50px;height:50px;
   border-radius:14px;background:var(--soft);color:var(--sea)}
-.perk h3{margin-top:18px;font-size:20px;line-height:1.35}
-.perk p{margin-top:9px;font-size:14.5px;line-height:1.8;color:var(--text)}
+.inc-c h3{margin-top:18px;font-size:19px;line-height:1.35}
+.inc-c p{margin-top:9px;font-size:14px;line-height:1.8;color:var(--text)}
 
 /* 6가지 특장점 — 번호 격자. 첫머리 주장 둘만 색을 준다. */
 .feats{margin-top:44px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -279,20 +247,6 @@ CSS_D = BASE + """
 .mc .go{margin-top:12px;display:inline-flex;align-items:center;min-height:44px;gap:7px;
   font-size:13.5px;font-weight:700;color:var(--deep)}
 
-/* 비교표 */
-.cmp{margin-top:36px;border-radius:18px;overflow:hidden;border:1px solid var(--line);
-  background:#fff}
-.crow{display:grid;grid-template-columns:260px repeat(3,1fr);align-items:stretch}
-.cc{display:flex;align-items:center;justify-content:center;padding:16px 18px;text-align:center;
-  min-height:62px}
-.chead .cc{min-height:112px;font-family:'SUIT',system-ui,sans-serif;font-size:15px;
-  font-weight:700;color:var(--ink);line-height:1.45;background:var(--soft)}
-.chead .cc.lead{background:var(--soft)}
-.cc.lead{font-size:15px;font-weight:700;color:var(--ink)}
-.crow:nth-child(2n) .cc{background:rgba(16,20,24,.03)}
-.cc > svg{color:var(--sea)}
-.cc .no{display:block;width:14px;height:1.5px;background:var(--line);border-radius:2px}
-
 /* 끝맺음 */
 .end{margin:104px 0 0;padding:72px var(--pad);background:var(--ink);color:#fff;text-align:center}
 .end h2{font-size:42px;color:#fff}
@@ -356,47 +310,15 @@ CSS_M = BASE + """
   align-items:flex-start;gap:8px;font-size:12.5px;line-height:1.7;color:var(--text)}
 .pure svg{color:var(--sea);margin-top:1px}
 
-.fam .tag{display:inline-flex;align-items:center;min-height:32px;padding:5px 14px;
-  border-radius:999px;background:var(--deep);color:#fff;font-size:12px;font-weight:700;
-  line-height:1.4}
-.fam h2{margin-top:14px;font-size:27px;line-height:1.35}
-.fam p{margin-top:12px;font-size:15px;font-weight:700;color:var(--ink)}
-.fam .hand{margin-top:8px;font-size:13.5px;font-weight:600;color:var(--deep)}
-.fam .ph{margin-top:22px;height:260px;border-radius:18px}
-
-.score{display:flex;align-items:baseline;gap:10px;margin-top:18px;justify-content:center}
-.score b{font-family:'SUIT',system-ui,sans-serif;font-size:44px;font-weight:800;
-  color:var(--ink);line-height:1}
-.score .st{display:flex;gap:2px;color:var(--sea)}
-.score i{font-style:normal;font-size:12px;color:var(--text)}
-/* 후기는 가로로 넘긴다. 랜딩 모바일과 같은 결이라 스크롤바도 같은 값을 쓴다. */
-.rv-list{display:flex;gap:12px;margin:22px calc(var(--pad) * -1) 0;
-  padding:2px var(--pad) 14px;overflow-x:auto;scroll-snap-type:x mandatory;
-  -webkit-overflow-scrolling:touch;scroll-padding-left:var(--pad)}
-.rv-c{flex:0 0 278px;scroll-snap-align:start;display:flex;flex-direction:column;
-  padding:20px 20px 18px;background:#fff;border:1px solid var(--line);border-radius:18px}
-.rv-c .st{display:flex;gap:2px;color:var(--sea)}
-.rv-c blockquote{margin-top:12px;font-size:13.5px;line-height:1.8;color:var(--text);
-  display:-webkit-box;-webkit-line-clamp:8;-webkit-box-orient:vertical;overflow:hidden}
-.rv-c figcaption{margin-top:auto;padding-top:16px;display:flex;gap:8px;align-items:baseline;
-  font-size:12.5px;font-weight:700;color:var(--ink)}
-.rv-c figcaption i{font-style:normal;font-weight:500;color:var(--muted)}
-.rv-list::-webkit-scrollbar,.cmp::-webkit-scrollbar{height:6px}
-.rv-list::-webkit-scrollbar-button,.cmp::-webkit-scrollbar-button{width:0;height:0;display:none}
-.rv-list::-webkit-scrollbar-track,.cmp::-webkit-scrollbar-track{background:rgba(16,20,24,.12);
-  border-radius:999px}
-.rv-list::-webkit-scrollbar-thumb,.cmp::-webkit-scrollbar-thumb{background:var(--ink);
-  border-radius:999px}
-@supports (-moz-appearance:none){
-  .rv-list,.cmp{scrollbar-width:thin;scrollbar-color:var(--ink) rgba(16,20,24,.12)}
-}
-
-.perks{margin-top:24px;display:grid;grid-template-columns:1fr;gap:12px}
-.perk{padding:22px 22px 24px;background:#fff;border:1px solid var(--line);border-radius:18px}
-.perk .ic{display:flex;align-items:center;justify-content:center;width:46px;height:46px;
+/* 포함 사항 — 데스크탑과 같은 이유로 한 장짜리 띠. 375px 에서는 세로로 쌓는다. */
+.inc{margin-top:24px;display:grid;grid-template-columns:1fr;
+  background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.inc-c{padding:22px 22px 24px;text-align:left}
+.inc-c + .inc-c{border-top:1px solid var(--line)}
+.inc-c .ic{display:flex;align-items:center;justify-content:center;width:46px;height:46px;
   border-radius:13px;background:var(--soft);color:var(--sea)}
-.perk h3{margin-top:14px;font-size:17px;line-height:1.35}
-.perk p{margin-top:8px;font-size:13.5px;line-height:1.8;color:var(--text)}
+.inc-c h3{margin-top:14px;font-size:17px;line-height:1.35}
+.inc-c p{margin-top:8px;font-size:13.5px;line-height:1.8;color:var(--text)}
 
 .feats{margin-top:24px;display:grid;grid-template-columns:1fr;gap:12px}
 .ft{padding:24px 22px 26px;background:#fff;border:1px solid var(--line);border-radius:18px}
@@ -472,20 +394,6 @@ CSS_M = BASE + """
 .mc .go{margin-top:8px;display:inline-flex;align-items:center;min-height:44px;gap:6px;
   font-size:13px;font-weight:700;color:var(--deep)}
 
-.cmp{margin:22px calc(var(--pad) * -1) 0;padding:0 var(--pad);overflow-x:auto;
-  -webkit-overflow-scrolling:touch}
-.cmp-in{width:max-content;border-radius:16px;overflow:hidden;border:1px solid var(--line);
-  background:#fff}
-.crow{display:grid;grid-template-columns:118px repeat(3,140px)}
-.cc{display:flex;align-items:center;justify-content:center;padding:12px 10px;text-align:center;
-  min-height:56px}
-.chead .cc{min-height:96px;font-family:'SUIT',system-ui,sans-serif;font-size:12.5px;
-  font-weight:700;color:var(--ink);line-height:1.45;background:var(--soft)}
-.cc.lead{font-size:12.5px;font-weight:700;color:var(--ink)}
-.crow:nth-child(2n) .cc{background:rgba(16,20,24,.03)}
-.cc > svg{color:var(--sea)}
-.cc .no{display:block;width:12px;height:1.5px;background:var(--line);border-radius:2px}
-
 .end{margin-top:60px;padding:52px var(--pad);background:var(--ink);color:#fff;text-align:center}
 .end h2{font-size:26px;color:#fff;line-height:1.35}
 .end p{margin-top:12px;font-size:14px;line-height:1.8;color:rgba(255,255,255,.76)}
@@ -494,13 +402,6 @@ CSS_M = BASE + """
 
 
 # ── 조각 ─────────────────────────────────────────────────────────────
-def ph(what, cls="", style=""):
-    """아직 못 받은 사진 자리."""
-    c = (" " + cls) if cls else ""
-    s = f' style="{style}"' if style else ""
-    return (f'<div class="ph{c}"{s}>{I_PH}<b>사진 자리</b><i>{what}</i></div>')
-
-
 def nav(mobile):
     if mobile:
         return ('<header class="nav">'
@@ -540,41 +441,13 @@ def hero(mobile):
 </section>"""
 
 
-def family(mobile):
-    f = C.FAMILY
-    box = ph("선장 가족 사진 (아빠 · 언니 · 동생 · 엄마)")
-    tx = (f'<div><span class="tag">{f["badge"]}</span><h2>{f["h2"]}</h2>'
-          f'<p>{f["body"]}</p><span class="hand">{f["hand"]}</span></div>')
-    inner = tx + box if mobile else tx + box
-    return f'<section class="sect fam">{inner}</section>'
-
-
-def reviews(mobile):
-    p = C.PROOF
-    cards = "".join(
-        f'<figure class="rv-c"><span class="st">{STARS5}</span>'
-        f'<blockquote>{t}</blockquote>'
-        f'<figcaption>{who}<i>{d}</i></figcaption></figure>'
-        for t, who, d in C.REVIEWS)
-    score = (f'<div class="score"><b class="n">5.0</b><span class="st">{STARS5}</span>'
-             f'<i>구글 맵 리뷰 5,754개 · 2026-09-16 기준</i></div>')
-    head = (f'<h2>{p["h2"]}</h2>{score}'
-            f'<p class="lede">{p["lead"]}</p>'
-            f'<p class="lede" style="font-weight:700;color:var(--ink)">{p["tail"]}</p>')
-    if mobile:
-        return (f'<section class="sect center proof">{head}'
-                f'<div class="rv-list">{cards}</div></section>')
-    return (f'<section class="sect proof"><div>{head}</div>'
-            f'<div class="rv-list">{cards}</div></section>')
-
-
 def perks(mobile):
-    cards = "".join(
-        f'<div class="perk"><span class="ic">{PERK_ICONS[k]}</span>'
+    cells = "".join(
+        f'<div class="inc-c"><span class="ic">{PERK_ICONS[k]}</span>'
         f'<h3>{t}</h3><p>{b}</p></div>' for k, t, b in C.PERKS)
     return (f'<section class="sect center"><span class="pill">{I_PLUS} 포함 사항</span>'
             f'<h2 style="margin-top:20px">{C.PERKS_H2}</h2>'
-            f'<div class="perks" style="text-align:left">{cards}</div></section>')
+            f'<div class="inc">{cells}</div></section>')
 
 
 def features(mobile):
@@ -642,20 +515,9 @@ def more(mobile):
         f'<span class="tx"><h3>{t}</h3><p>{b}</p>'
         f'<span class="go">바로가기 {I_ARROW}</span></span></a>'
         for img, t, b in C.MORE)
-    head = ('<div class="crow chead"><div class="cc lead"></div>'
-            + "".join(f'<div class="cc">{c}</div>' for c in C.CMP_COLS) + "</div>")
-    body = ""
-    for lab, cells in C.CMP_ROWS:
-        cs = "".join(f'<div class="cc">{I_CHECK if v else "<i class=no></i>"}</div>'
-                     for v in cells)
-        body += f'<div class="crow"><div class="cc lead">{lab}</div>{cs}</div>'
-    table = head + body
-    wrap = (f'<div class="cmp"><div class="cmp-in">{table}</div></div>' if mobile
-            else f'<div class="cmp">{table}</div>')
     return (f'<section class="sect center"><span class="pill">{I_PLUS} 다른 상품</span>'
             f'<h2 style="margin-top:20px">{C.MORE_H2}</h2>'
-            f'<div class="more" style="text-align:left">{cards}</div>'
-            f'<h2 style="margin-top:80px">{C.CMP_H2}</h2>{wrap}</section>')
+            f'<div class="more" style="text-align:left">{cards}</div></section>')
 
 
 def end():
@@ -667,9 +529,8 @@ def build(mobile):
     w, css = (375, CSS_M) if mobile else (1440, CSS_D)
     title = ("상세페이지 · 거북이 스노클링 — 모바일" if mobile
              else "상세페이지 · 거북이 스노클링 — 데스크탑")
-    body = (hero(mobile) + family(mobile) + reviews(mobile) + perks(mobile)
-            + features(mobile) + times(mobile) + flow(mobile) + stars(mobile)
-            + more(mobile) + end())
+    body = (hero(mobile) + perks(mobile) + features(mobile) + times(mobile)
+            + flow(mobile) + stars(mobile) + more(mobile) + end())
     html = f"""<!doctype html>
 <html>
 <head>

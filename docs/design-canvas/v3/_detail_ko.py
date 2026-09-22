@@ -7,8 +7,11 @@
      1부·2부를 직접 고르므로 그에 맞게 고쳐 썼다
   3. '예약 확정 시, 마이리얼트립 채팅으로 연락드립니다' -> 우리 사이트는
      확정되면 바우처 메일이 나간다 (lib/email.ts)
-숫자가 서로 다른 것(누적 리뷰 15,000 vs 랜딩 14,000, 해양 5종 vs 랜딩 4종)은
-고치지 않고 그대로 두었다. 어느 쪽이 맞는지는 운영자만 안다.
+'해양 5종'은 랜딩 비교표의 '해양 4종'과 다르지만 고치지 않았다. 어느 쪽이
+맞는지는 운영자만 안다.
+
+가족 소개·후기·상품 비교표는 운영자 요청으로 상세페이지에서 뺐다. 문안은
+git 이력(78ec661)에 남아 있다.
 """
 
 HERO = dict(
@@ -26,37 +29,6 @@ HERO = dict(
     ],
     pure="배는 08:00 출항해 11:00 항구로 돌아옵니다. 앞뒤 30분은 픽업과 드롭 시간입니다.",
 )
-
-FAMILY = dict(
-    h2="하와이 로컬 한인 가족이<br>운영하는 스노클링",
-    badge="최초! 하와이 아시안 여성 한인 선장",
-    body="Captain 엄마 & Boss 아빠 & MC 언니, 동생",
-    hand="알로하, 배에서 만나요!",
-)
-
-PROOF = dict(
-    h2='15,000+건<br><span class="hl">후기가 증명</span>',
-    lead="평점 5.0 만점의 신화. 광고 X, 협찬 X, 오직 한분 한분의 소중한 경험이 쌓아 올린 "
-         "결과입니다. 고객님의 하와이 여행에 잊을 수 없는 추억을 만들기 위해 노력합니다.",
-    tail="누구도 따라올 수 없는 오션스타의 퀄리티, 직접 경험해보세요.",
-)
-
-# 랜딩 보드와 같은 구글 후기. 실제로 받은 글 그대로다.
-REVIEWS = [
-    ("Amazing!! Didn't know it was a Korean boat experience and I wouldn't have had it any "
-     "other way. The staff was so helpful with the dive! They took such good pictures and "
-     "the ramen after was amazing 20/10 experience, Highly recommended.", "K*****.", "2026-03-28"),
-    ("가이드분이 너무 친절하셨고, 간식과 음료도 완벽하게 준비되어 있었어요. 거북이와 물고기들을 "
-     "원 없이 보고 난 뒤 다같이 본 하와이의 일몰은 정말 최고였습니다. 다음에도 무조건 다시 탈 거예요!",
-     "지**********", "2026-03-28"),
-    ("Oceanstar boat and crew were great! Troy and Zoey were great with instructions! "
-     "We saw lots of fishes and the turtles were huge!", "P*****.", "2026-03-28"),
-    ("Having our guide was like having our very own mermaid! We saw a lot of turtles and "
-     "tons of fish! We swam a good distance, too! It was AMAZING!", "D******.", "2026-03-28"),
-    ("Super fun time! The crew went above and beyond and made sure we had an incredible "
-     "time... We saw so many turtles! 바다 위에서 먹은 간식도 정말 꿀맛이었습니다. 최고!",
-     "M********.", "2026-03-28"),
-]
 
 PERKS_H2 = "여행을 더 간편하고 특별하게"
 PERKS = [
@@ -145,17 +117,5 @@ MORE = [
     ("sunset.jpg", "로맨틱 선셋 크루즈",
      "선셋 거북이 스노클링 + 해양 5종 + 와인 크루즈"),
 ]
-CMP_H2 = "어떤 상품이 나에게 맞을까?"
-CMP_COLS = ["거북이 스노클링 투어", "로맨틱 선셋 거북이<br>스노클링 & 와인 크루즈",
-            "[단독 대관] 프라이빗<br>거북이 스노클링 & 크루즈"]
-CMP_ROWS = [
-    ("거북이 100% 보장", [1, 1, 1]),
-    ("해양 5종",         [1, 1, 1]),
-    ("한국인 크루",      [1, 1, 1]),
-    ("선셋 크루즈",      [0, 1, 1]),
-    ("와인 & 치즈 보드", [0, 1, 0]),
-    ("단독 대관",        [0, 0, 1]),
-]
-
 END_H2 = "지금 바다로 나가 볼까요"
 END_SUB = "일요일을 제외하고 매일 출항합니다. 원하시는 날짜를 골라 주세요."
