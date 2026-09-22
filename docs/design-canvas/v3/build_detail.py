@@ -47,6 +47,9 @@ I_PIN   = icon('<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"></pa
 I_HOTEL = icon('<path d="M5 20V5.6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1V20"></path>'
                '<path d="M15 11.2h3.4a1 1 0 0 1 1 1V20"></path><path d="M3 20h18"></path>'
                '<path d="M8.4 8.2h1M11.4 8.2h1M8.4 11.6h1M11.4 11.6h1M8.4 15h1M11.4 15h1"></path>', 20)
+I_IG    = icon('<rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5"></rect>'
+               '<circle cx="12" cy="12" r="4.1"></circle>'
+               '<circle cx="17" cy="7" r="1.1" fill="currentColor" stroke="none"></circle>', 26)
 I_PH    = icon('<rect x="3.5" y="5" width="17" height="14" rx="2.4"></rect>'
                '<circle cx="9" cy="10.4" r="1.5"></circle>'
                '<path d="M4.6 17.2l4.1-4.1 3 3 3-2.6 4.7 4.2"></path>', 22, 1.5)
@@ -91,14 +94,14 @@ svg{flex:none}
   font-family:'Pretendard',system-ui,sans-serif;word-break:keep-all;
   -webkit-font-smoothing:antialiased}
 h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);letter-spacing:-.035em}
-.hl{color:var(--sea)}
+.hl{color:var(--sea-d)}
 
 /* 알약 */
 .pill{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 16px;
   border-radius:999px;background:#fff;border:1px solid var(--line);
-  font-size:13px;font-weight:700;color:var(--ink)}
+  font-size:14.5px;font-weight:700;color:var(--ink)}
 .book-pill{display:inline-flex;align-items:center;gap:9px;height:46px;padding:0 10px 0 22px;
-  border-radius:999px;background:var(--ink);color:#fff;font-size:14px;font-weight:700}
+  border-radius:999px;background:var(--ink);color:#fff;font-size:15.5px;font-weight:700}
 .book-pill svg{width:30px;height:30px;padding:7px;border-radius:50%;background:#fff;
   color:var(--ink);box-sizing:border-box}
 .book-pill.light{background:#fff;color:var(--ink)}
@@ -115,7 +118,7 @@ CSS_D = BASE + """
    보고 있는지 결이 구분되지 않았다. 가운데는 인증샷과 맺음에만 남겼다. */
 .sh{max-width:760px}
 .sh h2{font-size:46px;line-height:1.24}
-.sh .lede{margin-top:16px;font-size:16px;line-height:1.85;color:var(--text);max-width:52ch}
+.sh .lede{margin-top:16px;font-size:18px;line-height:1.8;color:var(--text);max-width:52ch}
 .center .sh{max-width:none}
 .center .sh .lede{margin-left:auto;margin-right:auto}
 
@@ -131,23 +134,23 @@ CSS_D = BASE + """
 .menu{display:flex;gap:4px;align-items:center;background:rgba(255,255,255,.16);
   border-radius:999px;padding:5px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .menu a{display:inline-flex;align-items:center;height:36px;padding:0 17px;border-radius:999px;
-  font-size:13.5px;font-weight:600;color:rgba(255,255,255,.88)}
+  font-size:14.5px;font-weight:600;color:rgba(255,255,255,.88)}
 .menu a.on{background:#fff;color:var(--ink);font-weight:700}
 .nav-r{display:flex;gap:10px;align-items:center;justify-self:end}
 .lang-pill{display:inline-flex;align-items:center;height:46px;padding:0 20px;border-radius:999px;
-  border:1px solid rgba(255,255,255,.44);color:#fff;font-size:13px;font-weight:700;letter-spacing:.06em}
+  border:1px solid rgba(255,255,255,.44);color:#fff;font-size:14px;font-weight:700;letter-spacing:.06em}
 .nav-r .book-pill{background:#fff;color:var(--ink)}
 .nav-r .book-pill svg{background:var(--ink);color:#fff}
 .hero-in{position:absolute;left:var(--pad);top:196px;z-index:3;color:#fff;max-width:720px}
 .eyebrow{display:inline-flex;align-items:center;height:32px;padding:0 18px;border-radius:999px;
   background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.34);
-  font-size:12.5px;font-weight:600;color:#fff;
+  font-size:14px;font-weight:600;color:#fff;
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .hero-in h1{margin-top:22px;font-size:68px;line-height:1.14;color:#fff;font-weight:800}
 .hero-in h1 .hl{color:var(--sky)}
 .hero-in .rev{display:inline-flex;align-items:center;gap:9px;margin-top:24px;height:38px;
   padding:0 18px;border-radius:999px;background:rgba(16,20,24,.5);color:#fff;
-  font-size:13.5px;font-weight:700;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  font-size:15px;font-weight:700;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .hero-in .rev svg{color:var(--sky)}
 
 /* 예약 패널 */
@@ -156,16 +159,16 @@ CSS_D = BASE + """
   display:grid;grid-template-columns:1fr 344px;gap:0 44px;align-items:center}
 .facts{display:grid;grid-template-columns:1fr 1fr;gap:18px 34px}
 .facts div{display:flex;flex-direction:column;gap:4px}
-.facts dt{font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--muted)}
-.facts dd{font-size:15px;font-weight:700;color:var(--ink);line-height:1.45}
+.facts dt{font-size:13px;font-weight:800;letter-spacing:.05em;color:var(--muted)}
+.facts dd{font-size:17px;font-weight:700;color:var(--ink);line-height:1.45}
 .buy-r{padding-left:38px;border-left:1px solid var(--line)}
-.buy-r .amt{display:block;font-family:'SUIT',system-ui,sans-serif;font-size:38px;
+.buy-r .amt{display:block;font-family:'SUIT',system-ui,sans-serif;font-size:42px;
   font-weight:800;color:var(--ink);line-height:1;letter-spacing:-.03em}
-.buy-r .amt-s{display:block;margin-top:7px;font-size:12.5px;color:var(--text)}
+.buy-r .amt-s{display:block;margin-top:8px;font-size:14.5px;color:var(--text)}
 .buy-r .book-pill{margin-top:18px;width:100%;justify-content:space-between;height:54px;
-  padding:0 10px 0 24px;font-size:15px}
+  padding:0 10px 0 24px;font-size:16.5px}
 .pure{grid-column:1 / -1;margin-top:26px;padding-top:20px;border-top:1px solid var(--line);
-  display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.7;color:var(--text)}
+  display:flex;align-items:flex-start;gap:9px;font-size:15px;line-height:1.75;color:var(--text)}
 .pure svg{color:var(--sea);margin-top:1px}
 
 /* 포함 사항 — 한 장짜리 띠를 칸으로 나눈다. 카드로 띄울 위계가 아니다. */
@@ -175,8 +178,9 @@ CSS_D = BASE + """
 .inc-c + .inc-c{border-left:1px solid var(--line)}
 .inc-c .ic{display:flex;align-items:center;justify-content:center;width:50px;height:50px;
   border-radius:14px;background:var(--soft);color:var(--sea)}
-.inc-c h3{margin-top:18px;font-size:19px;line-height:1.35}
-.inc-c p{margin-top:9px;font-size:14px;line-height:1.8;color:var(--text)}
+.inc-h{display:flex;flex-direction:column;align-items:flex-start;gap:18px}
+.inc-c h3{font-size:21px;line-height:1.35}
+.inc-c p{margin-top:12px;font-size:16px;line-height:1.8;color:var(--text)}
 
 /* 6가지 특장점 — 폭이 다른 여섯 칸. 줄마다 3+3 / 2+4 / 4+2 로 갈라 같은
    리듬이 반복되지 않게 했다. 사진 셋과 진한 칸 둘이 흰 칸 사이에 섞인다. */
@@ -192,12 +196,12 @@ CSS_D = BASE + """
 .ft-b{padding:30px 32px 32px}
 .ft .no{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;
   padding:0 10px;border-radius:999px;background:var(--soft);
-  font-family:'SUIT',system-ui,sans-serif;font-size:14px;font-weight:800;color:var(--deep)}
+  font-family:'SUIT',system-ui,sans-serif;font-size:15px;font-weight:800;color:var(--deep)}
 .ft.key .no{background:rgba(255,255,255,.16);color:#fff}
-.ft h3{margin-top:16px;font-size:23px;line-height:1.3}
-.ft .sub{margin-top:7px;font-size:15px;font-weight:700;color:var(--deep)}
-.ft p{margin-top:14px;font-size:14.5px;line-height:1.85;color:var(--text)}
-.ft .em{margin-top:14px;font-size:14.5px;line-height:1.8;font-weight:700;color:var(--deep)}
+.ft h3{margin-top:16px;font-size:25px;line-height:1.3}
+.ft .sub{margin-top:8px;font-size:16.5px;font-weight:700;color:var(--deep)}
+.ft p{margin-top:16px;font-size:16.5px;line-height:1.8;color:var(--text)}
+.ft .em{margin-top:16px;font-size:16.5px;line-height:1.8;font-weight:700;color:var(--deep)}
 .ft.key h3{color:#fff}
 .ft.key .sub{color:var(--sky-2)}
 .ft.key p{color:rgba(255,255,255,.84)}
@@ -208,32 +212,32 @@ CSS_D = BASE + """
 .time{display:grid;grid-template-columns:340px 1fr;gap:72px;align-items:start}
 .week{border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#fff}
 .wrow{display:grid;grid-template-columns:repeat(7,1fr)}
-.whead span{padding:15px 0;text-align:center;font-size:14px;font-weight:700;color:var(--ink);
+.whead span{padding:16px 0;text-align:center;font-size:15.5px;font-weight:700;color:var(--ink);
   background:var(--soft)}
 .whead span:last-child{color:var(--muted)}
 .slot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
   min-height:74px;color:#fff;text-align:center}
-.slot b{font-size:14px;font-weight:700}
-.slot em{font-style:normal;font-size:15px;font-weight:800;letter-spacing:-.01em;
+.slot b{font-size:15px;font-weight:700}
+.slot em{font-style:normal;font-size:17.5px;font-weight:800;letter-spacing:-.01em;
   font-variant-numeric:tabular-nums}
 .slot.sea{background:var(--sea-d)}
 .slot.deep{background:var(--deep)}
 .slot.food{background:var(--food-d)}
-.rest{display:flex;align-items:center;justify-content:center;font-size:12.5px;
+.rest{display:flex;align-items:center;justify-content:center;font-size:14px;
   font-weight:700;color:var(--muted);background:var(--soft)}
 .tnote{margin-top:22px;display:flex;align-items:flex-start;gap:10px;padding:18px 22px;
   border-radius:14px;background:#fff;border:1px solid var(--line);
-  font-size:13.5px;line-height:1.8;color:var(--text)}
+  font-size:15.5px;line-height:1.8;color:var(--text)}
 .tnote svg{color:var(--sea);margin-top:2px}
 .tlist{margin-top:34px}
-.tlist li{position:relative;padding-left:16px;font-size:13.5px;line-height:1.95;color:var(--muted)}
+.tlist li{position:relative;padding-left:17px;font-size:15.5px;line-height:1.9;color:var(--muted)}
 .tlist li::before{content:"";position:absolute;left:2px;top:12px;width:4px;height:4px;
   border-radius:50%;background:var(--muted)}
 
 /* 일정 — 단계 흐름. 픽업 안내는 카드를 걷고 실선 두 줄로 둔다. */
 .flow{margin-top:44px;display:flex;align-items:center;justify-content:space-between;gap:0}
-.step{display:flex;align-items:center;justify-content:center;width:120px;height:120px;
-  border-radius:50%;text-align:center;font-size:14px;font-weight:700;line-height:1.35;
+.step{display:flex;align-items:center;justify-content:center;width:126px;height:126px;
+  border-radius:50%;text-align:center;font-size:15.5px;font-weight:700;line-height:1.35;
   background:#fff;border:1px solid var(--line);color:var(--ink)}
 .step.on{background:var(--deep);border-color:var(--deep);color:#fff}
 .flow span.sp{flex:1;height:1px;background:var(--line);min-width:10px}
@@ -244,18 +248,18 @@ CSS_D = BASE + """
 .fc .ic{display:flex;align-items:center;justify-content:center;width:44px;height:44px;
   border-radius:13px;background:var(--soft);color:var(--sea);flex:none}
 .fc.back .ic{color:var(--food-d)}
-.fc h3{font-size:17px}
-.fc p{margin-top:7px;font-size:14px;line-height:1.75;color:var(--text)}
+.fc h3{font-size:19px}
+.fc p{margin-top:8px;font-size:16px;line-height:1.75;color:var(--text)}
 .fnote{margin-top:26px;padding-top:24px;border-top:1px solid var(--line);
-  font-size:14.5px;font-weight:700;color:var(--ink)}
+  font-size:16.5px;font-weight:700;color:var(--ink)}
 
 /* 인증샷 — 이 섹션과 맺음만 가운데다. 계속 왼쪽이면 결이 또 하나가 된다. */
 .stars{margin-top:40px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
 .star-c{border-radius:18px;overflow:hidden;background:#fff;border:1px solid var(--line)}
 .star-c img{width:100%;aspect-ratio:132 / 137;object-fit:cover}
-.star-c b{display:block;padding:13px 14px;font-size:13px;font-weight:700;color:var(--ink);
+.star-c b{display:block;padding:15px 14px;font-size:15px;font-weight:700;color:var(--ink);
   text-align:center;line-height:1.4}
-.ig{margin-top:26px;text-align:center;font-size:13.5px;font-weight:700;color:var(--muted)}
+.ig{margin-top:26px;text-align:center;font-size:15px;font-weight:700;color:var(--muted)}
 
 /* 다른 상품 */
 .more{margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -263,15 +267,15 @@ CSS_D = BASE + """
   border-radius:22px;overflow:hidden}
 .mc img{width:100%;height:100%;object-fit:cover}
 .mc .tx{padding:32px 34px;display:flex;flex-direction:column;justify-content:center}
-.mc h3{font-size:24px;line-height:1.3}
-.mc p{margin-top:10px;font-size:14.5px;line-height:1.75;color:var(--text)}
+.mc h3{font-size:26px;line-height:1.3}
+.mc p{margin-top:11px;font-size:16.5px;line-height:1.75;color:var(--text)}
 .mc .go{margin-top:12px;display:inline-flex;align-items:center;min-height:44px;gap:7px;
-  font-size:13.5px;font-weight:700;color:var(--deep)}
+  font-size:15px;font-weight:700;color:var(--deep)}
 
 /* 맺음 */
 .end{margin:112px 0 0;padding:76px var(--pad);background:var(--ink);color:#fff;text-align:center}
 .end h2{font-size:42px;color:#fff}
-.end p{margin-top:14px;font-size:16px;line-height:1.8;color:rgba(255,255,255,.76)}
+.end p{margin-top:14px;font-size:18px;line-height:1.8;color:rgba(255,255,255,.76)}
 .end .book-pill{margin-top:26px}
 
 /* ── 스크롤 연출. 랜딩과 같은 값이다. 긴 페이지에서 섹션이 차례로 놓이는
@@ -291,151 +295,187 @@ CSS_D = BASE + """
 """
 
 CSS_M = BASE + """
-.page{width:375px;--pad:20px}
-.sect{padding:64px var(--pad) 0}
+/* 375 폭을 기준으로 다시 짰다. 본문 16px 아래로는 내려가지 않는다.
+   앞 판은 데스크탑 값을 줄여 온 것이라 본문이 13.5px, 이름표가 10.5px 까지
+   내려가 손에 들고는 읽히지 않았다. 여기서는 읽히는 크기를 먼저 정하고
+   그 크기가 들어가도록 짜임을 바꿨다(주간 표·인증샷·포함사항). */
+.page{width:375px;--pad:22px}
+.sect{padding:72px var(--pad) 0}
 .center{text-align:center}
-.sh h2{font-size:27px;line-height:1.32}
-.sh .lede{margin-top:12px;font-size:14.5px;line-height:1.8;color:var(--text)}
+.sh h2{font-size:32px;line-height:1.28}
+.sh .lede{margin-top:14px;font-size:16.5px;line-height:1.78;color:var(--text)}
 
-.hero{position:relative;height:470px;overflow:hidden;background:var(--ink)}
+.hero{position:relative;height:524px;overflow:hidden;background:var(--ink)}
 .hero-img{position:absolute;left:0;right:0;top:-6%;width:100%;height:112%;object-fit:cover}
 .veil{position:absolute;inset:0;background:linear-gradient(170deg,
-  rgba(9,16,22,.58) 0%,rgba(9,16,22,.34) 34%,rgba(9,16,22,.46) 66%,rgba(9,16,22,.78) 100%)}
+  rgba(9,16,22,.60) 0%,rgba(9,16,22,.36) 32%,rgba(9,16,22,.50) 64%,rgba(9,16,22,.80) 100%)}
 .nav{position:absolute;left:var(--pad);right:var(--pad);top:16px;z-index:5;
   display:flex;align-items:center;justify-content:space-between}
-.logo{height:34px;width:auto;filter:brightness(0) invert(1)}
+.logo{height:36px;width:auto;filter:brightness(0) invert(1)}
 .nav-r{display:flex;gap:8px;align-items:center}
-.lang{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;
-  border-radius:50%;background:rgba(255,255,255,.9);color:var(--ink);font-size:12.5px;
+.lang{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;
+  border-radius:50%;background:rgba(255,255,255,.92);color:var(--ink);font-size:13.5px;
   font-weight:800;letter-spacing:.04em}
-.burger{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;
+.burger{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;
   border-radius:50%;background:rgba(255,255,255,.22);
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.hero-in{position:absolute;left:var(--pad);right:var(--pad);top:124px;z-index:3;color:#fff}
-.eyebrow{display:inline-flex;align-items:center;min-height:30px;padding:5px 14px;
+.hero-in{position:absolute;left:var(--pad);right:var(--pad);top:146px;z-index:3;color:#fff}
+.eyebrow{display:inline-flex;align-items:center;min-height:34px;padding:6px 15px;
   border-radius:999px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.34);
-  font-size:11.5px;font-weight:600;color:#fff;line-height:1.4;
+  font-size:13.5px;font-weight:600;color:#fff;line-height:1.45;
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.hero-in h1{margin-top:14px;font-size:34px;line-height:1.24;color:#fff;font-weight:800}
+.hero-in h1{margin-top:16px;font-size:40px;line-height:1.2;color:#fff;font-weight:800}
 .hero-in h1 .hl{color:var(--sky)}
-.hero-in .rev{display:inline-flex;align-items:center;gap:8px;margin-top:16px;min-height:36px;
-  padding:6px 15px;border-radius:999px;background:rgba(16,20,24,.5);color:#fff;
-  font-size:12px;font-weight:700;line-height:1.4;
+.hero-in .rev{display:inline-flex;align-items:center;gap:8px;margin-top:18px;min-height:40px;
+  padding:7px 16px;border-radius:999px;background:rgba(16,20,24,.52);color:#fff;
+  font-size:13.5px;font-weight:700;line-height:1.45;
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .hero-in .rev svg{color:var(--sky)}
 
 /* 값과 버튼이 먼저다. 마크업은 데스크탑 순서로 두고 여기서만 뒤집는다. */
-.buy{position:relative;z-index:6;margin:-56px var(--pad) 0;padding:24px 22px;background:#fff;
+.buy{position:relative;z-index:6;margin:-62px var(--pad) 0;padding:26px 22px;background:#fff;
   border-radius:22px;box-shadow:var(--e2);display:flex;flex-direction:column}
 .buy-r{order:1}
 .facts{order:2}
 .pure{order:3}
-.buy-r .amt{display:block;font-family:'SUIT',system-ui,sans-serif;font-size:32px;font-weight:800;
+.buy-r .amt{display:block;font-family:'SUIT',system-ui,sans-serif;font-size:38px;font-weight:800;
   color:var(--ink);line-height:1;letter-spacing:-.03em}
-.buy-r .amt-s{display:block;margin-top:6px;font-size:12px;color:var(--text)}
-.buy-r .book-pill{margin-top:16px;width:100%;justify-content:space-between;height:52px;
-  padding:0 10px 0 22px;font-size:15px}
-.facts{margin-top:22px;padding-top:20px;border-top:1px solid var(--line);
-  display:grid;grid-template-columns:1fr;gap:14px}
+.buy-r .amt-s{display:block;margin-top:9px;font-size:14.5px;color:var(--text)}
+.buy-r .book-pill{margin-top:18px;width:100%;justify-content:space-between;height:58px;
+  padding:0 10px 0 24px;font-size:16.5px}
+.buy-r .book-pill svg,.end .book-pill svg{width:36px;height:36px;padding:9px}
+.facts{margin-top:24px;padding-top:22px;border-top:1px solid var(--line);
+  display:grid;grid-template-columns:1fr;gap:15px}
 .facts div{display:flex;justify-content:space-between;align-items:baseline;gap:16px}
-.facts dt{font-size:12px;font-weight:700;color:var(--muted);flex:none}
-.facts dd{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.5;text-align:right}
-.pure{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);display:flex;
-  align-items:flex-start;gap:8px;font-size:12.5px;line-height:1.7;color:var(--text)}
-.pure svg{color:var(--sea);margin-top:1px}
+.facts dt{font-size:14px;font-weight:700;color:var(--muted);flex:none}
+.facts dd{font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.5;text-align:right}
+.pure{margin-top:20px;padding-top:18px;border-top:1px solid var(--line);display:flex;
+  align-items:flex-start;gap:9px;font-size:14.5px;line-height:1.75;color:var(--text)}
+.pure svg{color:var(--sea-d);margin-top:2px}
 
-.inc{margin-top:24px;display:grid;grid-template-columns:1fr;
-  background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.inc-c{padding:22px 22px 24px}
+/* 포함 사항 — 아이콘을 제목 옆으로 옮겨 한 줄을 벌었다. 글자를 키우면
+   아이콘 밑에 제목을 두는 앞 판은 칸마다 세로로 더 길어지기만 한다. */
+.inc{margin-top:28px;display:grid;grid-template-columns:1fr;
+  background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.inc-c{padding:24px 22px 26px}
 .inc-c + .inc-c{border-top:1px solid var(--line)}
-.inc-c .ic{display:flex;align-items:center;justify-content:center;width:46px;height:46px;
-  border-radius:13px;background:var(--soft);color:var(--sea)}
-.inc-c h3{margin-top:14px;font-size:17px;line-height:1.35}
-.inc-c p{margin-top:8px;font-size:13.5px;line-height:1.8;color:var(--text)}
+.inc-h{display:flex;align-items:center;gap:14px}
+.inc-c .ic{display:flex;align-items:center;justify-content:center;width:48px;height:48px;
+  border-radius:14px;background:var(--soft);color:var(--sea-d);flex:none}
+.inc-c h3{font-size:20.5px;line-height:1.35}
+.inc-c p{margin-top:14px;font-size:16px;line-height:1.8;color:var(--text)}
 
 /* 375px 에서는 폭을 나눌 수 없다. 한 줄로 쌓되 사진 칸이 리듬을 만든다. */
-.feats{margin-top:24px;display:grid;grid-template-columns:1fr;gap:12px}
+.feats{margin-top:28px;display:grid;grid-template-columns:1fr;gap:14px}
 .ft{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);
-  border-radius:18px;overflow:hidden}
+  border-radius:20px;overflow:hidden}
 .ft.key{background:var(--deep);border-color:var(--deep)}
-.ft img{width:100%;aspect-ratio:2 / 1;object-fit:cover}
-.ft-b{padding:22px 22px 26px}
-.ft .no{display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:32px;
-  padding:0 9px;border-radius:999px;background:var(--soft);
-  font-family:'SUIT',system-ui,sans-serif;font-size:13px;font-weight:800;color:var(--deep)}
+.ft img{width:100%;aspect-ratio:16 / 10;object-fit:cover}
+.ft-b{padding:24px 22px 28px}
+.ft .no{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;
+  padding:0 10px;border-radius:999px;background:var(--soft);
+  font-family:'SUIT',system-ui,sans-serif;font-size:14.5px;font-weight:800;color:var(--deep)}
 .ft.key .no{background:rgba(255,255,255,.16);color:#fff}
-.ft h3{margin-top:14px;font-size:20px;line-height:1.35}
-.ft .sub{margin-top:6px;font-size:14px;font-weight:700;color:var(--deep)}
-.ft p{margin-top:12px;font-size:13.5px;line-height:1.85;color:var(--text)}
-.ft .em{margin-top:12px;font-size:13.5px;line-height:1.8;font-weight:700;color:var(--deep)}
+.ft h3{margin-top:16px;font-size:24px;line-height:1.32}
+.ft .sub{margin-top:8px;font-size:16px;font-weight:700;color:var(--deep)}
+.ft p{margin-top:14px;font-size:16px;line-height:1.85;color:var(--text)}
+.ft .em{margin-top:14px;font-size:16px;line-height:1.8;font-weight:700;color:var(--deep)}
 .ft.key h3{color:#fff}
 .ft.key .sub{color:var(--sky-2)}
 .ft.key p{color:rgba(255,255,255,.84)}
 .ft.key .em{color:var(--sky-2)}
 
-.week{margin-top:22px;border-radius:16px;overflow:hidden;border:1px solid var(--line);
-  background:#fff}
-.wrow{display:grid;grid-template-columns:repeat(7,1fr)}
-.whead span{padding:11px 0;text-align:center;font-size:12.5px;font-weight:700;color:var(--ink);
-  background:var(--soft)}
-.whead span:last-child{color:var(--muted)}
-.slot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  min-height:66px;color:#fff;text-align:center;padding:0 4px}
-.slot b{font-size:11.5px;font-weight:700}
-.slot em{font-style:normal;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums}
-.slot.sea{background:var(--sea-d)}
-.slot.deep{background:var(--deep)}
-.slot.food{background:var(--food-d)}
-.rest{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;
-  color:var(--muted);background:var(--soft)}
-.tnote{margin-top:18px;display:flex;align-items:flex-start;gap:9px;padding:16px 18px;
-  border-radius:14px;background:#fff;border:1px solid var(--line);
-  font-size:12.5px;line-height:1.8;color:var(--text)}
-.tnote svg{color:var(--sea);margin-top:2px}
-.tlist{margin-top:14px}
-.tlist li{position:relative;padding-left:15px;font-size:12.5px;line-height:1.9;color:var(--muted)}
-.tlist li::before{content:"";position:absolute;left:2px;top:11px;width:4px;height:4px;
+/* 주간 표 — 375px 에 7칸 표를 밀어 넣으면 시각이 12.5px 까지 내려간다.
+   회차를 줄로 세우고 요일은 알약 일곱 개로 옮겨, 읽을 값(시각)에 19px 를
+   주고도 폭이 남는다. 데스크탑은 그대로 7칸 표다. */
+.tdays{margin-top:26px;display:grid;gap:12px}
+.trow{position:relative;overflow:hidden;background:#fff;border:1px solid var(--line);
+  border-radius:18px;padding:20px 20px 18px 24px}
+.trow::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px}
+.trow.sea::before{background:var(--sea-d)}
+.trow.deep::before{background:var(--deep)}
+.trow.food::before{background:var(--food-d)}
+.trow .th{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.trow b{font-family:'SUIT',system-ui,sans-serif;font-size:17.5px;font-weight:800;
+  color:var(--ink);letter-spacing:-.03em}
+.trow .tt{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.trow em{font-style:normal;font-size:19px;font-weight:800;color:var(--ink);
+  letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.dchips{margin-top:16px;display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.dchips span{display:flex;align-items:center;justify-content:center;height:34px;
+  border-radius:10px;background:var(--soft);color:var(--muted);font-size:14px;font-weight:700}
+.dchips span.on{background:var(--ink);color:#fff}
+.tnote{margin-top:18px;display:flex;align-items:flex-start;gap:10px;padding:18px 20px;
+  border-radius:16px;background:#fff;border:1px solid var(--line);
+  font-size:14.5px;line-height:1.8;color:var(--text)}
+.tnote svg{color:var(--sea-d);margin-top:2px}
+.tlist{margin-top:18px}
+.tlist li{position:relative;padding-left:17px;font-size:14.5px;line-height:1.9;color:var(--muted)}
+.tlist li::before{content:"";position:absolute;left:2px;top:12px;width:4px;height:4px;
   border-radius:50%;background:var(--muted)}
 
 /* 375px 에 원 일곱 개는 못 넣는다. 세로로 세운다. */
-.flow{margin-top:24px;display:grid;grid-template-columns:1fr;gap:0}
-.step{display:flex;align-items:center;gap:14px;min-height:52px;font-size:14.5px;font-weight:700;
-  color:var(--ink)}
-.step::before{content:"";width:11px;height:11px;border-radius:50%;background:#fff;
-  border:2.5px solid var(--line);flex:none;margin-left:5px}
+.flow{margin-top:28px;display:grid;grid-template-columns:1fr;gap:0}
+.step{display:flex;align-items:center;gap:15px;min-height:56px;font-size:16.5px;font-weight:700;
+  color:var(--ink);line-height:1.4}
+.step::before{content:"";width:12px;height:12px;border-radius:50%;background:#fff;
+  border:3px solid var(--line);flex:none;margin-left:5px}
 .step.on::before{background:var(--deep);border-color:var(--deep)}
-.flow span.sp{width:1px;height:14px;margin-left:12.5px;background:var(--line)}
-.fnotes{margin-top:30px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr}
-.fc{display:flex;gap:14px;align-items:flex-start;padding:22px 0}
+.flow span.sp{width:1px;height:16px;margin-left:10.5px;background:var(--line)}
+.fnotes{margin-top:34px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr}
+.fc{display:flex;gap:15px;align-items:flex-start;padding:24px 0}
 .fc + .fc{border-top:1px solid var(--line)}
-.fc .ic{display:flex;align-items:center;justify-content:center;width:44px;height:44px;
-  border-radius:13px;background:var(--soft);color:var(--sea);flex:none}
+.fc .ic{display:flex;align-items:center;justify-content:center;width:48px;height:48px;
+  border-radius:14px;background:var(--soft);color:var(--sea-d);flex:none}
 .fc.back .ic{color:var(--food-d)}
-.fc h3{font-size:16px}
-.fc p{margin-top:6px;font-size:13px;line-height:1.75;color:var(--text)}
-.fnote{margin-top:22px;padding-top:20px;border-top:1px solid var(--line);
-  font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.7}
+.fc h3{font-size:18px}
+.fc p{margin-top:8px;font-size:15px;line-height:1.75;color:var(--text)}
+.fnote{margin-top:24px;padding-top:22px;border-top:1px solid var(--line);
+  font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.7}
 
-.stars{margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.star-c{border-radius:14px;overflow:hidden;background:#fff;border:1px solid var(--line)}
+/* 인증샷 — 세 칸이면 이름표가 10.5px 여야 들어간다. 두 칸으로 줄이면 14px 가
+   들어가고 얼굴도 알아볼 만해진다(사진 원본이 315px 라 두 칸이 제 크기다).
+   열다섯이 두 칸에 홀로 남으므로 열여섯째를 인스타 칸으로 두었다. */
+.stars{margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.star-c{border-radius:16px;overflow:hidden;background:#fff;border:1px solid var(--line)}
 .star-c img{width:100%;aspect-ratio:132 / 137;object-fit:cover}
-.star-c b{display:block;padding:9px 7px;font-size:10.5px;font-weight:700;color:var(--ink);
-  text-align:center;line-height:1.4}
-.ig{margin-top:20px;text-align:center;font-size:12.5px;font-weight:700;color:var(--muted)}
+.star-c b{display:flex;align-items:center;justify-content:center;height:62px;padding:0 10px;
+  font-size:14px;font-weight:700;color:var(--ink);text-align:center;line-height:1.45;
+  text-wrap:balance}
+.ig-c{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;
+  padding:22px 14px;background:var(--deep);border-color:var(--deep);color:#fff;text-align:center}
+.ig-c svg{color:#fff}
+.ig-c b{display:block;height:auto;padding:0;font-size:14px;color:#fff;line-height:1.45;
+  word-break:normal;overflow-wrap:break-word;letter-spacing:-.01em}
+.ig-c span{font-size:14px;font-weight:700;color:var(--sky-2)}
 
-.more{margin-top:24px;display:grid;grid-template-columns:1fr;gap:12px}
-.mc{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.mc img{width:100%;height:170px;object-fit:cover}
-.mc .tx{padding:22px 20px 24px}
-.mc h3{font-size:20px;line-height:1.35}
-.mc p{margin-top:8px;font-size:13.5px;line-height:1.75;color:var(--text)}
-.mc .go{margin-top:8px;display:inline-flex;align-items:center;min-height:44px;gap:6px;
-  font-size:13px;font-weight:700;color:var(--deep)}
+.more{margin-top:26px;display:grid;grid-template-columns:1fr;gap:14px}
+.mc{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.mc img{width:100%;height:196px;object-fit:cover}
+.mc .tx{padding:24px 22px 26px}
+.mc h3{font-size:23px;line-height:1.35}
+.mc p{margin-top:10px;font-size:16px;line-height:1.75;color:var(--text)}
+.mc .go{margin-top:8px;display:inline-flex;align-items:center;min-height:48px;gap:7px;
+  font-size:15px;font-weight:700;color:var(--deep)}
 
-.end{margin-top:64px;padding:56px var(--pad);background:var(--ink);color:#fff;text-align:center}
-.end h2{font-size:26px;color:#fff;line-height:1.35}
-.end p{margin-top:12px;font-size:14px;line-height:1.8;color:rgba(255,255,255,.76)}
-.end .book-pill{margin-top:22px}
+.end{margin-top:72px;padding:60px var(--pad) 66px;background:var(--ink);color:#fff;
+  text-align:center}
+.end h2{font-size:30px;color:#fff;line-height:1.32}
+.end p{margin-top:14px;font-size:16px;line-height:1.8;color:rgba(255,255,255,.76)}
+.end .book-pill{margin-top:24px;height:58px;padding:0 10px 0 24px;font-size:16.5px}
+
+/* 엄지가 닿는 자리에 값과 버튼을 붙여 둔다. 7,000px 가 넘는 페이지에서
+   예약 버튼이 맨 위 카드와 맨 아래에만 있으면 중간에서는 닿을 곳이 없다. */
+.dock{position:sticky;bottom:0;z-index:20;display:flex;align-items:center;
+  justify-content:space-between;gap:14px;padding:12px 16px 14px;
+  background:rgba(255,255,255,.95);border-top:1px solid var(--line);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  box-shadow:0 -6px 24px rgba(16,20,24,.09)}
+.dock .d-l{display:flex;flex-direction:column;gap:3px}
+.dock .d-l b{font-family:'SUIT',system-ui,sans-serif;font-size:21px;font-weight:800;
+  color:var(--ink);letter-spacing:-.03em;line-height:1}
+.dock .d-l span{font-size:13px;font-weight:600;color:var(--muted)}
+.dock .book-pill{height:52px;padding:0 8px 0 20px;font-size:15.5px}
 
 @media (prefers-reduced-motion: no-preference){
   @supports (animation-timeline: view()){
@@ -443,6 +483,9 @@ CSS_M = BASE + """
       animation-timing-function:cubic-bezier(.22,.61,.36,1);
       animation-range:entry 4% cover 26%}
     @keyframes rise{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:none}}
+    .hero-img{animation:pan linear both;animation-timeline:view();
+      animation-range:cover 0% cover 100%}
+    @keyframes pan{from{transform:translateY(2.2%)}to{transform:translateY(-2.2%)}}
   }
 }
 """
@@ -497,8 +540,8 @@ def hero(mobile):
 
 def perks(mobile):
     cells = "".join(
-        f'<div class="inc-c"><span class="ic">{PERK_ICONS[k]}</span>'
-        f'<h3>{t}</h3><p>{b}</p></div>' for k, t, b in C.PERKS)
+        f'<div class="inc-c"><div class="inc-h"><span class="ic">{PERK_ICONS[k]}</span>'
+        f'<h3>{t}</h3></div><p>{b}</p></div>' for k, t, b in C.PERKS)
     return (f'<section class="sect">{sh(C.PERKS_H2)}'
             f'<div class="inc rise">{cells}</div></section>')
 
@@ -521,6 +564,19 @@ def features(mobile):
             f'<div class="feats">{"".join(out)}</div></section>')
 
 
+def week_m():
+    """모바일 주간 표. 7칸 격자를 버리고 회차 한 줄 + 요일 알약 일곱 개로 둔다."""
+    rows = []
+    for name, lines, span, col in C.SLOTS:
+        tm = "".join(f"<em>{x}</em>" for x in lines)
+        chips = "".join(f'<span class="on">{d}</span>' if i < span else f"<span>{d}</span>"
+                        for i, d in enumerate(C.DAYS))
+        rows.append(f'<div class="trow {col}"><div class="th"><b>{name}</b>'
+                    f'<span class="tt">{tm}</span></div>'
+                    f'<div class="dchips">{chips}</div></div>')
+    return f'<div class="tdays rise">{"".join(rows)}</div>'
+
+
 def times(mobile):
     head = "".join(f"<span>{d}</span>" for d in C.DAYS)
     rows = [f'<div class="wrow whead">{head}</div>']
@@ -534,7 +590,8 @@ def times(mobile):
     table = (f'<div class="rise"><div class="week">{"".join(rows)}</div>'
              f'<p class="tnote">{I_CLOCK}<span>{C.TIME_PURE}</span></p></div>')
     if mobile:
-        return (f'<section class="sect">{sh(C.TIME_H2, C.TIME_SUB)}{table}'
+        return (f'<section class="sect">{sh(C.TIME_H2, C.TIME_SUB)}{week_m()}'
+                f'<p class="tnote rise">{I_CLOCK}<span>{C.TIME_PURE}</span></p>'
                 f'<ul class="tlist">{notes}</ul></section>')
     # 유의사항은 왼쪽 기둥에 붙인다. 머리만 두면 표 옆이 500px 비어 버린다.
     left = (f'<div>{sh(C.TIME_H2, C.TIME_SUB)}'
@@ -562,6 +619,15 @@ def stars(mobile):
     tiles = "".join(
         f'<div class="star-c"><img src="star{i:02d}.webp" alt="{n}"><b>{n}</b></div>'
         for i, n in enumerate(C.STARS, 1))
+    if mobile:
+        # 두 칸 격자에 열다섯은 마지막 줄이 한 칸 빈다. 문안에 이미 있던
+        # 계정을 열여섯째 칸으로 세워 격자를 닫고 다음 행동도 붙여 둔다.
+        tail = (f'<a class="star-c ig-c" href="#">{I_IG}'
+                f'<b>{C.STAR_TAG.replace("_", "_<wbr>")}</b>'
+                f'<span>인증샷 더 보기</span></a>')
+        return (f'<section class="sect center">{sh(C.STAR_H2, C.STAR_SUB)}'
+                f'<span class="pill" style="margin-top:18px">{C.STAR_BADGE}</span>'
+                f'<div class="stars rise">{tiles}{tail}</div></section>')
     return (f'<section class="sect center">{sh(C.STAR_H2, C.STAR_SUB)}'
             f'<span class="pill" style="margin-top:18px">{C.STAR_BADGE}</span>'
             f'<div class="stars rise">{tiles}</div>'
@@ -583,12 +649,20 @@ def end():
             f'<a href="#" class="book-pill light">예약하기 {I_ARROW}</a></section>')
 
 
+def dock():
+    return (f'<div class="dock"><span class="d-l"><b class="n">{C.HERO["price"]}</b>'
+            f'<span>성인 1인 · 4시간</span></span>'
+            f'<a href="#" class="book-pill">예약하기 {I_ARROW}</a></div>')
+
+
 def build(mobile):
     w, css = (375, CSS_M) if mobile else (1440, CSS_D)
     title = ("상세페이지 · 거북이 스노클링 — 모바일" if mobile
              else "상세페이지 · 거북이 스노클링 — 데스크탑")
     body = (hero(mobile) + perks(mobile) + features(mobile) + times(mobile)
             + flow(mobile) + stars(mobile) + more(mobile) + end())
+    if mobile:
+        body += dock()
     html = f"""<!doctype html>
 <html>
 <head>
