@@ -183,13 +183,12 @@ CSS_D = BASE + """
 .inc-c p{margin-top:12px;font-size:16px;line-height:1.8;color:var(--text)}
 
 /* 6가지 특장점 — 폭이 다른 여섯 칸. 줄마다 3+3 / 2+4 / 4+2 로 갈라 같은
-   리듬이 반복되지 않게 했다. 사진 셋과 진한 칸 둘이 흰 칸 사이에 섞인다. */
+   리듬이 반복되지 않게 했다. 칸 꼴은 여섯이 같고, 리듬은 폭과 사진 유무로
+   만든다(진한 채움과 강조선은 운영자 의견으로 뺐다). */
 .feats{margin-top:40px;display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
-.ft{position:relative;display:flex;flex-direction:column;background:#fff;
-  border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.ft{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);
+  border-radius:22px;overflow:hidden}
 .ft.w3{grid-column:span 3} .ft.w4{grid-column:span 4} .ft.w2{grid-column:span 2}
-.ft.key::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;
-  z-index:2;background:var(--sea-d)}
 .ft img{width:100%;object-fit:cover}
 .ft.w2 img{aspect-ratio:1.41 / 1}
 .ft.w3 img{aspect-ratio:2.15 / 1}
@@ -203,7 +202,6 @@ CSS_D = BASE + """
 .ft .sub{margin-top:8px;font-size:16.5px;font-weight:700;color:var(--deep)}
 .ft p{margin-top:16px;font-size:16.5px;line-height:1.8;color:var(--text)}
 .ft .em{margin-top:16px;font-size:16.5px;line-height:1.8;font-weight:700;color:var(--deep)}
-.ft.key .sub{color:var(--sea-d)}
 
 /* 투어 시간 — 머리를 왼쪽에 세우고 표를 오른쪽에 둔다. 오른쪽 칸이 실제
    내용(주간 표)이라 머리와 설명만 갈라놓는 짜임이 아니다. */
@@ -365,10 +363,8 @@ CSS_M = BASE + """
 
 /* 375px 에서는 폭을 나눌 수 없다. 한 줄로 쌓되 사진 칸이 리듬을 만든다. */
 .feats{margin-top:28px;display:grid;grid-template-columns:1fr;gap:14px}
-.ft{position:relative;display:flex;flex-direction:column;background:#fff;
-  border:1px solid var(--line);border-radius:20px;overflow:hidden}
-.ft.key::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;
-  z-index:2;background:var(--sea-d)}
+.ft{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);
+  border-radius:20px;overflow:hidden}
 .ft img{width:100%;aspect-ratio:16 / 10;object-fit:cover}
 .ft-b{padding:24px 22px 28px}
 .ft .no{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;
@@ -379,7 +375,6 @@ CSS_M = BASE + """
 .ft .sub{margin-top:8px;font-size:16px;font-weight:700;color:var(--deep)}
 .ft p{margin-top:14px;font-size:16px;line-height:1.85;color:var(--text)}
 .ft .em{margin-top:14px;font-size:16px;line-height:1.8;font-weight:700;color:var(--deep)}
-.ft.key .sub{color:var(--sea-d)}
 
 /* 주간 표 — 375px 에 7칸 표를 밀어 넣으면 시각이 12.5px 까지 내려간다.
    회차를 줄로 세우고 요일은 알약 일곱 개로 옮겨, 읽을 값(시각)에 19px 를
@@ -546,14 +541,14 @@ def features(mobile):
     # 줄마다 폭을 달리한다. 3+3 / 2+4 / 4+2.
     SPAN = {"01": "w3", "02": "w3", "03": "w2", "04": "w4", "05": "w3", "06": "w3"}
     out = []
-    for no, t, sub, paras, em, key in C.FEATURES:
+    for no, t, sub, paras, em in C.FEATURES:
         img = ""
         if no in FEAT_IMG:
             src, alt = FEAT_IMG[no]
             img = f'<img src="{src}" alt="{alt}">'
         body = "".join(f'<p>{x}</p>' for x in paras)
         emx = f'<p class="em">{em}</p>' if em else ""
-        out.append(f'<div class="ft {SPAN[no]}{" key" if key else ""} rise">{img}'
+        out.append(f'<div class="ft {SPAN[no]} rise">{img}'
                    f'<div class="ft-b"><span class="no">{no}</span>'
                    f'<h3>{t}</h3><span class="sub">{sub}</span>{body}{emx}</div></div>')
     return (f'<section class="sect">{sh(C.FEAT_H2)}'
