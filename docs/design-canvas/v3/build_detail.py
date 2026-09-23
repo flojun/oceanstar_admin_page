@@ -245,12 +245,17 @@ CSS_D = BASE + """
 /* 일정 — 하나의 세로 레일. 앞 판은 원 일곱 개 + 카드 두 장 + 안내문 한 줄이라
    한 흐름이 세 덩어리로 흩어져 있었고, 픽업·복귀가 흐름 밖이라 언제인지
    보이지 않았다. 순서 안으로 들여 양 끝에 놓고 사진을 그 단계에 붙였다. */
-.jr{margin-top:48px}
-.jr-s{position:relative;display:grid;grid-template-columns:26px 300px 1fr;gap:0 48px;
-  padding-bottom:38px;align-items:start}
-/* 사진이 없는 단계는 글이 300px 안에 갇힐 이유가 없다. 두 칸을 다 쓰되
-   글줄은 62자에서 끊는다. */
-.jr-s:not(.shot) .jr-h{grid-column:2 / -1;max-width:640px}
+/* 사진은 섬네일 크기다. 이 섹션은 보여주기가 아니라 '4시간이 어떻게
+   흘러가는지' 읽는 자리고, 큰 사진은 히어로·인증샷·특별상품이 이미 맡고
+   있다. 사진을 줄인 만큼 레일 폭도 같이 잡았다 — 1,288px 를 두고 사진만
+   줄이면 오른쪽이 600px 비어 더 허전해진다. */
+.jr{margin-top:44px;max-width:620px}
+/* 이름 칸은 가장 긴 이름('다이아몬드헤드 크루즈', 20px 에서 212px)에 맞춘
+   224px 다. 더 넓히면 사진이 이름에서 멀어져 두 덩어리로 읽힌다. */
+.jr-s{position:relative;display:grid;grid-template-columns:26px 224px 1fr;gap:0 32px;
+  padding-bottom:30px;align-items:start}
+/* 사진이 없는 단계는 글이 272px 안에 갇힐 이유가 없다. 두 칸을 다 쓴다. */
+.jr-s:not(.shot) .jr-h{grid-column:2 / -1;max-width:560px}
 .jr-s:last-child{padding-bottom:0}
 /* 레일은 점 아래에서 다음 점까지 잇는다. */
 .jr-s::before{content:"";position:absolute;left:12px;top:32px;bottom:0;width:2px;
@@ -263,10 +268,10 @@ CSS_D = BASE + """
 .jr-s.anchor .jr-d{display:flex;align-items:center;justify-content:center;
   background:var(--deep);border-color:var(--deep);color:#fff}
 .jr-s.anchor .jr-d svg{width:13px;height:13px}
-.jr-h h3{font-size:21px;line-height:1.35}
+.jr-h h3{font-size:20px;line-height:1.35}
 .jr-h p{margin-top:10px;font-size:16px;line-height:1.8;color:var(--text)}
 .jr-h p + p{margin-top:8px}
-.jr-m{max-width:640px}
+.jr-m{max-width:300px}
 .jr-m > img{width:100%;aspect-ratio:16 / 9;object-fit:cover;border-radius:16px}
 
 /* 해양 5종은 한 장으로 안 된다. 네 장을 두 줄로 두고 이름표를 단다.
@@ -275,8 +280,8 @@ CSS_D = BASE + """
   background:var(--line);border-radius:16px;overflow:hidden}
 .strip figure{display:flex;flex-direction:column;background:var(--soft)}
 .strip img{width:100%;aspect-ratio:16 / 9;object-fit:cover}
-.strip figcaption{padding:11px 8px;text-align:center;
-  font-size:14.5px;font-weight:700;color:var(--ink)}
+.strip figcaption{padding:9px 6px;text-align:center;
+  font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.4}
 
 /* 인증샷 — 이 섹션과 맺음만 가운데다. 계속 왼쪽이면 결이 또 하나가 된다. */
 .stars{margin-top:40px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
@@ -485,9 +490,12 @@ CSS_M = BASE + """
 .jr-h p{margin-top:8px;font-size:15px;line-height:1.8;color:var(--text)}
 .jr-h p + p{margin-top:7px}
 /* 두 칸 격자라 사진은 둘째 칸에 못 박아야 한다. 안 그러면 다음 줄
-   첫 칸(레일 22px)으로 흘러가 사진이 22px 로 찌그러진다. */
-.jr-m{grid-column:2;margin-top:14px}
-.jr-m > img{width:100%;aspect-ratio:16 / 9;object-fit:cover;border-radius:14px}
+   첫 칸(레일 22px)으로 흘러가 사진이 22px 로 찌그러진다.
+   한 장짜리는 글줄 왼쪽에 맞춰 작게 둔다. 넉 장짜리(해양 5종)만 폭을
+   다 쓴다 — 접어도 한 칸이 128px 라 더 줄이면 무엇인지 안 보인다. */
+.jr-m{grid-column:2;margin-top:12px;max-width:252px}
+.jr-m.wide{max-width:none}
+.jr-m > img{width:100%;aspect-ratio:16 / 9;object-fit:cover;border-radius:12px}
 
 /* 인증샷 — 세 칸이면 이름표가 10.5px 여야 들어간다. 두 칸으로 줄이면 14px 가
    들어가고 얼굴도 알아볼 만해진다(사진 원본이 315px 라 두 칸이 제 크기다).
@@ -705,7 +713,7 @@ def jr_media(key):
         return f'<div class="jr-m"><img src="{src}" alt="{alt}"></div>'
     tiles = "".join(f'<figure><img src="{src}" alt="{alt}">'
                     f'<figcaption>{cap}</figcaption></figure>' for src, cap, alt in shots)
-    return f'<div class="jr-m"><div class="strip">{tiles}</div></div>'
+    return f'<div class="jr-m wide"><div class="strip">{tiles}</div></div>'
 
 
 def flow(mobile):
