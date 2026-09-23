@@ -19,24 +19,24 @@ import _detail_ko as C
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-# 사진은 전부 일정(JOURNEY)으로 옮겼다. 특장점은 글만 남는다 — 같은 사진을
-# 특장점과 일정에 두 번 쓰면 아래로 내려갈수록 본 것을 또 보게 된다.
-# 단계 이름 -> [(파일, 이름표 or None, 대체문안)]
-JR_IMG = {
-    "boat":   [("act_roof.webp", None,
-                "와이키키 앞바다에 정박한 오션스타 보트와 나무 루프탑")],
-    "turtle": [("turtle.jpg", None,
-                "모래바닥 산호 위에 모여 있는 푸른바다거북 무리")],
-    "acts":   [("act_sup.webp",   "스탠드업 패들보드",
-                "다이아몬드헤드를 배경으로 패들보드 위에 올라선 손님"),
-               ("act_kayak.webp", "씨카약",
-                "씨카약을 탄 두 사람 앞으로 지나가는 푸른바다거북"),
-               ("act_dive.webp",  "다이빙",
-                "보트 위에서 바다로 뛰어드는 손님"),
-               ("act_photo.webp", "인생샷",
-                "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람")],
-    "drone":  [("hero_waikiki.jpg", None,
-                "와이키키 앞바다의 오션스타 보트와 다이아몬드헤드를 위에서 내려다본 모습")],
+# 사진은 코스 소개에만 쓴다. 특장점과 일정 안내는 글만 남는다 — 같은 사진을
+# 여러 곳에 두면 아래로 내려갈수록 본 것을 또 보게 된다.
+# key -> ("img", [(파일, 대체문안), ...]) 또는 ("icon", 아이콘 이름)
+# 밴과 간식은 실사진이 없다. 빈칸 대신 아이콘 타일을 같은 크기로 둔다.
+CS_MEDIA = {
+    "van":    ("icon", "van"),
+    "bowl":   ("icon", "bowl"),
+    "boat":   ("img", [("act_roof.webp",
+                        "와이키키 앞바다에 정박한 오션스타 보트와 나무 루프탑")]),
+    "turtle": ("img", [("turtle.jpg",
+                        "모래바닥 산호 위에 모여 있는 푸른바다거북 무리")]),
+    "sup2":   ("img", [("act_sup.webp",
+                        "다이아몬드헤드를 배경으로 패들보드 위에 올라선 손님"),
+                       ("act_kayak.webp",
+                        "씨카약을 탄 두 사람 앞으로 지나가는 푸른바다거북")]),
+    "dive":   ("img", [("act_dive.webp", "보트 위에서 바다로 뛰어드는 손님")]),
+    "photo":  ("img", [("act_photo.webp",
+                        "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람")]),
 }
 
 
@@ -242,46 +242,54 @@ CSS_D = BASE + """
 .tlist li::before{content:"";position:absolute;left:2px;top:12px;width:4px;height:4px;
   border-radius:50%;background:var(--muted)}
 
-/* 일정 — 하나의 세로 레일. 앞 판은 원 일곱 개 + 카드 두 장 + 안내문 한 줄이라
-   한 흐름이 세 덩어리로 흩어져 있었고, 픽업·복귀가 흐름 밖이라 언제인지
-   보이지 않았다. 순서 안으로 들여 양 끝에 놓고 사진을 그 단계에 붙였다. */
-/* 사진은 섬네일 크기다. 이 섹션은 보여주기가 아니라 '4시간이 어떻게
-   흘러가는지' 읽는 자리고, 큰 사진은 히어로·인증샷·특별상품이 이미 맡고
-   있다. 사진을 줄인 만큼 레일 폭도 같이 잡았다 — 1,288px 를 두고 사진만
-   줄이면 오른쪽이 600px 비어 더 허전해진다. */
-.jr{margin-top:44px;max-width:620px}
-/* 이름 칸은 가장 긴 이름('다이아몬드헤드 크루즈', 20px 에서 212px)에 맞춘
-   224px 다. 더 넓히면 사진이 이름에서 멀어져 두 덩어리로 읽힌다. */
-.jr-s{position:relative;display:grid;grid-template-columns:26px 224px 1fr;gap:0 32px;
-  padding-bottom:30px;align-items:start}
-/* 사진이 없는 단계는 글이 272px 안에 갇힐 이유가 없다. 두 칸을 다 쓴다. */
-.jr-s:not(.shot) .jr-h{grid-column:2 / -1;max-width:560px}
-.jr-s:last-child{padding-bottom:0}
-/* 레일은 점 아래에서 다음 점까지 잇는다. */
-.jr-s::before{content:"";position:absolute;left:12px;top:32px;bottom:0;width:2px;
+/* 일정 — 차례만 한 줄에 둔다. 앞 판은 단계마다 사진이 있거나 없어 결이
+   어긋났다. 사진과 설명은 바로 아래 코스 소개로 옮기고 여기는 한눈에 보는
+   차례만 남긴다.
+   알약을 흘려 두면 1,288px 에서 여덟 개 + 한 개로 끊겨 '호텔 복귀'가 다음
+   줄에 홀로 떨어졌다. 아홉 칸 격자라 늘 한 줄이고, 긴 이름은 칸 안에서
+   두 줄로 접힌다. 양 끝(픽업·복귀)만 채워 뭍과 바다를 가른다. */
+.hops{position:relative;margin-top:44px;display:grid;grid-template-columns:repeat(9,1fr)}
+/* 첫 점 중심(1/18)에서 끝 점 중심(17/18)까지 */
+.hops::before{content:"";position:absolute;left:5.56%;right:5.56%;top:14px;height:2px;
   background:var(--line)}
-.jr-s:last-child::before{display:none}
-.jr-d{position:relative;z-index:1;width:26px;height:26px;border-radius:50%;
-  background:#fff;border:3px solid var(--line);margin-top:3px}
-/* 양 끝(픽업·복귀)만 채운 점에 아이콘. 바다 위 일곱 단계와 뭍의 두 단계를
-   한눈에 가른다. */
-.jr-s.anchor .jr-d{display:flex;align-items:center;justify-content:center;
-  background:var(--deep);border-color:var(--deep);color:#fff}
-.jr-s.anchor .jr-d svg{width:13px;height:13px}
-.jr-h h3{font-size:20px;line-height:1.35}
-.jr-h p{margin-top:10px;font-size:16px;line-height:1.8;color:var(--text)}
-.jr-h p + p{margin-top:8px}
-.jr-m{max-width:300px}
-.jr-m > img{width:100%;aspect-ratio:16 / 9;object-fit:cover;border-radius:16px}
+.hop{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;
+  padding:0 6px;text-align:center}
+.hop-d{display:flex;align-items:center;justify-content:center;width:30px;height:30px;
+  border-radius:50%;background:#fff;border:3px solid var(--line)}
+.hop.anchor .hop-d{background:var(--deep);border-color:var(--deep);color:#fff}
+.hop.anchor .hop-d svg{width:14px;height:14px}
+.hop-l{font-size:16px;font-weight:700;line-height:1.45;color:var(--ink)}
+.hnote{margin-top:34px;padding-top:22px;border-top:1px solid var(--line);
+  font-size:16px;line-height:1.75;font-weight:700;color:var(--ink)}
 
-/* 해양 5종은 한 장으로 안 된다. 네 장을 두 줄로 두고 이름표를 단다.
-   16:9 두 줄이라 한 장짜리 단계와 사진 높이가 거의 같다. */
-.strip{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;
-  background:var(--line);border-radius:16px;overflow:hidden}
-.strip figure{display:flex;flex-direction:column;background:var(--soft)}
-.strip img{width:100%;aspect-ratio:16 / 9;object-fit:cover}
-.strip figcaption{padding:9px 6px;text-align:center;
-  font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.4}
+/* 코스 소개 — 운영 중인 OTA 의 코스 소개를 옮겼다. 번호·글·사진 세 칸이고
+   줄은 실선으로만 가른다(카드로 띄울 위계가 아니다).
+   사진 칸은 모든 단계가 300x169 로 같다. 사진이 없는 단계(밴·간식)는 빈칸
+   대신 같은 크기의 아이콘 타일이 들어가, 어떤 줄은 있고 어떤 줄은 없는 결이
+   생기지 않는다. 실사진을 받으면 그 자리에 바꿔 넣으면 된다. */
+.cs{margin-top:40px;border-top:1px solid var(--line)}
+.cs-s{display:grid;grid-template-columns:38px 1fr 300px;gap:0 32px;align-items:start;
+  padding:34px 0;border-bottom:1px solid var(--line)}
+.cs-h{display:contents}
+.cs-n{display:inline-flex;align-items:center;justify-content:center;
+  width:38px;height:38px;border-radius:999px;background:var(--soft);
+  font-family:'SUIT',system-ui,sans-serif;font-size:14.5px;font-weight:800;color:var(--deep)}
+.cs-ht{grid-column:2;grid-row:1}
+.cs-ht h3{display:inline;font-size:22px;line-height:1.4}
+.cs-t{display:inline-flex;align-items:center;vertical-align:4px;margin-left:12px;height:30px;
+  padding:0 12px;border-radius:999px;background:var(--soft);
+  font-size:14px;font-weight:700;color:var(--deep)}
+.cs-b{grid-column:2;grid-row:2}
+.cs-b p{margin-top:14px;font-size:16.5px;line-height:1.85;color:var(--text)}
+.cs-note{margin-top:16px;padding-left:14px;border-left:3px solid var(--sky);
+  font-size:15.5px;line-height:1.8;color:var(--muted)}
+.cs-m{grid-column:3;grid-row:1 / span 2;width:300px;aspect-ratio:16 / 9;
+  border-radius:14px;overflow:hidden;background:var(--soft)}
+.cs-m img{width:100%;height:100%;object-fit:cover}
+.cs-m.two{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--line)}
+.cs-m.ic{display:flex;align-items:center;justify-content:center;color:var(--deep);
+  border:1px solid var(--line)}
+.cs-m.ic svg{width:48px;height:48px}
 
 /* 인증샷 — 이 섹션과 맺음만 가운데다. 계속 왼쪽이면 결이 또 하나가 된다. */
 .stars{margin-top:40px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
@@ -436,14 +444,6 @@ CSS_M = BASE + """
 .ac-b p + p{margin-top:14px}
 .ac-b .em{font-weight:700;color:var(--deep)}
 
-/* 해양 5종 네 장. 375px 에 나란히 두면 한 장이 79px 라 두 줄로 접는다. */
-.strip{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;
-  background:var(--line);border-radius:14px;overflow:hidden}
-.strip figure{display:flex;flex-direction:column;background:var(--soft)}
-.strip img{width:100%;aspect-ratio:16 / 9;object-fit:cover}
-.strip figcaption{padding:10px 6px;text-align:center;
-  font-size:14px;font-weight:700;color:var(--ink);line-height:1.4}
-
 /* 주간 표 — 375px 에 7칸 표를 밀어 넣으면 시각이 12.5px 까지 내려간다.
    회차를 줄로 세우고 요일은 알약 일곱 개로 옮겨, 읽을 값(시각)에 19px 를
    주고도 폭이 남는다. 데스크탑은 그대로 7칸 표다. */
@@ -473,29 +473,48 @@ CSS_M = BASE + """
 .tlist li::before{content:"";position:absolute;left:2px;top:12px;width:4px;height:4px;
   border-radius:50%;background:var(--muted)}
 
-/* 일정 — 데스크탑과 같은 세로 레일. 폭이 없으니 사진은 제목 아래로 내린다. */
-.jr{margin-top:30px}
-.jr-s{position:relative;display:grid;grid-template-columns:22px 1fr;gap:0 16px;
-  padding-bottom:28px}
-.jr-s:last-child{padding-bottom:0}
-.jr-s::before{content:"";position:absolute;left:10px;top:28px;bottom:0;width:2px;
+/* 일정 — 데스크탑의 가로 레일을 세로로 세운다. 알약을 흘려 두면 다섯 줄로
+   접히면서 화살표가 줄 끝과 줄 머리에 걸려 차례가 흐려졌다. 사진이 없으니
+   한 단계가 44px 한 줄이다. */
+.hops{position:relative;margin-top:24px;display:grid}
+.hops::before{content:"";position:absolute;left:12px;top:22px;bottom:22px;width:2px;
   background:var(--line)}
-.jr-s:last-child::before{display:none}
-.jr-d{position:relative;z-index:1;width:22px;height:22px;border-radius:50%;
-  background:#fff;border:3px solid var(--line);margin-top:2px}
-.jr-s.anchor .jr-d{display:flex;align-items:center;justify-content:center;
-  background:var(--deep);border-color:var(--deep);color:#fff}
-.jr-s.anchor .jr-d svg{width:11px;height:11px}
-.jr-h h3{font-size:18px;line-height:1.4}
-.jr-h p{margin-top:8px;font-size:15px;line-height:1.8;color:var(--text)}
-.jr-h p + p{margin-top:7px}
-/* 두 칸 격자라 사진은 둘째 칸에 못 박아야 한다. 안 그러면 다음 줄
-   첫 칸(레일 22px)으로 흘러가 사진이 22px 로 찌그러진다.
-   한 장짜리는 글줄 왼쪽에 맞춰 작게 둔다. 넉 장짜리(해양 5종)만 폭을
-   다 쓴다 — 접어도 한 칸이 128px 라 더 줄이면 무엇인지 안 보인다. */
-.jr-m{grid-column:2;margin-top:12px;max-width:252px}
-.jr-m.wide{max-width:none}
-.jr-m > img{width:100%;aspect-ratio:16 / 9;object-fit:cover;border-radius:12px}
+.hop{position:relative;display:flex;align-items:center;gap:14px;min-height:44px}
+.hop-d{display:flex;align-items:center;justify-content:center;flex:none;
+  width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--line)}
+.hop.anchor .hop-d{background:var(--deep);border-color:var(--deep);color:#fff}
+.hop.anchor .hop-d svg{width:12px;height:12px}
+.hop-l{font-size:16px;font-weight:700;color:var(--ink)}
+.hnote{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);
+  font-size:15px;line-height:1.75;font-weight:700;color:var(--ink)}
+
+/* 코스 소개 — 폰에서는 사진이 제목 옆 88px 정사각 섬네일이다(운영 중인 OTA
+   코스 소개와 같은 자리). 전폭으로 두면 186px 사진이 여덟 번 반복되고,
+   사진이 없는 단계의 아이콘 타일이 186px 빈 회색 상자가 되어 '사진 누락'
+   으로 읽혔다. 88px 에서는 아이콘 타일도 뱃지로 읽힌다.
+   본문은 섬네일 아래로 내려 폭을 다 쓴다. */
+.cs{margin-top:26px;border-top:1px solid var(--line)}
+.cs-s{display:grid;grid-template-columns:1fr 88px;gap:0 14px;align-items:start;
+  padding:24px 0 26px;border-bottom:1px solid var(--line)}
+.cs-h{grid-column:1;grid-row:1}
+.cs-n{display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:999px;background:var(--soft);
+  font-family:'SUIT',system-ui,sans-serif;font-size:13px;font-weight:800;color:var(--deep)}
+.cs-ht h3{margin-top:10px;font-size:18.5px;line-height:1.42}
+.cs-t{display:inline-flex;align-items:center;margin-top:8px;height:28px;padding:0 11px;
+  border-radius:999px;background:var(--soft);font-size:13.5px;font-weight:700;color:var(--deep)}
+.cs-m{grid-column:2;grid-row:1;width:88px;height:88px;border-radius:14px;overflow:hidden;
+  background:var(--soft)}
+.cs-m img{width:100%;height:100%;object-fit:cover}
+/* 88px 에 두 장을 가르면 한 장이 43px 띠가 된다. 첫 장(패들보드)만 보인다. */
+.cs-m.two img + img{display:none}
+.cs-m.ic{display:flex;align-items:center;justify-content:center;color:var(--deep);
+  border:1px solid var(--line)}
+.cs-m.ic svg{width:34px;height:34px}
+.cs-b{grid-column:1 / -1;grid-row:2}
+.cs-b p{margin-top:14px;font-size:16px;line-height:1.85;color:var(--text)}
+.cs-note{margin-top:14px;padding-left:13px;border-left:3px solid var(--sky);
+  font-size:15px;line-height:1.8;color:var(--muted)}
 
 /* 인증샷 — 세 칸이면 이름표가 10.5px 여야 들어간다. 두 칸으로 줄이면 14px 가
    들어가고 얼굴도 알아볼 만해진다(사진 원본이 315px 라 두 칸이 제 크기다).
@@ -703,31 +722,41 @@ ANCHOR_IC = {"van": icon('<path d="M2.6 16.4V8.6a1 1 0 0 1 1-1h9.9v8.8H2.6z"></p
                            '<path d="M3 20h18"></path>', 24, 2.2)}
 
 
-def jr_media(key):
-    """한 단계에 붙는 사진. 한 장이면 그대로, 넉 장이면 이름표 붙인 띠."""
-    if not key:
-        return ""
-    shots = JR_IMG[key]
-    if len(shots) == 1:
-        src, _, alt = shots[0]
-        return f'<div class="jr-m"><img src="{src}" alt="{alt}"></div>'
-    tiles = "".join(f'<figure><img src="{src}" alt="{alt}">'
-                    f'<figcaption>{cap}</figcaption></figure>' for src, cap, alt in shots)
-    return f'<div class="jr-m wide"><div class="strip">{tiles}</div></div>'
-
-
 def flow(mobile):
-    steps = []
-    for title, lines, img, anchor in C.JOURNEY:
-        dot = (f'<span class="jr-d">{ANCHOR_IC[anchor]}</span>' if anchor
-               else '<span class="jr-d"></span>')
-        body = "".join(f'<p>{x}</p>' for x in lines)
-        cls = ("anchor " if anchor else "") + ("shot " if img else "")
-        steps.append(f'<div class="jr-s {cls}rise">{dot}'
-                     f'<div class="jr-h"><h3>{title}</h3>{body}</div>'
-                     f'{jr_media(img)}</div>')
+    """일정 안내. 차례만 본다. 양 끝(픽업·복귀)만 채운다.
+    데스크탑은 아홉 칸 가로 레일, 폰은 같은 마크업을 세로로 세운다."""
+    hops = []
+    for name, anchor in C.JOURNEY:
+        ic = ANCHOR_IC[anchor] if anchor else ""
+        hops.append(f'<span class="hop{" anchor" if anchor else ""}">'
+                    f'<span class="hop-d">{ic}</span><span class="hop-l">{name}</span></span>')
     return (f'<section class="sect">{sh(C.FLOW_H2, C.FLOW_SUB)}'
-            f'<div class="jr">{"".join(steps)}</div></section>')
+            f'<div class="hops rise">{"".join(hops)}</div>'
+            f'<p class="hnote">{C.FLOW_NOTE}</p></section>')
+
+
+def cs_media(key):
+    kind, v = CS_MEDIA[key]
+    if kind == "icon":
+        return f'<div class="cs-m ic" aria-hidden="true">{PERK_ICONS[v]}</div>'
+    imgs = "".join(f'<img src="{src}" alt="{alt}">' for src, alt in v)
+    return f'<div class="cs-m{" two" if len(v) == 2 else ""}">{imgs}</div>'
+
+
+def course(mobile):
+    """코스 소개. 운영 중인 OTA 의 코스 소개 여덟 단계."""
+    rows = []
+    for k, (title, dur, body, note, media) in enumerate(C.COURSE, 1):
+        t = f'<span class="cs-t">{dur}</span>' if dur else ""
+        n = f'<p class="cs-note">{note}</p>' if note else ""
+        rows.append(
+            f'<article class="cs-s rise">'
+            f'<div class="cs-h"><span class="cs-n n">{k:02d}</span>'
+            f'<div class="cs-ht"><h3>{title}</h3>{t}</div></div>'
+            f'{cs_media(media)}'
+            f'<div class="cs-b"><p>{body}</p>{n}</div></article>')
+    return (f'<section class="sect">{sh(C.COURSE_H2)}'
+            f'<div class="cs">{"".join(rows)}</div></section>')
 
 
 def stars(mobile):
@@ -790,7 +819,7 @@ def build(mobile):
     title = ("상세페이지 · 거북이 스노클링 — 모바일" if mobile
              else "상세페이지 · 거북이 스노클링 — 데스크탑")
     body = (hero(mobile) + perks(mobile) + features(mobile) + times(mobile)
-            + flow(mobile) + stars(mobile) + more(mobile) + foot())
+            + flow(mobile) + course(mobile) + stars(mobile) + more(mobile) + foot())
     if mobile:
         body += dock()
     html = f"""<!doctype html>
