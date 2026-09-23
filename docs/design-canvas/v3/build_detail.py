@@ -19,22 +19,25 @@ import _detail_ko as C
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-# 특장점 칸에 들어가는 실촬영본. act_* 는 운영자가 보내 준 원본이고,
-# 나머지는 저장소 public/ 에 있던 것을 잘라 담았다.
-FEAT_IMG = {"01": ("hero_waikiki.jpg", "와이키키 앞바다의 오션스타 보트와 다이아몬드헤드"),
-            "02": ("act_roof.webp",    "와이키키 앞바다에 정박한 오션스타 보트와 나무 루프탑"),
-            "04": ("feat_turtle.webp", "모래바닥에 모여 있는 푸른바다거북")}
-
-# 03 은 사진 한 장으로 담기지 않는다. '해양 5종 + 인생샷'을 네 장으로 보여 주고
-# 이름표를 단다. 차례는 본문이 나열하는 순서(패들보드·카약·…·다이빙)를 따랐다.
-FEAT_STRIP = {"03": [("act_sup.webp",   "스탠드업 패들보드",
-                      "다이아몬드헤드를 배경으로 패들보드 위에 올라선 손님"),
-                     ("act_kayak.webp", "씨카약",
-                      "씨카약을 탄 두 사람 앞으로 지나가는 푸른바다거북"),
-                     ("act_dive.webp",  "다이빙",
-                      "보트 위에서 바다로 뛰어드는 손님"),
-                     ("act_photo.webp", "인생샷",
-                      "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람")]}
+# 사진은 전부 일정(JOURNEY)으로 옮겼다. 특장점은 글만 남는다 — 같은 사진을
+# 특장점과 일정에 두 번 쓰면 아래로 내려갈수록 본 것을 또 보게 된다.
+# 단계 이름 -> [(파일, 이름표 or None, 대체문안)]
+JR_IMG = {
+    "boat":   [("act_roof.webp", None,
+                "와이키키 앞바다에 정박한 오션스타 보트와 나무 루프탑")],
+    "turtle": [("turtle.jpg", None,
+                "모래바닥 산호 위에 모여 있는 푸른바다거북 무리")],
+    "acts":   [("act_sup.webp",   "스탠드업 패들보드",
+                "다이아몬드헤드를 배경으로 패들보드 위에 올라선 손님"),
+               ("act_kayak.webp", "씨카약",
+                "씨카약을 탄 두 사람 앞으로 지나가는 푸른바다거북"),
+               ("act_dive.webp",  "다이빙",
+                "보트 위에서 바다로 뛰어드는 손님"),
+               ("act_photo.webp", "인생샷",
+                "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람")],
+    "drone":  [("hero_waikiki.jpg", None,
+                "와이키키 앞바다의 오션스타 보트와 다이아몬드헤드를 위에서 내려다본 모습")],
+}
 
 
 def fonts():
@@ -49,22 +52,15 @@ def icon(path, size=18, sw=1.7, fill="none"):
 
 
 I_ARROW = icon('<path d="M7 17L17 7M17 7H9M17 7v8"></path>', 15)
-I_PLUS  = icon('<path d="M12 5v14M5 12h14"></path>', 13)
 I_CLOCK = icon('<circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.3V12l3.2 1.9"></path>')
 I_STAR  = icon('<path d="M12 3.6l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 '
                '5.8-.8z" fill="currentColor" stroke="none"></path>', 15)
 I_PIN   = icon('<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"></path>'
                '<circle cx="12" cy="10" r="2.6"></circle>', 20)
-I_HOTEL = icon('<path d="M5 20V5.6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1V20"></path>'
-               '<path d="M15 11.2h3.4a1 1 0 0 1 1 1V20"></path><path d="M3 20h18"></path>'
-               '<path d="M8.4 8.2h1M11.4 8.2h1M8.4 11.6h1M11.4 11.6h1M8.4 15h1M11.4 15h1"></path>', 20)
 I_CHEV  = icon('<path d="M6 9.5l6 6 6-6"></path>', 20, 2)
 I_IG    = icon('<rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5"></rect>'
                '<circle cx="12" cy="12" r="4.1"></circle>'
                '<circle cx="17" cy="7" r="1.1" fill="currentColor" stroke="none"></circle>', 26)
-I_PH    = icon('<rect x="3.5" y="5" width="17" height="14" rx="2.4"></rect>'
-               '<circle cx="9" cy="10.4" r="1.5"></circle>'
-               '<path d="M4.6 17.2l4.1-4.1 3 3 3-2.6 4.7 4.2"></path>', 22, 1.5)
 PERK_ICONS = {
     "van":    icon('<path d="M2.6 16.4V8.6a1 1 0 0 1 1-1h9.9v8.8H2.6z"></path>'
                    '<path d="M13.5 11h3.6l3.3 3.4v2h-6.9z"></path>'
@@ -205,21 +201,6 @@ CSS_D = BASE + """
 /* 좁은 칸은 옆의 사진 칸 높이까지 늘리지 않는다. 늘리면 글 아래가 300px
    가까이 비어 버린다. 높이를 달리 두는 것이 벤토의 결이기도 하다. */
 .ft.w2{align-self:start}
-/* 폭이 달라도 사진 띠 높이가 296px 로 같아 한 줄에서 끝선이 맞는다. */
-.ft > img{width:100%;object-fit:cover}
-.ft.w2 > img{aspect-ratio:1.41 / 1}
-.ft.w3 > img{aspect-ratio:2.15 / 1}
-.ft.w4 > img{aspect-ratio:2.88 / 1}
-
-/* 해양 5종은 한 장으로 안 된다. 네 장을 나란히 두고 이름표를 단다.
-   3:2 는 원본 비 그대로라 잘려 나가는 데가 없다. */
-.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0 3px;
-  background:var(--line);border-bottom:1px solid var(--line)}
-.strip figure{display:flex;flex-direction:column;background:var(--soft)}
-.strip img{width:100%;aspect-ratio:3 / 2;object-fit:cover}
-.strip figcaption{padding:13px 8px;text-align:center;
-  font-size:14.5px;font-weight:700;color:var(--ink)}
-
 .ft-b{padding:30px 32px 32px}
 /* 폭을 다 쓰는 칸은 글줄이 1,200px 를 넘어 읽기 어렵다. 머리와 본문을
    두 기둥으로 갈라 글줄을 잡아 준다. */
@@ -261,24 +242,41 @@ CSS_D = BASE + """
 .tlist li::before{content:"";position:absolute;left:2px;top:12px;width:4px;height:4px;
   border-radius:50%;background:var(--muted)}
 
-/* 일정 — 단계 흐름. 픽업 안내는 카드를 걷고 실선 두 줄로 둔다. */
-.flow{margin-top:44px;display:flex;align-items:center;justify-content:space-between;gap:0}
-.step{display:flex;align-items:center;justify-content:center;width:126px;height:126px;
-  border-radius:50%;text-align:center;font-size:15.5px;font-weight:700;line-height:1.35;
-  background:#fff;border:1px solid var(--line);color:var(--ink)}
-.step.on{background:var(--deep);border-color:var(--deep);color:#fff}
-.flow span.sp{flex:1;height:1px;background:var(--line);min-width:10px}
-.fnotes{margin-top:52px;border-top:1px solid var(--line);
-  display:grid;grid-template-columns:1fr 1fr;gap:0}
-.fc{display:flex;gap:18px;align-items:flex-start;padding:28px 0}
-.fc + .fc{padding-left:44px;border-left:1px solid var(--line)}
-.fc .ic{display:flex;align-items:center;justify-content:center;width:44px;height:44px;
-  border-radius:13px;background:var(--soft);color:var(--sea);flex:none}
-.fc.back .ic{color:var(--food-d)}
-.fc h3{font-size:19px}
-.fc p{margin-top:8px;font-size:16px;line-height:1.75;color:var(--text)}
-.fnote{margin-top:26px;padding-top:24px;border-top:1px solid var(--line);
-  font-size:16.5px;font-weight:700;color:var(--ink)}
+/* 일정 — 하나의 세로 레일. 앞 판은 원 일곱 개 + 카드 두 장 + 안내문 한 줄이라
+   한 흐름이 세 덩어리로 흩어져 있었고, 픽업·복귀가 흐름 밖이라 언제인지
+   보이지 않았다. 순서 안으로 들여 양 끝에 놓고 사진을 그 단계에 붙였다. */
+.jr{margin-top:48px}
+.jr-s{position:relative;display:grid;grid-template-columns:26px 300px 1fr;gap:0 48px;
+  padding-bottom:38px;align-items:start}
+/* 사진이 없는 단계는 글이 300px 안에 갇힐 이유가 없다. 두 칸을 다 쓰되
+   글줄은 62자에서 끊는다. */
+.jr-s:not(.shot) .jr-h{grid-column:2 / -1;max-width:640px}
+.jr-s:last-child{padding-bottom:0}
+/* 레일은 점 아래에서 다음 점까지 잇는다. */
+.jr-s::before{content:"";position:absolute;left:12px;top:32px;bottom:0;width:2px;
+  background:var(--line)}
+.jr-s:last-child::before{display:none}
+.jr-d{position:relative;z-index:1;width:26px;height:26px;border-radius:50%;
+  background:#fff;border:3px solid var(--line);margin-top:3px}
+/* 양 끝(픽업·복귀)만 채운 점에 아이콘. 바다 위 일곱 단계와 뭍의 두 단계를
+   한눈에 가른다. */
+.jr-s.anchor .jr-d{display:flex;align-items:center;justify-content:center;
+  background:var(--deep);border-color:var(--deep);color:#fff}
+.jr-s.anchor .jr-d svg{width:13px;height:13px}
+.jr-h h3{font-size:21px;line-height:1.35}
+.jr-h p{margin-top:10px;font-size:16px;line-height:1.8;color:var(--text)}
+.jr-h p + p{margin-top:8px}
+.jr-m{max-width:640px}
+.jr-m > img{width:100%;aspect-ratio:16 / 9;object-fit:cover;border-radius:16px}
+
+/* 해양 5종은 한 장으로 안 된다. 네 장을 두 줄로 두고 이름표를 단다.
+   16:9 두 줄이라 한 장짜리 단계와 사진 높이가 거의 같다. */
+.strip{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;
+  background:var(--line);border-radius:16px;overflow:hidden}
+.strip figure{display:flex;flex-direction:column;background:var(--soft)}
+.strip img{width:100%;aspect-ratio:16 / 9;object-fit:cover}
+.strip figcaption{padding:11px 8px;text-align:center;
+  font-size:14.5px;font-weight:700;color:var(--ink)}
 
 /* 인증샷 — 이 섹션과 맺음만 가운데다. 계속 왼쪽이면 결이 또 하나가 된다. */
 .stars{margin-top:40px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
@@ -433,15 +431,13 @@ CSS_M = BASE + """
 .ac-b p + p{margin-top:14px}
 .ac-b .em{font-weight:700;color:var(--deep)}
 
-/* 375px 에 넉 장을 나란히 두면 한 장이 79px 다. 두 줄로 접는다.
-   펼친 칸 안에서는 칸 끝까지 물린다. */
+/* 해양 5종 네 장. 375px 에 나란히 두면 한 장이 79px 라 두 줄로 접는다. */
 .strip{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;
-  background:var(--line);border-bottom:1px solid var(--line)}
+  background:var(--line);border-radius:14px;overflow:hidden}
 .strip figure{display:flex;flex-direction:column;background:var(--soft)}
-.strip img{width:100%;aspect-ratio:3 / 2;object-fit:cover}
-.strip figcaption{padding:11px 6px;text-align:center;
+.strip img{width:100%;aspect-ratio:16 / 9;object-fit:cover}
+.strip figcaption{padding:10px 6px;text-align:center;
   font-size:14px;font-weight:700;color:var(--ink);line-height:1.4}
-.ac-b .strip{margin:0 -20px 20px;border-top:1px solid var(--line)}
 
 /* 주간 표 — 375px 에 7칸 표를 밀어 넣으면 시각이 12.5px 까지 내려간다.
    회차를 줄로 세우고 요일은 알약 일곱 개로 옮겨, 읽을 값(시각)에 19px 를
@@ -472,24 +468,26 @@ CSS_M = BASE + """
 .tlist li::before{content:"";position:absolute;left:2px;top:12px;width:4px;height:4px;
   border-radius:50%;background:var(--muted)}
 
-/* 375px 에 원 일곱 개는 못 넣는다. 세로로 세운다. */
-.flow{margin-top:28px;display:grid;grid-template-columns:1fr;gap:0}
-.step{display:flex;align-items:center;gap:15px;min-height:56px;font-size:16.5px;font-weight:700;
-  color:var(--ink);line-height:1.4}
-.step::before{content:"";width:12px;height:12px;border-radius:50%;background:#fff;
-  border:3px solid var(--line);flex:none;margin-left:5px}
-.step.on::before{background:var(--deep);border-color:var(--deep)}
-.flow span.sp{width:1px;height:16px;margin-left:10.5px;background:var(--line)}
-.fnotes{margin-top:34px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr}
-.fc{display:flex;gap:15px;align-items:flex-start;padding:24px 0}
-.fc + .fc{border-top:1px solid var(--line)}
-.fc .ic{display:flex;align-items:center;justify-content:center;width:48px;height:48px;
-  border-radius:14px;background:var(--soft);color:var(--sea-d);flex:none}
-.fc.back .ic{color:var(--food-d)}
-.fc h3{font-size:18px}
-.fc p{margin-top:8px;font-size:15px;line-height:1.75;color:var(--text)}
-.fnote{margin-top:24px;padding-top:22px;border-top:1px solid var(--line);
-  font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.7}
+/* 일정 — 데스크탑과 같은 세로 레일. 폭이 없으니 사진은 제목 아래로 내린다. */
+.jr{margin-top:30px}
+.jr-s{position:relative;display:grid;grid-template-columns:22px 1fr;gap:0 16px;
+  padding-bottom:28px}
+.jr-s:last-child{padding-bottom:0}
+.jr-s::before{content:"";position:absolute;left:10px;top:28px;bottom:0;width:2px;
+  background:var(--line)}
+.jr-s:last-child::before{display:none}
+.jr-d{position:relative;z-index:1;width:22px;height:22px;border-radius:50%;
+  background:#fff;border:3px solid var(--line);margin-top:2px}
+.jr-s.anchor .jr-d{display:flex;align-items:center;justify-content:center;
+  background:var(--deep);border-color:var(--deep);color:#fff}
+.jr-s.anchor .jr-d svg{width:11px;height:11px}
+.jr-h h3{font-size:18px;line-height:1.4}
+.jr-h p{margin-top:8px;font-size:15px;line-height:1.8;color:var(--text)}
+.jr-h p + p{margin-top:7px}
+/* 두 칸 격자라 사진은 둘째 칸에 못 박아야 한다. 안 그러면 다음 줄
+   첫 칸(레일 22px)으로 흘러가 사진이 22px 로 찌그러진다. */
+.jr-m{grid-column:2;margin-top:14px}
+.jr-m > img{width:100%;aspect-ratio:16 / 9;object-fit:cover;border-radius:14px}
 
 /* 인증샷 — 세 칸이면 이름표가 10.5px 여야 들어간다. 두 칸으로 줄이면 14px 가
    들어가고 얼굴도 알아볼 만해진다(사진 원본이 315px 라 두 칸이 제 크기다).
@@ -617,20 +615,9 @@ def perks(mobile):
             f'<div class="inc rise">{cells}</div></section>')
 
 
-def strip_html(no):
-    """03 의 해양 5종 사진 띠. 두 보드가 같은 마크업을 쓴다."""
-    if no not in FEAT_STRIP:
-        return ""
-    return ('<div class="strip">' + "".join(
-        f'<figure><img src="{src}" alt="{alt}">'
-        f'<figcaption>{cap}</figcaption></figure>'
-        for src, cap, alt in FEAT_STRIP[no]) + '</div>')
-
-
 def features_m():
     """모바일 특장점. 제목 여섯 줄을 먼저 보이고 본문은 접는다.
-    사진은 펼친 칸 안으로 들어간다 — 01·02·04 의 단독 사진은 접힌 상태에서
-    보이지 않으므로 사실상 뺀 것과 같다. 정보를 지닌 03 의 띠만 남긴다."""
+    사진은 전부 일정으로 옮겼으므로 여기는 글만 남는다."""
     out = []
     for i, (no, t, sub, paras, em) in enumerate(C.FEATURES):
         body = "".join(f'<p>{x}</p>' for x in paras)
@@ -641,7 +628,7 @@ def features_m():
             f'<summary><span class="no">{no}</span>'
             f'<span class="ac-t"><b>{t}</b><i>{sub}</i></span>'
             f'<span class="chev">{I_CHEV}</span></summary>'
-            f'<div class="ac-b">{strip_html(no)}{body}</div></details>')
+            f'<div class="ac-b">{body}</div></details>')
     return (f'<section class="sect">{sh(C.FEAT_H2)}'
             f'<div class="accs rise">{"".join(out)}</div></section>')
 
@@ -653,15 +640,9 @@ def features(mobile):
     SPAN = {"01": "w3", "02": "w3", "03": "w6", "04": "w4", "05": "w2", "06": "w6"}
     out = []
     for no, t, sub, paras, em in C.FEATURES:
-        img = ""
-        if no in FEAT_IMG:
-            src, alt = FEAT_IMG[no]
-            img = f'<img src="{src}" alt="{alt}">'
-        else:
-            img = strip_html(no)
         body = "".join(f'<p>{x}</p>' for x in paras)
         emx = f'<p class="em">{em}</p>' if em else ""
-        out.append(f'<div class="ft {SPAN[no]} rise">{img}'
+        out.append(f'<div class="ft {SPAN[no]} rise">'
                    f'<div class="ft-b">'
                    f'<div class="ft-h"><span class="no">{no}</span>'
                    f'<h3>{t}</h3><span class="sub">{sub}</span></div>'
@@ -705,20 +686,40 @@ def times(mobile):
     return f'<section class="sect"><div class="time">{left}{table}</div></section>'
 
 
+ANCHOR_IC = {"van": icon('<path d="M2.6 16.4V8.6a1 1 0 0 1 1-1h9.9v8.8H2.6z"></path>'
+                         '<path d="M13.5 11h3.6l3.3 3.4v2h-6.9z"></path>'
+                         '<circle cx="7" cy="16.6" r="1.9"></circle>'
+                         '<circle cx="16.8" cy="16.6" r="1.9"></circle>', 24, 2.2),
+             "hotel": icon('<path d="M5 20V5.6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1V20"></path>'
+                           '<path d="M15 11.2h3.4a1 1 0 0 1 1 1V20"></path>'
+                           '<path d="M3 20h18"></path>', 24, 2.2)}
+
+
+def jr_media(key):
+    """한 단계에 붙는 사진. 한 장이면 그대로, 넉 장이면 이름표 붙인 띠."""
+    if not key:
+        return ""
+    shots = JR_IMG[key]
+    if len(shots) == 1:
+        src, _, alt = shots[0]
+        return f'<div class="jr-m"><img src="{src}" alt="{alt}"></div>'
+    tiles = "".join(f'<figure><img src="{src}" alt="{alt}">'
+                    f'<figcaption>{cap}</figcaption></figure>' for src, cap, alt in shots)
+    return f'<div class="jr-m"><div class="strip">{tiles}</div></div>'
+
+
 def flow(mobile):
     steps = []
-    for i, x in enumerate(C.FLOW):
-        if i:
-            steps.append('<span class="sp"></span>')
-        steps.append(f'<div class="step{" on" if i % 2 == 0 else ""}">{x}</div>')
-    ic = {"pickup": PERK_ICONS["van"], "back": I_HOTEL}
-    cards = "".join(
-        f'<div class="fc{" back" if k == "back" else ""}"><span class="ic">{ic[k]}</span>'
-        f'<div><h3>{t}</h3><p>{b}</p></div></div>' for k, t, b in C.FLOW_CARDS)
-    return (f'<section class="sect">{sh(C.FLOW_H2)}'
-            f'<div class="flow rise">{"".join(steps)}</div>'
-            f'<div class="fnotes rise">{cards}</div>'
-            f'<p class="fnote">{C.FLOW_NOTE}</p></section>')
+    for title, lines, img, anchor in C.JOURNEY:
+        dot = (f'<span class="jr-d">{ANCHOR_IC[anchor]}</span>' if anchor
+               else '<span class="jr-d"></span>')
+        body = "".join(f'<p>{x}</p>' for x in lines)
+        cls = ("anchor " if anchor else "") + ("shot " if img else "")
+        steps.append(f'<div class="jr-s {cls}rise">{dot}'
+                     f'<div class="jr-h"><h3>{title}</h3>{body}</div>'
+                     f'{jr_media(img)}</div>')
+    return (f'<section class="sect">{sh(C.FLOW_H2, C.FLOW_SUB)}'
+            f'<div class="jr">{"".join(steps)}</div></section>')
 
 
 def stars(mobile):
