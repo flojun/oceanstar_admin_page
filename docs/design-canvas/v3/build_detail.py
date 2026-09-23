@@ -58,6 +58,7 @@ I_PIN   = icon('<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"></pa
 I_HOTEL = icon('<path d="M5 20V5.6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1V20"></path>'
                '<path d="M15 11.2h3.4a1 1 0 0 1 1 1V20"></path><path d="M3 20h18"></path>'
                '<path d="M8.4 8.2h1M11.4 8.2h1M8.4 11.6h1M11.4 11.6h1M8.4 15h1M11.4 15h1"></path>', 20)
+I_CHEV  = icon('<path d="M6 9.5l6 6 6-6"></path>', 20, 2)
 I_IG    = icon('<rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5"></rect>'
                '<circle cx="12" cy="12" r="4.1"></circle>'
                '<circle cx="17" cy="7" r="1.1" fill="currentColor" stroke="none"></circle>', 26)
@@ -298,11 +299,28 @@ CSS_D = BASE + """
 .mc .go{margin-top:12px;display:inline-flex;align-items:center;min-height:44px;gap:7px;
   font-size:15px;font-weight:700;color:var(--deep)}
 
-/* 맺음 */
-.end{margin:112px 0 0;padding:76px var(--pad);background:var(--ink);color:#fff;text-align:center}
+/* 맺음 + 푸터 — 랜딩(SianB)과 같은 한 덩어리다. 맺음 띠가 곧 푸터의 머리라
+   어두운 면이 둘로 끊기지 않는다.
+   어두운 면의 밝은 글자는 얇게 보여서 굵기를 600 으로 올려 둔다(랜딩과 동일). */
+.foot{margin-top:112px;background:var(--ink);color:#fff;padding:76px var(--pad) 40px;
+  -webkit-font-smoothing:auto;-moz-osx-font-smoothing:auto}
+.end{text-align:center}
 .end h2{font-size:42px;color:#fff}
 .end p{margin-top:14px;font-size:18px;line-height:1.8;color:rgba(255,255,255,.76)}
 .end .book-pill{margin-top:26px}
+.cols{display:grid;grid-template-columns:1.5fr 1fr 1fr 1.1fr;gap:40px;
+  margin-top:72px;padding:48px 0 40px;border-top:1px solid rgba(255,255,255,.18)}
+.f-logo{height:42px;width:auto;filter:brightness(0) invert(1)}
+.c-brand p{margin-top:16px;max-width:330px;font-size:15.5px;font-weight:600;line-height:1.85}
+.c-h{display:flex;align-items:center;gap:8px;margin-bottom:16px;
+  font-size:15px;font-weight:700;color:#fff}
+.c-h svg{color:var(--sky)}
+.cols p{font-size:15.5px;font-weight:600;line-height:1.9}
+.f-more{display:inline-flex;align-items:center;gap:7px;margin-top:16px;min-height:44px;
+  font-size:14.5px;font-weight:700;color:#fff}
+.f-bot{display:flex;align-items:center;gap:20px;padding-top:26px;
+  border-top:1px solid rgba(255,255,255,.18);
+  font-size:14px;font-weight:600;color:rgba(255,255,255,.9)}
 
 /* ── 스크롤 연출. 랜딩과 같은 값이다. 긴 페이지에서 섹션이 차례로 놓이는
    것을 알리는 목적이고, 감속을 선호하면 전부 정지한다. ───────────── */
@@ -391,27 +409,39 @@ CSS_M = BASE + """
 .inc-c h3{font-size:20.5px;line-height:1.35}
 .inc-c p{margin-top:14px;font-size:16px;line-height:1.8;color:var(--text)}
 
-/* 375px 에서는 폭을 나눌 수 없다. 한 줄로 쌓되 사진 칸이 리듬을 만든다. */
-.feats{margin-top:28px;display:grid;grid-template-columns:1fr;gap:14px}
-.ft{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);
+/* 375px 에 카드 여섯 장을 그대로 쌓으면 3,310px — 페이지의 31% 가 이 한
+   섹션이고 넉 화면을 넘긴다. 제목 여섯 줄을 먼저 보이고 본문은 펼쳐 읽게
+   바꿨다. <details> 라 스크립트 없이 열리고 키보드로도 다뤄진다.
+   폭이 남는 데스크탑은 벤토 그대로다. */
+.accs{margin-top:26px;background:#fff;border:1px solid var(--line);
   border-radius:20px;overflow:hidden}
-.ft > img{width:100%;aspect-ratio:16 / 10;object-fit:cover}
-/* 375px 에 넉 장을 나란히 두면 한 장이 79px 다. 두 줄로 접는다. */
+.acc + .acc{border-top:1px solid var(--line)}
+.acc > summary{display:flex;align-items:center;gap:14px;padding:20px;min-height:68px;
+  cursor:pointer;list-style:none}
+.acc > summary::-webkit-details-marker{display:none}
+.acc .no{display:inline-flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:999px;background:var(--soft);flex:none;
+  font-family:'SUIT',system-ui,sans-serif;font-size:14.5px;font-weight:800;color:var(--deep)}
+.ac-t{flex:1;display:flex;flex-direction:column;gap:5px}
+.ac-t b{font-family:'SUIT',system-ui,sans-serif;font-size:19px;font-weight:800;
+  color:var(--ink);line-height:1.35;letter-spacing:-.035em}
+.ac-t i{font-style:normal;font-size:14.5px;font-weight:700;color:var(--deep);line-height:1.45}
+.acc .chev{display:flex;color:var(--muted);flex:none}
+.acc[open] .chev{transform:rotate(180deg)}
+.ac-b{padding:0 20px 24px}
+.ac-b p{font-size:16px;line-height:1.85;color:var(--text)}
+.ac-b p + p{margin-top:14px}
+.ac-b .em{font-weight:700;color:var(--deep)}
+
+/* 375px 에 넉 장을 나란히 두면 한 장이 79px 다. 두 줄로 접는다.
+   펼친 칸 안에서는 칸 끝까지 물린다. */
 .strip{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;
   background:var(--line);border-bottom:1px solid var(--line)}
 .strip figure{display:flex;flex-direction:column;background:var(--soft)}
 .strip img{width:100%;aspect-ratio:3 / 2;object-fit:cover}
 .strip figcaption{padding:11px 6px;text-align:center;
   font-size:14px;font-weight:700;color:var(--ink);line-height:1.4}
-.ft-b{padding:24px 22px 28px}
-.ft .no{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;
-  padding:0 10px;border-radius:999px;background:var(--soft);
-  font-family:'SUIT',system-ui,sans-serif;font-size:14.5px;font-weight:800;color:var(--deep)}
-
-.ft h3{margin-top:16px;font-size:24px;line-height:1.32}
-.ft .sub{margin-top:8px;font-size:16px;font-weight:700;color:var(--deep)}
-.ft p{margin-top:14px;font-size:16px;line-height:1.85;color:var(--text)}
-.ft .em{margin-top:14px;font-size:16px;line-height:1.8;font-weight:700;color:var(--deep)}
+.ac-b .strip{margin:0 -20px 20px;border-top:1px solid var(--line)}
 
 /* 주간 표 — 375px 에 7칸 표를 밀어 넣으면 시각이 12.5px 까지 내려간다.
    회차를 줄로 세우고 요일은 알약 일곱 개로 옮겨, 읽을 값(시각)에 19px 를
@@ -480,17 +510,30 @@ CSS_M = BASE + """
 .more{margin-top:26px;display:grid;grid-template-columns:1fr;gap:14px}
 .mc{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden}
 .mc img{width:100%;height:196px;object-fit:cover}
-.mc .tx{padding:24px 22px 26px}
+.mc .tx{display:block;padding:24px 22px 26px}
 .mc h3{font-size:23px;line-height:1.35}
 .mc p{margin-top:10px;font-size:16px;line-height:1.75;color:var(--text)}
 .mc .go{margin-top:8px;display:inline-flex;align-items:center;min-height:48px;gap:7px;
   font-size:15px;font-weight:700;color:var(--deep)}
 
-.end{margin-top:72px;padding:60px var(--pad) 66px;background:var(--ink);color:#fff;
-  text-align:center}
+.foot{margin-top:72px;background:var(--ink);color:#fff;padding:60px var(--pad) 30px;
+  -webkit-font-smoothing:auto;-moz-osx-font-smoothing:auto}
+.end{text-align:center}
 .end h2{font-size:30px;color:#fff;line-height:1.32}
 .end p{margin-top:14px;font-size:16px;line-height:1.8;color:rgba(255,255,255,.76)}
 .end .book-pill{margin-top:24px;height:58px;padding:0 10px 0 24px;font-size:16.5px}
+.cols{display:grid;gap:28px;margin-top:44px;padding-top:30px;
+  border-top:1px solid rgba(255,255,255,.18)}
+.f-logo{height:38px;width:auto;filter:brightness(0) invert(1)}
+.c-brand p{margin-top:14px;font-size:15px;font-weight:600;line-height:1.85}
+.c-h{display:flex;align-items:center;gap:8px;margin-bottom:12px;
+  font-size:15.5px;font-weight:700;color:#fff}
+.c-h svg{color:var(--sky)}
+.cols p{font-size:15px;font-weight:600;line-height:1.9}
+.f-more{display:inline-flex;align-items:center;gap:7px;margin-top:10px;min-height:44px;
+  font-size:14.5px;font-weight:700;color:#fff}
+.f-bot{margin-top:30px;padding-top:20px;border-top:1px solid rgba(255,255,255,.18);
+  font-size:13.5px;font-weight:600;color:rgba(255,255,255,.88)}
 
 /* 엄지가 닿는 자리에 값과 버튼을 붙여 둔다. 7,000px 가 넘는 페이지에서
    예약 버튼이 맨 위 카드와 맨 아래에만 있으면 중간에서는 닿을 곳이 없다. */
@@ -574,7 +617,38 @@ def perks(mobile):
             f'<div class="inc rise">{cells}</div></section>')
 
 
+def strip_html(no):
+    """03 의 해양 5종 사진 띠. 두 보드가 같은 마크업을 쓴다."""
+    if no not in FEAT_STRIP:
+        return ""
+    return ('<div class="strip">' + "".join(
+        f'<figure><img src="{src}" alt="{alt}">'
+        f'<figcaption>{cap}</figcaption></figure>'
+        for src, cap, alt in FEAT_STRIP[no]) + '</div>')
+
+
+def features_m():
+    """모바일 특장점. 제목 여섯 줄을 먼저 보이고 본문은 접는다.
+    사진은 펼친 칸 안으로 들어간다 — 01·02·04 의 단독 사진은 접힌 상태에서
+    보이지 않으므로 사실상 뺀 것과 같다. 정보를 지닌 03 의 띠만 남긴다."""
+    out = []
+    for i, (no, t, sub, paras, em) in enumerate(C.FEATURES):
+        body = "".join(f'<p>{x}</p>' for x in paras)
+        if em:
+            body += f'<p class="em">{em}</p>'
+        out.append(
+            f'<details class="acc"{" open" if i == 0 else ""}>'
+            f'<summary><span class="no">{no}</span>'
+            f'<span class="ac-t"><b>{t}</b><i>{sub}</i></span>'
+            f'<span class="chev">{I_CHEV}</span></summary>'
+            f'<div class="ac-b">{strip_html(no)}{body}</div></details>')
+    return (f'<section class="sect">{sh(C.FEAT_H2)}'
+            f'<div class="accs rise">{"".join(out)}</div></section>')
+
+
 def features(mobile):
+    if mobile:
+        return features_m()
     # 줄마다 폭을 달리한다. 3+3 / 6 / 4+2 / 6.
     SPAN = {"01": "w3", "02": "w3", "03": "w6", "04": "w4", "05": "w2", "06": "w6"}
     out = []
@@ -583,11 +657,8 @@ def features(mobile):
         if no in FEAT_IMG:
             src, alt = FEAT_IMG[no]
             img = f'<img src="{src}" alt="{alt}">'
-        elif no in FEAT_STRIP:
-            img = ('<div class="strip">' + "".join(
-                f'<figure><img src="{src}" alt="{alt}">'
-                f'<figcaption>{cap}</figcaption></figure>'
-                for src, cap, alt in FEAT_STRIP[no]) + '</div>')
+        else:
+            img = strip_html(no)
         body = "".join(f'<p>{x}</p>' for x in paras)
         emx = f'<p class="em">{em}</p>' if em else ""
         out.append(f'<div class="ft {SPAN[no]} rise">{img}'
@@ -679,9 +750,24 @@ def more(mobile):
             f'<div class="more">{cards}</div></section>')
 
 
-def end():
-    return (f'<section class="end"><h2>{C.END_H2}</h2><p>{C.END_SUB}</p>'
-            f'<a href="#" class="book-pill light">예약하기 {I_ARROW}</a></section>')
+def foot():
+    """맺음 띠와 푸터를 한 덩어리로. 문안은 랜딩 보드(SianB)에서 그대로 옮겼다."""
+    cols = "".join(f'<div>{x}</div>' for x in [
+        (f'<img src="logo_full.png" alt="오션스타" class="f-logo">'
+         f'<p>{C.FOOT_ABOUT}</p>'
+         f'<a href="#" class="f-more">오션스타 소개 {I_ARROW}</a>'),
+        (f'<span class="c-h">{I_CLOCK} 영업시간 · 연락처</span>'
+         + "".join(f'<p>{x}</p>' for x in C.FOOT_HOURS)),
+        (f'<span class="c-h">{I_PIN} 위치</span><p>{C.FOOT_ADDR}</p>'
+         f'<a href="#" class="f-more">구글 지도로 바로보기 {I_ARROW}</a>'),
+        (f'<span class="c-h">사업자 정보</span>'
+         + "".join(f'<p>{x}</p>' for x in C.FOOT_BIZ)),
+    ])
+    return (f'<footer class="foot">'
+            f'<div class="end rise"><h2>{C.END_H2}</h2><p>{C.END_SUB}</p>'
+            f'<a href="#" class="book-pill light">예약하기 {I_ARROW}</a></div>'
+            f'<div class="cols rise">{cols}</div>'
+            f'<div class="f-bot"><span>{C.FOOT_COPY}</span></div></footer>')
 
 
 def dock():
@@ -695,7 +781,7 @@ def build(mobile):
     title = ("상세페이지 · 거북이 스노클링 — 모바일" if mobile
              else "상세페이지 · 거북이 스노클링 — 데스크탑")
     body = (hero(mobile) + perks(mobile) + features(mobile) + times(mobile)
-            + flow(mobile) + stars(mobile) + more(mobile) + end())
+            + flow(mobile) + stars(mobile) + more(mobile) + foot())
     if mobile:
         body += dock()
     html = f"""<!doctype html>

@@ -119,3 +119,13 @@ MORE = [
 ]
 END_H2 = "지금 바다로 나가 볼까요"
 END_SUB = "일요일을 제외하고 매일 출항합니다. 원하시는 날짜를 골라 주세요."
+
+# 푸터 — 랜딩 보드(SianB)의 푸터에서 그대로 옮겼다. 두 페이지가 같은 값을
+# 보여야 하므로 여기서 지어내지 않는다.
+FOOT_ABOUT = "하와이 한인 최초 거북이 스노클링 원조. 여행 플랫폼 8,000 리뷰 · 구글 5,000 리뷰."
+FOOT_HOURS = ["하와이 현지 기준 월~토 09:00~17:00", "hioceanstar@gmail.com", "8083081792"]
+FOOT_ADDR = "1125 Kewalo Basin Harbor,<br>Gate D #110, Honolulu, HI 96814"
+FOOT_BIZ = ["상호명: Oceanview Activity LLC",
+            "사업장 소재지: 615 PIKOI ST. STE 811",
+            "사업자 전화번호: 8083081792"]
+FOOT_COPY = "© 2026 Ocean Star. All Rights Reserved."
