@@ -36,6 +36,17 @@ export const OTA_SOURCE: Record<OtaPlatform, string> = {
     yeogi: '여기어때',
 };
 
+/**
+ * 사람에게 보여 줄 플랫폼 이름. DB 의 source 값(`OTA_SOURCE`)은 표에서 좁게 쓰려고
+ * 줄여 놓은 코드라 'G' 처럼 알림에 실으면 어디서 온 예약인지 알 수 없다.
+ */
+export const OTA_LABEL: Record<OtaPlatform, string> = {
+    klook: '클룩',
+    gyg: 'GetYourGuide',
+    viator: 'Viator',
+    yeogi: '여기어때',
+};
+
 /** IMAP `from` 검색어. imapflow 의 from 은 값을 하나만 받아서 플랫폼별로 따로 검색한다. */
 export const OTA_FROM: Record<OtaPlatform, string> = {
     klook: 'klook',

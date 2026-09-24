@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
-import { parseOtaEmail, OTA_FROM, OTA_SUBJECT, type OtaPlatform, type OtaBooking } from '@/lib/otaEmailParser';
+import { parseOtaEmail, OTA_FROM, OTA_LABEL, OTA_SUBJECT, type OtaPlatform, type OtaBooking } from '@/lib/otaEmailParser';
 import { isUrgentTourDate } from '@/lib/reservationUrgency';
 import { sendDiscordUrgentAlert } from '@/lib/discordWebhook';
 import { getHawaiiDateStr } from '@/lib/timeUtils';
@@ -406,13 +406,15 @@ async function handlePartialCancel(b: OtaBooking): Promise<Result> {
  */
 async function notify(b: OtaBooking, outcome: Outcome, detail?: string): Promise<boolean> {
     const kindLabel = b.kind === 'partial_cancel' ? '부분취소' : b.kind === 'update' ? '예약변경' : '취소';
+    // 어느 플랫폼에서 온 건지 알림 제목과 출처에 그대로 적는다. 'OTA' 나 'G' 로는 알 수 없다.
+    const platform = OTA_LABEL[b.platform];
 
     const title =
-        outcome === 'cancelled' ? '❌ [취소요청] OTA 취소 접수'
-            : outcome === 'partial' ? '✂️ [부분취소] 인원이 줄었습니다'
-                : outcome === 'updated' ? '🔄 [예약변경] 날짜·인원·픽업이 바뀌었습니다'
-                    : outcome === 'unmatched' ? `⚠️ [${kindLabel}] 매칭되는 예약을 못 찾음`
-                        : outcome === 'inserted' && isUrgentTourDate(b.tourDate) ? '🚨 [안내필요] OTA 긴급 예약!'
+        outcome === 'cancelled' ? `❌ [취소요청] ${platform} 취소 접수`
+            : outcome === 'partial' ? `✂️ [부분취소] ${platform} 인원이 줄었습니다`
+                : outcome === 'updated' ? `🔄 [예약변경] ${platform} 날짜·인원·픽업이 바뀌었습니다`
+                    : outcome === 'unmatched' ? `⚠️ [${kindLabel}] ${platform} — 매칭되는 예약을 못 찾음`
+                        : outcome === 'inserted' && isUrgentTourDate(b.tourDate) ? `🚨 [안내필요] ${platform} 긴급 예약!`
                             : null;
 
     if (!title) return false;
@@ -423,7 +425,7 @@ async function notify(b: OtaBooking, outcome: Outcome, detail?: string): Promise
         tourDate: b.tourDate,
         option: b.option,
         pax: b.pax,
-        source: b.source,
+        source: platform,
         orderNumber: b.orderId,
         pickupLocation: b.pickupLocation || undefined,
         detail,
