@@ -14,8 +14,8 @@
      특장점 세 칸에 넣었다.
   5. 움직임이 없었다. 랜딩과 같은 .rise 스크롤 연출을 넣었다(감속 선호 시 정지).
 """
-import io, os, re
-import _detail_ko as C
+import importlib, io, os, re
+import _detail_ko as C   # build 루프에서 상품마다 바꿔 끼운다
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -44,6 +44,17 @@ CS_MEDIA = {
                        ("act_kayak.webp",
                         "씨카약을 탄 두 사람 앞으로 지나가는 푸른바다거북")]),
     "dive":   ("img", [("act_dive.webp", "보트 위에서 바다로 뛰어드는 손님")]),
+    # 선셋 상세
+    "sup":    ("img", [("act_sup.webp",
+                        "다이아몬드헤드를 배경으로 패들보드 위에 올라선 손님")]),
+    "kayak":  ("img", [("act_kayak.webp",
+                        "씨카약을 탄 두 사람 앞으로 지나가는 푸른바다거북")]),
+    "wine":   ("img", [("course_wine.webp",
+                        "체크 식탁보 위의 와인 두 병과 치즈·과자, 와인이 담긴 잔")]),
+    # public/images/timeline/scooter.png. 저장소에 있던 파일인데 산호초 배경이라
+    # 와이키키 실촬영본이 아니다. 실사진을 받으면 바꿔야 한다.
+    "scooter": ("img", [("course_scooter.webp",
+                         "씨두 스쿠터를 잡고 물속을 나아가는 스노클러")]),
     "photo":  ("img", [("act_photo.webp",
                         "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람")]),
 }
@@ -81,6 +92,16 @@ PERK_ICONS = {
                    '<path d="M11.5 12h1M4.1 12H2.2M19.9 12h1.9"></path>', 24),
     "bowl":   icon('<path d="M3.4 10.6h17.2a8.6 8.6 0 0 1-17.2 0z"></path>'
                    '<path d="M8 7.6c0-1.2 1-1.6 1-2.7M12 7.3c0-1.4 1-1.8 1-3M16 7.6c0-1.2 1-1.6 1-2.7"></path>', 24),
+    "turtle": icon('<path d="M4.6 13.4a6.6 5 0 0 1 13.2 0z"></path>'
+                   '<path d="M3.4 13.4h15.6"></path><circle cx="19.6" cy="11.2" r="1.7"></circle>'
+                   '<path d="M6.4 13.6l-1.6 3.2M15.8 13.6l1.6 3.2M9.2 8.9l1.9 4.5M13.3 8.9l-1.9 4.5"></path>', 24),
+    "wine":   icon('<path d="M7.6 3.6h8.8l-.5 5.6a3.9 3.9 0 0 1-7.8 0z"></path>'
+                   '<path d="M8 7.6h8"></path><path d="M12 13.1v6.9M8.6 20.4h6.8"></path>', 24),
+    "sup":    icon('<path d="M3 18.6c4.4 1.5 13.6 1.5 18 0"></path><circle cx="11" cy="4.8" r="1.7"></circle>'
+                   '<path d="M11 7.2v5.4l-2.6 4.4M11 12.6l2.6 4.4M8.6 9.6h4.8"></path>'
+                   '<path d="M17.4 3.4l-2.6 14.2"></path>', 24),
+    "guide":  icon('<circle cx="9" cy="7.4" r="3.2"></circle><path d="M3 20.2a6 6 0 0 1 12 0"></path>'
+                   '<path d="M17.6 3.6v9.4M17.6 3.6h3.6l-1.2 2.1 1.2 2.1h-3.6"></path>', 24),
     "camera": icon('<path d="M3.6 8.6h3l1.5-2.1h5.8l1.5 2.1h3a1 1 0 0 1 1 1v7.8a1 1 0 0 1-1 1'
                    'h-14.8a1 1 0 0 1-1-1V9.6a1 1 0 0 1 1-1z"></path>'
                    '<circle cx="12" cy="13.2" r="3.4"></circle>', 24),
@@ -199,6 +220,20 @@ CSS_D = BASE + """
 .inc-h{display:flex;flex-direction:column;align-items:flex-start;gap:18px}
 .inc-c h3{font-size:21px;line-height:1.35}
 .inc-c p{margin-top:12px;font-size:16px;line-height:1.8;color:var(--text)}
+
+/* 선셋 — 상품 소개 글과 사진을 나란히, 하이라이트 여섯 칸은 3열 두 줄. */
+.intro{display:grid;grid-template-columns:1fr 460px;gap:0 64px;align-items:center}
+.intro .sh{max-width:none}
+.intro-ph img{display:block;width:100%;aspect-ratio:4 / 3;object-fit:cover;border-radius:22px}
+.hl-h{margin-top:56px;font-size:26px;line-height:1.3}
+.hl-h + .inc{margin-top:22px}
+.inc.n6{grid-template-columns:repeat(3,1fr)}
+.inc.n6 .inc-c{border-left:1px solid var(--line);border-top:1px solid var(--line)}
+.inc.n6 .inc-c:nth-child(3n+1){border-left:0}
+.inc.n6 .inc-c:nth-child(-n+3){border-top:0}
+.pnotes{margin-top:26px;display:grid;gap:10px}
+.pnotes li{font-size:16px;line-height:1.75;color:var(--ink);font-weight:600}
+.hero.sunset .hero-in h1 .hl{color:#FFC08A}
 
 /* 6가지 특장점 — 폭이 다른 여섯 칸. 줄마다 3+3 / 6 / 4+2 / 6 으로 갈라 같은
    리듬이 반복되지 않게 했다. 칸 꼴은 여섯이 같고, 리듬은 폭과 사진 유무로
@@ -430,6 +465,23 @@ CSS_M = BASE + """
 .inc-c h3{font-size:20.5px;line-height:1.35}
 .inc-c p{margin-top:14px;font-size:16px;line-height:1.8;color:var(--text)}
 
+/* 선셋 — 소개 사진은 글 아래로, 하이라이트는 짧은 글이라 2열로 접는다. */
+.intro-ph{margin-top:22px}
+.intro-ph img{display:block;width:100%;aspect-ratio:3 / 2;object-fit:cover;border-radius:18px}
+.hl-h{margin-top:40px;font-size:22px;line-height:1.3}
+.hl-h + .inc{margin-top:16px}
+.inc.n6{grid-template-columns:1fr 1fr}
+.inc.n6 .inc-c{padding:20px 16px 22px;border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.inc.n6 .inc-c:nth-child(2n+1){border-left:0}
+.inc.n6 .inc-c:nth-child(-n+2){border-top:0}
+.inc.n6 .inc-h{flex-direction:column;align-items:flex-start;gap:12px}
+.inc.n6 .inc-c .ic{width:42px;height:42px;border-radius:12px}
+.inc.n6 .inc-c h3{font-size:17.5px}
+.inc.n6 .inc-c p{margin-top:8px;font-size:15px;line-height:1.65}
+.pnotes{margin-top:20px;display:grid;gap:10px}
+.pnotes li{font-size:15px;line-height:1.75;color:var(--ink);font-weight:600}
+.hero.sunset .hero-in h1 .hl{color:#FFC08A}
+
 /* 375px 에 카드 여섯 장을 그대로 쌓으면 3,310px — 페이지의 31% 가 이 한
    섹션이고 넉 화면을 넘긴다. 제목 여섯 줄을 먼저 보이고 본문은 펼쳐 읽게
    바꿨다. <details> 라 스크립트 없이 열리고 키보드로도 다뤄진다.
@@ -633,8 +685,12 @@ def sh(h2, lede=None, cls=""):
 
 def hero(mobile):
     h = C.HERO
-    return f"""<section class="hero">
-  <img src="hero_turtle.webp" alt="와이키키 앞바다 산호 위의 푸른바다거북" class="hero-img">
+    src, alt = getattr(C, "HERO_IMG", ("hero_turtle.webp", "와이키키 앞바다 산호 위의 푸른바다거북"))
+    if mobile and hasattr(C, "HERO_IMG_M"):
+        src, alt = C.HERO_IMG_M
+    theme = f" {C.THEME}" if hasattr(C, "THEME") else ""
+    return f"""<section class="hero{theme}">
+  <img src="{src}" alt="{alt}" class="hero-img">
   <span class="veil"></span>
   {nav(mobile)}
   <div class="hero-in">
@@ -655,11 +711,19 @@ def hero(mobile):
 
 
 def perks(mobile):
+    """오전: 포함 사항 네 칸. 선셋: 상품 소개(글+사진) + 하이라이트 여섯 칸 + 안내 줄."""
     cells = "".join(
         f'<div class="inc-c"><div class="inc-h"><span class="ic">{PERK_ICONS[k]}</span>'
         f'<h3>{t}</h3></div><p>{b}</p></div>' for k, t, b in C.PERKS)
-    return (f'<section class="sect">{sh(C.PERKS_H2)}'
-            f'<div class="inc rise">{cells}</div></section>')
+    grid = f'<div class="inc{" n6" if len(C.PERKS) == 6 else ""} rise">{cells}</div>'
+    if not hasattr(C, "PERK_PHOTO"):
+        return f'<section class="sect">{sh(C.PERKS_H2)}{grid}</section>'
+    src, alt = C.PERK_PHOTO
+    notes = "".join(f"<li>{x}</li>" for x in getattr(C, "PERK_NOTES", []))
+    return (f'<section class="sect"><div class="intro">{sh(C.PERKS_H2, C.PERKS_LEDE)}'
+            f'<figure class="intro-ph rise"><img src="{src}" alt="{alt}"></figure></div>'
+            f'<h3 class="hl-h rise">{C.PERKS_SUB_H}</h3>{grid}'
+            f'<ul class="pnotes rise">{notes}</ul></section>')
 
 
 def features_m():
@@ -716,8 +780,8 @@ def times(mobile):
     rows = [f'<div class="wrow whead">{head}</div>']
     for name, lines, span, col in C.SLOTS:
         tm = "".join(f"<em>{x}</em>" for x in lines)
-        rest = (f'<span class="rest" style="grid-column:{span+1} / -1">휴무</span>'
-                if span < 7 else "")
+        rest = (f'<span class="rest" style="grid-column:{span+1} / -1">'
+                f'{getattr(C, "REST_LABEL", "휴무")}</span>' if span < 7 else "")
         rows.append(f'<div class="wrow"><div class="slot {col}" '
                     f'style="grid-column:1 / span {span}"><b>{name}</b>{tm}</div>{rest}</div>')
     notes = "".join(f"<li>{x}</li>" for x in C.TIME_NOTES)
@@ -837,8 +901,8 @@ def dock():
 
 def build(mobile):
     w, css = (375, CSS_M) if mobile else (1440, CSS_D)
-    title = ("상세페이지 · 거북이 스노클링 — 모바일" if mobile
-             else "상세페이지 · 거북이 스노클링 — 데스크탑")
+    base = getattr(C, "BOARD_TITLE", "상세페이지 · 거북이 스노클링")
+    title = f"{base} — 모바일" if mobile else f"{base} — 데스크탑"
     body = (hero(mobile) + perks(mobile) + features(mobile) + times(mobile)
             + flow(mobile) + course(mobile) + stars(mobile) + more(mobile) + foot())
     if mobile:
@@ -863,10 +927,14 @@ def build(mobile):
 </body>
 </html>
 """
-    name = "DetailKo_M.dc.html" if mobile else "DetailKo.dc.html"
+    stem = getattr(C, "STEM", "DetailKo")
+    name = f"{stem}_M.dc.html" if mobile else f"{stem}.dc.html"
     io.open(os.path.join(HERE, name), "w", encoding="utf-8").write(html)
     print(f"{name:<22} {len(html):>7} bytes")
 
 
-build(False)
-build(True)
+# 상품마다 문안 모듈을 바꿔 끼워 같은 꼴로 찍는다.
+for _mod in ("_detail_ko", "_detail_sunset_ko"):
+    C = importlib.import_module(_mod)
+    build(False)
+    build(True)
