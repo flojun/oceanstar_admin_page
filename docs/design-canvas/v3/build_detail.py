@@ -49,8 +49,10 @@ CS_MEDIA = {
                         "다이아몬드헤드를 배경으로 패들보드 위에 올라선 손님")]),
     "kayak":  ("img", [("act_kayak.webp",
                         "씨카약을 탄 두 사람 앞으로 지나가는 푸른바다거북")]),
+    "sup_sunset": ("img", [("course_sup_sunset.webp",
+                        "노을 진 바다 위 패들보드에 올라 두 팔을 든 손님")]),
     "wine":   ("img", [("course_wine.webp",
-                        "체크 식탁보 위의 와인 두 병과 치즈·과자, 와인이 담긴 잔")]),
+                        "체크 식탁보 위에 차린 살라미·치즈 보드와 과일, 케이크, 와인")]),
     # public/images/timeline/scooter.png. 저장소에 있던 파일인데 산호초 배경이라
     # 와이키키 실촬영본이 아니다. 실사진을 받으면 바꿔야 한다.
     "scooter": ("img", [("course_scooter.webp",
@@ -904,7 +906,8 @@ def build(mobile):
     base = getattr(C, "BOARD_TITLE", "상세페이지 · 거북이 스노클링")
     title = f"{base} — 모바일" if mobile else f"{base} — 데스크탑"
     body = (hero(mobile) + perks(mobile) + features(mobile) + times(mobile)
-            + flow(mobile) + course(mobile) + stars(mobile) + more(mobile) + foot())
+            + flow(mobile) + course(mobile)
+            + (stars(mobile) if getattr(C, "SHOW_STARS", True) else "") + more(mobile) + foot())
     if mobile:
         body += dock()
     html = f"""<!doctype html>
