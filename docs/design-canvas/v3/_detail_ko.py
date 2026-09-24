@@ -14,6 +14,7 @@
 git 이력(78ec661)에 남아 있다.
 """
 
+THEME = "turtle"
 HERO = dict(
     eyebrow="하와이 거북이 스노클링의 원조, 오션스타",
     h1='거북이 100% 보장<br><span class="hl">스노클링</span>',
