@@ -67,6 +67,7 @@ I_STAR  = icon('<path d="M12 3.6l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5
 I_PIN   = icon('<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"></path>'
                '<circle cx="12" cy="10" r="2.6"></circle>', 20)
 I_CHEV  = icon('<path d="M6 9.5l6 6 6-6"></path>', 20, 2)
+I_SWIPE = icon('<path d="M4 12h15M14 7l5 5-5 5"></path>', 16, 2)
 I_IG    = icon('<rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5"></rect>'
                '<circle cx="12" cy="12" r="4.1"></circle>'
                '<circle cx="17" cy="7" r="1.1" fill="currentColor" stroke="none"></circle>', 26)
@@ -497,33 +498,43 @@ CSS_M = BASE + """
 .hnote{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);
   font-size:15px;line-height:1.75;font-weight:700;color:var(--ink)}
 
-/* 코스 소개 — 폰에서는 사진이 제목 옆 88px 정사각 섬네일이다(운영 중인 OTA
-   코스 소개와 같은 자리). 전폭으로 두면 186px 사진이 여덟 번 반복되고,
-   사진이 없는 단계의 아이콘 타일이 186px 빈 회색 상자가 되어 '사진 누락'
-   으로 읽혔다. 88px 에서는 아이콘 타일도 뱃지로 읽힌다.
-   본문은 섬네일 아래로 내려 폭을 다 쓴다. */
-.cs{margin-top:26px;border-top:1px solid var(--line)}
-.cs-s{display:grid;grid-template-columns:1fr 88px;gap:0 14px;align-items:start;
-  padding:24px 0 26px;border-bottom:1px solid var(--line)}
-.cs-h{grid-column:1;grid-row:1}
+/* 코스 소개 — 폰에서는 가로로 넘기는 카드다. 여덟 단계를 세로로 쌓으면
+   이 섹션 하나가 3,276px 였다. 한 장은 292px 라 다음 카드가 45px 보여 옆으로
+   넘길 수 있다는 것이 드러나고, 넘기면 카드 머리에 맞춰 멈춘다.
+   카드가 넓어져 사진은 다시 위로 올리고(16:9), 04 의 두 장도 둘 다 보인다.
+   아래 얇은 막대가 스크롤 위치를 보여 준다(iOS 는 넘길 때만 보인다). */
+.cs-hint{display:flex;align-items:center;gap:6px;margin-top:10px;
+  font-size:14px;font-weight:700;color:var(--muted)}
+.cs-hint svg{width:16px;height:16px}
+/* 카드 높이는 내용만큼이다. 가장 긴 카드(03)에 맞춰 늘리면 짧은 카드 아래가
+   200px 가까이 비어 덜 만든 것처럼 보인다. */
+.cs{margin:22px calc(var(--pad) * -1) 0;padding:2px var(--pad) 16px;display:flex;gap:12px;
+  align-items:flex-start;overflow-x:auto;overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;scroll-padding:0 var(--pad);
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--deep) var(--line)}
+.cs::-webkit-scrollbar{height:4px}
+.cs::-webkit-scrollbar-track{margin:0 var(--pad);border-radius:4px;background:var(--line)}
+.cs::-webkit-scrollbar-thumb{border-radius:4px;background:var(--deep)}
+/* 마지막 카드 뒤에도 좌우 여백과 같은 22px 를 남긴다(12 + 10). */
+.cs::after{content:"";flex:0 0 10px}
+.cs-s{flex:0 0 292px;scroll-snap-align:start;display:flex;flex-direction:column;
+  background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+/* 높이를 못 박는다. aspect-ratio 만 두면 세로 흐름 안에서 사진 원본 비(1.49)가
+   최소 높이로 잡혀 02·05 사진이 32px 더 커졌다. 292 x 9/16 = 164. */
+.cs-m{order:-1;flex:none;width:100%;height:164px;overflow:hidden;background:var(--soft)}
+.cs-m img{display:block;width:100%;height:100%;object-fit:cover}
+.cs-m.two{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--line)}
+.cs-h{padding:18px 20px 0}
 .cs-n{display:inline-flex;align-items:center;justify-content:center;
   width:32px;height:32px;border-radius:999px;background:var(--soft);
   font-family:'SUIT',system-ui,sans-serif;font-size:13px;font-weight:800;color:var(--deep)}
-.cs-ht h3{margin-top:10px;font-size:18.5px;line-height:1.42}
+.cs-ht h3{margin-top:10px;font-size:18px;line-height:1.42}
 .cs-t{display:inline-flex;align-items:center;margin-top:8px;height:28px;padding:0 11px;
   border-radius:999px;background:var(--soft);font-size:13.5px;font-weight:700;color:var(--deep)}
-.cs-m{grid-column:2;grid-row:1;width:88px;height:88px;border-radius:14px;overflow:hidden;
-  background:var(--soft)}
-.cs-m img{width:100%;height:100%;object-fit:cover}
-/* 88px 에 두 장을 가르면 한 장이 43px 띠가 된다. 첫 장(패들보드)만 보인다. */
-.cs-m.two img + img{display:none}
-.cs-m.ic{display:flex;align-items:center;justify-content:center;color:var(--deep);
-  border:1px solid var(--line)}
-.cs-m.ic svg{width:34px;height:34px}
-.cs-b{grid-column:1 / -1;grid-row:2}
-.cs-b p{margin-top:14px;font-size:16px;line-height:1.85;color:var(--text)}
-.cs-note{margin-top:14px;padding-left:13px;border-left:3px solid var(--sky);
-  font-size:15px;line-height:1.8;color:var(--muted)}
+.cs-b{padding:0 20px 22px}
+.cs-b p{margin-top:12px;font-size:15.5px;line-height:1.8;color:var(--text)}
+.cs-note{margin-top:12px;padding-left:12px;border-left:3px solid var(--sky);
+  font-size:14.5px;line-height:1.75;color:var(--muted)}
 
 /* 인증샷 — 세 칸이면 이름표가 10.5px 여야 들어간다. 두 칸으로 줄이면 14px 가
    들어가고 얼굴도 알아볼 만해진다(사진 원본이 315px 라 두 칸이 제 크기다).
@@ -764,7 +775,8 @@ def course(mobile):
             f'<div class="cs-ht"><h3>{title}</h3>{t}</div></div>'
             f'{cs_media(media)}'
             f'<div class="cs-b"><p>{body}</p>{n}</div></article>')
-    return (f'<section class="sect">{sh(C.COURSE_H2)}'
+    hint = (f'<p class="cs-hint">{C.COURSE_HINT} {I_SWIPE}</p>' if mobile else "")
+    return (f'<section class="sect">{sh(C.COURSE_H2)}{hint}'
             f'<div class="cs">{"".join(rows)}</div></section>')
 
 
