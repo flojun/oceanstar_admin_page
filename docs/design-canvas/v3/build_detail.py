@@ -335,6 +335,14 @@ CSS_D = BASE + """
 .cb .book-pill{margin-top:28px}
 .combo.n3{grid-template-columns:repeat(3,1fr);gap:18px}
 .combo.n3 .cb{padding:32px 32px 30px}
+/* 상품이 하나뿐이면 반쪽 카드가 비어 보인다. 한 장을 가로로 눕혀 왼쪽은 이름·가격,
+   오른쪽은 구성·예약으로. */
+.combo.n1{grid-template-columns:1fr}
+.combo.n1 .cb{display:grid;grid-template-columns:1fr 1fr;
+  column-gap:64px;align-items:start;padding:40px 48px}
+.combo.n1 .cb > *{grid-column:1;justify-self:start}
+.combo.n1 .cb ul{grid-column:2;grid-row:1 / span 4;align-self:center;justify-self:stretch;margin-top:0}
+.combo.n1 .cb .book-pill{grid-column:1;margin-top:26px}
 
 /* 프라이빗 — 예약 가능 시간. 차트 없이 글자 위계만: 요일은 굵게, 시간은 같은 크기의
    숫자로 나란히, 요일 사이에만 가는 선 하나. 선셋만 주황 글자. */
@@ -1184,11 +1192,12 @@ def combo(mobile):
         f'<a href="#" class="book-pill">{tag} 예약하기 {I_ARROW}</a></article>'
         for tag, t, lines in C.COMBOS)
     n3 = len(C.COMBOS) == 3
+    n1 = len(C.COMBOS) == 1
     # 폰에서 세 장은 세로로 쌓으면 1,200px 가까이 되어 가로로 넘기게 한다(운영자 요청).
     hint = (f'<p class="cs-hint">옆으로 넘겨 보세요 {I_SWIPE}</p>'
             if mobile and n3 else "")
     return (f'<section class="sect">{sh(C.COMBO_H2, C.COMBO_LEDE)}{hint}'
-            f'<div class="combo{" n3" if n3 else ""}">{cards}</div></section>')
+            f'<div class="combo{" n3" if n3 else ""}{" n1" if n1 else ""}">{cards}</div></section>')
 
 
 def _slot(t):
