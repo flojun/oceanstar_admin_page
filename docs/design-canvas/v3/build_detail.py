@@ -278,6 +278,9 @@ CSS_D = BASE + """
   background:#fff;border:1px solid var(--line);border-radius:22px}
 .cb h3{margin-top:18px;font-size:30px;line-height:1.3}
 .cb-p{margin-top:14px;font-size:18px;font-weight:800;color:var(--food-d)}
+.cb-p.has b{display:block;font-family:'SUIT',system-ui,sans-serif;font-size:32px;
+  font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+.cb-p.has span{display:block;margin-top:4px;font-size:14.5px;font-weight:600;color:var(--muted)}
 .cb ul{align-self:stretch;margin-top:22px;border-top:1px solid var(--line)}
 .cb li{padding:13px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--text)}
 .cb .book-pill{margin-top:28px}
@@ -569,6 +572,9 @@ CSS_M = BASE + """
   background:#fff;border:1px solid var(--line);border-radius:20px}
 .cb h3{margin-top:12px;font-size:24px;line-height:1.3}
 .cb-p{margin-top:10px;font-size:17px;font-weight:800;color:var(--food-d)}
+.cb-p.has b{display:block;font-family:'SUIT',system-ui,sans-serif;font-size:28px;
+  font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+.cb-p.has span{display:block;margin-top:4px;font-size:14px;font-weight:600;color:var(--muted)}
 .cb ul{align-self:stretch;margin-top:16px;border-top:1px solid var(--line)}
 .cb li{padding:12px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--text)}
 .cb .book-pill{margin-top:20px;align-self:stretch;justify-content:space-between;height:54px}
@@ -974,11 +980,19 @@ def acts(mobile):
             f'<div class="acts">{"".join(out)}</div>{note}</section>')
 
 
+def cb_price(tag):
+    """패키지 가격. 값이 있으면 원화 큰 글씨 + 보조 줄, 없으면 '콤보 특별 할인가'."""
+    v = getattr(C, "COMBO_PRICES", {}).get(tag)
+    if not v:
+        return f'<p class="cb-p">{C.COMBO_PRICE}</p>'
+    return f'<p class="cb-p has"><b class="n">{v[0]}</b><span>{v[1]}</span></p>'
+
+
 def combo(mobile):
     """콤보: 패키지 A · B 고르기."""
     cards = "".join(
         f'<article class="cb rise"><span class="act-tag">{tag}</span><h3>{t}</h3>'
-        f'<p class="cb-p">{C.COMBO_PRICE}</p>'
+        f'{cb_price(tag)}'
         f'<ul>{"".join(f"<li>{x}</li>" for x in lines)}</ul>'
         f'<a href="#" class="book-pill">{tag} 예약하기 {I_ARROW}</a></article>'
         for tag, t, lines in C.COMBOS)
