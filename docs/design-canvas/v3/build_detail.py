@@ -327,14 +327,27 @@ CSS_D = BASE + """
 .combo.n3{grid-template-columns:repeat(3,1fr);gap:18px}
 .combo.n3 .cb{padding:32px 32px 30px}
 
-/* 프라이빗 — 요일 카드. 요일이 이어지지 않아 주간 표보다 이쪽이 바로 읽힌다. */
-.days{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.day{padding:30px 32px 32px;background:#fff;border:1px solid var(--line);border-radius:22px}
-.day h3{font-size:22px}
-.day ul{margin-top:18px;border-top:1px solid var(--line)}
-.day li{padding:13px 0;border-bottom:1px solid var(--line);font-size:18px;font-weight:700;
-  color:var(--deep)}
-.days + .tnote{margin-top:18px}
+/* 프라이빗 — 운영표. 10시~20시 축 위 막대. 한 장의 판 안에 요일이 줄로 선다. */
+.gantt{margin-top:40px;padding:22px 36px 30px;background:#fff;border:1px solid var(--line);
+  border-radius:22px}
+.gr{display:grid;grid-template-columns:110px 1fr;align-items:start;gap:0 24px;padding:18px 0;
+  border-top:1px solid var(--line)}
+.gr.gh{padding:0 0 12px;border-top:0}
+.gr h3{font-size:20px;line-height:44px}
+.gx{position:relative;height:20px}
+.gx span{position:absolute;top:0;transform:translateX(-50%);font-size:13.5px;font-weight:700;
+  color:var(--muted)}
+.gx span:first-child{transform:none}
+.gx span:last-child{transform:translateX(-100%)}
+.gt{position:relative;min-height:44px}
+.gt > i{position:absolute;top:-18px;bottom:-18px;width:1px;background:var(--line);opacity:.7}
+.bar{position:absolute;height:44px;display:flex;align-items:center;justify-content:center;gap:8px;
+  border-radius:12px;background:var(--sea-d);color:#fff;white-space:nowrap}
+.bar b{font-size:16px;font-weight:700}
+.bar i{font-style:normal;font-size:13px;font-weight:800;padding:2px 8px;border-radius:999px;
+  background:rgba(255,255,255,.2)}
+.bar.sun{background:var(--food-d)}
+.gantt + .tnote{margin-top:18px}
 /* 프라이빗 — 추천 대상. 알약 여섯 개, 3열. */
 .reco{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .reco li{display:flex;align-items:center;justify-content:center;min-height:64px;padding:0 20px;
@@ -667,13 +680,18 @@ CSS_M = BASE + """
 .combo.n3 .cb{scroll-snap-align:start}
 .sh + .cs-hint + .combo.n3{margin-top:14px}
 
-.days{margin-top:24px;display:grid;gap:12px}
-.day{padding:20px 20px 18px;background:#fff;border:1px solid var(--line);border-radius:20px}
-.day h3{font-size:19px}
-.day ul{margin-top:12px;border-top:1px solid var(--line)}
-.day li{padding:11px 0;border-bottom:1px solid var(--line);font-size:16.5px;font-weight:700;
-  color:var(--deep)}
-.days + .tnote{margin-top:14px}
+/* 프라이빗 운영표 — 폰은 요일 한 줄 + 시간 알약. */
+.dlist{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:4px 18px}
+.dl{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:start;padding:16px 0}
+.dl + .dl{border-top:1px solid var(--line)}
+.dl h3{font-size:17px;line-height:36px}
+.dl ul{display:flex;flex-wrap:wrap;gap:8px}
+.dl li{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 13px;border-radius:999px;
+  background:var(--sea-d);color:#fff}
+.dl li b{font-size:15px;font-weight:700}
+.dl li i{font-style:normal;font-size:12.5px;font-weight:800}
+.dl li.sun{background:var(--food-d)}
+.dlist + .tnote{margin-top:14px}
 .reco{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .reco li{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 12px;
   border-radius:999px;background:#fff;border:1px solid var(--line);font-size:15.5px;font-weight:700;
@@ -1110,15 +1128,53 @@ def combo(mobile):
             f'<div class="combo{" n3" if n3 else ""}">{cards}</div></section>')
 
 
+def _slot(t):
+    """'15:30 - 19:30 선셋' -> (15.5, 19.5, '15:30 - 19:30', '선셋')"""
+    m = re.match(r"(\d+):(\d+)\s*-\s*(\d+):(\d+)\s*(.*)", t)
+    a, b, c, d, tag = m.groups()
+    return (int(a) + int(b) / 60, int(c) + int(d) / 60, f"{a}:{b} - {c}:{d}", tag.strip())
+
+
 def days(mobile):
-    """프라이빗: 요일이 띄엄띄엄이라 주간 표 대신 요일 카드."""
-    cards = "".join(
-        f'<div class="day rise"><h3>{d}</h3>'
-        f'<ul>{"".join(f"<li class=n>{t}</li>" for t in ts)}</ul></div>'
-        for d, ts in C.DAY_SLOTS)
-    return (f'<section class="sect">{sh(C.TIME_H2, C.TIME_SUB)}'
-            f'<div class="days">{cards}</div>'
-            f'<p class="tnote rise">{I_CLOCK}<span>{C.TIME_PURE}</span></p></section>')
+    """프라이빗 예약 가능 시간. 요일마다 회차 수가 1~3 으로 달라 같은 칸 세 장은
+    월요일이 텅 비어 보였다. 데스크탑은 10시~20시 시간 축 위에 막대로 그려 '언제'가
+    보이게 하고, 겹치는 회차는 줄을 나눈다. 폰은 막대 안에 시간이 안 들어가
+    요일 한 줄 + 시간 알약으로 접는다."""
+    note = f'<p class="tnote rise">{I_CLOCK}<span>{C.TIME_PURE}</span></p>'
+    head = sh(C.TIME_H2, C.TIME_SUB)
+    if mobile:
+        rows = []
+        for d, ts in C.DAY_SLOTS:
+            chips = "".join(
+                f'<li class="{"sun" if tag else ""}"><b class="n">{rng}</b>'
+                f'{f"<i>{tag}</i>" if tag else ""}</li>'
+                for _, _, rng, tag in map(_slot, ts))
+            rows.append(f'<div class="dl"><h3>{d}</h3><ul>{chips}</ul></div>')
+        return (f'<section class="sect">{head}<div class="dlist rise">{"".join(rows)}</div>'
+                f'{note}</section>')
+    t0, t1 = 10, 20
+    ticks = "".join(f'<span style="left:{(h - t0) / (t1 - t0) * 100:.3f}%">{h}:00</span>'
+                    for h in range(t0, t1 + 1, 2))
+    grid = "".join(f'<i style="left:{(h - t0) / (t1 - t0) * 100:.3f}%"></i>'
+                   for h in range(t0, t1 + 1))
+    rows = []
+    for d, ts in C.DAY_SLOTS:
+        lanes, bars = [], []
+        for a, b, rng, tag in map(_slot, ts):
+            k = next((n for n, end in enumerate(lanes) if end <= a), len(lanes))
+            if k == len(lanes):
+                lanes.append(b)
+            else:
+                lanes[k] = b
+            bars.append(
+                f'<span class="bar{" sun" if tag else ""}" style="left:{(a - t0) / (t1 - t0) * 100:.3f}%;'
+                f'width:{(b - a) / (t1 - t0) * 100:.3f}%;top:{k * 52}px">'
+                f'<b class="n">{rng}</b>{f"<i>{tag}</i>" if tag else ""}</span>')
+        rows.append(f'<div class="gr"><h3>{d}</h3>'
+                    f'<div class="gt" style="height:{len(lanes) * 52 - 8}px">{grid}{"".join(bars)}</div></div>')
+    return (f'<section class="sect">{head}<div class="gantt rise">'
+            f'<div class="gr gh"><span></span><div class="gx">{ticks}</div></div>'
+            f'{"".join(rows)}</div>{note}</section>')
 
 
 def reco(mobile):

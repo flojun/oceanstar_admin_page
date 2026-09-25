@@ -205,14 +205,27 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);letter-spac
 .combo.n3{grid-template-columns:repeat(3,1fr);gap:18px}
 .combo.n3 .cb{padding:32px 32px 30px}
 
-/* 프라이빗 — 요일 카드. 요일이 이어지지 않아 주간 표보다 이쪽이 바로 읽힌다. */
-.days{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.day{padding:30px 32px 32px;background:#fff;border:1px solid var(--line);border-radius:22px}
-.day h3{font-size:22px}
-.day ul{margin-top:18px;border-top:1px solid var(--line)}
-.day li{padding:13px 0;border-bottom:1px solid var(--line);font-size:18px;font-weight:700;
-  color:var(--deep)}
-.days + .tnote{margin-top:18px}
+/* 프라이빗 — 운영표. 10시~20시 축 위 막대. 한 장의 판 안에 요일이 줄로 선다. */
+.gantt{margin-top:40px;padding:22px 36px 30px;background:#fff;border:1px solid var(--line);
+  border-radius:22px}
+.gr{display:grid;grid-template-columns:110px 1fr;align-items:start;gap:0 24px;padding:18px 0;
+  border-top:1px solid var(--line)}
+.gr.gh{padding:0 0 12px;border-top:0}
+.gr h3{font-size:20px;line-height:44px}
+.gx{position:relative;height:20px}
+.gx span{position:absolute;top:0;transform:translateX(-50%);font-size:13.5px;font-weight:700;
+  color:var(--muted)}
+.gx span:first-child{transform:none}
+.gx span:last-child{transform:translateX(-100%)}
+.gt{position:relative;min-height:44px}
+.gt > i{position:absolute;top:-18px;bottom:-18px;width:1px;background:var(--line);opacity:.7}
+.bar{position:absolute;height:44px;display:flex;align-items:center;justify-content:center;gap:8px;
+  border-radius:12px;background:var(--sea-d);color:#fff;white-space:nowrap}
+.bar b{font-size:16px;font-weight:700}
+.bar i{font-style:normal;font-size:13px;font-weight:800;padding:2px 8px;border-radius:999px;
+  background:rgba(255,255,255,.2)}
+.bar.sun{background:var(--food-d)}
+.gantt + .tnote{margin-top:18px}
 /* 프라이빗 — 추천 대상. 알약 여섯 개, 3열. */
 .reco{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .reco li{display:flex;align-items:center;justify-content:center;min-height:64px;padding:0 20px;
