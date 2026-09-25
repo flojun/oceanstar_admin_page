@@ -1077,7 +1077,66 @@ def build(mobile):
 
 
 # 상품마다 문안 모듈을 바꿔 끼워 같은 꼴로 찍는다.
+BUILT = []
 for _mod in ("_detail_ko", "_detail_sunset_ko", "_detail_combo_ko"):
     C = importlib.import_module(_mod)
-    build(False)
-    build(True)
+    for _m in (False, True):
+        build(_m)
+        BUILT.append(f"{getattr(C, 'STEM', 'DetailKo')}{'_M' if _m else ''}.dc.html")
+
+
+# 폰트. 처음엔 랜딩(SianB)의 서브셋을 빌려 썼는데, 그 서브셋엔 랜딩에 쓰인 글자만
+# 있어 상세에만 나오는 글자('더', '편', '특' 등 213자)가 시스템 글꼴로 대신 그려져
+# 그 글자만 크고 모양이 달랐다. 상세 여섯 장에 실제로 쓰인 글자로 다시 잘라 심는다.
+FONTDIR = os.path.join(HERE, "..", "fonts")
+FACES = [("Pretendard-Regular.woff2", "Pretendard", 400),
+         ("Pretendard-SemiBold.woff2", "Pretendard", 600),
+         ("Pretendard-Bold.woff2", "Pretendard", 700),
+         ("SUIT-Bold.woff2", "SUIT", 700),
+         ("SUIT-ExtraBold.woff2", "SUIT", 800)]
+BASE_CHARS = ("0123456789.,:;·~-+/()[]%₩$&'\"!?@#*<>=_‘’“”—– "
+              "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+
+
+def visible_text(html):
+    html = re.sub(r"<style[^>]*>.*?</style>", " ", html, flags=re.S)
+    html = re.sub(r"<script[^>]*>.*?</script>", " ", html, flags=re.S)
+    keep = " ".join(re.findall(r'(?:alt|aria-label)="([^"]*)"', html))
+    html = re.sub(r"<[^>]+>", " ", html)
+    html = re.sub(r"&nbsp;", " ", html)
+    return html + " " + keep
+
+
+def embed_fonts(files):
+    import base64, subprocess, sys, tempfile
+    try:
+        import fontTools  # noqa: F401
+    except ImportError:
+        print("fontTools 없음 — 랜딩 폰트 서브셋을 그대로 둔다 (pip install fonttools brotli)")
+        return
+    chars = set(BASE_CHARS)
+    for f in files:
+        chars |= set(visible_text(io.open(os.path.join(HERE, f), encoding="utf-8").read()))
+    text = "".join(sorted(c for c in chars if c.isprintable() and not c.isspace()
+                          and ord(c) < 0x1F000))
+    css, tmp = [], tempfile.mkdtemp()
+    for fname, family, weight in FACES:
+        out = os.path.join(tmp, fname)
+        subprocess.run([sys.executable, "-m", "fontTools.subset",
+                        os.path.join(FONTDIR, fname), "--text=" + text, "--flavor=woff2",
+                        "--layout-features=*", "--no-hinting", "--desubroutinize",
+                        "--output-file=" + out], check=True, capture_output=True)
+        b64 = base64.b64encode(open(out, "rb").read()).decode()
+        css.append("@font-face{font-family:'%s';font-style:normal;font-weight:%d;"
+                   "font-display:block;src:url(data:font/woff2;base64,%s) format('woff2')}"
+                   % (family, weight, b64))
+    block = "/*__FONTS__*/" + "".join(css) + "/*__FONTS_END__*/"
+    for f in files:
+        p = os.path.join(HERE, f)
+        s = io.open(p, encoding="utf-8").read()
+        s = re.sub(r"/\*__FONTS__\*/.*?/\*__FONTS_END__\*/", lambda m: block, s, flags=re.S)
+        io.open(p, "w", encoding="utf-8").write(s)
+    print(f"폰트: 글자 {len(text)}자, 블록 {len(block) // 1024} KB")
+
+
+embed_fonts(BUILT)
