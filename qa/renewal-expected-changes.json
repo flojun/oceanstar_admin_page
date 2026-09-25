@@ -1,0 +1,16 @@
+{
+  "_설명": "리뉴얼로 '의도적으로' 바뀌는 것들. scripts/qa/audit-ui.mjs --compare 가 기준선과 비교할 때 여기 적힌 항목은 차단하지 않는다. 사유 없는 항목은 추가하지 말 것. 근거: docs/renewal-prd.md",
+
+  "requiredRedirects": [
+    { "source": "/restaurants", "destination": "/blog/hawaii-restaurants", "reason": "PRD §8.1 — 현장 QR 코드가 이 주소를 가리킴 (협상 불가)" },
+    { "source": "/kr/restaurants", "destination": "/kr/blog/hawaii-restaurants", "reason": "PRD §8.1" }
+  ],
+
+  "accept": [
+    { "code": "feature-unwired", "surface": "customer", "subjectPrefix": "anchor #", "reason": "PRD §3.1 — 헤더 메뉴가 #앵커 스크롤에서 페이지 링크(<Link>)로 바뀜. 대신 /kr/reviews, /kr/faq 등 새 링크가 생겨야 함 (feature-added 로 확인)" },
+    { "code": "feature-unwired", "surface": "customer", "subject": "nav /restaurants", "reason": "PRD §3.2 — 맛집은 블로그 1호 글로 이전 (nav /blog/hawaii-restaurants 로 대체)" },
+    { "code": "feature-unwired", "surface": "customer", "subject": "nav /kr/restaurants", "reason": "PRD §3.2 — 동일 (KO)" },
+    { "code": "label-missing", "surface": "customer", "subject": "Tours / 투어", "reason": "PRD §3.3 — '투어' 메뉴는 헤더에서 제거, 홈 섹션으로 유지" },
+    { "code": "label-missing", "surface": "customer", "subject": "About Us / 회사소개", "reason": "PRD §3.3 — '회사소개'는 전역 푸터로 승격" }
+  ]
+}

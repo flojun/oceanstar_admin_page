@@ -1,0 +1,1895 @@
+{
+  "route": "/kr",
+  "project": "public-desktop",
+  "at": "2026-09-25T03:04:36.875Z",
+  "probes": [
+    {
+      "path": [
+        "OceanStar Logo"
+      ],
+      "tag": "div",
+      "label": "OceanStar Logo",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 4"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "Home"
+      ],
+      "tag": "button",
+      "label": "Home",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 3"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어"
+      ],
+      "tag": "button",
+      "label": "투어",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 3"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "고객후기"
+      ],
+      "tag": "button",
+      "label": "고객후기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 3"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "FAQ"
+      ],
+      "tag": "button",
+      "label": "FAQ",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 3"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "회사소개"
+      ],
+      "tag": "button",
+      "label": "회사소개",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "request",
+      "detail": [
+        "조회 GET https://www.oceanstarhi.com/kr/restaurants",
+        "스크롤",
+        "화면 변화 15"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "EN"
+      ],
+      "tag": "button",
+      "label": "EN",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "navigate",
+      "detail": [
+        "→ https://www.oceanstarhi.com/",
+        "조회 GET https://www.oceanstarhi.com/",
+        "조회 GET https://www.oceanstarhi.com/api/google-reviews",
+        "조회 GET https://www.oceanstarhi.com/api/pickup",
+        "조회 GET https://www.oceanstarhi.com/api/settings",
+        "조회 GET https://fubwwgywtejxybzrnhjg.supabase.co/storage/v1/object/public/website-assets/versions.json",
+        "스크롤"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "내 예약 관리"
+      ],
+      "tag": "a",
+      "label": "내 예약 관리",
+      "href": "/kr/manage-booking",
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "navigate",
+      "detail": [
+        "→ https://www.oceanstarhi.com/kr/manage-booking",
+        "조회 GET https://www.oceanstarhi.com/api/pickup",
+        "조회 GET https://www.oceanstarhi.com/api/settings",
+        "스크롤"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 예약하기"
+      ],
+      "tag": "button",
+      "label": "투어 예약하기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 5"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "바로 예약하기"
+      ],
+      "tag": "button",
+      "label": "바로 예약하기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 8"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "slide-0"
+      ],
+      "tag": "div",
+      "label": "slide-0",
+      "href": null,
+      "handlers": [
+        "onTouchEnd"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 9"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "자세히 보기"
+      ],
+      "tag": "button",
+      "label": "자세히 보기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 15"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "예약하기"
+      ],
+      "tag": "button",
+      "label": "예약하기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 9"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "slide-0"
+      ],
+      "tag": "div",
+      "label": "slide-0",
+      "href": null,
+      "handlers": [
+        "onTouchEnd"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 13"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "자세히 보기"
+      ],
+      "tag": "button",
+      "label": "자세히 보기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 16"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "예약하기"
+      ],
+      "tag": "button",
+      "label": "예약하기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "request",
+      "detail": [
+        "조회 GET https://www.oceanstarhi.com/api/availability",
+        "스크롤",
+        "화면 변화 32"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "slide-0"
+      ],
+      "tag": "div",
+      "label": "slide-0",
+      "href": null,
+      "handlers": [
+        "onTouchEnd"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 9"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "자세히 보기"
+      ],
+      "tag": "button",
+      "label": "자세히 보기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 8"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "예약하기"
+      ],
+      "tag": "button",
+      "label": "예약하기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "request",
+      "detail": [
+        "조회 GET https://www.oceanstarhi.com/api/availability",
+        "화면 변화 11"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "slide-0"
+      ],
+      "tag": "div",
+      "label": "slide-0",
+      "href": null,
+      "handlers": [
+        "onTouchEnd"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 4"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "자세히 보기"
+      ],
+      "tag": "button",
+      "label": "자세히 보기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 12"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "예약하기"
+      ],
+      "tag": "button",
+      "label": "예약하기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "request",
+      "detail": [
+        "조회 GET https://www.oceanstarhi.com/api/availability",
+        "화면 변화 15"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "리뷰 작성하기"
+      ],
+      "tag": "button",
+      "label": "리뷰 작성하기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 9"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "이전 리뷰"
+      ],
+      "tag": "button",
+      "label": "이전 리뷰",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 3"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "다음 리뷰"
+      ],
+      "tag": "button",
+      "label": "다음 리뷰",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 3"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img"
+      ],
+      "tag": "img",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img"
+      ],
+      "tag": "img",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "더보기"
+      ],
+      "tag": "button",
+      "label": "더보기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 5"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img"
+      ],
+      "tag": "img",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "더보기"
+      ],
+      "tag": "button",
+      "label": "더보기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 5"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "더보기"
+      ],
+      "tag": "button",
+      "label": "더보기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 5"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img"
+      ],
+      "tag": "img",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "더보기"
+      ],
+      "tag": "button",
+      "label": "더보기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 13"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img"
+      ],
+      "tag": "img",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 5"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "더보기"
+      ],
+      "tag": "button",
+      "label": "더보기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 5"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img"
+      ],
+      "tag": "img",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img"
+      ],
+      "tag": "img",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "더보기"
+      ],
+      "tag": "button",
+      "label": "더보기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 5"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img"
+      ],
+      "tag": "img",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "더보기"
+      ],
+      "tag": "button",
+      "label": "더보기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 5"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img"
+      ],
+      "tag": "img",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "더보기"
+      ],
+      "tag": "button",
+      "label": "더보기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 5"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img"
+      ],
+      "tag": "img",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img"
+      ],
+      "tag": "img",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "더보기"
+      ],
+      "tag": "button",
+      "label": "더보기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 5"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "구글에서 전체 리뷰 보기"
+      ],
+      "tag": "a",
+      "label": "구글에서 전체 리뷰 보기",
+      "href": "https://www.google.com/maps/search/?api=1&query=Ocean+Star+Hawaii",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.google.com/maps/search/?api=1&query=Ocean+Star+Hawaii",
+        "화면 변화 3"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "button"
+      ],
+      "tag": "button",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 12"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "button"
+      ],
+      "tag": "button",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 4"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다"
+      ],
+      "tag": "div",
+      "label": "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 10"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "참여 자격 & 안전5"
+      ],
+      "tag": "button",
+      "label": "참여 자격 & 안전5",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 5"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "예약 & 운영5"
+      ],
+      "tag": "button",
+      "label": "예약 & 운영5",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 19"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 내용 & 거북이4"
+      ],
+      "tag": "button",
+      "label": "투어 내용 & 거북이4",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 19"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "준비물 & 현장3"
+      ],
+      "tag": "button",
+      "label": "준비물 & 현장3",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 18"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "프라이빗 & 특수 상황3"
+      ],
+      "tag": "button",
+      "label": "프라이빗 & 특수 상황3",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 18"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "취소 및 환불3"
+      ],
+      "tag": "button",
+      "label": "취소 및 환불3",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "request",
+      "detail": [
+        "조회 GET https://www.oceanstarhi.com/kr/restaurants",
+        "화면 변화 19"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "기타7"
+      ],
+      "tag": "button",
+      "label": "기타7",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 23"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "Q. 수영을 전혀 못해도 참여할 수 있나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 수영을 전혀 못해도 참여할 수 있나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 9"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "Q. 아이들도 탈 수 있나요? 몇 살부터 가능한가요?"
+      ],
+      "tag": "button",
+      "label": "Q. 아이들도 탈 수 있나요? 몇 살부터 가능한가요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 9"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "Q. 임산부도 참여할 수 있나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 임산부도 참여할 수 있나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 9"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "Q. 배멀미가 심한 편인데 괜찮을까요?"
+      ],
+      "tag": "button",
+      "label": "Q. 배멀미가 심한 편인데 괜찮을까요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 10"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "Q. 노약자나 고령자도 참여 가능한가요?"
+      ],
+      "tag": "button",
+      "label": "Q. 노약자나 고령자도 참여 가능한가요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "request",
+      "detail": [
+        "조회 GET https://www.oceanstarhi.com/kr/restaurants",
+        "화면 변화 10"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "Instagram"
+      ],
+      "tag": "a",
+      "label": "Instagram",
+      "href": "https://www.instagram.com/oceanstar_turtlesnorkelling?igsh=dG8zMDZxczF2Z2t1",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.instagram.com/accounts/login/?next=https%3A%2F%2Fwww.instagram.com%2Foceanstar_turtlesnorkelling%3Figsh%3DdG8zMDZxczF2Z2t1&is_from_rle",
+        "조회 GET https://www.oceanstarhi.com/kr/restaurants",
+        "스크롤",
+        "화면 변화 4"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "YouTube"
+      ],
+      "tag": "a",
+      "label": "YouTube",
+      "href": "https://www.youtube.com/@oceanstarhi",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.youtube.com/@oceanstarhi",
+        "조회 GET https://www.oceanstarhi.com/kr/restaurants",
+        "화면 변화 4"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "맛집 리스트 보기"
+      ],
+      "tag": "a",
+      "label": "맛집 리스트 보기",
+      "href": "/kr/restaurants",
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "navigate",
+      "detail": [
+        "→ https://www.oceanstarhi.com/kr/restaurants",
+        "조회 GET https://www.oceanstarhi.com/kr/restaurants",
+        "조회 GET https://www.oceanstarhi.com/",
+        "스크롤"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "구글 지도로 바로보기"
+      ],
+      "tag": "a",
+      "label": "구글 지도로 바로보기",
+      "href": "https://www.google.com/maps/place/%EC%98%A4%EC%85%98%EC%8A%A4%ED%83%80/@21.2909527,-157.8596751,17.95z/data=!4m6!3m5!1s0x7c006e0714500001:0x42c44e799ee07eac!8m2!3d21.2913542!4d-157.8586971!16s%2Fg%2F11t2p_627w?authuser=0&entry=ttu&g_ep=EgoyMDI2MDMyMy4xIKXMDSoASAFQAw%3D%3D",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.google.com/maps/place/%EC%98%A4%EC%85%98%EC%8A%A4%ED%83%80/@21.2909527,-157.8596751,17.95z/data=!4m6!3m5!1s0x7c006e0714500001:0x42c44e799ee07eac!8m2!3d21.2913542!4d-157.8586971!16s%2Fg%2F11t2p_627w?authuser=0&entry=ttu&g_ep=EgoyMDI2MDMyMy4xIKXMDSoASAFQAw%3D%3D",
+        "조회 GET https://www.oceanstarhi.com/kr/restaurants",
+        "화면 변화 4"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "예약하기"
+      ],
+      "tag": "button",
+      "label": "예약하기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 5"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "인스타그램 DM 문의하기"
+      ],
+      "tag": "a",
+      "label": "인스타그램 DM 문의하기",
+      "href": "https://www.instagram.com/oceanstar_turtlesnorkelling?igsh=dG8zMDZxczF2Z2t1",
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.instagram.com/accounts/login/?next=https%3A%2F%2Fwww.instagram.com%2Foceanstar_turtlesnorkelling%3Figsh%3DdG8zMDZxczF2Z2t1&is_from_rle",
+        "화면 변화 3"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "카카오톡 1:1 상담하기"
+      ],
+      "tag": "a",
+      "label": "카카오톡 1:1 상담하기",
+      "href": "http://pf.kakao.com/_hzxeEn",
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 3"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 예약하기",
+        "div"
+      ],
+      "tag": "div",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "unclickable",
+      "detail": [
+        "locator.click: Timeout 4000ms exceeded."
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 예약하기",
+        "button"
+      ],
+      "tag": "button",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 5"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 예약하기",
+        "1부 거북이 스노클링 08:00 - 11:00 ₩152,540 / 성인 ₩106,780 / 아동"
+      ],
+      "tag": "div",
+      "label": "1부 거북이 스노클링 08:00 - 11:00 ₩152,540 / 성인 ₩106,780 / 아동",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "request",
+      "detail": [
+        "조회 GET https://www.oceanstarhi.com/api/availability",
+        "스크롤",
+        "화면 변화 34"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 예약하기",
+        "2부 거북이 스노클링 11:00 - 14:00 ₩152,540 / 성인 ₩106,780 / 아동"
+      ],
+      "tag": "div",
+      "label": "2부 거북이 스노클링 11:00 - 14:00 ₩152,540 / 성인 ₩106,780 / 아동",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "request",
+      "detail": [
+        "조회 GET https://www.oceanstarhi.com/api/availability",
+        "화면 변화 26"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 예약하기",
+        "선셋 거북이 스노클링 시즌별 시간 변동 ₩208,010 / 성인 ₩131,740 / 아동"
+      ],
+      "tag": "div",
+      "label": "선셋 거북이 스노클링 시즌별 시간 변동 ₩208,010 / 성인 ₩131,740 / 아동",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "request",
+      "detail": [
+        "조회 GET https://www.oceanstarhi.com/api/availability",
+        "화면 변화 28"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 예약하기",
+        "거북이 스노클링 + 패러세일링 / 제트스키 AM - ₩291,220 / 성인 ₩291,220 / 아동"
+      ],
+      "tag": "div",
+      "label": "거북이 스노클링 + 패러세일링 / 제트스키 AM - ₩291,220 / 성인 ₩291,220 / 아동",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "request",
+      "detail": [
+        "조회 GET https://www.oceanstarhi.com/api/availability",
+        "화면 변화 11"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 예약하기",
+        "프라이빗 차터 최대 30인 단독 대관 단독 차터 (계단식 요금)"
+      ],
+      "tag": "div",
+      "label": "프라이빗 차터 최대 30인 단독 대관 단독 차터 (계단식 요금)",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "request",
+      "detail": [
+        "조회 GET https://www.oceanstarhi.com/api/availability",
+        "스크롤",
+        "화면 변화 25"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 예약하기",
+        "결제하기"
+      ],
+      "tag": "button",
+      "label": "결제하기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 10"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "자세히 보기",
+        "닫기"
+      ],
+      "tag": "button",
+      "label": "닫기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 6"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "자세히 보기",
+        "예약하기"
+      ],
+      "tag": "button",
+      "label": "예약하기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 14"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img",
+        "Enlarged review photo"
+      ],
+      "tag": "div",
+      "label": "Enlarged review photo",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 8"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img",
+        "Close"
+      ],
+      "tag": "button",
+      "label": "Close",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 1"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "img",
+        "img"
+      ],
+      "tag": "img",
+      "label": "",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "none",
+      "detail": [
+        "재시도 1회 후에도 무반응"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "더보기",
+        "접기"
+      ],
+      "tag": "button",
+      "label": "접기",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 11"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다 ※ 실제 도로 사정에 따라 5분 정도 차이가"
+      ],
+      "tag": "div",
+      "label": "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다 ※ 실제 도로 사정에 따라 5분 정도 차이가",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 7"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+        "구글 지도 열기"
+      ],
+      "tag": "a",
+      "label": "구글 지도 열기",
+      "href": "https://www.google.com/maps/search/?api=1&query=21.2737672781507,-157.821442561537",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.google.com/maps/search/?api=1&query=21.2737672781507,-157.821442561537",
+        "스크롤",
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+        "구글 지도 열기"
+      ],
+      "tag": "a",
+      "label": "구글 지도 열기",
+      "href": "https://www.google.com/maps/search/?api=1&query=21.2765918616464,-157.825201042562",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.google.com/maps/search/?api=1&query=21.2765918616464,-157.825201042562",
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+        "구글 지도 열기"
+      ],
+      "tag": "a",
+      "label": "구글 지도 열기",
+      "href": "https://www.google.com/maps/search/?api=1&query=21.2749624174069,-157.823618602426",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.google.com/maps/search/?api=1&query=21.2749624174069,-157.823618602426",
+        "스크롤",
+        "화면 변화 10"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+        "구글 지도 열기"
+      ],
+      "tag": "a",
+      "label": "구글 지도 열기",
+      "href": "https://www.google.com/maps/search/?api=1&query=21.2788431496628,-157.824734241976",
+      "handlers": [],
+      "verdict": "unclickable",
+      "detail": [
+        "상위 요소 재현 실패"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+        "구글 지도 열기"
+      ],
+      "tag": "a",
+      "label": "구글 지도 열기",
+      "href": "https://www.google.com/maps/search/?api=1&query=21.2789305570102,-157.828290982386",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.google.com/maps/search/?api=1&query=21.2789305570102,-157.828290982386",
+        "스크롤",
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+        "구글 지도 열기"
+      ],
+      "tag": "a",
+      "label": "구글 지도 열기",
+      "href": "https://www.google.com/maps/search/?api=1&query=21.279812168534,-157.832283145618",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.google.com/maps/search/?api=1&query=21.279812168534,-157.832283145618",
+        "스크롤",
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+        "구글 지도 열기"
+      ],
+      "tag": "a",
+      "label": "구글 지도 열기",
+      "href": "https://www.google.com/maps/search/?api=1&query=21.2849007712637,-157.836547749432",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.google.com/maps/search/?api=1&query=21.2849007712637,-157.836547749432",
+        "스크롤",
+        "화면 변화 10"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+        "구글 지도 열기"
+      ],
+      "tag": "a",
+      "label": "구글 지도 열기",
+      "href": "https://www.google.com/maps/search/?api=1&query=21.2830516797254,-157.830147268113",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.google.com/maps/search/?api=1&query=21.2830516797254,-157.830147268113",
+        "스크롤",
+        "화면 변화 10"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+        "구글 지도 열기"
+      ],
+      "tag": "a",
+      "label": "구글 지도 열기",
+      "href": "https://www.google.com/maps/search/?api=1&query=21.286394930815,-157.840131037456",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.google.com/maps/search/?api=1&query=21.286394930815,-157.840131037456",
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+        "구글 지도 열기"
+      ],
+      "tag": "a",
+      "label": "구글 지도 열기",
+      "href": "https://www.google.com/maps/search/?api=1&query=21.293988773121,-157.843499557417",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.google.com/maps/search/?api=1&query=21.293988773121,-157.843499557417",
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+        "구글 지도 열기"
+      ],
+      "tag": "a",
+      "label": "구글 지도 열기",
+      "href": "https://www.google.com/maps/search/?api=1&query=21.2901253882565,-157.83985612354",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.google.com/maps/search/?api=1&query=21.2901253882565,-157.83985612354",
+        "화면 변화 2"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "오션스타 공식 픽업 노선도 투어 예약시 호텔주소를 입력하시면 가장 가까운 픽업 장소로 배정해드립니다",
+        "구글 지도 열기"
+      ],
+      "tag": "a",
+      "label": "구글 지도 열기",
+      "href": "https://www.google.com/maps/search/?api=1&query=21.2917,-157.8541",
+      "handlers": [],
+      "verdict": "popup",
+      "detail": [
+        "새 창 https://www.google.com/maps/search/?api=1&query=21.2917,-157.8541",
+        "스크롤",
+        "화면 변화 10"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 내용 & 거북이4",
+        "Q. 거북이를 정말 100% 볼 수 있나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 거북이를 정말 100% 볼 수 있나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 15"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 내용 & 거북이4",
+        "Q. 투어가 총 몇 시간인가요? 어떤 순서로 진행되나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 투어가 총 몇 시간인가요? 어떤 순서로 진행되나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 7"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 내용 & 거북이4",
+        "Q. 4종 해양 액티비티가 정확히 무엇인가요? 모두 강제 참여인가요?"
+      ],
+      "tag": "button",
+      "label": "Q. 4종 해양 액티비티가 정확히 무엇인가요? 모두 강제 참여인가요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 7"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "투어 내용 & 거북이4",
+        "Q. 돌고래나 다른 바다 생물도 볼 수 있나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 돌고래나 다른 바다 생물도 볼 수 있나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "request",
+      "detail": [
+        "조회 GET https://www.oceanstarhi.com/kr/restaurants",
+        "화면 변화 8"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "준비물 & 현장3",
+        "Q. 무엇을 준비해 가면 되나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 무엇을 준비해 가면 되나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 9"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "준비물 & 현장3",
+        "Q. 사진이나 영상은 어떻게 남길 수 있나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 사진이나 영상은 어떻게 남길 수 있나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 7"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "준비물 & 현장3",
+        "Q. 현장에 화장실이나 샤워 시설이 있나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 현장에 화장실이나 샤워 시설이 있나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 7"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "프라이빗 & 특수 상황3",
+        "Q. 날씨가 나쁘면 어떻게 되나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 날씨가 나쁘면 어떻게 되나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 7"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "프라이빗 & 특수 상황3",
+        "Q. 생일, 돌잔치, 기업 행사 등 단체 이벤트도 가능한가요?"
+      ],
+      "tag": "button",
+      "label": "Q. 생일, 돌잔치, 기업 행사 등 단체 이벤트도 가능한가요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 15"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "프라이빗 & 특수 상황3",
+        "Q. 매너팁은 꼭 줘야 하나요? 얼마가 적당한가요?"
+      ],
+      "tag": "button",
+      "label": "Q. 매너팁은 꼭 줘야 하나요? 얼마가 적당한가요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 7"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "기타7",
+        "Q. 수영복은 미리 입고 가야 하나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 수영복은 미리 입고 가야 하나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 7"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "기타7",
+        "Q. 캐리어나 짐 보관 가능한가요?"
+      ],
+      "tag": "button",
+      "label": "Q. 캐리어나 짐 보관 가능한가요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 15"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "기타7",
+        "Q. 음식이나 음료가 제공되나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 음식이나 음료가 제공되나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 7"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "기타7",
+        "Q. 예약 변경이 가능한가요?"
+      ],
+      "tag": "button",
+      "label": "Q. 예약 변경이 가능한가요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 7"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "기타7",
+        "Q. 왜 오션스타를 선택해야 하나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 왜 오션스타를 선택해야 하나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "ui",
+      "detail": [
+        "화면 변화 7"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "기타7",
+        "Q. 거북이를 만지거나 같이 사진 찍어도 되나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 거북이를 만지거나 같이 사진 찍어도 되나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "scroll",
+      "detail": [
+        "스크롤",
+        "화면 변화 16"
+      ],
+      "errors": []
+    },
+    {
+      "path": [
+        "기타7",
+        "Q. 픽업 시간을 놓치면 어떻게 되나요?"
+      ],
+      "tag": "button",
+      "label": "Q. 픽업 시간을 놓치면 어떻게 되나요?",
+      "href": null,
+      "handlers": [
+        "onClick"
+      ],
+      "verdict": "request",
+      "detail": [
+        "조회 GET https://www.oceanstarhi.com/kr/restaurants",
+        "스크롤",
+        "화면 변화 8"
+      ],
+      "errors": []
+    }
+  ]
+}
