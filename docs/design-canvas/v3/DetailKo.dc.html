@@ -144,22 +144,26 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);letter-spac
 
 /* 콤보 — 패러세일링 · 제트스키. 사진 반, 글 반. 두 판은 사진 쪽을 바꿔 리듬을 준다. */
 .acts{margin-top:44px;display:grid;gap:28px}
-.act{display:grid;grid-template-columns:1fr 1fr;background:#fff;border:1px solid var(--line);
+/* 사진 칸을 넓히고 사양 표를 두 단으로 접어 카드 높이를 줄였다. 둘 다 1:1 에
+   가깝던 사진 칸을 4:3 가까이 되돌려, 사진 좌우가 덜 잘린다. */
+.act{display:grid;grid-template-columns:1.2fr 1fr;background:#fff;border:1px solid var(--line);
   border-radius:22px;overflow:hidden}
+.act.rev{grid-template-columns:1fr 1.2fr}
 .act-ph{position:relative;min-height:420px}
 .act-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .act.rev .act-ph{order:2}
-.act-b{padding:44px 48px 40px}
+.act-b{padding:40px 44px 36px}
 .act-tag{display:inline-flex;align-items:center;height:30px;padding:0 13px;border-radius:999px;
   background:var(--soft);color:var(--deep);font-size:14px;font-weight:800}
 .act-b h3{margin-top:16px;font-size:34px;line-height:1.25}
 .act-k{margin-top:8px;font-size:17px;font-weight:700;color:var(--sea-d)}
 .act-t p{margin-top:14px;font-size:16px;line-height:1.8;color:var(--text)}
-.act-spec{margin-top:26px;border-top:1px solid var(--line)}
-.act-spec div{display:grid;grid-template-columns:76px 1fr;gap:14px;padding:12px 0;
+.act-spec{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;column-gap:26px}
+.act-spec div{display:grid;grid-template-columns:52px 1fr;gap:10px;padding:11px 0;
   border-bottom:1px solid var(--line)}
+.act-spec div:nth-child(-n+2){border-top:1px solid var(--line)}
 .act-spec dt{font-size:14.5px;font-weight:700;color:var(--muted)}
-.act-spec dd{font-size:15.5px;font-weight:600;line-height:1.6;color:var(--ink)}
+.act-spec dd{font-size:15px;font-weight:600;line-height:1.6;color:var(--ink)}
 .acts + .tnote{margin-top:22px}
 
 /* 콤보 — 패키지 A · B. */
