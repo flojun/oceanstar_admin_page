@@ -663,6 +663,7 @@ CSS_M = BASE + """
 .hero.private .hero-in{text-shadow:0 2px 6px rgba(9,16,22,.28),0 2px 22px rgba(9,16,22,.42)}
 /* 폰에서는 리뷰 알약이 사람 얼굴에 걸려 뺀다(운영자 요청). 리뷰 수는 아래 푸터에도 있다. */
 .hero.private .hero-in .rev{display:none}
+.hero.surf .hero-img{top:0}  /* 수평 보정으로 위가 조금 잘려, 사람이 알약에 닿지 않게 사진을 내린다 */
 
 /* 콤보 — 패러세일링 · 제트스키. 폰에서는 사진을 위로. */
 .acts{margin-top:24px;display:grid;gap:18px}
