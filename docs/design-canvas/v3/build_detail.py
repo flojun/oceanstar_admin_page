@@ -114,6 +114,8 @@ PERK_ICONS = {
                    '<path d="M2.4 19c2.2 1 4.4 1 6.6 0s4.4-1 6.6 0 4.4 1 6.6 0"></path>', 24),
     "cal":    icon('<rect x="3.6" y="5.2" width="16.8" height="15" rx="2"></rect>'
                    '<path d="M3.6 10h16.8M8 3.4v3.6M16 3.4v3.6M8 14h2M14 14h2M8 17h2"></path>', 24),
+    # 서핑 상세 (준비물)
+    "check":  icon('<circle cx="12" cy="12" r="8.6"></circle><path d="M8.2 12.3l2.6 2.6 5-5.2"></path>', 24),
     # 프라이빗 상세
     "float":  icon('<ellipse cx="12" cy="13" rx="8.6" ry="4.6"></ellipse>'
                    '<ellipse cx="12" cy="13" rx="3.6" ry="1.8"></ellipse>'
@@ -348,6 +350,36 @@ CSS_D = BASE + """
   background:rgba(255,255,255,.2)}
 .bar.sun{background:var(--food-d)}
 .gantt + .tnote{margin-top:18px}
+/* 서핑 — 레슨 회차. 한 판 안에 다섯 칸, 시간을 크게. */
+.sess{margin-top:40px;display:grid;grid-template-columns:repeat(5,1fr);background:#fff;
+  border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.se{display:flex;flex-direction:column;align-items:center;gap:6px;padding:30px 12px 32px}
+.se + .se{border-left:1px solid var(--line)}
+.se span{font-size:15px;font-weight:700;color:var(--muted)}
+.se b{font-family:'SUIT',system-ui,sans-serif;font-size:36px;font-weight:800;color:var(--deep);
+  letter-spacing:-.02em}
+.sess + .tnote{margin-top:18px}
+/* 서핑 — 이동 및 픽업. 사진 왼쪽, 두 갈래 오른쪽. */
+.meet{margin-top:40px;display:grid;grid-template-columns:1.35fr 1fr;gap:18px}
+.meet-ph img{display:block;width:100%;height:100%;min-height:320px;object-fit:cover;border-radius:22px}
+.meet-c{display:grid;gap:18px}
+.mt{display:flex;flex-direction:column;padding:28px 30px;background:#fff;border:1px solid var(--line);
+  border-radius:22px}
+.mt h3{font-size:22px}
+.mt p{margin-top:12px;font-size:16.5px;line-height:1.8;color:var(--text)}
+.mt-go{margin-top:auto;padding-top:12px;align-self:flex-end;display:inline-flex;align-items:center;
+  min-height:44px;gap:7px;font-size:15px;font-weight:700;color:var(--deep)}
+/* 서핑 — 유의사항. 목록 왼쪽, 사진 오른쪽(이동 섹션과 사진 쪽을 바꿔 리듬). */
+.rules{margin-top:40px;display:grid;grid-template-columns:1.35fr 1fr;gap:18px;align-items:stretch}
+.rl{background:#fff;border:1px solid var(--line);border-radius:22px;padding:8px 30px}
+.rl li{display:grid;grid-template-columns:92px 1fr;gap:18px;align-items:start;padding:18px 0}
+.rl li + li{border-top:1px solid var(--line)}
+.rk{display:inline-flex;align-items:center;justify-content:center;height:30px;padding:0 12px;
+  border-radius:999px;background:var(--soft);color:var(--deep);font-size:14px;font-weight:800;
+  white-space:nowrap}
+.rk.no{background:var(--food-d);color:#fff}
+.rl p{font-size:16.5px;line-height:1.75;color:var(--ink)}
+.rules-ph img{display:block;width:100%;height:100%;object-fit:cover;border-radius:22px}
 /* 프라이빗 — 추천 대상. 알약 여섯 개, 3열. */
 .reco{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .reco li{display:flex;align-items:center;justify-content:center;min-height:64px;padding:0 20px;
@@ -680,6 +712,32 @@ CSS_M = BASE + """
 .combo.n3 .cb{scroll-snap-align:start}
 .sh + .cs-hint + .combo.n3{margin-top:14px}
 
+/* 서핑 — 폰에서도 다섯 회차를 한 줄로. */
+.sess{margin-top:24px;display:grid;grid-template-columns:repeat(5,1fr);background:#fff;
+  border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.se{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 2px 18px}
+.se + .se{border-left:1px solid var(--line)}
+.se span{font-size:13px;font-weight:700;color:var(--muted)}
+.se b{font-family:'SUIT',system-ui,sans-serif;font-size:18px;font-weight:800;color:var(--deep)}
+.sess + .tnote{margin-top:14px}
+.meet{margin-top:24px;display:grid;gap:12px}
+.meet-ph img{display:block;width:100%;aspect-ratio:16 / 9;object-fit:cover;border-radius:18px}
+.meet-c{display:grid;gap:12px}
+.mt{display:flex;flex-direction:column;padding:20px 20px 16px;background:#fff;
+  border:1px solid var(--line);border-radius:18px}
+.mt h3{font-size:19px}
+.mt p{margin-top:8px;font-size:15.5px;line-height:1.75;color:var(--text)}
+.mt-go{margin-top:4px;align-self:flex-end;display:inline-flex;align-items:center;min-height:44px;
+  gap:7px;font-size:15px;font-weight:700;color:var(--deep)}
+.rules{margin-top:24px;display:flex;flex-direction:column-reverse;gap:12px}
+.rl{background:#fff;border:1px solid var(--line);border-radius:18px;padding:4px 18px}
+.rl li{padding:16px 0}
+.rl li + li{border-top:1px solid var(--line)}
+.rk{display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:999px;
+  background:var(--soft);color:var(--deep);font-size:13.5px;font-weight:800}
+.rk.no{background:var(--food-d);color:#fff}
+.rl p{margin-top:8px;font-size:15.5px;line-height:1.7;color:var(--ink)}
+.rules-ph img{display:block;width:100%;aspect-ratio:16 / 9;object-fit:cover;border-radius:18px}
 /* 프라이빗 운영표 — 폰은 요일 한 줄 + 시간 알약. */
 .dlist{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:4px 18px}
 .dl{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:start;padding:16px 0}
@@ -1184,6 +1242,37 @@ def reco(mobile):
             f'<ul class="reco rise">{chips}</ul></section>')
 
 
+def sessions(mobile):
+    """서핑: 하루 다섯 회차. 한 판 안에 다섯 칸, 폰에서도 한 줄."""
+    cells = "".join(f'<div class="se"><span>{k}</span><b class="n">{t}</b></div>'
+                    for k, t in C.SESSIONS)
+    return (f'<section class="sect">{sh(C.SESS_H2, C.SESS_SUB)}'
+            f'<div class="sess rise">{cells}</div>'
+            f'<p class="tnote rise">{I_CLOCK}<span>{C.SESS_NOTE}</span></p></section>')
+
+
+def meet(mobile):
+    """서핑: 이동 및 픽업. 해변 사진 + 두 갈래(직접 이동 / 호텔 픽업)."""
+    src, alt = C.MEET_PHOTO
+    cards = "".join(
+        f'<div class="mt"><h3>{t}</h3><p>{b}</p>'
+        f'{f"<a class=mt-go href={C.MAP_URL}>{lk} {I_ARROW}</a>" if lk else ""}</div>'
+        for t, b, lk in C.MEET)
+    return (f'<section class="sect">{sh(C.MEET_H2)}<div class="meet rise">'
+            f'<figure class="meet-ph"><img src="{src}" alt="{alt}"></figure>'
+            f'<div class="meet-c">{cards}</div></div></section>')
+
+
+def rules(mobile):
+    """서핑: 연령 및 참가 유의사항. 구분 말 + 원문 문장, 참여 불가만 주황."""
+    src, alt = C.RULES_PHOTO
+    rows = "".join(f'<li><span class="rk{" no" if hot else ""}">{k}</span><p>{t}</p></li>'
+                   for k, t, hot in C.RULES)
+    return (f'<section class="sect">{sh(C.RULES_H2)}<div class="rules rise">'
+            f'<ul class="rl">{rows}</ul>'
+            f'<figure class="rules-ph"><img src="{src}" alt="{alt}"></figure></div></section>')
+
+
 def more(mobile):
     cards = "".join(
         f'<a class="mc rise" href="#"><img src="{img}" alt="{t}">'
@@ -1230,7 +1319,7 @@ def build(mobile):
         order = [x for x in order if x != "stars"]
     fn = {"perks": perks, "features": features, "times": times, "flow": flow,
           "course": course, "stars": stars, "more": more, "acts": acts, "combo": combo,
-          "days": days, "reco": reco}
+          "days": days, "reco": reco, "sessions": sessions, "meet": meet, "rules": rules}
     body = hero(mobile) + "".join(fn[k](mobile) for k in order) + foot()
     if mobile:
         body += dock()
@@ -1262,7 +1351,8 @@ def build(mobile):
 
 # 상품마다 문안 모듈을 바꿔 끼워 같은 꼴로 찍는다.
 BUILT = []
-for _mod in ("_detail_ko", "_detail_sunset_ko", "_detail_combo_ko", "_detail_private_ko"):
+for _mod in ("_detail_ko", "_detail_sunset_ko", "_detail_combo_ko", "_detail_private_ko",
+             "_detail_surf_ko"):
     C = importlib.import_module(_mod)
     for _m in (False, True):
         build(_m)
