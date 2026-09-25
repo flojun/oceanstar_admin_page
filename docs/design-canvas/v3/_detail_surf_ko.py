@@ -17,8 +17,10 @@ SHOW_STARS = False
 SECTIONS = ["perks", "combo", "sessions", "meet", "rules", "more"]
 DOCK_SUB = "그룹 레슨 1인 · 90분"
 
+# 데스크탑·모바일 같은 사진(운영자 요청). 세로 사진이라 데스크탑은 힉스필드 outpaint 로
+# 좌우 하늘·바다·잔디만 늘렸다(사람은 원본 그대로).
 HERO_IMG = ("hero_surf.webp",
-            "다이아몬드헤드와 와이키키가 보이는 알라모아나 바다에서 보드 위에 엎드린 강사와 학생")
+            "야자수 잎 아래 서핑보드를 들고 바다로 걸어가는 아이와 강사")
 HERO_IMG_M = ("hero_surf_m.webp",
               "야자수 잎 아래 서핑보드를 들고 바다로 걸어가는 아이와 강사")
 HERO = dict(
