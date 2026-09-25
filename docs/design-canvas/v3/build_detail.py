@@ -275,6 +275,8 @@ CSS_D = BASE + """
 .act-b h3{margin-top:16px;font-size:34px;line-height:1.25}
 .act-k{margin-top:8px;font-size:17px;font-weight:700;color:var(--sea-d)}
 .act-t p{margin-top:14px;font-size:16px;line-height:1.8;color:var(--text)}
+.act-t{margin-top:16px;margin-left:20px;padding-left:18px;border-left:2px solid var(--sky)}
+.act-t > p:first-child{margin-top:0}
 .act-spec{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;column-gap:26px}
 .act-spec div{display:grid;grid-template-columns:52px 1fr;gap:10px;padding:11px 0;
   border-bottom:1px solid var(--line)}
@@ -320,6 +322,11 @@ CSS_D = BASE + """
 .ft .sub{margin-top:8px;font-size:16.5px;font-weight:700;color:var(--deep)}
 .ft p{margin-top:16px;font-size:16.5px;line-height:1.8;color:var(--text)}
 .ft .em{margin-top:16px;font-size:16.5px;line-height:1.8;font-weight:700;color:var(--deep)}
+/* 카드 안 본문도 섹션 소개글과 같은 규칙: 제목보다 한 단 안쪽, 브랜드색 2px 선.
+   카드는 섹션보다 작으니 들이는 폭도 한 단계 작게(20+18). 본문이 이미 오른쪽 단으로
+   갈라진 넓은 칸(w6)은 그 자체로 떨어져 있어 두지 않는다. */
+.ft:not(.w6) .ft-t{margin-top:18px;margin-left:20px;padding-left:18px;border-left:2px solid var(--sky)}
+.ft:not(.w6) .ft-t > p:first-child{margin-top:0}
 
 /* 투어 시간 — 머리를 왼쪽에 세우고 표를 오른쪽에 둔다. 오른쪽 칸이 실제
    내용(주간 표)이라 머리와 설명만 갈라놓는 짜임이 아니다. */
@@ -387,6 +394,10 @@ CSS_D = BASE + """
   font-size:14px;font-weight:700;color:var(--deep)}
 .cs-b{grid-column:2;grid-row:2}
 .cs-b p{margin-top:14px;font-size:16.5px;line-height:1.85;color:var(--text)}
+.cs-b{margin-top:14px;margin-left:20px;padding-left:18px;border-left:2px solid var(--sky)}
+.cs-b > p:first-child{margin-top:0}
+/* 참고 줄은 이미 들인 단 안에 있으니 자기 선은 거두고 글색으로만 구분한다. */
+.cs-b .cs-note{padding-left:0;border-left:0}
 .cs-note{margin-top:16px;padding-left:14px;border-left:3px solid var(--sky);
   font-size:15.5px;line-height:1.8;color:var(--muted)}
 .cs-m{grid-column:3;grid-row:1 / span 2;width:300px;aspect-ratio:16 / 9;
