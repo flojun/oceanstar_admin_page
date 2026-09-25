@@ -52,6 +52,11 @@ CS_MEDIA = {
                         "노을 진 바다 위 패들보드에 올라 두 팔을 든 손님"),
                        ("act_kayak.webp",
                         "씨카약을 탄 두 사람 앞으로 지나가는 푸른바다거북")]),
+    "pv_free":   ("img", [("pv_sup.webp",
+                           "다이아몬드헤드를 배경으로 패들보드 위에 선 손님"),
+                          ("pv_dive.webp", "보트 난간에서 바다로 백플립 하는 손님")]),
+    "pv_cruise": ("img", [("pv_couple.webp",
+                           "다이아몬드헤드를 배경으로 선상에 나란히 앉은 커플")]),
     "photo":  ("img", [("act_photo.webp",
                         "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람")]),
 }
@@ -109,6 +114,13 @@ PERK_ICONS = {
                    '<path d="M2.4 19c2.2 1 4.4 1 6.6 0s4.4-1 6.6 0 4.4 1 6.6 0"></path>', 24),
     "cal":    icon('<rect x="3.6" y="5.2" width="16.8" height="15" rx="2"></rect>'
                    '<path d="M3.6 10h16.8M8 3.4v3.6M16 3.4v3.6M8 14h2M14 14h2M8 17h2"></path>', 24),
+    # 프라이빗 상세
+    "float":  icon('<ellipse cx="12" cy="13" rx="8.6" ry="4.6"></ellipse>'
+                   '<ellipse cx="12" cy="13" rx="3.6" ry="1.8"></ellipse>'
+                   '<path d="M2.8 19c2.2 1 4.4 1 6.6 0s4.4-1 6.6 0 4.4 1 6.2 0"></path>', 24),
+    "sun":    icon('<circle cx="12" cy="12" r="4.2"></circle>'
+                   '<path d="M12 2.8v2.2M12 19v2.2M2.8 12h2.2M19 12h2.2M5.5 5.5l1.6 1.6'
+                   'M16.9 16.9l1.6 1.6M18.5 5.5l-1.6 1.6M7.1 16.9l-1.6 1.6"></path>', 24),
     "camera": icon('<path d="M3.6 8.6h3l1.5-2.1h5.8l1.5 2.1h3a1 1 0 0 1 1 1v7.8a1 1 0 0 1-1 1'
                    'h-14.8a1 1 0 0 1-1-1V9.6a1 1 0 0 1 1-1z"></path>'
                    '<circle cx="12" cy="13.2" r="3.4"></circle>', 24),
@@ -255,6 +267,8 @@ CSS_D = BASE + """
 .pnotes li{font-size:16px;line-height:1.75;color:var(--ink);font-weight:600}
 .hero.sunset .hero-in h1 .hl{color:#FFC08A}
 .hero.para .hero-in h1 .hl{color:#FFE066}
+/* 프라이빗 사진은 사람이 화면 가운데부터 서 있어 제목을 한 단계 줄여 얼굴에 닿지 않게. */
+.hero.private .hero-in h1{font-size:58px}
 /* 패러 사진은 밝은 바다가 주인공이라 덮개를 옅게. 글자 쪽만 살짝 누르고 오른쪽 낙하산은 원색 그대로. */
 /* 경계가 띠처럼 보이지 않게 두 겹 모두 완만하게 꺾이는(ease-out) 여러 단으로 푼다. */
 .hero.para .veil{background:
@@ -303,6 +317,22 @@ CSS_D = BASE + """
 .cb ul{align-self:stretch;margin-top:22px;border-top:1px solid var(--line)}
 .cb li{padding:13px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--text)}
 .cb .book-pill{margin-top:28px}
+.combo.n3{grid-template-columns:repeat(3,1fr);gap:18px}
+.combo.n3 .cb{padding:32px 32px 30px}
+
+/* 프라이빗 — 요일 카드. 요일이 이어지지 않아 주간 표보다 이쪽이 바로 읽힌다. */
+.days{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.day{padding:30px 32px 32px;background:#fff;border:1px solid var(--line);border-radius:22px}
+.day h3{font-size:22px}
+.day ul{margin-top:18px;border-top:1px solid var(--line)}
+.day li{padding:13px 0;border-bottom:1px solid var(--line);font-size:18px;font-weight:700;
+  color:var(--deep)}
+.days + .tnote{margin-top:18px}
+/* 프라이빗 — 추천 대상. 알약 여섯 개, 3열. */
+.reco{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.reco li{display:flex;align-items:center;justify-content:center;min-height:64px;padding:0 20px;
+  border-radius:999px;background:#fff;border:1px solid var(--line);font-size:17px;font-weight:700;
+  color:var(--ink)}
 
 /* 6가지 특장점 — 폭이 다른 여섯 칸. 줄마다 3+3 / 6 / 4+2 / 6 으로 갈라 같은
    리듬이 반복되지 않게 했다. 칸 꼴은 여섯이 같고, 리듬은 폭과 사진 유무로
@@ -387,7 +417,7 @@ CSS_D = BASE + """
    대신 같은 크기의 아이콘 타일이 들어가, 어떤 줄은 있고 어떤 줄은 없는 결이
    생기지 않는다. 실사진을 받으면 그 자리에 바꿔 넣으면 된다. */
 .cs{margin-top:40px;border-top:1px solid var(--line)}
-.cs-s{display:grid;grid-template-columns:38px 1fr 300px;gap:0 32px;align-items:start;
+.cs-s{display:grid;grid-template-columns:38px 1fr 300px;grid-template-rows:auto 1fr;gap:0 32px;align-items:start;
   padding:34px 0;border-bottom:1px solid var(--line)}
 .cs-h{display:contents}
 .cs-n{display:inline-flex;align-items:center;justify-content:center;
@@ -613,6 +643,18 @@ CSS_M = BASE + """
 .cb ul{align-self:stretch;margin-top:16px;border-top:1px solid var(--line)}
 .cb li{padding:12px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--text)}
 .cb .book-pill{margin-top:20px;align-self:stretch;justify-content:space-between;height:54px}
+
+.days{margin-top:24px;display:grid;gap:12px}
+.day{padding:20px 20px 18px;background:#fff;border:1px solid var(--line);border-radius:20px}
+.day h3{font-size:19px}
+.day ul{margin-top:12px;border-top:1px solid var(--line)}
+.day li{padding:11px 0;border-bottom:1px solid var(--line);font-size:16.5px;font-weight:700;
+  color:var(--deep)}
+.days + .tnote{margin-top:14px}
+.reco{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.reco li{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 12px;
+  border-radius:999px;background:#fff;border:1px solid var(--line);font-size:15.5px;font-weight:700;
+  color:var(--ink);text-align:center}
 
 /* 375px 에 카드 여섯 장을 그대로 쌓으면 3,310px — 페이지의 31% 가 이 한
    섹션이고 넉 화면을 넘긴다. 제목 여섯 줄을 먼저 보이고 본문은 펼쳐 읽게
@@ -852,16 +894,17 @@ def perks(mobile):
     """오전: 포함 사항 네 칸. 선셋: 상품 소개(글+사진) + 하이라이트 여섯 칸 + 안내 줄."""
     cells = "".join(
         f'<div class="inc-c"><div class="inc-h"><span class="ic">{PERK_ICONS[k]}</span>'
-        f'<h3>{t}</h3></div><p>{b}</p></div>' for k, t, b in C.PERKS)
+        f'<h3>{t}</h3></div>{f"<p>{b}</p>" if b else ""}</div>' for k, t, b in C.PERKS)
     grid = f'<div class="inc{" n6" if len(C.PERKS) == 6 else ""} rise">{cells}</div>'
     if not hasattr(C, "PERK_PHOTO"):
         return f'<section class="sect">{sh(C.PERKS_H2)}{grid}</section>'
     src, alt = C.PERK_PHOTO
     notes = "".join(f"<li>{x}</li>" for x in getattr(C, "PERK_NOTES", []))
+    nl = f'<ul class="pnotes rise">{notes}</ul>' if notes else ""
     return (f'<section class="sect"><div class="intro">{sh(C.PERKS_H2, C.PERKS_LEDE)}'
             f'<figure class="intro-ph rise"><img src="{src}" alt="{alt}"></figure></div>'
             f'<h3 class="hl-h rise">{C.PERKS_SUB_H}</h3>{grid}'
-            f'<ul class="pnotes rise">{notes}</ul></section>')
+            f'{nl}</section>')
 
 
 def features_m():
@@ -1036,7 +1079,25 @@ def combo(mobile):
         f'<a href="#" class="book-pill">{tag} 예약하기 {I_ARROW}</a></article>'
         for tag, t, lines in C.COMBOS)
     return (f'<section class="sect">{sh(C.COMBO_H2, C.COMBO_LEDE)}'
-            f'<div class="combo">{cards}</div></section>')
+            f'<div class="combo{" n3" if len(C.COMBOS) == 3 else ""}">{cards}</div></section>')
+
+
+def days(mobile):
+    """프라이빗: 요일이 띄엄띄엄이라 주간 표 대신 요일 카드."""
+    cards = "".join(
+        f'<div class="day rise"><h3>{d}</h3>'
+        f'<ul>{"".join(f"<li class=n>{t}</li>" for t in ts)}</ul></div>'
+        for d, ts in C.DAY_SLOTS)
+    return (f'<section class="sect">{sh(C.TIME_H2, C.TIME_SUB)}'
+            f'<div class="days">{cards}</div>'
+            f'<p class="tnote rise">{I_CLOCK}<span>{C.TIME_PURE}</span></p></section>')
+
+
+def reco(mobile):
+    """프라이빗: 추천 대상 여섯 개."""
+    chips = "".join(f"<li>{x}</li>" for x in C.RECO)
+    return (f'<section class="sect">{sh(C.RECO_H2)}'
+            f'<ul class="reco rise">{chips}</ul></section>')
 
 
 def more(mobile):
@@ -1084,7 +1145,8 @@ def build(mobile):
     if not getattr(C, "SHOW_STARS", True):
         order = [x for x in order if x != "stars"]
     fn = {"perks": perks, "features": features, "times": times, "flow": flow,
-          "course": course, "stars": stars, "more": more, "acts": acts, "combo": combo}
+          "course": course, "stars": stars, "more": more, "acts": acts, "combo": combo,
+          "days": days, "reco": reco}
     body = hero(mobile) + "".join(fn[k](mobile) for k in order) + foot()
     if mobile:
         body += dock()
@@ -1116,7 +1178,7 @@ def build(mobile):
 
 # 상품마다 문안 모듈을 바꿔 끼워 같은 꼴로 찍는다.
 BUILT = []
-for _mod in ("_detail_ko", "_detail_sunset_ko", "_detail_combo_ko"):
+for _mod in ("_detail_ko", "_detail_sunset_ko", "_detail_combo_ko", "_detail_private_ko"):
     C = importlib.import_module(_mod)
     for _m in (False, True):
         build(_m)
