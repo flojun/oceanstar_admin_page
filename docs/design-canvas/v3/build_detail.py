@@ -201,6 +201,10 @@ CSS_D = BASE + """
   font-size:14.5px;font-weight:600;color:rgba(255,255,255,.88)}
 .menu a.on{background:#fff;color:var(--ink);font-weight:700}
 .nav-r{display:flex;gap:10px;align-items:center;justify-self:end}
+/* 내 예약 관리 — 랜딩(SianB) 머리와 같은 반투명 알약. */
+.ghost-pill{display:inline-flex;align-items:center;height:46px;padding:0 20px;border-radius:999px;
+  background:rgba(255,255,255,.18);color:#fff;font-size:14px;font-weight:600;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .lang-pill{display:inline-flex;align-items:center;height:46px;padding:0 20px;border-radius:999px;
   border:1px solid rgba(255,255,255,.44);color:#fff;font-size:14px;font-weight:700;letter-spacing:.06em}
 .nav-r .book-pill{background:#fff;color:var(--ink)}
@@ -588,6 +592,9 @@ CSS_M = BASE + """
   display:flex;align-items:center;justify-content:space-between}
 .logo{height:36px;width:auto;filter:brightness(0) invert(1)}
 .nav-r{display:flex;gap:8px;align-items:center}
+.ghost-pill{display:inline-flex;align-items:center;height:48px;padding:0 15px;border-radius:999px;
+  background:rgba(255,255,255,.22);color:#fff;font-size:13.5px;font-weight:700;white-space:nowrap;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .lang{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;
   border-radius:50%;background:rgba(255,255,255,.92);color:var(--ink);font-size:13.5px;
   font-weight:800;letter-spacing:.04em}
@@ -957,7 +964,8 @@ def nav(mobile):
     if mobile:
         return ('<header class="nav">'
                 '<img src="logo_full.png" alt="오션스타" class="logo">'
-                '<div class="nav-r"><a href="#" class="lang">EN</a>'
+                '<div class="nav-r"><a href="#" class="ghost-pill">내 예약 관리</a>'
+                '<a href="#" class="lang">EN</a>'
                 '<a href="#" class="burger"><svg width="22" height="22" viewBox="0 0 24 24" '
                 'fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">'
                 '<path d="M4 7h16M4 12h16M4 17h16"/></svg></a></div></header>')
@@ -966,6 +974,7 @@ def nav(mobile):
             '<div class="menu"><a href="#">Home</a><a href="#" class="on">투어</a>'
             '<a href="#">고객후기</a><a href="#">FAQ</a></div>'
             '<div class="nav-r"><a href="#" class="lang-pill">EN</a>'
+            '<a href="#" class="ghost-pill">내 예약 관리</a>'
             f'<a href="#" class="book-pill">투어 예약하기 {I_ARROW}</a></div></header>')
 
 

@@ -77,6 +77,10 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);letter-spac
   font-size:14.5px;font-weight:600;color:rgba(255,255,255,.88)}
 .menu a.on{background:#fff;color:var(--ink);font-weight:700}
 .nav-r{display:flex;gap:10px;align-items:center;justify-self:end}
+/* 내 예약 관리 — 랜딩(SianB) 머리와 같은 반투명 알약. */
+.ghost-pill{display:inline-flex;align-items:center;height:46px;padding:0 20px;border-radius:999px;
+  background:rgba(255,255,255,.18);color:#fff;font-size:14px;font-weight:600;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .lang-pill{display:inline-flex;align-items:center;height:46px;padding:0 20px;border-radius:999px;
   border:1px solid rgba(255,255,255,.44);color:#fff;font-size:14px;font-weight:700;letter-spacing:.06em}
 .nav-r .book-pill{background:#fff;color:var(--ink)}
@@ -444,7 +448,7 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);letter-spac
 <section class="hero surf">
   <img src="hero_surf.webp" alt="야자수 잎 아래 서핑보드를 들고 바다로 걸어가는 아이와 강사" class="hero-img">
   <span class="veil"></span>
-  <header class="nav"><img src="logo_full.png" alt="오션스타" class="logo"><div class="menu"><a href="#">Home</a><a href="#" class="on">투어</a><a href="#">고객후기</a><a href="#">FAQ</a></div><div class="nav-r"><a href="#" class="lang-pill">EN</a><a href="#" class="book-pill">투어 예약하기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></div></header>
+  <header class="nav"><img src="logo_full.png" alt="오션스타" class="logo"><div class="menu"><a href="#">Home</a><a href="#" class="on">투어</a><a href="#">고객후기</a><a href="#">FAQ</a></div><div class="nav-r"><a href="#" class="lang-pill">EN</a><a href="#" class="ghost-pill">내 예약 관리</a><a href="#" class="book-pill">투어 예약하기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></div></header>
   <div class="hero-in">
     <span class="eyebrow">알라모아나 서핑 레슨</span>
     <h1>하와이에서 만나는<br>첫 <span class="hl">서핑</span> 레슨</h1>
