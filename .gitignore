@@ -55,3 +55,8 @@ public/*.pptx
 
 # claude code worktrees (실수로 gitlink 로 커밋되던 항목)
 .claude/worktrees/
+
+# QA (docs/qa/regression-test-plan.md) — 기준선(qa/baseline)만 커밋, 실행 결과·로그인 세션은 제외
+/qa/reports/
+/qa/.auth/
+/test-results/
