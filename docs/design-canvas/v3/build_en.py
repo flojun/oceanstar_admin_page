@@ -108,8 +108,9 @@ REPL = [
     (">Hawaii's Best Tour<", '>Hawaii\u2019s Best Tour<'),
 
     # 내비게이션
-    ('class="lang-pill">EN<', 'class="lang-pill">KO<'),
-    ('class="lang">EN<', 'class="lang">KO<'),
+    # 한국어 판으로 가는 버튼은 한글로 쓴다(운영자 요청). 'KO' 보다 알아보기 쉽다.
+    ('class="lang-pill">EN<', 'class="lang-pill">한국어<'),
+    ('class="lang">EN<', 'class="lang">한국어<'),
     ('고객후기', 'Reviews'),
     ('블로그', 'Blog'),
     ('내 예약 관리', 'Manage booking'),
@@ -293,7 +294,7 @@ def build(src_name, out_name, en_css, title):
 
     # 마크업에 한글이 남으면 옮기다 만 것이다. 번역한 후기의 작성자 표기만 남긴다.
     body = out.split("</style>", 1)[1]
-    left = set(re.findall(r"[가-힣]+", body)) - {"지"}
+    left = set(re.findall(r"[가-힣]+", body)) - {"지", "한국어"}
     assert not left, "안 옮긴 한글: %s" % sorted(left)
     for ch in ("—", "–"):
         assert ch not in body, "대시 금지 규칙 위반: %r" % ch

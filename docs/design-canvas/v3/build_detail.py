@@ -455,12 +455,12 @@ CSS_M = BASE + """
 .center{text-align:center}
 .sh h2{font-size:32px;line-height:1.28}
 .sh .lede{margin-top:14px;font-size:16.5px;line-height:1.78;color:var(--text)}
-/* 콤보 모바일 — 섹션 머리는 가운데(운영자 요청). 가성비 특징 칸은 아이콘 자리는
-   그대로 두고 글만 가운데로. */
-.page.para .sh,.page.para .hl-h{text-align:center}
-.page.para .sh .lede{margin-left:auto;margin-right:auto}
-.page.para .inc.n6 .inc-h h3{align-self:stretch;text-align:center}
-.page.para .inc.n6 .inc-c p{text-align:center}
+/* 모바일 — 섹션 머리(제목+설명)는 가운데(운영자 요청, 랜딩과 같게). 여섯 칸
+   특징 표는 아이콘 자리는 그대로 두고 글만 가운데로. */
+.sh,.hl-h{text-align:center}
+.sh .lede{margin-left:auto;margin-right:auto}
+.inc.n6 .inc-h h3{align-self:stretch;text-align:center}
+.inc.n6 .inc-c p{text-align:center}
 
 .hero{position:relative;height:524px;overflow:hidden;background:var(--ink)}
 .hero-img{position:absolute;left:0;right:0;top:-6%;width:100%;height:112%;object-fit:cover}
