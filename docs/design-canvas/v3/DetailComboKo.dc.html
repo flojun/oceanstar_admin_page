@@ -55,8 +55,12 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);letter-spac
 .sh{max-width:760px}
 .sh h2{font-size:46px;line-height:1.24}
 .sh .lede{margin-top:16px;font-size:18px;line-height:1.8;color:var(--text);max-width:52ch}
+/* 소개글은 제목보다 한 단 안쪽에서 시작한다(운영자 요청). 제목과 같은 왼쪽선에
+   붙으면 제목의 연장처럼 읽혀 위계가 흐려진다. 들인 자리에 브랜드색 2px 세로선을
+   두어, 어긋난 것이 아니라 일부러 들인 단임을 보인다. */
+.sh .lede{margin-top:18px;margin-left:34px;padding-left:20px;border-left:2px solid var(--sky)}
 .center .sh{max-width:none}
-.center .sh .lede{margin-left:auto;margin-right:auto}
+.center .sh .lede{margin-left:auto;margin-right:auto;padding-left:0;border-left:0}
 
 /* 히어로 — 사진 띠 위에 내비, 글은 왼쪽 아래. 그 아래로 예약 패널이 걸친다.
    랜딩 히어로가 가운데 정렬이라 상세까지 같으면 두 장이 똑같아 보인다. */
@@ -226,7 +230,7 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);letter-spac
   border-radius:14px;background:#fff;border:1px solid var(--line);
   font-size:15.5px;line-height:1.8;color:var(--text)}
 .tnote svg{color:var(--sea);margin-top:2px}
-.tlist{margin-top:34px}
+.tlist{margin-top:30px;margin-left:34px;padding-left:22px}  /* 소개글 글줄과 같은 선에서 시작 */
 .tlist li{position:relative;padding-left:17px;font-size:15.5px;line-height:1.9;color:var(--muted)}
 .tlist li::before{content:"";position:absolute;left:2px;top:12px;width:4px;height:4px;
   border-radius:50%;background:var(--muted)}
