@@ -45,18 +45,13 @@ CS_MEDIA = {
                         "씨카약을 탄 두 사람 앞으로 지나가는 푸른바다거북")]),
     "dive":   ("img", [("act_dive.webp", "보트 위에서 바다로 뛰어드는 손님")]),
     # 선셋 상세
-    "sup":    ("img", [("act_sup.webp",
-                        "다이아몬드헤드를 배경으로 패들보드 위에 올라선 손님")]),
-    "kayak":  ("img", [("act_kayak.webp",
-                        "씨카약을 탄 두 사람 앞으로 지나가는 푸른바다거북")]),
-    "sup_sunset": ("img", [("course_sup_sunset.webp",
-                        "노을 진 바다 위 패들보드에 올라 두 팔을 든 손님")]),
     "wine":   ("img", [("course_wine.webp",
                         "체크 식탁보 위에 차린 살라미·치즈 보드와 과일, 케이크, 와인")]),
-    # public/images/timeline/scooter.png. 저장소에 있던 파일인데 산호초 배경이라
-    # 와이키키 실촬영본이 아니다. 실사진을 받으면 바꿔야 한다.
-    "scooter": ("img", [("course_scooter.webp",
-                         "씨두 스쿠터를 잡고 물속을 나아가는 스노클러")]),
+    # 패들보드·카약·씨체어 묶음. 씨체어 사진은 아직 없다.
+    "sup3":   ("img", [("course_sup_sunset.webp",
+                        "노을 진 바다 위 패들보드에 올라 두 팔을 든 손님"),
+                       ("act_kayak.webp",
+                        "씨카약을 탄 두 사람 앞으로 지나가는 푸른바다거북")]),
     "photo":  ("img", [("act_photo.webp",
                         "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람")]),
 }
@@ -295,7 +290,7 @@ CSS_D = BASE + """
    알약을 흘려 두면 1,288px 에서 여덟 개 + 한 개로 끊겨 '호텔 복귀'가 다음
    줄에 홀로 떨어졌다. 아홉 칸 격자라 늘 한 줄이고, 긴 이름은 칸 안에서
    두 줄로 접힌다. 양 끝(픽업·복귀)만 채워 뭍과 바다를 가른다. */
-.hops{position:relative;margin-top:44px;display:grid;grid-template-columns:repeat(9,1fr)}
+.hops{position:relative;margin-top:44px;display:grid;grid-template-columns:repeat(var(--n,9),1fr)}
 /* 첫 점 중심(1/18)에서 끝 점 중심(17/18)까지 */
 .hops::before{content:"";position:absolute;left:5.56%;right:5.56%;top:14px;height:2px;
   background:var(--line)}
@@ -830,7 +825,7 @@ def flow(mobile):
         hops.append(f'<span class="hop{" anchor" if anchor else ""}">'
                     f'<span class="hop-d">{ic}</span><span class="hop-l">{name}</span></span>')
     return (f'<section class="sect">{sh(C.FLOW_H2, C.FLOW_SUB)}'
-            f'<div class="hops rise">{"".join(hops)}</div>'
+            f'<div class="hops rise" style="--n:{len(hops)}">{"".join(hops)}</div>'
             f'<p class="hnote">{C.FLOW_NOTE}</p></section>')
 
 
