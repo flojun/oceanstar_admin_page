@@ -99,6 +99,16 @@ PERK_ICONS = {
                    '<path d="M17.4 3.4l-2.6 14.2"></path>', 24),
     "guide":  icon('<circle cx="9" cy="7.4" r="3.2"></circle><path d="M3 20.2a6 6 0 0 1 12 0"></path>'
                    '<path d="M17.6 3.6v9.4M17.6 3.6h3.6l-1.2 2.1 1.2 2.1h-3.6"></path>', 24),
+    # 콤보 상세
+    "para":   icon('<path d="M3 10a9 6 0 0 1 18 0"></path>'
+                   '<path d="M3 10c2-1.2 4-1.2 6 0 2-1.2 4-1.2 6 0 2-1.2 4-1.2 6 0"></path>'
+                   '<path d="M3 10l8.2 7.6M21 10l-8.2 7.6M9 10l2.4 7.4M15 10l-2.4 7.4"></path>'
+                   '<circle cx="12" cy="19.4" r="1.5"></circle>', 24),
+    "jet":    icon('<path d="M2.8 15.4h14.4l3.8-3.2h-6.2l-2-2.6H9.4l-1.6 2.6H4.4z"></path>'
+                   '<path d="M12.6 9.6l1.3-3.1"></path>'
+                   '<path d="M2.4 19c2.2 1 4.4 1 6.6 0s4.4-1 6.6 0 4.4 1 6.6 0"></path>', 24),
+    "cal":    icon('<rect x="3.6" y="5.2" width="16.8" height="15" rx="2"></rect>'
+                   '<path d="M3.6 10h16.8M8 3.4v3.6M16 3.4v3.6M8 14h2M14 14h2M8 17h2"></path>', 24),
     "camera": icon('<path d="M3.6 8.6h3l1.5-2.1h5.8l1.5 2.1h3a1 1 0 0 1 1 1v7.8a1 1 0 0 1-1 1'
                    'h-14.8a1 1 0 0 1-1-1V9.6a1 1 0 0 1 1-1z"></path>'
                    '<circle cx="12" cy="13.2" r="3.4"></circle>', 24),
@@ -231,6 +241,37 @@ CSS_D = BASE + """
 .pnotes{margin-top:26px;display:grid;gap:10px}
 .pnotes li{font-size:16px;line-height:1.75;color:var(--ink);font-weight:600}
 .hero.sunset .hero-in h1 .hl{color:#FFC08A}
+.hero.para .hero-in h1 .hl{color:#FFE066}
+
+/* 콤보 — 패러세일링 · 제트스키. 사진 반, 글 반. 두 판은 사진 쪽을 바꿔 리듬을 준다. */
+.acts{margin-top:44px;display:grid;gap:28px}
+.act{display:grid;grid-template-columns:1fr 1fr;background:#fff;border:1px solid var(--line);
+  border-radius:22px;overflow:hidden}
+.act-ph{position:relative;min-height:420px}
+.act-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.act.rev .act-ph{order:2}
+.act-b{padding:44px 48px 40px}
+.act-tag{display:inline-flex;align-items:center;height:30px;padding:0 13px;border-radius:999px;
+  background:var(--soft);color:var(--deep);font-size:14px;font-weight:800}
+.act-b h3{margin-top:16px;font-size:34px;line-height:1.25}
+.act-k{margin-top:8px;font-size:17px;font-weight:700;color:var(--sea-d)}
+.act-t p{margin-top:14px;font-size:16px;line-height:1.8;color:var(--text)}
+.act-spec{margin-top:26px;border-top:1px solid var(--line)}
+.act-spec div{display:grid;grid-template-columns:76px 1fr;gap:14px;padding:12px 0;
+  border-bottom:1px solid var(--line)}
+.act-spec dt{font-size:14.5px;font-weight:700;color:var(--muted)}
+.act-spec dd{font-size:15.5px;font-weight:600;line-height:1.6;color:var(--ink)}
+.acts + .tnote{margin-top:22px}
+
+/* 콤보 — 패키지 A · B. */
+.combo{margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.cb{display:flex;flex-direction:column;align-items:flex-start;padding:38px 40px 36px;
+  background:#fff;border:1px solid var(--line);border-radius:22px}
+.cb h3{margin-top:18px;font-size:30px;line-height:1.3}
+.cb-p{margin-top:14px;font-size:18px;font-weight:800;color:var(--food-d)}
+.cb ul{align-self:stretch;margin-top:22px;border-top:1px solid var(--line)}
+.cb li{padding:13px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--text)}
+.cb .book-pill{margin-top:28px}
 
 /* 6가지 특장점 — 폭이 다른 여섯 칸. 줄마다 3+3 / 6 / 4+2 / 6 으로 갈라 같은
    리듬이 반복되지 않게 했다. 칸 꼴은 여섯이 같고, 리듬은 폭과 사진 유무로
@@ -489,6 +530,35 @@ CSS_M = BASE + """
 /* 오전 사진(1440x617)은 세로가 모자라 그냥 덮으면 거북이 머리가 제목 뒤에 온다.
    사진을 조금 키워 머리(원본 y 360)를 제목 아래 띠(약 380px)로 내린다. */
 .hero.turtle .hero-img{top:-3%;height:130%}
+.hero.para .hero-in h1 .hl{color:#FFE066}
+
+/* 콤보 — 패러세일링 · 제트스키. 폰에서는 사진을 위로. */
+.acts{margin-top:24px;display:grid;gap:18px}
+.act{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.act-ph img{width:100%;aspect-ratio:4 / 3;object-fit:cover}
+.act-b{padding:22px 20px 22px}
+.act-tag{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:999px;
+  background:var(--soft);color:var(--deep);font-size:13.5px;font-weight:800}
+.act-b h3{margin-top:12px;font-size:26px;line-height:1.25}
+.act-k{margin-top:6px;font-size:16px;font-weight:700;color:var(--sea-d)}
+.act-t p{margin-top:12px;font-size:15.5px;line-height:1.8;color:var(--text)}
+.act-spec{margin-top:20px;border-top:1px solid var(--line)}
+.act-spec div{display:grid;grid-template-columns:58px 1fr;gap:10px;padding:11px 0;
+  border-bottom:1px solid var(--line)}
+.act-spec dt{font-size:14px;font-weight:700;color:var(--muted)}
+.act-spec dd{font-size:15px;font-weight:600;line-height:1.6;color:var(--ink)}
+.acts + .tnote{margin-top:16px}
+.tt em{white-space:nowrap}
+
+/* 콤보 — 패키지 A · B. */
+.combo{margin-top:24px;display:grid;gap:14px}
+.cb{display:flex;flex-direction:column;align-items:flex-start;padding:24px 20px 22px;
+  background:#fff;border:1px solid var(--line);border-radius:20px}
+.cb h3{margin-top:12px;font-size:24px;line-height:1.3}
+.cb-p{margin-top:10px;font-size:17px;font-weight:800;color:var(--food-d)}
+.cb ul{align-self:stretch;margin-top:16px;border-top:1px solid var(--line)}
+.cb li{padding:12px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--text)}
+.cb .book-pill{margin-top:20px;align-self:stretch;justify-content:space-between;height:54px}
 
 /* 375px 에 카드 여섯 장을 그대로 쌓으면 3,310px — 페이지의 31% 가 이 한
    섹션이고 넉 화면을 넘긴다. 제목 여섯 줄을 먼저 보이고 본문은 펼쳐 읽게
@@ -750,7 +820,7 @@ def features_m():
             f'<span class="ac-t"><b>{t}</b><i>{sub}</i></span>'
             f'<span class="chev">{I_CHEV}</span></summary>'
             f'<div class="ac-b">{body}</div></details>')
-    return (f'<section class="sect">{sh(C.FEAT_H2)}'
+    return (f'<section class="sect">{sh(C.FEAT_H2, getattr(C, "FEAT_LEDE", None))}'
             f'<div class="accs rise">{"".join(out)}</div></section>')
 
 
@@ -768,7 +838,7 @@ def features(mobile):
                    f'<div class="ft-h"><span class="no">{no}</span>'
                    f'<h3>{t}</h3><span class="sub">{sub}</span></div>'
                    f'<div class="ft-t">{body}{emx}</div></div></div>')
-    return (f'<section class="sect">{sh(C.FEAT_H2)}'
+    return (f'<section class="sect">{sh(C.FEAT_H2, getattr(C, "FEAT_LEDE", None))}'
             f'<div class="feats">{"".join(out)}</div></section>')
 
 
@@ -873,6 +943,36 @@ def stars(mobile):
             f'<p class="ig">{C.STAR_TAG}</p></section>')
 
 
+def acts(mobile):
+    """콤보: 패러세일링·제트스키. 사진 한 장 + 글 + 사양 표를 한 판으로.
+    데스크탑은 사진을 좌우로 번갈아 두고, 폰은 사진을 위로 올린다."""
+    out = []
+    for i, (tag, name, kick, paras, spec, img, alt) in enumerate(C.ACTS):
+        rows = "".join(f'<div><dt>{k}</dt><dd>{v}</dd></div>' for k, v in spec)
+        body = "".join(f"<p>{x}</p>" for x in paras)
+        out.append(
+            f'<article class="act{" rev" if i % 2 else ""} rise">'
+            f'<figure class="act-ph"><img src="{img}" alt="{alt}"></figure>'
+            f'<div class="act-b"><span class="act-tag">{tag}</span><h3>{name}</h3>'
+            f'<p class="act-k">{kick}</p><div class="act-t">{body}</div>'
+            f'<dl class="act-spec">{rows}</dl></div></article>')
+    note = f'<p class="tnote rise">{PERK_ICONS["van"]}<span>{C.ACTS_NOTE}</span></p>'
+    return (f'<section class="sect">{sh(C.ACTS_H2, C.ACTS_LEDE)}'
+            f'<div class="acts">{"".join(out)}</div>{note}</section>')
+
+
+def combo(mobile):
+    """콤보: 패키지 A · B 고르기."""
+    cards = "".join(
+        f'<article class="cb rise"><span class="act-tag">{tag}</span><h3>{t}</h3>'
+        f'<p class="cb-p">{C.COMBO_PRICE}</p>'
+        f'<ul>{"".join(f"<li>{x}</li>" for x in lines)}</ul>'
+        f'<a href="#" class="book-pill">{tag} 예약하기 {I_ARROW}</a></article>'
+        for tag, t, lines in C.COMBOS)
+    return (f'<section class="sect">{sh(C.COMBO_H2, C.COMBO_LEDE)}'
+            f'<div class="combo">{cards}</div></section>')
+
+
 def more(mobile):
     cards = "".join(
         f'<a class="mc rise" href="#"><img src="{img}" alt="{t}">'
@@ -905,7 +1005,7 @@ def foot():
 
 def dock():
     return (f'<div class="dock"><span class="d-l"><b class="n">{C.HERO["price"]}</b>'
-            f'<span>성인 1인 · 4시간</span></span>'
+            f'<span>{getattr(C, "DOCK_SUB", "성인 1인 · 4시간")}</span></span>'
             f'<a href="#" class="book-pill">예약하기 {I_ARROW}</a></div>')
 
 
@@ -913,9 +1013,13 @@ def build(mobile):
     w, css = (375, CSS_M) if mobile else (1440, CSS_D)
     base = getattr(C, "BOARD_TITLE", "상세페이지 · 거북이 스노클링")
     title = f"{base} — 모바일" if mobile else f"{base} — 데스크탑"
-    body = (hero(mobile) + perks(mobile) + features(mobile) + times(mobile)
-            + flow(mobile) + course(mobile)
-            + (stars(mobile) if getattr(C, "SHOW_STARS", True) else "") + more(mobile) + foot())
+    order = getattr(C, "SECTIONS", ["perks", "features", "times", "flow", "course",
+                                     "stars", "more"])
+    if not getattr(C, "SHOW_STARS", True):
+        order = [x for x in order if x != "stars"]
+    fn = {"perks": perks, "features": features, "times": times, "flow": flow,
+          "course": course, "stars": stars, "more": more, "acts": acts, "combo": combo}
+    body = hero(mobile) + "".join(fn[k](mobile) for k in order) + foot()
     if mobile:
         body += dock()
     html = f"""<!doctype html>
@@ -945,7 +1049,7 @@ def build(mobile):
 
 
 # 상품마다 문안 모듈을 바꿔 끼워 같은 꼴로 찍는다.
-for _mod in ("_detail_ko", "_detail_sunset_ko"):
+for _mod in ("_detail_ko", "_detail_sunset_ko", "_detail_combo_ko"):
     C = importlib.import_module(_mod)
     build(False)
     build(True)
