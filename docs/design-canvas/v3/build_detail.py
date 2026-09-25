@@ -269,6 +269,13 @@ CSS_D = BASE + """
 .hero.para .hero-in h1 .hl{color:#FFE066}
 /* 프라이빗 사진은 사람이 화면 가운데부터 서 있어 제목을 한 단계 줄여 얼굴에 닿지 않게. */
 .hero.private .hero-in h1{font-size:58px}
+/* 사진이 밝은 한낮이라 덮개를 옅게(패러와 같은 결), 글자는 그림자로 받친다. */
+.hero.private .veil{background:
+  linear-gradient(180deg,rgba(9,16,22,.34) 0,rgba(9,16,22,.25) 60px,rgba(9,16,22,.15) 125px,
+    rgba(9,16,22,.07) 190px,rgba(9,16,22,.02) 250px,rgba(9,16,22,0) 300px),
+  linear-gradient(100deg,rgba(9,16,22,.34) 0%,rgba(9,16,22,.28) 16%,rgba(9,16,22,.19) 32%,
+    rgba(9,16,22,.10) 45%,rgba(9,16,22,.03) 56%,rgba(9,16,22,0) 66%)}
+.hero.private .hero-in{text-shadow:0 2px 6px rgba(9,16,22,.28),0 2px 26px rgba(9,16,22,.42)}
 /* 패러 사진은 밝은 바다가 주인공이라 덮개를 옅게. 글자 쪽만 살짝 누르고 오른쪽 낙하산은 원색 그대로. */
 /* 경계가 띠처럼 보이지 않게 두 겹 모두 완만하게 꺾이는(ease-out) 여러 단으로 푼다. */
 .hero.para .veil{background:
@@ -612,6 +619,12 @@ CSS_M = BASE + """
   rgba(9,16,22,.38) 0%,rgba(9,16,22,.32) 20%,rgba(9,16,22,.24) 35%,rgba(9,16,22,.14) 47%,
   rgba(9,16,22,.06) 56%,rgba(9,16,22,.02) 62%,rgba(9,16,22,0) 68%,rgba(9,16,22,.06) 100%)}
 .hero.para .hero-in{text-shadow:0 2px 6px rgba(9,16,22,.28),0 2px 22px rgba(9,16,22,.42)}
+.hero.private .veil{background:linear-gradient(180deg,
+  rgba(9,16,22,.40) 0%,rgba(9,16,22,.34) 20%,rgba(9,16,22,.24) 33%,rgba(9,16,22,.12) 42%,
+  rgba(9,16,22,.04) 50%,rgba(9,16,22,0) 58%,rgba(9,16,22,.06) 100%)}
+.hero.private .hero-in{text-shadow:0 2px 6px rgba(9,16,22,.28),0 2px 22px rgba(9,16,22,.42)}
+/* 폰에서는 리뷰 알약이 사람 얼굴에 걸려 뺀다(운영자 요청). 리뷰 수는 아래 푸터에도 있다. */
+.hero.private .hero-in .rev{display:none}
 
 /* 콤보 — 패러세일링 · 제트스키. 폰에서는 사진을 위로. */
 .acts{margin-top:24px;display:grid;gap:18px}
