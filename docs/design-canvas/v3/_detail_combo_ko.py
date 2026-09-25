@@ -23,7 +23,7 @@ from _detail_ko import (FEATURES, DAYS, END_H2,
 
 STEM = "DetailComboKo"
 BOARD_TITLE = "상세페이지 · 거북이 스노클링 + 패러 · 제트"
-THEME = "para"            # 히어로 강조색을 낙하산 노랑으로
+THEME = "para"            # 히어로 강조색(노랑)과 옅은 덮개
 SHOW_STARS = False
 # 섹션 차례. 패러·제트가 거북이 스노클링(특장점)보다 먼저 온다.
 SECTIONS = ["perks", "acts", "features", "times", "combo", "more"]
@@ -32,9 +32,9 @@ DOCK_SUB = "콤보 A · B"
 # 히어로: 운영자 드론 사진. 모바일은 세로가 모자라 힉스필드 outpaint 로
 # 하늘을 위로 늘린 뒤 잘랐다.
 HERO_IMG = ("hero_para.webp",
-            "다이아몬드헤드 앞바다에서 보트가 끄는 노란 스마일 패러세일")
+            "코코헤드를 배경으로 보트가 끄는 연두색 패러세일과 두 사람")
 HERO_IMG_M = ("hero_para_m.webp",
-              "다이아몬드헤드 앞바다에서 보트가 끄는 노란 스마일 패러세일")
+              "코코헤드를 배경으로 보트가 끄는 연두색 패러세일과 두 사람")
 HERO = dict(
     eyebrow="하와이 최고 인기 액티비티의 만남",
     h1='거북이 스노클링 +<br><span class="hl">패러 · 제트</span>',
