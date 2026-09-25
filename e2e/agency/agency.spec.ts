@@ -42,8 +42,15 @@ test.describe("로그인 후", () => {
     test("버튼 전수 클릭 (쓰기 차단)", async ({ page }, info) => {
         test.setTimeout(20 * 60_000);
         const guard = await installGuard(page, { allowMutations: false });
-        const probes = await sweepPage(page, { route: "/agency-dashboard", guard, limit: env.sweepLimit, depth: env.sweepDepth, only: env.sweepOnly });
-        saveSweep(info.project.name, "/agency-dashboard", probes);
+        const probes = await sweepPage(page, {
+            route: "/agency-dashboard",
+            guard,
+            limit: env.sweepLimit,
+            depth: env.sweepDepth,
+            only: env.sweepOnly,
+            allowMutations: false,
+            onProgress: (r) => saveSweep(info.project.name, "/agency-dashboard", r),
+        });
         expect.soft(probes.filter((p) => p.verdict === "error").map((p) => p.path.join(" › "))).toEqual([]);
     });
 });

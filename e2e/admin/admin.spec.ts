@@ -85,11 +85,12 @@ for (const route of ADMIN_ROUTES) {
             limit: env.sweepLimit,
             depth: Math.min(env.sweepDepth, 1),
             only: env.sweepOnly,
+            allowMutations: false,
+            onProgress: (r) => saveSweep(info.project.name, route, r),
             ready: async (p) => {
                 await expect(p).not.toHaveURL(/\/login/);
             },
         });
-        saveSweep(info.project.name, route, probes);
         const broken = probes.filter((p) => p.verdict === "error");
         const dead = probes.filter((p) => p.verdict === "none" && !isAllowed(allow, route, p));
         const fmt = (xs: typeof probes) => xs.map((p) => `  - ${p.path.join(" › ")}  ${[...p.errors, ...p.detail].join(" / ")}`).join("\n");

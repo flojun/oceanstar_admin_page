@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Page } from "@playwright/test";
-import type { Guard, GuardEvent } from "./guard";
+import { installGuard, type Guard, type GuardEvent } from "./guard";
 
 /**
  * "버튼 전수 클릭" — 페이지에 보이는 모든 클릭 가능한 요소를 하나씩 눌러 보고,
@@ -222,7 +222,14 @@ export interface SweepOptions {
     ready?: (page: Page) => Promise<void>;
     /** 라벨이 이 정규식에 맞는 최상위 요소만 검사 (QA_SWEEP_ONLY) */
     only?: RegExp;
+    /** 탭을 새로 만들 때 guard 에 넘길 값 */
+    allowMutations?: boolean;
+    /** 요소 하나 검사할 때마다 호출 — 도중에 멈춰도 결과가 남도록 */
+    onProgress?: (results: Probe[]) => void;
 }
+
+/** 이 횟수마다 새 탭으로 갈아탄다 (같은 탭을 수백 번 새로고침하면 메모리가 쌓여 탭이 죽음) */
+const ROTATE_EVERY = 30;
 
 /**
  * 페이지를 새로 연다. 로드 중 5xx·JS 예외가 있으면 한 번 다시 열고, 그래도 실패하면 오류 목록을 돌려준다.
@@ -281,46 +288,78 @@ async function probeOne(page: Page, guard: Guard, c: Candidate): Promise<Omit<Pr
     return { ...base, ...classify(guard.since(m), navigated, Math.abs(after.scroll - before.scroll) > 4, navigated ? 0 : after.mut, new URL(page.url()).origin) };
 }
 
-export async function sweepPage(page: Page, opts: SweepOptions): Promise<Probe[]> {
-    const { route, guard, limit, depth, ready, only } = opts;
+export async function sweepPage(firstPage: Page, opts: SweepOptions): Promise<Probe[]> {
+    const { route, limit, depth, ready, only, onProgress } = opts;
+    let page = firstPage;
+    let guard = opts.guard;
     const results: Probe[] = [];
+    const record = (p: Probe) => {
+        results.push(p);
+        onProgress?.(results);
+    };
+    const freshTab = async () => {
+        const context = page.context();
+        if (page !== firstPage) await page.close().catch(() => {});
+        page = await context.newPage();
+        guard = await installGuard(page, { allowMutations: opts.allowMutations });
+    };
+
     const firstLoad = await open(page, route, guard, ready);
-    if (firstLoad.length) return [{ path: ["(페이지 로드)"], tag: "page", label: route, href: null, handlers: [], verdict: "error", detail: [], errors: firstLoad }];
+    if (firstLoad.length) {
+        record({ path: ["(페이지 로드)"], tag: "page", label: route, href: null, handlers: [], verdict: "error", detail: [], errors: firstLoad });
+        return results;
+    }
     const top = (await enumerate(page)).filter((c) => !only || only.test(c.label));
     const queue: { path: Candidate[]; c: Candidate }[] = top.map((c) => ({ path: [], c }));
     const seen = new Set(top.map((c) => `${c.sig}#${c.nth}`));
+    let sinceRotate = 0;
     while (queue.length && results.length < limit) {
         const { path: parents, c } = queue.shift()!;
-        const loadErrors = await open(page, route, guard, ready);
-        if (loadErrors.length) {
-            results.push({ path: [...parents.map((p) => p.label || p.tag), c.label || c.tag], tag: c.tag, label: c.label, href: c.href, handlers: c.handlers, verdict: "error", detail: ["클릭 전 페이지 로드 실패"], errors: loadErrors });
-            continue;
+        const pathLabels = [...parents.map((p) => p.label || p.tag), c.label || c.tag];
+        const base = { path: pathLabels, tag: c.tag, label: c.label, href: c.href, handlers: c.handlers };
+        if (++sinceRotate > ROTATE_EVERY) {
+            await freshTab();
+            sinceRotate = 0;
         }
-        if (parents.length && !(await replay(page, parents, guard))) {
-            results.push({ path: [...parents.map((p) => p.label || p.tag), c.label || c.tag], tag: c.tag, label: c.label, href: c.href, handlers: c.handlers, verdict: "unclickable", detail: ["상위 요소 재현 실패"], errors: [] });
-            continue;
-        }
-        let probe = await probeOne(page, guard, c);
-        // "무반응"은 한 번 더 새로 열어 확인한다 (느린 로드·애니메이션 중 클릭으로 인한 오판 방지)
-        if (probe.verdict === "none") {
-            const again = await open(page, route, guard, ready);
-            if (!again.length && (!parents.length || (await replay(page, parents, guard)))) {
-                const retry = await probeOne(page, guard, c);
-                probe = retry.verdict === "none" ? { ...retry, detail: [...retry.detail, "재시도 1회 후에도 무반응"] } : { ...retry, detail: [...retry.detail, "첫 시도 무반응 → 재시도에서 반응"] };
+        try {
+            const loadErrors = await open(page, route, guard, ready);
+            if (loadErrors.length) {
+                record({ ...base, verdict: "error", detail: ["클릭 전 페이지 로드 실패"], errors: loadErrors });
+                continue;
             }
-        }
-        results.push({ path: [...parents.map((p) => p.label || p.tag), c.label || c.tag], ...probe });
-        // 모달이 열리는 등 화면만 바뀐 경우: 새로 나타난 요소를 다음 깊이로
-        if (probe.verdict === "ui" && parents.length + 1 < depth) {
-            const now = await enumerate(page).catch(() => [] as Candidate[]);
-            for (const child of now) {
-                const key = `${child.sig}#${child.nth}`;
-                if (seen.has(key)) continue;
-                seen.add(key);
-                queue.push({ path: [...parents, c], c: child });
+            if (parents.length && !(await replay(page, parents, guard))) {
+                record({ ...base, verdict: "unclickable", detail: ["상위 요소 재현 실패"], errors: [] });
+                continue;
             }
+            let probe = await probeOne(page, guard, c);
+            // "무반응"은 한 번 더 새로 열어 확인한다 (느린 로드·애니메이션 중 클릭으로 인한 오판 방지)
+            if (probe.verdict === "none") {
+                const again = await open(page, route, guard, ready);
+                if (!again.length && (!parents.length || (await replay(page, parents, guard)))) {
+                    const retry = await probeOne(page, guard, c);
+                    probe = retry.verdict === "none" ? { ...retry, detail: [...retry.detail, "재시도 1회 후에도 무반응"] } : { ...retry, detail: [...retry.detail, "첫 시도 무반응 → 재시도에서 반응"] };
+                }
+            }
+            record({ path: pathLabels, ...probe });
+            // 모달이 열리는 등 화면만 바뀐 경우: 새로 나타난 요소를 다음 깊이로
+            if (probe.verdict === "ui" && parents.length + 1 < depth) {
+                const now = await enumerate(page).catch(() => [] as Candidate[]);
+                for (const child of now) {
+                    const key = `${child.sig}#${child.nth}`;
+                    if (seen.has(key)) continue;
+                    seen.add(key);
+                    queue.push({ path: [...parents, c], c: child });
+                }
+            }
+        } catch (e) {
+            // 탭이 죽거나 닫혀도 전체 검사를 멈추지 않고 새 탭으로 이어 간다
+            const msg = String((e as Error).message).split("\n")[0].slice(0, 160);
+            record({ ...base, verdict: "unclickable", detail: [`검사 중 오류로 건너뜀: ${msg}`], errors: [] });
+            await freshTab();
+            sinceRotate = 0;
         }
     }
+    if (page !== firstPage) await page.close().catch(() => {});
     return results;
 }
 

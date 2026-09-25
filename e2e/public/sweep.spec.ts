@@ -21,8 +21,14 @@ for (const route of [...routesFor("customer"), ...routesFor("checkin")]) {
     test(`버튼 전수 클릭: ${route}`, async ({ page }, info) => {
         test.setTimeout(20 * 60_000);
         const guard = await installGuard(page);
-        const probes = await sweepPage(page, { route, guard, limit: env.sweepLimit, depth: env.sweepDepth, only: env.sweepOnly });
-        saveSweep(info.project.name, route, probes);
+        const probes = await sweepPage(page, {
+            route,
+            guard,
+            limit: env.sweepLimit,
+            depth: env.sweepDepth,
+            only: env.sweepOnly,
+            onProgress: (r) => saveSweep(info.project.name, route, r),
+        });
 
         const broken = probes.filter((p) => p.verdict === "error");
         const dead = probes.filter((p) => p.verdict === "none" && !isAllowed(allow, route, p));
