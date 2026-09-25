@@ -686,16 +686,20 @@ CSS_M = BASE + """
 .cs-b{grid-row:3}
 .cs-m img{display:block;width:100%;height:100%;object-fit:cover}
 .cs-m.two{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--line)}
-.cs-h{padding:18px 20px 0}
-.cs-n{display:inline-flex;align-items:center;justify-content:center;
+/* 번호와 소요 시간 칩을 한 줄에(번호 왼쪽, 칩 오른쪽), 제목은 그 아래 한 줄.
+   칩이 제목 밑 한 줄을 따로 먹던 것을 없애고 위아래 여백도 줄였다. */
+.cs-h{padding:16px 18px 0;display:grid;grid-template-columns:auto 1fr;align-items:center;align-content:start}
+.cs-ht{display:contents}
+.cs-n{grid-row:1;grid-column:1;display:inline-flex;align-items:center;justify-content:center;
   width:32px;height:32px;border-radius:999px;background:var(--soft);
   font-family:'SUIT',system-ui,sans-serif;font-size:13px;font-weight:800;color:var(--deep)}
-.cs-ht h3{margin-top:10px;font-size:18px;line-height:1.42}
-.cs-t{display:inline-flex;align-items:center;margin-top:8px;height:28px;padding:0 11px;
-  border-radius:999px;background:var(--soft);font-size:13.5px;font-weight:700;color:var(--deep)}
-.cs-b{padding:0 20px 22px}
-.cs-b p{margin-top:12px;font-size:15.5px;line-height:1.8;color:var(--text)}
-.cs-note{margin-top:12px;padding-left:12px;border-left:3px solid var(--sky);
+.cs-ht h3{grid-row:2;grid-column:1 / -1;margin-top:10px;font-size:18px;line-height:1.42}
+.cs-t{grid-row:1;grid-column:2;justify-self:end;display:inline-flex;align-items:center;height:28px;
+  padding:0 11px;border-radius:999px;background:var(--soft);font-size:13.5px;font-weight:700;
+  color:var(--deep)}
+.cs-b{padding:0 18px 18px}
+.cs-b p{margin-top:8px;font-size:15.5px;line-height:1.75;color:var(--text)}
+.cs-note{margin-top:10px;padding-left:12px;border-left:3px solid var(--sky);
   font-size:14.5px;line-height:1.75;color:var(--muted)}
 
 /* 인증샷 — 세 칸이면 이름표가 10.5px 여야 들어간다. 두 칸으로 줄이면 14px 가
