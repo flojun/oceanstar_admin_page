@@ -205,27 +205,20 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);letter-spac
 .combo.n3{grid-template-columns:repeat(3,1fr);gap:18px}
 .combo.n3 .cb{padding:32px 32px 30px}
 
-/* 프라이빗 — 운영표. 10시~20시 축 위 막대. 한 장의 판 안에 요일이 줄로 선다. */
-.gantt{margin-top:40px;padding:22px 36px 30px;background:#fff;border:1px solid var(--line);
-  border-radius:22px}
-.gr{display:grid;grid-template-columns:110px 1fr;align-items:start;gap:0 24px;padding:18px 0;
-  border-top:1px solid var(--line)}
-.gr.gh{padding:0 0 12px;border-top:0}
-.gr h3{font-size:20px;line-height:44px}
-.gx{position:relative;height:20px}
-.gx span{position:absolute;top:0;transform:translateX(-50%);font-size:13.5px;font-weight:700;
-  color:var(--muted)}
-.gx span:first-child{transform:none}
-.gx span:last-child{transform:translateX(-100%)}
-.gt{position:relative;min-height:44px}
-.gt > i{position:absolute;top:-18px;bottom:-18px;width:1px;background:var(--line);opacity:.7}
-.bar{position:absolute;height:44px;display:flex;align-items:center;justify-content:center;gap:8px;
-  border-radius:12px;background:var(--sea-d);color:#fff;white-space:nowrap}
-.bar b{font-size:16px;font-weight:700}
-.bar i{font-style:normal;font-size:13px;font-weight:800;padding:2px 8px;border-radius:999px;
-  background:rgba(255,255,255,.2)}
-.bar.sun{background:var(--food-d)}
-.gantt + .tnote{margin-top:18px}
+/* 프라이빗 — 예약 가능 시간. 차트 없이 글자 위계만: 요일은 굵게, 시간은 같은 크기의
+   숫자로 나란히, 요일 사이에만 가는 선 하나. 선셋만 주황 글자. */
+.dlist{margin-top:40px;background:#fff;border:1px solid var(--line);border-radius:22px;
+  padding:6px 40px}
+.dl{display:grid;grid-template-columns:180px 1fr;align-items:center;min-height:84px;padding:14px 0}
+.dl + .dl{border-top:1px solid var(--line)}
+.dl h3{font-size:22px}
+.dl ul{display:flex;flex-wrap:wrap;column-gap:56px;row-gap:8px}
+.dl li{display:inline-flex;align-items:baseline;gap:10px}
+.dl li b{font-family:'SUIT',system-ui,sans-serif;font-size:24px;font-weight:800;color:var(--deep);
+  letter-spacing:-.01em}
+.dl li i{font-style:normal;font-size:14px;font-weight:800;color:var(--food-d)}
+.dl li.sun b{color:var(--food-d)}
+.dlist + .tnote{margin-top:18px}
 /* 서핑 — 레슨 회차. 한 판 안에 다섯 칸, 시간을 크게. */
 .sess{margin-top:40px;display:grid;grid-template-columns:repeat(5,1fr);background:#fff;
   border:1px solid var(--line);border-radius:22px;overflow:hidden}
