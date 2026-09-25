@@ -248,7 +248,7 @@ CSS_D = BASE + """
 /* 아이콘은 칸 왼쪽 위 모서리에 띄워 두고(흐름에서 빼서) 글 묶음은 칸 한가운데에.
    아이콘이 글 위 한 줄을 차지해 글이 아래로 처져 보이던 것을 풀었다. */
 .inc.n6 .inc-c{position:relative;display:flex;flex-direction:column;justify-content:center;
-  min-height:176px;padding:28px 30px}
+  min-height:176px;padding:30px 30px 26px}  /* 글줄 여백(줄 높이) 차이를 보정해 글자 위·아래 빈칸을 같게 */
 .inc.n6 .inc-c .ic{position:absolute;top:22px;left:22px;width:44px;height:44px;border-radius:12px}
 .inc.n6 .inc-h{display:block}
 .pnotes{margin-top:26px;display:grid;gap:10px}
