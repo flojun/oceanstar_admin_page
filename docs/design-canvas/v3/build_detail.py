@@ -664,7 +664,6 @@ CSS_M = BASE + """
 .combo.n3::-webkit-scrollbar{height:4px}
 .combo.n3::-webkit-scrollbar-track{margin:0 var(--pad);border-radius:4px;background:var(--line)}
 .combo.n3::-webkit-scrollbar-thumb{border-radius:4px;background:var(--deep)}
-.combo.n3::after{content:"";width:10px}
 .combo.n3 .cb{scroll-snap-align:start}
 .sh + .cs-hint + .combo.n3{margin-top:14px}
 
