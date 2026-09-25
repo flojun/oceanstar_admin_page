@@ -245,6 +245,12 @@ CSS_D = BASE + """
 /* 여섯 칸 특징 표 — 모바일과 같게 아이콘 자리는 그대로, 글만 가운데로(운영자 요청). */
 .inc.n6 .inc-h h3{align-self:stretch;text-align:center}
 .inc.n6 .inc-c p{text-align:center}
+/* 아이콘은 칸 왼쪽 위 모서리에 띄워 두고(흐름에서 빼서) 글 묶음은 칸 한가운데에.
+   아이콘이 글 위 한 줄을 차지해 글이 아래로 처져 보이던 것을 풀었다. */
+.inc.n6 .inc-c{position:relative;display:flex;flex-direction:column;justify-content:center;
+  min-height:176px;padding:28px 30px}
+.inc.n6 .inc-c .ic{position:absolute;top:22px;left:22px;width:44px;height:44px;border-radius:12px}
+.inc.n6 .inc-h{display:block}
 .pnotes{margin-top:26px;display:grid;gap:10px}
 .pnotes li{font-size:16px;line-height:1.75;color:var(--ink);font-weight:600}
 .hero.sunset .hero-in h1 .hl{color:#FFC08A}
