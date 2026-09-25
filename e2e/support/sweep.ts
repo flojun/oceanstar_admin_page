@@ -25,6 +25,8 @@ export interface Candidate {
     target: string | null;
     handlers: string[];
     submitsForm: boolean;
+    /** onClick 이 e.stopPropagation() 만 한다 = 부모(모달 배경 등)로 클릭이 새지 않게 하는 의도된 무반응 */
+    stopOnly: boolean;
 }
 
 export interface Probe {
@@ -60,7 +62,7 @@ function collectInPage(): Candidate[] {
         return getComputedStyle(el).pointerEvents !== "none";
     };
     const text = (el: Element) =>
-        (el.getAttribute("aria-label") || el.getAttribute("title") || (el as HTMLElement).innerText || (el as HTMLInputElement).value || el.querySelector("img[alt]")?.getAttribute("alt") || "")
+        (el.getAttribute("aria-label") || el.getAttribute("title") || (el as HTMLElement).innerText || (el as HTMLInputElement).value || el.getAttribute("alt") || el.querySelector("img[alt]")?.getAttribute("alt") || "")
             .replace(/\s+/g, " ")
             .trim()
             .slice(0, 80);
@@ -77,7 +79,9 @@ function collectInPage(): Candidate[] {
         const form = el.closest("form");
         const formProps = form ? propsOf(form) : null;
         const submitsForm = tag === "button" && !!form && (el as HTMLButtonElement).type === "submit" && typeof formProps?.onSubmit === "function";
-        picked.push({ el, c: { tag, label: text(el), href: el.getAttribute("href"), target: el.getAttribute("target"), handlers, submitsForm } });
+        const clickSrc = typeof p?.onClick === "function" ? String(p.onClick) : "";
+        const stopOnly = /^(function\s*\w*)?\s*\(?\s*(\w+)\s*\)?\s*(=>)?\s*\{?\s*(return\s+)?\2\.stopPropagation\(\)\s*;?\s*\}?$/.test(clickSrc.trim());
+        picked.push({ el, c: { tag, label: text(el), href: el.getAttribute("href"), target: el.getAttribute("target"), handlers, submitsForm, stopOnly } });
     }
     // 버튼/링크 안에 들어 있는 안쪽 후보는 같은 동작이므로 제외 (button > span[onClick] 등)
     const set = new Set(picked.map((x) => x.el));
@@ -264,14 +268,37 @@ async function probeOne(page: Page, guard: Guard, c: Candidate): Promise<Omit<Pr
     const base = { tag: c.tag, label: c.label, href: c.href, handlers: c.handlers };
     if (SKIP_LABEL.test(c.label)) return { ...base, verdict: "skipped", detail: ["세션 종료 버튼은 누르지 않음"], errors: [] };
     if (c.href && /^(tel:|mailto:|sms:)/.test(c.href)) return { ...base, verdict: "skipped", detail: [`${c.href} (OS 앱 호출, 형식만 확인)`], errors: [] };
+    if (c.stopOnly) return { ...base, verdict: "skipped", detail: ["클릭 전파만 막는 핸들러 (의도된 무반응)"], errors: [] };
     if (!(await mark(page, c))) return { ...base, verdict: "unclickable", detail: ["다시 열었을 때 요소를 찾지 못함 (동적 콘텐츠)"], errors: [] };
     const loc = page.locator('[data-qa-sweep="1"]');
     await centerScrollers(page);
     await loc.scrollIntoViewIfNeeded({ timeout: 3000 }).catch(() => {});
     const before = await snapshot(page);
     const m = guard.mark();
+    // 가운데를 누르면 자식의 핸들러가 받는 경우가 있다 (모달 배경 가운데 = 모달 본문).
+    // 이 요소 자신의 핸들러가 받는 지점을 찾아 거기를 누른다.
+    const position = await loc
+        .evaluate((el) => {
+            const r = el.getBoundingClientRect();
+            const ownHit = (hit: Element | null) => {
+                if (!hit || !el.contains(hit)) return false;
+                for (let a: Element | null = hit; a && a !== el; a = a.parentElement) {
+                    const k = Object.keys(a).find((x) => x.startsWith("__reactProps$"));
+                    if (k && typeof (a as unknown as Record<string, Record<string, unknown>>)[k]?.onClick === "function") return false;
+                }
+                return true;
+            };
+            const pts = [[0.5, 0.5], [0.5, 0.08], [0.08, 0.5], [0.92, 0.5], [0.5, 0.92], [0.08, 0.08], [0.92, 0.08], [0.08, 0.92], [0.92, 0.92]];
+            for (const [fx, fy] of pts) {
+                const x = r.left + r.width * fx;
+                const y = r.top + r.height * fy;
+                if (ownHit(document.elementFromPoint(x, y))) return { x: r.width * fx, y: r.height * fy };
+            }
+            return null;
+        })
+        .catch(() => null);
     try {
-        await loc.click({ timeout: 4000 });
+        await loc.click({ timeout: 4000, ...(position ? { position } : {}) });
     } catch (e) {
         return { ...base, verdict: "unclickable", detail: [String((e as Error).message).split("\n")[0].slice(0, 160)], errors: [] };
     }
@@ -309,9 +336,12 @@ export async function sweepPage(firstPage: Page, opts: SweepOptions): Promise<Pr
         record({ path: ["(페이지 로드)"], tag: "page", label: route, href: null, handlers: [], verdict: "error", detail: [], errors: firstLoad });
         return results;
     }
-    const top = (await enumerate(page)).filter((c) => !only || only.test(c.label));
+    const key = (c: Candidate) => `${c.sig}#${c.nth}`;
+    const all = await enumerate(page);
+    const top = all.filter((c) => !only || only.test(c.label));
     const queue: { path: Candidate[]; c: Candidate }[] = top.map((c) => ({ path: [], c }));
-    const seen = new Set(top.map((c) => `${c.sig}#${c.nth}`));
+    // 필터와 무관하게 처음부터 보이던 요소는 "새로 나타난 요소"가 아니다
+    const seen = new Set(all.map(key));
     let sinceRotate = 0;
     while (queue.length && results.length < limit) {
         const { path: parents, c } = queue.shift()!;
@@ -331,6 +361,7 @@ export async function sweepPage(firstPage: Page, opts: SweepOptions): Promise<Pr
                 record({ ...base, verdict: "unclickable", detail: ["상위 요소 재현 실패"], errors: [] });
                 continue;
             }
+            const before = new Set((await enumerate(page)).map(key));
             let probe = await probeOne(page, guard, c);
             // "무반응"은 한 번 더 새로 열어 확인한다 (느린 로드·애니메이션 중 클릭으로 인한 오판 방지)
             if (probe.verdict === "none") {
@@ -343,11 +374,11 @@ export async function sweepPage(firstPage: Page, opts: SweepOptions): Promise<Pr
             record({ path: pathLabels, ...probe });
             // 모달이 열리는 등 화면만 바뀐 경우: 새로 나타난 요소를 다음 깊이로
             if (probe.verdict === "ui" && parents.length + 1 < depth) {
+                // 클릭 전에 없던 요소만 = 이 클릭으로 열린 모달·메뉴 안의 요소
                 const now = await enumerate(page).catch(() => [] as Candidate[]);
                 for (const child of now) {
-                    const key = `${child.sig}#${child.nth}`;
-                    if (seen.has(key)) continue;
-                    seen.add(key);
+                    if (before.has(key(child)) || seen.has(key(child))) continue;
+                    seen.add(key(child));
                     queue.push({ path: [...parents, c], c: child });
                 }
             }
