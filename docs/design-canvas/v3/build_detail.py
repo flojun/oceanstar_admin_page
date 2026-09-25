@@ -243,9 +243,12 @@ CSS_D = BASE + """
 .hero.sunset .hero-in h1 .hl{color:#FFC08A}
 .hero.para .hero-in h1 .hl{color:#FFE066}
 /* 패러 사진은 밝은 바다가 주인공이라 덮개를 옅게. 글자 쪽만 살짝 누르고 오른쪽 낙하산은 원색 그대로. */
+/* 경계가 띠처럼 보이지 않게 두 겹 모두 완만하게 꺾이는(ease-out) 여러 단으로 푼다. */
 .hero.para .veil{background:
-  linear-gradient(180deg,rgba(9,16,22,.46) 0,rgba(9,16,22,0) 150px),
-  linear-gradient(100deg,rgba(9,16,22,.60) 0%,rgba(9,16,22,.38) 34%,rgba(9,16,22,.06) 60%,rgba(9,16,22,0) 100%)}
+  linear-gradient(180deg,rgba(9,16,22,.42) 0,rgba(9,16,22,.31) 60px,rgba(9,16,22,.19) 125px,
+    rgba(9,16,22,.10) 190px,rgba(9,16,22,.04) 250px,rgba(9,16,22,0) 310px),
+  linear-gradient(100deg,rgba(9,16,22,.58) 0%,rgba(9,16,22,.49) 15%,rgba(9,16,22,.36) 30%,
+    rgba(9,16,22,.22) 43%,rgba(9,16,22,.11) 55%,rgba(9,16,22,.04) 65%,rgba(9,16,22,0) 76%)}
 .hero.para .hero-in{text-shadow:0 1px 18px rgba(9,16,22,.35)}
 
 /* 콤보 — 패러세일링 · 제트스키. 사진 반, 글 반. 두 판은 사진 쪽을 바꿔 리듬을 준다. */
@@ -537,7 +540,8 @@ CSS_M = BASE + """
 .hero.turtle .hero-img{top:-3%;height:130%}
 .hero.para .hero-in h1 .hl{color:#FFE066}
 .hero.para .veil{background:linear-gradient(180deg,
-  rgba(9,16,22,.52) 0%,rgba(9,16,22,.40) 36%,rgba(9,16,22,.16) 52%,rgba(9,16,22,0) 62%,rgba(9,16,22,.10) 100%)}
+  rgba(9,16,22,.50) 0%,rgba(9,16,22,.45) 20%,rgba(9,16,22,.36) 35%,rgba(9,16,22,.23) 47%,
+  rgba(9,16,22,.11) 56%,rgba(9,16,22,.04) 63%,rgba(9,16,22,0) 70%,rgba(9,16,22,.08) 100%)}
 .hero.para .hero-in{text-shadow:0 1px 16px rgba(9,16,22,.35)}
 
 /* 콤보 — 패러세일링 · 제트스키. 폰에서는 사진을 위로. */
