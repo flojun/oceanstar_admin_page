@@ -399,11 +399,12 @@ CSS_D = BASE + """
 .mc{display:grid;grid-template-columns:250px 1fr;background:#fff;border:1px solid var(--line);
   border-radius:22px;overflow:hidden}
 .mc img{width:100%;height:100%;object-fit:cover}
-.mc .tx{padding:32px 34px;display:flex;flex-direction:column;justify-content:center}
+/* 바로가기는 카드 오른쪽 아래 끝에 둔다(운영자 요청). 제목·설명은 위에서부터. */
+.mc .tx{padding:32px 34px 22px;display:flex;flex-direction:column}
 .mc h3{font-size:26px;line-height:1.3}
 .mc p{margin-top:11px;font-size:16.5px;line-height:1.75;color:var(--text)}
-.mc .go{margin-top:12px;display:inline-flex;align-items:center;min-height:44px;gap:7px;
-  font-size:15px;font-weight:700;color:var(--deep)}
+.mc .go{margin-top:auto;padding-top:12px;align-self:flex-end;display:inline-flex;align-items:center;
+  min-height:44px;gap:7px;font-size:15px;font-weight:700;color:var(--deep)}
 
 /* 맺음 + 푸터 — 랜딩(SianB)과 같은 한 덩어리다. 맺음 띠가 곧 푸터의 머리라
    어두운 면이 둘로 끊기지 않는다.
@@ -706,11 +707,11 @@ CSS_M = BASE + """
 .more{margin-top:26px;display:grid;grid-template-columns:1fr;gap:14px}
 .mc{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden}
 .mc img{width:100%;height:196px;object-fit:cover}
-.mc .tx{display:block;padding:24px 22px 26px}
+.mc .tx{display:flex;flex-direction:column;padding:24px 22px 16px}
 .mc h3{font-size:23px;line-height:1.35}
 .mc p{margin-top:10px;font-size:16px;line-height:1.75;color:var(--text)}
-.mc .go{margin-top:8px;display:inline-flex;align-items:center;min-height:48px;gap:7px;
-  font-size:15px;font-weight:700;color:var(--deep)}
+.mc .go{margin-top:8px;align-self:flex-end;display:inline-flex;align-items:center;min-height:48px;
+  gap:7px;font-size:15px;font-weight:700;color:var(--deep)}
 
 .foot{margin-top:72px;background:var(--ink);color:#fff;padding:60px var(--pad) 30px;
   -webkit-font-smoothing:auto;-moz-osx-font-smoothing:auto}
