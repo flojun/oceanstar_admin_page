@@ -271,6 +271,13 @@ CSS_D = BASE + """
 .hero.para .hero-in h1 .hl{color:#FFE066}
 /* 프라이빗 사진은 사람이 화면 가운데부터 서 있어 제목을 한 단계 줄여 얼굴에 닿지 않게. */
 .hero.private .hero-in h1{font-size:58px}
+/* 서핑 — 한낮 사진이라 프라이빗과 같은 옅은 덮개, 글자는 그림자로 받친다. */
+.hero.surf .veil{background:
+  linear-gradient(180deg,rgba(9,16,22,.30) 0,rgba(9,16,22,.22) 60px,rgba(9,16,22,.13) 125px,
+    rgba(9,16,22,.06) 190px,rgba(9,16,22,.02) 250px,rgba(9,16,22,0) 300px),
+  linear-gradient(100deg,rgba(9,16,22,.30) 0%,rgba(9,16,22,.25) 16%,rgba(9,16,22,.17) 32%,
+    rgba(9,16,22,.09) 45%,rgba(9,16,22,.03) 56%,rgba(9,16,22,0) 66%)}
+.hero.surf .hero-in{text-shadow:0 2px 6px rgba(9,16,22,.28),0 2px 26px rgba(9,16,22,.42)}
 /* 사진이 밝은 한낮이라 덮개를 옅게(패러와 같은 결), 글자는 그림자로 받친다. */
 .hero.private .veil{background:
   linear-gradient(180deg,rgba(9,16,22,.34) 0,rgba(9,16,22,.25) 60px,rgba(9,16,22,.15) 125px,
@@ -663,6 +670,10 @@ CSS_M = BASE + """
 .hero.private .hero-in{text-shadow:0 2px 6px rgba(9,16,22,.28),0 2px 22px rgba(9,16,22,.42)}
 /* 폰에서는 리뷰 알약이 사람 얼굴에 걸려 뺀다(운영자 요청). 리뷰 수는 아래 푸터에도 있다. */
 .hero.private .hero-in .rev{display:none}
+.hero.surf .veil{background:linear-gradient(180deg,
+  rgba(9,16,22,.38) 0%,rgba(9,16,22,.32) 20%,rgba(9,16,22,.22) 33%,rgba(9,16,22,.11) 42%,
+  rgba(9,16,22,.04) 50%,rgba(9,16,22,0) 58%,rgba(9,16,22,.06) 100%)}
+.hero.surf .hero-in{text-shadow:0 2px 6px rgba(9,16,22,.28),0 2px 22px rgba(9,16,22,.42)}
 .hero.surf .hero-img{top:0}  /* 수평 보정으로 위가 조금 잘려, 사람이 알약에 닿지 않게 사진을 내린다 */
 
 /* 콤보 — 패러세일링 · 제트스키. 폰에서는 사진을 위로. */
