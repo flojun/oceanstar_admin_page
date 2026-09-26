@@ -254,6 +254,7 @@ CSS_D = BASE + """
 .intro{display:grid;grid-template-columns:1fr 460px;gap:0 64px;align-items:center}
 .intro .sh{max-width:none}
 .intro-ph img{display:block;width:100%;aspect-ratio:4 / 3;object-fit:cover;border-radius:22px}
+.page.surf .intro-ph img{aspect-ratio:3 / 2}  /* 서핑 소개 사진은 좌우를 늘린 3:2 를 자르지 않고 */
 .hl-h{margin-top:56px;font-size:26px;line-height:1.3}
 .hl-h + .inc{margin-top:22px}
 .inc.n6{grid-template-columns:repeat(3,1fr)}
