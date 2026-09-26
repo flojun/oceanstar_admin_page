@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 import { Loader2, MapPin, CreditCard } from "lucide-react";
 import { findClosestPickup, getWalkingMinutes, type PickupLocation } from "@/lib/utils";
+import { getPickupDisplayNameByLang } from "@/constants/pickupLocations";
 import type { Currency } from "@/lib/pricing";
 
 interface TourOption {
@@ -145,7 +146,7 @@ export default function CustomBookingForm({
         if (!result) return;
         setPickupId(result.closestLocation.id);
         setSuggestion({
-            name: result.closestLocation.name,
+            name: getPickupDisplayNameByLang(result.closestLocation.name, lang),
             minutes: getWalkingMinutes(result.distanceMeters),
         });
     };
@@ -302,7 +303,9 @@ export default function CustomBookingForm({
                             className={FIELD + " bg-white"}>
                             <option value="">{t.select}</option>
                             {pickupLocations.map((p) => (
-                                <option key={p.id} value={p.id}>{p.name}</option>
+                                <option key={p.id} value={p.id}>
+                                    {getPickupDisplayNameByLang(p.name, lang)}
+                                </option>
                             ))}
                         </select>
                         <p className="mt-1.5 text-xs text-slate-500">{t.pickupNotice}</p>
