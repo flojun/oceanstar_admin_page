@@ -10,7 +10,7 @@ interface Created {
     base: number;
     fee: number;
     total: number;
-    expires_at: number;
+    id: string;
 }
 
 const symbolFor = (c: Currency) => (c === "USD" ? "$" : "₩");
@@ -21,7 +21,6 @@ export default function CustomPaymentLinkView() {
     const [currency, setCurrency] = useState<Currency>("USD");
     const [amount, setAmount] = useState("3200");
     const [description, setDescription] = useState("오션스타 프라이빗 차터");
-    const [email, setEmail] = useState("");
     const [addFee, setAddFee] = useState(true);
 
     const [running, setRunning] = useState(false);
@@ -45,7 +44,7 @@ export default function CustomPaymentLinkView() {
             const res = await fetch("/api/admin/payment-link", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount: base, currency, description, email, addFee }),
+                body: JSON.stringify({ amount: base, currency, description, addFee }),
             });
             const json = await res.json();
             if (!res.ok || !json.success) throw new Error(json.error || "HTTP " + res.status);
@@ -82,6 +81,7 @@ export default function CustomPaymentLinkView() {
                     <li>· <b>예약이 자동으로 생기지 않습니다.</b> 결제 확인 후 예약관리에서 직접 넣으세요.</li>
                     <li>· <b>즉시 결제됩니다.</b> 승인만 걸어두는 방식이 아니라 바로 돈이 빠져나갑니다.</li>
                     <li>· <b>환불은 Stripe 대시보드에서</b> 하셔야 합니다. 환불 화면에는 안 뜹니다.</li>
+                    <li>· 링크 주소를 아는 사람은 누구나 열 수 있습니다. <b>1회 결제되면 자동으로 닫힙니다.</b></li>
                 </ul>
             </div>
 
@@ -128,19 +128,6 @@ export default function CustomPaymentLinkView() {
                             />
                         </div>
                     </div>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        손님 이메일 <span className="font-normal text-gray-400">(선택 · 영수증 발송)</span>
-                    </label>
-                    <input
-                        type="email"
-                        value={email}
-                        disabled={running}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm disabled:bg-gray-100"
-                    />
                 </div>
 
                 <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -203,8 +190,8 @@ export default function CustomPaymentLinkView() {
                         </button>
                     </div>
                     <p className="text-xs text-green-800">
-                        {new Date(created.expires_at * 1000).toLocaleDateString("ko-KR")}까지 유효합니다.
-                        결제되면 Stripe 대시보드에 바로 뜹니다.
+                        만료되지 않습니다. <b>한 번 결제되면 자동으로 닫힙니다.</b>
+                        결제 내역은 Stripe 대시보드에서 확인하세요.
                     </p>
                 </div>
             )}
