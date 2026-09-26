@@ -392,7 +392,9 @@ CSS_D = BASE + """
   white-space:nowrap}
 .rk.no{background:var(--food-d);color:#fff}
 .rl p{font-size:16.5px;line-height:1.75;color:var(--ink)}
-.rules-ph img{display:block;width:100%;height:100%;object-fit:cover;border-radius:22px}
+/* 사진은 목록 높이를 따라간다(사진 비율이 행 높이를 키워 목록 아래가 비지 않게). */
+.rules-ph{position:relative;min-height:280px}
+.rules-ph img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;border-radius:22px}
 /* 프라이빗 — 추천 대상. 알약 여섯 개, 3열. */
 .reco{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .reco li{display:flex;align-items:center;justify-content:center;min-height:64px;padding:0 20px;
