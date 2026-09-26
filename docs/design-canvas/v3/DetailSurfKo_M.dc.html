@@ -201,6 +201,9 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);letter-spac
 .cb ul{align-self:stretch;margin-top:16px;border-top:1px solid var(--line)}
 .cb li{padding:12px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--text)}
 .cb .book-pill{margin-top:20px;align-self:stretch;justify-content:space-between;height:54px}
+/* 폭 가득 찬 예약 버튼은 글자를 가운데, 화살표 원은 오른쪽 끝에 그대로(운영자). */
+.cb .book-pill,.buy-r .book-pill{position:relative;justify-content:center;padding:0 52px}
+.cb .book-pill svg,.buy-r .book-pill svg{position:absolute;right:10px;top:50%;transform:translateY(-50%)}
 /* 옵션 세 장 — 코스 소개와 같은 가로 넘김. 카드 폭 280px, 다음 카드가 살짝 보이게. */
 .combo.n3{margin:16px calc(var(--pad) * -1) 0;padding:2px var(--pad) 16px;display:grid;
   grid-auto-flow:column;grid-auto-columns:280px;gap:12px;overflow-x:auto;
