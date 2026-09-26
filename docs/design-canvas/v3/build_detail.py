@@ -585,7 +585,7 @@ CSS_M = BASE + """
 .sh,.hl-h{text-align:center}
 .sh .lede{margin-left:auto;margin-right:auto}
 .inc.n6 .inc-h h3{align-self:stretch;text-align:center}
-.inc.n6 .inc-c p{text-align:center}
+.inc.n6 .inc-c p{text-align:center;word-break:keep-all;text-wrap:balance}
 
 .hero{position:relative;height:524px;overflow:hidden;background:var(--ink)}
 .hero-img{position:absolute;left:0;right:0;top:-6%;width:100%;height:112%;object-fit:cover}
