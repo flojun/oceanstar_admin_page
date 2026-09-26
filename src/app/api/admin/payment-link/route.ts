@@ -104,9 +104,17 @@ export async function POST(request: Request) {
             },
         });
 
+        // Stripe 주소를 그대로 주지 않는다. book.stripe.com 은 공유 미리보기
+        // 제목이 "Stripe Checkout" 으로 고정이라 오션스타 이름이 안 뜬다.
+        // 우리 도메인을 거쳐 넘기면 미리보기를 우리가 정할 수 있다.
+        const origin = new Headers(request.headers).get('origin')
+            || process.env.NEXT_PUBLIC_SITE_URL
+            || 'http://localhost:3000';
+
         return NextResponse.json({
             success: true,
-            url: link.url,
+            url: `${origin}/pay/${link.id}`,
+            stripeUrl: link.url,
             id: link.id,
             currency: cur,
             base: amount,

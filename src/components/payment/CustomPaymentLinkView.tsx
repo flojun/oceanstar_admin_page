@@ -189,8 +189,9 @@ export default function CustomPaymentLinkView() {
                             {copied ? "복사됨" : "복사"}
                         </button>
                     </div>
-                    <p className="text-xs text-green-800">
+                    <p className="text-xs text-green-800 leading-relaxed">
                         만료되지 않습니다. <b>한 번 결제되면 자동으로 닫힙니다.</b>
+                        카카오톡으로 보내면 <b>Oceanstar Custom Checkout</b> 으로 뜹니다.
                         결제 내역은 Stripe 대시보드에서 확인하세요.
                     </p>
                 </div>
