@@ -392,7 +392,7 @@ def single_body(mobile, picked):
                  + f'<div class="grp">{glab("거북이 스노클링 시간 선택", "픽업 포함 시간")}'
                  + combo_times() + '</div>')
     else:
-        first = (f'<div class="grp">{glab(T["step1"], "성인 2명 기준 총액")}'
+        first = (f'<div class="grp">{glab(T["step1"], "성인 1인 기준")}'
                  + tour_list(sel=None, mobile=mobile) + '</div>')
     return f"""
       {first}
@@ -465,7 +465,7 @@ def side(state):
     if state == "A":
         return f"""<aside class="side">
       <div class="s-empty">투어를 고르면 날짜와 금액이 여기에 쌓입니다.
-        지금은 상품마다 성인 2명 기준 총액을 보여 드리고 있습니다.</div>
+        인원을 넣으면 실제 결제 금액이 계산됩니다.</div>
       <div class="s-total"><span>{T['total_payment']}</span><b class="n">-</b></div>
       <div class="cur"><a class="on">KRW</a><a>USD</a></div>
       <div class="pay wait">투어를 먼저 골라주세요</div>
@@ -487,15 +487,14 @@ def side(state):
       <p class="safe">{I_LOCK}<span>{T['safe_notice']}</span></p>
     </aside>"""
     if state == "D":
-        # 서핑 정가가 아직 없다. ₩261,018 은 $190 환산값이고 시안 B 비교표에도
-        # 같은 값이 쓰인다. 지어낸 수가 아니라 환산값이라는 것을 옆에 적는다.
+        # 서핑 콤보 $160 (운영자). 원화는 $×1,377.9 임시값.
         rows = """<li><span>인원</span><b>성인 2 · 아동 0</b></li>
         <li><span>스노클링 날짜</span><b>10-17 (토) 1부</b></li>
         <li><span>스노클링 픽업</span><b>하얏트 리젠시 앞</b></li>
         <li><span>서핑 날짜</span><b>10-21 (수)</b></li>
         <li><span>서핑 픽업</span><b>하얏트 리젠시 앞</b></li>"""
-        idx, per, tot = 4, "성인 2 × ₩261,018", "₩522,036"
-        note = '<p class="s-note">환산값입니다. 원화 정가 확정 전.</p>'
+        idx, per, tot = 4, "성인 2 × ₩220,460", "₩440,920"
+        note = ""
     else:
         rows = """<li><span>옵션</span><b>패러세일링 ($210)</b></li>
         <li><span>인원</span><b>성인 2 · 아동 0</b></li>
@@ -531,8 +530,8 @@ def bar(state):
         sub = f"{TOURS[0][0]} · 2026-10-17 (토) 성인 2명"
         tot = "₩303,140"
     elif state == "D":
-        sub = "서핑 · 스노클링 10-17 (토), 서핑 10-21 (수) · 환산값, 정가 확정 전"
-        tot = "₩522,036"
+        sub = "서핑 · 스노클링 10-17 (토), 서핑 10-21 (수)"
+        tot = "₩440,920"
     else:
         sub = "패러세일링 · 스노클링 10-17 (토), 패러세일링 10-20 (화)"
         tot = "₩578,720"
