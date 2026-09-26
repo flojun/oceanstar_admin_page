@@ -198,7 +198,7 @@ def site_sec(mobile):
               f'<button aria-label="다음 후기">{I_RIGHT}</button></div>')
     return (f'<section class="sect" id="site">'
             f'<div class="rv-h"><div class="sh"><h2>홈페이지 후기</h2>'
-            f'<p class="lede">오션스타에서 예약하고 다녀오신 분만 남길 수 있어요. '
+            f'<p class="lede">오션스타에서 예약하고 다녀오신 분만 남길 수 있어요.<br>'
             f'예약번호로 한 번 더 확인한 후기입니다.</p></div>'
             f'<div class="rv-act"><a href="#" class="book-pill write">{I_PEN}후기 작성하기</a>{arrows}</div></div>'
             f'<div class="rrow rise">{cards}{end}</div>'
@@ -438,6 +438,7 @@ CSS_RM = """
 .sect{padding-top:64px}
 #site{padding-top:56px}
 .rv-h{display:flex;flex-direction:column;align-items:center;gap:22px}
+.rv-h .lede{text-wrap:balance}   /* 첫 문장 끝 "있어요." 가 혼자 떨어지지 않게 */
 .book-pill.write{height:52px;padding:0 26px;font-size:16px}
 .rrow{margin:28px calc(var(--pad) * -1) 0;padding:0 var(--pad);display:grid;grid-auto-flow:column;
   grid-auto-columns:292px;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;
