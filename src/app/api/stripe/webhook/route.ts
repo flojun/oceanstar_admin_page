@@ -67,6 +67,14 @@ export async function POST(req: Request) {
             return NextResponse.json({ received: true, ignored: 'non-booking session' });
         }
 
+        // 맞춤 결제 링크는 1회용이다. Price 를 닫아 다시 못 쓰게 한다.
+        // 실패해도 예약 생성은 막지 않는다.
+        const customPriceId = session.metadata?.custom_price_id;
+        if (customPriceId) {
+            await stripeClient.prices.update(customPriceId, { active: false })
+                .catch((err) => console.error('[stripe webhook] 맞춤 링크를 닫지 못함:', customPriceId, err));
+        }
+
         const result = await createReservationFromSession(session);
         if (!result.ok) {
             // Non-2xx makes Stripe retry, which is what we want for a DB failure.

@@ -1,44 +1,40 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { stripeClient } from "@/lib/stripeBooking";
-import PayRedirectClient from "./PayRedirectClient";
+import { fromMinor } from "@/lib/money";
+import CustomBookingForm from "./CustomBookingForm";
 
 /**
- * 맞춤 결제 링크를 우리 도메인에서 내보낸다.
+ * 맞춤 결제 링크의 손님 화면.
  *
- * Stripe 가 호스팅하는 book.stripe.com 페이지는 공유 미리보기 제목이
- * "Stripe Checkout" 으로 고정이고 계정 이름이나 브랜딩 설정으로 바뀌지 않는다.
- * 카카오톡·문자로 보냈을 때 오션스타 이름이 뜨게 하려면 우리 페이지를 거쳐야
- * 한다.
+ * 관리자는 상품명과 금액만 정해두고, 예약 정보는 손님이 여기서 채운다.
+ * 제출하면 /api/pay/[id] 가 결제창을 만들어 Stripe 로 넘긴다.
  *
- * 그래서 서버 리다이렉트를 쓰지 않는다. 서버에서 302 로 넘기면 미리보기를
- * 만드는 크롤러가 Stripe 페이지까지 따라가서 결국 Stripe 제목을 가져간다.
- * 이 페이지를 HTML 로 내려주고 브라우저에서만 넘긴다.
- *
- * 손님 언어는 링크를 만들 때 정해 metadata 에 넣어둔다.
+ * Stripe 가 호스팅하는 결제 페이지는 공유 미리보기 제목이 "Stripe Checkout"
+ * 으로 고정이고 계정 이름이나 브랜딩 설정으로 바뀌지 않는다. 카카오톡·문자로
+ * 보냈을 때 오션스타 이름이 뜨게 하려면 우리 페이지를 거쳐야 한다.
  */
 
 type Props = { params: Promise<{ id: string }> };
 
 const TITLE = "Oceanstar Custom Checkout";
 const DESCRIPTION = {
-    ko: "오션스타 하와이 결제 페이지입니다. 안전하게 결제를 진행해 주세요.",
-    en: "Secure payment page for Ocean Star Hawaii.",
+    ko: "오션스타 하와이 예약 결제 페이지입니다. 예약 정보를 입력해 주세요.",
+    en: "Ocean Star Hawaii booking payment. Please fill in your details.",
 } as const;
 
-async function loadLink(id: string) {
-    if (!stripeClient || !id.startsWith("plink_")) return null;
-    try {
-        return await stripeClient.paymentLinks.retrieve(id);
-    } catch {
-        return null;
-    }
+async function loadPrice(id: string) {
+    if (!stripeClient || !id.startsWith("price_")) return null;
+    const price = await stripeClient.prices.retrieve(id).catch(() => null);
+    // 우리가 만든 맞춤 링크만 연다.
+    if (!price || price.metadata?.kind !== "custom_link") return null;
+    return price;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { id } = await params;
-    const link = await loadLink(id);
-    const lang = link?.metadata?.lang === "en" ? "en" : "ko";
+    const price = await loadPrice(id);
+    const lang = price?.metadata?.lang === "en" ? "en" : "ko";
 
     return {
         title: TITLE,
@@ -57,9 +53,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PayPage({ params }: Props) {
     const { id } = await params;
-    const link = await loadLink(id);
-    if (!link) notFound();
+    const price = await loadPrice(id);
+    if (!price) notFound();
 
-    const lang = link.metadata?.lang === "en" ? "en" : "ko";
-    return <PayRedirectClient url={link.active ? link.url : null} lang={lang} />;
+    const lang = price.metadata?.lang === "en" ? "en" : "ko";
+    const feeMinor = Number(price.metadata?.fee_minor ?? 0);
+
+    return (
+        <CustomBookingForm
+            priceId={price.id}
+            lang={lang}
+            active={price.active}
+            productName={price.metadata?.product_name ?? ""}
+            currency={price.currency.toUpperCase() === "KRW" ? "KRW" : "USD"}
+            base={fromMinor(price.unit_amount ?? 0, price.currency)}
+            fee={fromMinor(feeMinor, price.currency)}
+        />
+    );
 }

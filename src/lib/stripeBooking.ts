@@ -114,6 +114,9 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
             pax: reservation.pax,
             option: reservation.option,
             pickup_location: reservation.pickup_location,
+            // 맞춤 링크는 정규 픽업 시간표가 없다. 시간을 "별도 안내"로 적고
+            // 시각이 인쇄된 시간표 PDF 는 붙이지 않는다.
+            pickupTimeTbd: metadata.custom_pickup_time === '1',
         }).catch(err => {
             console.error('Failed to send voucher email:', order_id, err);
         });

@@ -25,6 +25,8 @@ interface VoucherMail {
   pax: string;
   option: string;
   pickup_location: string;
+  /** 정규 픽업 시간표가 없는 예약. 시각이 인쇄된 PDF 를 붙이면 안 된다. */
+  pickupTimeTbd?: boolean;
 }
 
 /**
@@ -33,10 +35,11 @@ interface VoucherMail {
  * 한 통이 실패해도 나머지 한 통은 계속 보낸다.
  */
 export async function sendVoucherEmail(booking: VoucherMail) {
-  const { to, option, pickup_location, order_id } = booking;
+  const { to, option, pickup_location, order_id, pickupTimeTbd } = booking;
 
   // 선셋 시간 조회가 들어 있어 언어당 한 번씩 하지 않고 한 번만 푼다.
-  const fileName = await resolveVoucherFile(pickup_location, option);
+  // 시간이 별도 안내인 예약은 시각이 박힌 시간표 PDF 를 붙이지 않는다.
+  const fileName = pickupTimeTbd ? null : await resolveVoucherFile(pickup_location, option);
 
   const results = await Promise.allSettled(
     LANGS.map(async (lang) => {
