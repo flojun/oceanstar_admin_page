@@ -23,6 +23,7 @@ import {
     PanelLeftOpen,
     BarChart3,
     Receipt,
+    Link2,
     ClipboardCheck,
     Building2,
     Bell,
@@ -43,6 +44,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
     { name: "캘린더", href: "/dashboard/monthly", icon: Calendar },
     { name: "예약관리", href: "/dashboard/all", icon: ClipboardList },
     { name: "취소 및 환불", href: "/dashboard/refunds", icon: Receipt },
+    { name: "맞춤 결제 링크", href: "/dashboard/payment-link", icon: Link2 },
     {
         name: "크루 스케쥴",
         icon: Anchor,
