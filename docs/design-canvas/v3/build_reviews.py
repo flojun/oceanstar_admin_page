@@ -155,10 +155,11 @@ def google_card(r):
 
 
 def hero(mobile):
-    # 데스크탑은 사람이 오른쪽에 있어 글과 겹치지 않는다. 폰은 제목이 가운데 오면 두 사람
-    # 얼굴을 덮어, 오전 상세와 같은 거북이 사진을 쓴다.
-    src, alt = (("hero_turtle.webp", "와이키키 앞바다 산호 위의 푸른바다거북") if mobile else
-                ("act_photo.webp", "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람"))
+    # 데스크탑과 같은 사진(운영자 요청). 폰은 세로가 모자라 두 사람을 가운데로 잘라낸 뒤
+    # 위쪽 하늘만 늘렸다(GPT Image 2.5 편집). 하늘 아래는 원본 픽셀을 다시 얹어
+    # 사람·배·바다는 원본과 같다(차이 0). 제목은 늘린 하늘 위에 앉는다.
+    src, alt = (("hero_reviews_m.webp" if mobile else "act_photo.webp"),
+                "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람")
     return f"""<section class="hero rv-hero">
   <img src="{src}" alt="{alt}" class="hero-img">
   <span class="veil"></span>
@@ -423,6 +424,7 @@ CSS_RD = """
 
 CSS_RM = """
 .rv-hero{height:452px}
+.rv-hero .hero-img{object-position:50% 40%}   /* 제목·로고 줄은 늘린 하늘 위, 두 사람 얼굴은 그 아래 */
 .rv-hero .hero-in{top:150px;text-align:center}
 .rv-hero .hero-in h1{font-size:40px}
 .rv-sub{margin-top:12px;font-size:16.5px;line-height:1.7}
