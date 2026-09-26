@@ -223,7 +223,7 @@ CSS_D = BASE + """
 
 /* 예약 패널 */
 .buy{position:relative;z-index:6;margin:-104px var(--pad) 0;padding:34px 38px;
-  background:#fff;border-radius:22px;box-shadow:var(--e2);
+  background:#fff;border-radius:22px;border:1px solid var(--line);  /* 그림자 없이 선만(운영자 요청) */
   display:grid;grid-template-columns:1fr 344px;gap:0 44px;align-items:center}
 .facts{display:grid;grid-template-columns:1fr 1fr;gap:18px 34px}
 .facts div{display:flex;flex-direction:column;gap:4px}
@@ -617,7 +617,7 @@ CSS_M = BASE + """
 
 /* 값과 버튼이 먼저다. 마크업은 데스크탑 순서로 두고 여기서만 뒤집는다. */
 .buy{position:relative;z-index:6;margin:-62px var(--pad) 0;padding:26px 22px;background:#fff;
-  border-radius:22px;box-shadow:var(--e2);display:flex;flex-direction:column}
+  border-radius:22px;border:1px solid var(--line);display:flex;flex-direction:column}
 .buy-r{order:1}
 .facts{order:2}
 .pure{order:3}
