@@ -739,13 +739,16 @@ CSS_M = BASE + """
 .combo.n3 .cb{scroll-snap-align:start}
 .sh + .cs-hint + .combo.n3{margin-top:14px}
 
-/* 서핑 — 폰에서도 다섯 회차를 한 줄로. */
-.sess{margin-top:24px;display:grid;grid-template-columns:repeat(5,1fr);background:#fff;
-  border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.se{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 2px 18px}
-.se + .se{border-left:1px solid var(--line)}
+/* 서핑 — 폰에서는 다섯 회차를 두 줄(3 + 2)로. 한 줄 다섯 칸은 글자가 칸을 꽉 채워
+   답답했다(운영자). 6단 격자에 위 세 칸은 2단씩, 아래 두 칸은 3단씩 차지해 빈 칸 없이
+   양끝을 맞춘다. 칸마다 떨어진 타일로 두어 숨 쉴 틈을 준다. */
+.sess{margin-top:24px;display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.se{grid-column:span 2;display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:20px 8px 22px;background:#fff;border:1px solid var(--line);border-radius:18px}
+.se:nth-child(n+4){grid-column:span 3}
 .se span{font-size:13px;font-weight:700;color:var(--muted)}
-.se b{font-family:'SUIT',system-ui,sans-serif;font-size:18px;font-weight:800;color:var(--deep)}
+.se b{font-family:'SUIT',system-ui,sans-serif;font-size:23px;font-weight:800;color:var(--deep);
+  letter-spacing:-.01em}
 .sess + .tnote{margin-top:14px}
 .meet{margin-top:24px;display:grid;gap:12px}
 .meet-ph img{display:block;width:100%;aspect-ratio:16 / 9;object-fit:cover;border-radius:18px}
@@ -1253,7 +1256,7 @@ def reco(mobile):
 
 
 def sessions(mobile):
-    """서핑: 하루 다섯 회차. 한 판 안에 다섯 칸, 폰에서도 한 줄."""
+    """서핑: 하루 다섯 회차. 데스크탑은 한 판 다섯 칸, 폰은 두 줄(3 + 2)."""
     cells = "".join(f'<div class="se"><span>{k}</span><b class="n">{t}</b></div>'
                     for k, t in C.SESSIONS)
     return (f'<section class="sect">{sh(C.SESS_H2, C.SESS_SUB)}'
