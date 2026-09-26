@@ -100,9 +100,9 @@ REPL = [
      '참여할 수 있습니다. 거북이 관찰 100% 보장.',
      'Wild sea turtles off Waikiki, from a 51-seat rooftop boat. '
      'English-speaking crew swim beside you. Non-swimmers welcome.'),
-    ('누적 리뷰 14,000+ · Since 2019 하와이 최초 개설',
-     '14,000+ guest reviews. On the water since 2019.'),
-    ('누적 리뷰 14,000+', '14,000+ guest reviews'),
+    ('누적 리뷰 15,000+ · Since 2019 하와이 최초 개설',
+     '15,000+ guest reviews. On the water since 2019.'),
+    ('누적 리뷰 15,000+', '15,000+ guest reviews'),
     ('하와이 와이키키 거북이 스노클링 투어', 'Waikiki Turtle Snorkeling Tour'),
 
     (">Hawaii's Best Tour<", '>Hawaii\u2019s Best Tour<'),
@@ -119,7 +119,7 @@ REPL = [
 
     # 숫자 띠
     ('<i>하와이 최초 개설</i>', '<i>Running in Waikiki</i>'),
-    ('<b>14,000+</b><i>누적 리뷰</i>', '<b>14,000+</b><i>Guest reviews</i>'),
+    ('<b>15,000+</b><i>누적 리뷰</i>', '<b>15,000+</b><i>Guest reviews</i>'),
     ('<i>거북이 관찰 보장</i>', '<i>Turtle sighting guarantee</i>'),
     ('<b>51인승</b><i>루프탑 보트</i>', '<b>51 seats</b><i>Rooftop boat</i>'),
 
