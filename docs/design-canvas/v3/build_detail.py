@@ -335,6 +335,8 @@ CSS_D = BASE + """
 .cb-p.has b{display:block;font-family:'SUIT',system-ui,sans-serif;font-size:32px;
   font-weight:800;letter-spacing:-.02em;color:var(--ink)}
 .cb-p.has span{display:block;margin-top:4px;font-size:14.5px;font-weight:600;color:var(--muted)}
+.per{margin-right:.28em;font-family:'Pretendard',system-ui,sans-serif;font-size:max(12px,.42em);font-weight:700;
+  letter-spacing:0;color:var(--muted);vertical-align:.18em}
 .cb ul{align-self:stretch;margin-top:22px;border-top:1px solid var(--line)}
 .cb li{padding:13px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--text)}
 .cb .book-pill{margin-top:28px}
@@ -721,6 +723,8 @@ CSS_M = BASE + """
 .cb-p.has b{display:block;font-family:'SUIT',system-ui,sans-serif;font-size:28px;
   font-weight:800;letter-spacing:-.02em;color:var(--ink)}
 .cb-p.has span{display:block;margin-top:4px;font-size:14px;font-weight:600;color:var(--muted)}
+.per{margin-right:.28em;font-family:'Pretendard',system-ui,sans-serif;font-size:max(12px,.42em);font-weight:700;
+  letter-spacing:0;color:var(--muted);vertical-align:.18em}
 .cb ul{align-self:stretch;margin-top:16px;border-top:1px solid var(--line)}
 .cb li{padding:12px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--text)}
 .cb .book-pill{margin-top:20px;align-self:stretch;justify-content:space-between;height:54px}
@@ -1006,7 +1010,7 @@ def hero(mobile):
 <section class="buy">
   <dl class="facts">{''.join(f'<div><dt>{k}</dt><dd>{v}</dd></div>' for k, v in h['facts'])}</dl>
   <div class="buy-r">
-    <b class="amt n">{h['price']}</b>
+    <b class="amt n">{per(h.get('price_per'))}{h['price']}</b>
     <span class="amt-s">{h['price_sub']}</span>
     <a href="#" class="book-pill">예약하기 {I_ARROW}</a>
   </div>
@@ -1186,12 +1190,19 @@ def acts(mobile):
             f'<div class="acts">{"".join(out)}</div>{note}</section>')
 
 
+def per(label):
+    """원화 앞의 작은 '1인'. 한화 페이지는 달러를 싣지 않고 기준만 작게 붙인다(운영자)."""
+    return f'<small class="per">{label}</small>' if label else ""
+
+
 def cb_price(tag):
     """패키지 가격. 값이 있으면 원화 큰 글씨 + 보조 줄, 없으면 '콤보 특별 할인가'."""
     v = getattr(C, "COMBO_PRICES", {}).get(tag)
     if not v:
         return f'<p class="cb-p">{C.COMBO_PRICE}</p>'
-    return f'<p class="cb-p has"><b class="n">{v[0]}</b><span>{v[1]}</span></p>'
+    sub = f'<span>{v[1]}</span>' if v[1] else ""
+    return (f'<p class="cb-p has"><b class="n">{per(v[2] if len(v) > 2 else None)}{v[0]}</b>'
+            f'{sub}</p>')
 
 
 def combo(mobile):
@@ -1303,7 +1314,8 @@ def foot():
 
 
 def dock():
-    return (f'<div class="dock"><span class="d-l"><b class="n">{C.HERO["price"]}</b>'
+    return (f'<div class="dock"><span class="d-l"><b class="n">'
+            f'{per(C.HERO.get("price_per"))}{C.HERO["price"]}</b>'
             f'<span>{getattr(C, "DOCK_SUB", "성인 1인 · 4시간")}</span></span>'
             f'<a href="#" class="book-pill">예약하기 {I_ARROW}</a></div>')
 
