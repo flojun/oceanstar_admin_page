@@ -138,9 +138,10 @@ def site_card(r, long_cut=150):
         ph = (f'<figure class="rc-ph"><img src="{photos[0]}" alt="{mask(name)} 님이 올린 투어 사진">'
               f'{extra}</figure>')
     more = '<button class="more">더보기</button>' if len(body) > long_cut else ""
-    return (f'<article class="rc">{ph}<div class="rc-b">'
+    q = "" if photos else '<span class="rq" aria-hidden="true">“</span>'
+    return (f'<article class="rc{"" if photos else " tx"}">{ph}<div class="rc-b">'
             f'<div class="rc-top">{stars()}<span class="ok">{I_SHIELD}예약 확인 후기</span></div>'
-            f'<p class="rc-t{" clamp" if more else ""}">{br(body)}</p>{more}'
+            f'<div class="rc-m">{q}<p class="rc-t{" clamp" if more else ""}">{br(body)}</p>{more}</div>'
             f'<div class="rc-by"><b>{mask(name)}</b><span class="n">{date}</span></div>'
             f'</div></article>')
 
@@ -184,42 +185,23 @@ def tabs():
             '<a href="#gyg">GetYourGuide</a></nav>')
 
 
-def est_h(r, w=388):
-    """카드 높이 어림값(px). 세 단 높이를 맞추는 데만 쓴다."""
-    from PIL import Image
-    h = 150
-    if r[3]:
-        iw, ih = Image.open(os.path.join(HERE, r[3][0])).size
-        h += min(340, w * ih / iw)
-    return h + min(5, len(r[2]) / 26 + r[2].count("\n")) * 28
-
-
-def columns(items, n=3):
-    """최신순을 왼쪽에서 오른쪽으로 읽히게 두면서, 가장 짧은 단에 다음 카드를 얹어
-    세 단의 끝을 맞춘다(CSS columns 는 위에서 아래로 채워 순서가 흐트러지고 끝이 들쭉날쭉했다)."""
-    cols, hs = [[] for _ in range(n)], [0] * n
-    for r in items:
-        k = hs.index(min(hs))
-        cols[k].append(r)
-        hs[k] += est_h(r) + 20
-    return cols
-
-
 def site_sec(mobile):
-    n = 5 if mobile else 9
-    if mobile:
-        cards = "".join(site_card(r) for r in SITE[:n])
-    else:
-        cards = "".join(f'<div class="rcol">{"".join(site_card(r) for r in col)}</div>'
-                        for col in columns(SITE[:n]))
+    """홈페이지 후기. 구글 리뷰와 같이 옆으로 넘겨 보는 한 줄(운영자 요청).
+    앞 9건을 싣고, 줄 끝 칸에서 나머지 후기로 넘어간다."""
+    n = 9
+    cards = "".join(site_card(r) for r in SITE[:n])
     rest = len(SITE) - n
+    end = (f'<a href="#" class="rc-end"><b>후기 {rest}개 더 보기</b>'
+           f'<span>전체 후기를 최신순으로 볼 수 있어요</span>{I_ARROW}</a>')
+    arrows = ("" if mobile else
+              f'<div class="arr"><button aria-label="이전 후기">{I_LEFT}</button>'
+              f'<button aria-label="다음 후기">{I_RIGHT}</button></div>')
     return (f'<section class="sect" id="site">'
             f'<div class="rv-h"><div class="sh"><h2>홈페이지 후기</h2>'
             f'<p class="lede">오션스타에서 예약하고 다녀오신 분만 남길 수 있어요. '
             f'예약번호로 한 번 더 확인한 후기입니다.</p></div>'
-            f'<a href="#" class="book-pill write">{I_PEN}후기 작성하기</a></div>'
-            f'<div class="rgrid rise">{cards}</div>'
-            f'<div class="rv-more"><a href="#" class="ghost-btn">후기 {rest}개 더보기</a></div>'
+            f'<div class="rv-act"><a href="#" class="book-pill write">{I_PEN}후기 작성하기</a>{arrows}</div></div>'
+            f'<div class="rrow rise">{cards}{end}</div>'
             f'</section>')
 
 
@@ -294,7 +276,29 @@ CSS_COMMON = """
 .rstars{display:inline-flex;gap:1px;color:#F5B400}
 .book-pill.write{gap:8px}
 .book-pill.write svg{width:auto;height:auto;padding:0;background:none;color:#fff}
-.rc{background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;break-inside:avoid}
+.rc{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:22px;
+  overflow:hidden;scroll-snap-align:start}
+.rc-b{flex:1;display:flex;flex-direction:column}
+.rc-by{margin-top:auto!important}
+.rc-t{margin-bottom:18px}
+.rc-t.clamp{-webkit-line-clamp:4}
+/* 사진 없는 후기는 글이 주인공 — 크게, 따옴표 하나로 빈 자리를 읽을 거리로 바꾼다. */
+.rc.tx .rc-t{font-size:18px;line-height:1.75;font-weight:600;letter-spacing:-.01em}
+.rc.tx .rc-t.clamp{-webkit-line-clamp:8}
+/* 글 칸은 별점과 이름 사이 남는 높이의 가운데에 둔다. */
+.rc.tx .rc-m{flex:1;display:flex;flex-direction:column;justify-content:center;padding:6px 0 22px}
+.rc.tx .rc-t{margin-top:0;margin-bottom:0}
+.rq{display:block;height:30px;font-family:'SUIT',system-ui,sans-serif;font-size:60px;
+  font-weight:800;line-height:.9;color:var(--sky)}
+.rc-ph img{aspect-ratio:16 / 10;height:auto;max-height:none!important}
+/* 줄 끝 칸 — 나머지 후기로 */
+.rc-end{display:flex;flex-direction:column;justify-content:center;gap:8px;padding:28px;border-radius:22px;
+  background:var(--ink);color:#fff;scroll-snap-align:start}
+.rc-end b{font-family:'SUIT',system-ui,sans-serif;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.rc-end span{font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.72)}
+.rc-end svg{margin-top:10px;width:40px;height:40px;padding:11px;border-radius:50%;background:#fff;
+  color:var(--ink);box-sizing:border-box}
+.rv-act{display:flex;align-items:center;gap:14px}
 .rc-ph{position:relative}
 .rc-ph img{width:100%;height:auto;max-height:340px;object-fit:cover}
 .ph-n{position:absolute;right:12px;bottom:12px;height:28px;padding:0 11px;border-radius:999px;
@@ -309,9 +313,6 @@ CSS_COMMON = """
 .rc-by{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line)}
 .rc-by b{font-size:14.5px;color:var(--ink)}
 .rc-by span{font-size:13.5px;color:var(--muted)}
-.rv-more{text-align:center}
-.ghost-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;
-  border:1px solid var(--line);background:#fff;font-weight:700;color:var(--ink)}
 .src-h{display:flex;align-items:center}
 .src-logo{flex:none;background:#fff;border:1px solid var(--line);border-radius:18px;object-fit:contain}
 .src-logo.gy{display:flex;align-items:center;justify-content:center}
@@ -390,13 +391,13 @@ CSS_RD = """
 #site{padding-top:88px}
 .rv-h{display:flex;align-items:flex-end;justify-content:space-between;gap:40px}
 .book-pill.write{height:52px;padding:0 26px;font-size:16px}
-.rgrid{margin-top:44px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
-.rcol{display:flex;flex-direction:column;gap:20px}
+.rrow{margin:44px calc(var(--pad) * -1) 0;padding:0 var(--pad);display:grid;grid-auto-flow:column;
+  grid-auto-columns:344px;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;
+  scroll-padding:0 var(--pad);scrollbar-width:none}
+.arr{margin-left:0}
 .rc-b{padding:22px 24px 20px}
 .rc-t{margin-top:14px;font-size:16px;line-height:1.75}
 .rc-by{margin-top:18px;padding-top:14px}
-.rv-more{margin-top:18px}
-.ghost-btn{height:52px;padding:0 30px;font-size:15.5px}
 .src-h{gap:22px}
 .src-logo{width:72px;height:72px;padding:14px}
 .src-t h2{font-size:36px}
@@ -438,13 +439,14 @@ CSS_RM = """
 #site{padding-top:56px}
 .rv-h{display:flex;flex-direction:column;align-items:center;gap:22px}
 .book-pill.write{height:52px;padding:0 26px;font-size:16px}
-.rgrid{margin-top:28px;display:flex;flex-direction:column;gap:14px}
+.rrow{margin:28px calc(var(--pad) * -1) 0;padding:0 var(--pad);display:grid;grid-auto-flow:column;
+  grid-auto-columns:292px;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;
+  scroll-padding:0 var(--pad);scrollbar-width:none}
+.rrow::after{content:"";width:10px}
+.rc-end{padding:24px}
 .rc-b{padding:18px 18px 16px}
-.rc-ph img{max-height:280px}
 .rc-t{margin-top:12px;font-size:16px;line-height:1.75}
 .rc-by{margin-top:14px;padding-top:12px}
-.rv-more{margin-top:18px}
-.ghost-btn{width:100%;height:52px;font-size:15.5px}
 .src-h{flex-direction:column;text-align:center;gap:14px}
 .src-logo{width:64px;height:64px;padding:12px}
 .src-t h2{font-size:30px}
