@@ -135,6 +135,11 @@ def page(title, css, body, width, bg="rgba(16,20,24,.58)"):
 .behind{{position:absolute;inset:0;background:url(hero_waikiki.jpg) center/cover}}
 .scrim{{position:absolute;inset:0;background:{bg}}}
 {css}
+/* 줄바꿈(taste 점검): 제목·짧은 이름은 줄 길이를 고르게, 본문은 마지막 줄에
+   낱말 하나만 떨어지지 않게. 문구는 그대로 두고 끊는 자리만 고른다. */
+h1,h2,h3,h4,b,strong,label,dt,dd{{text-wrap:balance}}
+p,li,blockquote,figcaption{{text-wrap:pretty}}
+.nw{{white-space:nowrap}}
   </style>
 </helmet>
 <div class="page">

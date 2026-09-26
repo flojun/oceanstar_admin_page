@@ -409,6 +409,11 @@ em{font-style:italic;font-weight:400}
                    to{transform:scale(1) translateY(-1.8%)}}
   }
 }
+/* 줄바꿈(taste 점검): 제목·짧은 이름은 줄 길이를 고르게, 본문은 마지막 줄에
+   낱말 하나만 떨어지지 않게. 문구는 그대로 두고 끊는 자리만 고른다. */
+h1,h2,h3,h4,b,strong,label,dt,dd{text-wrap:balance}
+p,li,blockquote,figcaption{text-wrap:pretty}
+p.bal{text-wrap:balance}   /* 히어로 소개처럼 짧은 문단은 줄 길이를 고르게 */
 </style>
 </helmet>
 <div class="page">
@@ -441,7 +446,7 @@ em{font-style:italic;font-weight:400}
         </span>
         <b>누적 리뷰 15,000+ · Since 2019 하와이 최초 개설</b>
       </div>
-      <p>와이키키 앞바다에서 야생 바다거북을 만나는 한국어 스노클링 투어입니다. 51인승 루프탑 보트로 이동하고 해양 전문 한국인 크루가 함께해, 수영을 못해도 참여할 수 있습니다. 거북이 관찰 100% 보장.</p>
+      <p class="bal">와이키키 앞바다에서 야생 바다거북을 만나는 한국어 스노클링 투어입니다. 51인승 루프탑 보트로 이동하고 해양 전문 한국인 크루가 함께해, 수영을 못해도 참여할&nbsp;수 있습니다.<br>거북이 관찰 100% 보장.</p>
       <a href="#" class="book-pill light">바로 예약하기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a>
     </div>
   </div>
@@ -526,7 +531,7 @@ em{font-style:italic;font-weight:400}
   <div class="rv-head rise">
     <div>
       <h2>다녀오신 분들이<br><span class="hl">직접 남긴 후기</span></h2>
-      <p>구글에 남겨주신 후기에서 글과 별점을 그대로 옮겼습니다.
+      <p>구글에 남겨주신 후기에서 글과 별점을 그대로 옮겼습니다.<br>
         이름은 운영 중인 화면과 같은 규칙으로 가립니다.</p>
     </div>
     <div class="rv-sum">
@@ -582,10 +587,10 @@ em{font-style:italic;font-weight:400}
     <div class="faq-left rise">
       <span class="pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> FAQ</span>
       <h2>자주 묻는 <span class="hl">질문</span></h2>
-      <p>가장 많이 주신 질문 여섯 가지입니다. 나머지도 FAQ 페이지에 전부 답해 뒀습니다.</p>
+      <p>가장 많이 주신 질문 여섯 가지입니다.<br>나머지도 FAQ 페이지에 전부 답해 뒀습니다.</p>
       <a href="/kr/faq" class="dark-pill">FAQ 전체 보기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a>
     </div>
-    <ul class="faq-list"><li><a href="/kr/faq"><span>수영을 전혀 못해도 참여할 수 있나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>거북이를 정말 100% 볼 수 있나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>아이들도 탈 수 있나요? 몇 살부터 가능한가요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>픽업은 어디서 하나요? 호텔까지 와주나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>날씨가 나쁘면 어떻게 되나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>취소 및 환불 규정이 어떻게 되나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li></ul>
+    <ul class="faq-list"><li><a href="/kr/faq"><span>수영을 전혀 못해도 참여할&nbsp;수 있나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>거북이를 정말 100% 볼&nbsp;수 있나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>아이들도 탈&nbsp;수 있나요? 몇 살부터 가능한가요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>픽업은 어디서 하나요? 호텔까지 와주나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>날씨가 나쁘면 어떻게 되나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/kr/faq"><span>취소 및 환불 규정이 어떻게 되나요?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li></ul>
   </div>
 </section>
 <footer class="foot">
@@ -599,7 +604,7 @@ em{font-style:italic;font-weight:400}
   <div class="cols rise">
     <div class="c-brand">
       <img src="logo_full.png" alt="오션스타" class="f-logo">
-      <p>하와이 한인 최초 거북이 스노클링 원조. 여행 플랫폼 8,000 리뷰 ·
+      <p>하와이 한인 최초 거북이 스노클링 원조.<br>여행 플랫폼 8,000 리뷰 ·
         구글 5,000 리뷰.</p>
       <a href="#" class="more">오션스타 소개 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a>
     </div>

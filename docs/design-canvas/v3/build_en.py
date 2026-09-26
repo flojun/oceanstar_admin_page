@@ -97,8 +97,8 @@ REPL = [
     # 히어로 본문·신뢰 줄
     ('와이키키 앞바다에서 야생 바다거북을 만나는 한국어 스노클링 투어입니다. '
      '51인승 루프탑 보트로 이동하고 해양 전문 한국인 크루가 함께해, 수영을 못해도 '
-     '참여할 수 있습니다. 거북이 관찰 100% 보장.',
-     'Wild sea turtles off Waikiki, from a 51-seat rooftop boat. '
+     '참여할 수 있습니다.<br>거북이 관찰 100% 보장.',
+     'Wild sea turtles off Waikiki, from a 51-seat rooftop boat.<br>'
      'English-speaking crew swim beside you. Non-swimmers welcome.'),
     ('누적 리뷰 15,000+ · Since 2019 하와이 최초 개설',
      '15,000+ guest reviews. On the water since 2019.'),
@@ -180,9 +180,9 @@ REPL = [
     ('투어 리뷰', 'Reviews'),
     ('다녀오신 분들이', 'From the people'),
     ('직접 남긴 후기', 'who were on the boat'),
-    ('구글에 남겨주신 후기에서 글과 별점을 그대로 옮겼습니다.\n        '
+    ('구글에 남겨주신 후기에서 글과 별점을 그대로 옮겼습니다.<br>\n        '
      '이름은 운영 중인 화면과 같은 규칙으로 가립니다.',
-     'Star ratings and text are copied from Google exactly as written.\n        '
+     'Star ratings and text are copied from Google exactly as written.<br>\n        '
      'Names are masked the same way they are on the live site.'),
     ('Google 리뷰', 'Google reviews'),
     ('구글 맵 리뷰 <b>5,754</b>개 · 2026-09-16 기준',
@@ -225,8 +225,8 @@ REPL = [
     ('유튜브 야노시호 YanoShiho', 'YouTube · YanoShiho'),
 
     # FAQ
-    ('가장 많이 주신 질문 여섯 가지입니다. 나머지도 FAQ 페이지에 전부 답해 뒀습니다.',
-     'The six we are asked most. Everything else is answered in full on the FAQ page.'),
+    ('가장 많이 주신 질문 여섯 가지입니다.<br>나머지도 FAQ 페이지에 전부 답해 뒀습니다.',
+     'The six we are asked most.<br>Everything else is answered in full on the FAQ page.'),
     ('자주 묻는 <span class="hl">질문</span>',
      'Questions we get <span class="hl">a lot</span>'),
     ('FAQ 전체 보기', 'See all FAQs'),
@@ -247,9 +247,9 @@ REPL = [
     ('인스타그램으로 문의하기', 'Ask us on Instagram'),
     ('카카오톡 채널로 문의하기', 'Ask us on KakaoTalk'),
     ('직접 방문한 하와이 맛집 추천', 'Where we eat in Honolulu'),
-    ('하와이 한인 최초 거북이 스노클링 원조. 여행 플랫폼 8,000 리뷰 ·\n        '
+    ('하와이 한인 최초 거북이 스노클링 원조.<br>여행 플랫폼 8,000 리뷰 ·\n        '
      '구글 5,000 리뷰.',
-     'Turtle snorkeling out of Kewalo Basin since 2019.\n        '
+     'Turtle snorkeling out of Kewalo Basin since 2019.<br>\n        '
      '8,000 reviews across travel platforms, 5,000 on Google.'),
     ('오션스타 소개', 'About Oceanstar'),
     ('영업시간 · 연락처', 'Hours and contact'),
@@ -258,7 +258,7 @@ REPL = [
     ('구글 지도로 바로보기', 'Open in Google Maps'),
     ('사업자 정보', 'Business details'),
     ('상호명: Oceanview Activity LLC', 'Company: Oceanview Activity LLC'),
-    ('사업장 소재지: 615 PIKOI ST. STE 811', 'Registered address: 615 Pikoi St, Ste 811'),
+    ('사업장 소재지: 615 PIKOI ST. STE 811', 'Registered address: 615 Pikoi St,&nbsp;Ste&nbsp;811'),
     ('사업자 전화번호: 8083081792', 'Phone: +1 808-308-1792'),
     ('<p>8083081792</p>', '<p>+1 808-308-1792</p>'),
 
@@ -279,6 +279,8 @@ REPL = [
 def build(src_name, out_name, en_css, title):
     src = io.open(os.path.join(HERE, src_name), encoding="utf-8").read()
     head, tail = src.split("</style>", 1)
+    # 한글 판은 "할&nbsp;수" 로 묶어 두었다(줄 머리 '수' 방지). 옮김 표는 보통 띄어쓰기로 찾는다.
+    tail = tail.replace("&nbsp;수 ", " 수 ")
 
     hits = 0
     for old, new in REPL:

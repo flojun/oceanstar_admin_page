@@ -409,6 +409,11 @@ em{font-style:italic;font-weight:400}
                    to{transform:scale(1) translateY(-1.8%)}}
   }
 }
+/* 줄바꿈(taste 점검): 제목·짧은 이름은 줄 길이를 고르게, 본문은 마지막 줄에
+   낱말 하나만 떨어지지 않게. 문구는 그대로 두고 끊는 자리만 고른다. */
+h1,h2,h3,h4,b,strong,label,dt,dd{text-wrap:balance}
+p,li,blockquote,figcaption{text-wrap:pretty}
+p.bal{text-wrap:balance}   /* 히어로 소개처럼 짧은 문단은 줄 길이를 고르게 */
 
 /* ── 영문 조판 레이어 ─────────────────────────────────────────────
    위 규칙은 한글판 그대로 두고 여기서만 덮어쓴다.
@@ -477,7 +482,7 @@ em{font-style:italic;font-weight:400}
         </span>
         <b>15,000+ guest reviews. On the water since 2019.</b>
       </div>
-      <p>Wild sea turtles off Waikiki, from a 51-seat rooftop boat. English-speaking crew swim beside you. Non-swimmers welcome.</p>
+      <p class="bal">Wild sea turtles off Waikiki, from a 51-seat rooftop boat.<br>English-speaking crew swim beside you. Non-swimmers welcome.</p>
       <a href="#" class="book-pill light">Book a tour <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a>
     </div>
   </div>
@@ -562,7 +567,7 @@ em{font-style:italic;font-weight:400}
   <div class="rv-head rise">
     <div>
       <h2>From the people<br><span class="hl">who were on the boat</span></h2>
-      <p>Star ratings and text are copied from Google exactly as written.
+      <p>Star ratings and text are copied from Google exactly as written.<br>
         Names are masked the same way they are on the live site.</p>
     </div>
     <div class="rv-sum">
@@ -618,7 +623,7 @@ em{font-style:italic;font-weight:400}
     <div class="faq-left rise">
       <span class="pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> FAQ</span>
       <h2>Questions we get <span class="hl">a lot</span></h2>
-      <p>The six we are asked most. Everything else is answered in full on the FAQ page.</p>
+      <p>The six we are asked most.<br>Everything else is answered in full on the FAQ page.</p>
       <a href="/en/faq" class="dark-pill">See all FAQs <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a>
     </div>
     <ul class="faq-list"><li><a href="/en/faq"><span>Can I join if I cannot swim at all?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/en/faq"><span>What languages does the crew speak?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/en/faq"><span>Can children join? What is the minimum age?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/en/faq"><span>Where is pickup? Do you come to my hotel?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/en/faq"><span>What happens if the weather is bad?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/en/faq"><span>What is the cancellation and refund policy?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li></ul>
@@ -635,7 +640,7 @@ em{font-style:italic;font-weight:400}
   <div class="cols rise">
     <div class="c-brand">
       <img src="logo_full.png" alt="Oceanstar" class="f-logo">
-      <p>Turtle snorkeling out of Kewalo Basin since 2019.
+      <p>Turtle snorkeling out of Kewalo Basin since 2019.<br>
         8,000 reviews across travel platforms, 5,000 on Google.</p>
       <a href="#" class="more">About Oceanstar <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a>
     </div>
@@ -653,7 +658,7 @@ em{font-style:italic;font-weight:400}
     <div>
       <span class="c-h">Business details</span>
       <p>Company: Oceanview Activity LLC</p>
-      <p>Registered address: 615 Pikoi St, Ste 811</p>
+      <p>Registered address: 615 Pikoi St,&nbsp;Ste&nbsp;811</p>
       <p>Phone: +1 808-308-1792</p>
     </div>
   </div>

@@ -337,7 +337,7 @@ CSS_COMMON = """
 .gy-sk{background:#fff;border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;gap:12px}
 .sk{display:block;height:12px;border-radius:6px;background:var(--soft)}
 .sk.w40{width:40%}.sk.w60{width:60%}.sk.w80{width:80%}.sk.w90{width:90%}
-.gy-note{text-align:center;font-size:14.5px;font-weight:600;color:var(--muted)}
+.gy-note{text-wrap:balance;text-align:center;font-size:14.5px;font-weight:600;color:var(--muted)}
 /* 후기 작성 창 */
 .board-modal{position:relative;overflow:hidden}
 .dim{position:absolute;inset:0;background:rgba(16,20,24,.58);z-index:20}
@@ -502,7 +502,7 @@ def build(mobile, write=False):
   </style>
 </helmet>
 <div class="page reviews">
-{page(mobile, write)}
+{D.bind_su(page(mobile, write))}
 </div>
 </x-dc>
 </body>

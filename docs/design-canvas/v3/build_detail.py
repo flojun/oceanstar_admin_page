@@ -155,6 +155,12 @@ svg{flex:none}
   -webkit-font-smoothing:antialiased}
 h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);letter-spacing:-.035em}
 .hl{color:var(--sea-d)}
+/* 줄바꿈(taste 점검): 제목·짧은 이름은 줄 길이를 고르게, 본문은 마지막 줄에
+   낱말 하나만 떨어지지 않게. 문구는 그대로 두고 끊는 자리만 고른다. */
+h1,h2,h3,h4,b,strong,label,dt,dd{text-wrap:balance}
+p,li,blockquote,figcaption{text-wrap:pretty}
+.nw{white-space:nowrap}
+.mc p,.end p,.pure span{text-wrap:balance}
 
 /* 알약 */
 .pill{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 16px;
@@ -594,7 +600,7 @@ CSS_M = BASE + """
 /* 모바일 — 섹션 머리(제목+설명)는 가운데(운영자 요청, 랜딩과 같게). 여섯 칸
    특징 표는 아이콘 자리는 그대로 두고 글만 가운데로. */
 .sh,.hl-h{text-align:center}
-.sh .lede{margin-left:auto;margin-right:auto}
+.sh .lede{margin-left:auto;margin-right:auto;text-wrap:balance}   /* 가운데 정렬 글은 줄 길이를 고르게 */
 .inc.n6 .inc-h h3{align-self:stretch;text-align:center}
 .inc.n6 .inc-c p{text-align:center;word-break:keep-all;text-wrap:balance}
 
@@ -980,6 +986,19 @@ CSS_M = BASE + """
 """
 
 
+def _bind_text(t):
+    t = re.sub(r'(?<=[가-힣]) 수 (?=[있없])', '&nbsp;수 ', t)                 # 할 수 있다
+    t = re.sub(r'(?<=[월화수목금토일]) - (?=[월화수목금토일])', '&nbsp;-&nbsp;', t)  # 월 - 금
+    t = re.sub(r'(?<=\d:\d\d) - (?=\d{1,2}:\d\d)', '&nbsp;-&nbsp;', t)         # 09:00 - 10:00
+    return t
+
+
+def bind_su(html):
+    """줄 머리·줄 끝에서 떨어지면 어색한 묶음을 붙여 둔다(태그 밖 글자에만).
+    '할 수 있/없' 의 '수', 요일 범위 '월 - 금', 시간 범위 '09:00 - 10:00'."""
+    return re.sub(r'(>[^<]*)', lambda m: _bind_text(m.group(1)), html)
+
+
 # ── 조각 ─────────────────────────────────────────────────────────────
 def nav(mobile):
     if mobile:
@@ -1363,7 +1382,7 @@ def build(mobile):
   </style>
 </helmet>
 <div class="page{" " + C.THEME if hasattr(C, "THEME") else ""}">
-{body}
+{bind_su(body)}
 </div>
 </x-dc>
 </body>

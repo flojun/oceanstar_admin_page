@@ -421,7 +421,7 @@ def combo_body(mobile, kind="marine"):
                 + chip(4, "두 활동이 서로 다른 날에 열립니다") + "</div>")
         sec_name, sec_rule = "서핑 강습", "[운영 시간 확정 필요]"
         sec_sel, sec_blocked = 21, PAST
-        sec_note = ("※ 서핑의 운휴 요일은 아직 받지 못했습니다. 지금은 스노클링과 "
+        sec_note = ("※ 서핑의 운휴 요일은 아직 받지 못했습니다.<br>지금은 스노클링과 "
                     "같은 날만 막아 두었습니다.")
     else:
         head = (f'<div class="grp">{glab(T["step1"])}'
@@ -448,8 +448,8 @@ def combo_body(mobile, kind="marine"):
           <div class="ahead"><span class="ano">2</span>
             <b>{sec_name}</b><i>{sec_rule}</i></div>
           <div class="abody">
-            <p class="recalc">스노클링 날짜와 <b>같은 날은 고를 수 없습니다.</b>
-              달력에서 ✕ 로 표시한 10월 17일입니다.</p>
+            <p class="recalc">스노클링 날짜와 <b>같은 날은 고를 수 없습니다.</b><br>
+              달력에서 <span class="nw">✕ 로</span> 표시한 10월 17일입니다.</p>
             {month_grid(sel=sec_sel, blocked=sec_blocked, cell=cell, note=sec_note,
                         clash=17)}
             <div class="asub">{stay_fields()}</div>

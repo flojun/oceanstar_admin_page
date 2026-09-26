@@ -371,6 +371,10 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
     .strip>span:nth-child(4){animation-range:entry 15% cover 31%}
   }
 }
+/* 줄바꿈(taste 점검): 제목·짧은 이름은 줄 길이를 고르게, 본문은 마지막 줄에
+   낱말 하나만 떨어지지 않게. 문구는 그대로 두고 끊는 자리만 고른다. */
+h1,h2,h3,h4,b,strong,label,dt,dd{text-wrap:balance}
+p,li,blockquote,figcaption{text-wrap:pretty}
 
 /* ── 영문 조판 레이어 ─────────────────────────────────────────────
    데스크탑 판과 같은 이유로 덮어쓴다. 375px 에서는 한 줄에 들어가는 글자 수가
@@ -535,7 +539,7 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
 <section class="sect center faq">
   <span class="pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> FAQ</span>
   <h2>Questions we get <span class="hl">a lot</span></h2>
-  <p>The six we are asked most. Everything else is answered in full on the FAQ page.</p>
+  <p>The six we are asked most.<br>Everything else is answered in full on the FAQ page.</p>
   <ul class="faq-list"><li><a href="/en/faq"><span>Can I join if I cannot swim at all?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/en/faq"><span>What languages does the crew speak?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/en/faq"><span>Can children join? What is the minimum age?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/en/faq"><span>Where is pickup? Do you come to my hotel?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/en/faq"><span>What happens if the weather is bad?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li><li><a href="/en/faq"><span>What is the cancellation and refund policy?</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a></li></ul>
   <a href="/en/faq" class="dark-pill faq-all">See all FAQs <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"></path></svg></a>
 </section>
@@ -557,7 +561,7 @@ h1,h2,h3,h4{font-family:'SUIT',system-ui,sans-serif;color:var(--ink);
     <div>
       <span class="c-h">Business details</span>
       <p>Company: Oceanview Activity LLC</p>
-      <p>Registered address: 615 Pikoi St, Ste 811</p>
+      <p>Registered address: 615 Pikoi St,&nbsp;Ste&nbsp;811</p>
       <p>Phone: +1 808-308-1792</p>
     </div>
   </div>
