@@ -340,6 +340,15 @@ CSS_D = BASE + """
 .cb ul{align-self:stretch;margin-top:22px;border-top:1px solid var(--line)}
 .cb li{padding:13px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--text)}
 .cb .book-pill{margin-top:28px}
+/* 예약 버튼은 글자를 가운데, 화살표 원은 오른쪽 끝에(운영자). 좌우 여백을 같게 두어
+   폭이 글자만큼인 버튼도 글자가 가운데 온다. */
+.cb .book-pill,.buy-r .book-pill,.end .book-pill{position:relative;justify-content:center;padding:0 56px}
+.cb .book-pill svg,.buy-r .book-pill svg,.end .book-pill svg{position:absolute;right:10px;top:50%;
+  transform:translateY(-50%)}
+/* 카드 안 버튼은 폭을 가득 채워 가운데 글자가 제자리에 보이게(모바일·가격 박스와 같게). */
+.cb .book-pill{align-self:stretch;height:54px;font-size:16px}
+.combo.n1 .cb .book-pill{justify-self:stretch}
+.end .book-pill{min-width:260px;height:54px}
 .combo.n3{grid-template-columns:repeat(3,1fr);gap:18px}
 .combo.n3 .cb{padding:32px 32px 30px}
 /* 상품이 하나뿐이면 반쪽 카드가 비어 보인다. 한 장을 가로로 눕혀 왼쪽은 이름·가격,
@@ -1217,7 +1226,7 @@ def combo(mobile):
         f'<article class="cb rise"><span class="act-tag">{tag}</span><h3>{t}</h3>'
         f'{cb_price(tag)}'
         f'<ul>{"".join(f"<li>{x}</li>" for x in lines)}</ul>'
-        f'<a href="#" class="book-pill">{tag} 예약하기 {I_ARROW}</a></article>'
+        f'<a href="#" class="book-pill">예약하기 {I_ARROW}</a></article>'
         for tag, t, lines in C.COMBOS)
     n3 = len(C.COMBOS) == 3
     n1 = len(C.COMBOS) == 1
