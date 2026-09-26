@@ -1001,7 +1001,7 @@ def hero(mobile):
     <span class="rev">{I_STAR} {h['badge']}</span>
   </div>
 </section>
-<section class="buy rise">
+<section class="buy">
   <dl class="facts">{''.join(f'<div><dt>{k}</dt><dd>{v}</dd></div>' for k, v in h['facts'])}</dl>
   <div class="buy-r">
     <b class="amt n">{h['price']}</b>
