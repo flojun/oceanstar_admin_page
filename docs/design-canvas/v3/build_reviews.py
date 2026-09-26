@@ -424,8 +424,12 @@ CSS_RD = """
 
 CSS_RM = """
 .rv-hero{height:452px}
-.rv-hero .hero-img{object-position:50% 40%}   /* 제목·로고 줄은 늘린 하늘 위, 두 사람 얼굴은 그 아래 */
-.rv-hero .hero-in{top:150px;text-align:center}
+/* 글은 내비 바로 아래로 올리고(운영자 요청), 사진도 함께 올려 두 사람이 탭 줄에
+   눌리지 않게 한다. 글 뒤가 흰 구름이라 글 자리만 덮개를 짙게 하고 그림자를 준다. */
+.rv-hero .hero-img{object-position:50% 70%}
+.rv-hero .veil{background:linear-gradient(180deg,rgba(9,16,22,.62) 0%,rgba(9,16,22,.6) 57%,
+  rgba(9,16,22,.24) 72%,rgba(9,16,22,.14) 84%,rgba(9,16,22,.5) 100%)}
+.rv-hero .hero-in{top:88px;text-align:center;text-shadow:0 1px 14px rgba(9,16,22,.45)}
 .rv-hero .hero-in h1{font-size:40px}
 .rv-sub{margin-top:12px;font-size:16.5px;line-height:1.7}
 .loved{justify-content:center;flex-wrap:wrap;gap:8px 10px;margin-top:20px}
