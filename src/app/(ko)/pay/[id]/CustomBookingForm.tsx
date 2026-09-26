@@ -46,13 +46,13 @@ const COPY = {
         closedTitle: "이미 결제가 완료된 링크입니다.",
         closedBody: "결제하지 않으셨다면 오션스타로 문의해 주세요.",
         pickupNotice: "픽업 시간은 예약 확정 후 별도로 안내드립니다.",
-        paxUnit: "명",
+        paxPlaceholder: "예: 8",
     },
     en: {
         heading: "Booking details",
         lead: "Please fill in your details before paying.",
         name: "Full name", contact: "Phone", email: "Email",
-        date: "Tour date", pax: "Guests", option: "Option",
+        date: "Tour date", pax: "Number of guests", option: "Option",
         time: "Preferred time", timeHint: "(optional)",
         address: "Hotel or address", addressHint: "We will find your nearest pickup point",
         addressPlaceholder: "Enter your hotel name or address",
@@ -68,7 +68,7 @@ const COPY = {
         closedTitle: "This payment link has already been used.",
         closedBody: "If you have not paid yet, please contact Ocean Star.",
         pickupNotice: "Pickup time will be sent separately once your booking is confirmed.",
-        paxUnit: "guests",
+        paxPlaceholder: "e.g. 8",
     },
 } as const;
 
@@ -112,9 +112,13 @@ export default function CustomBookingForm({
             .then((r) => r.json())
             .then((d) => setPickupLocations(d.pickupLocations ?? d ?? []))
             .catch(() => { /* 목록을 못 받아도 직접 선택은 가능하다 */ });
+        // 맞춤 링크는 프라이빗 차터 전용이다. 다른 옵션은 정규 예약 페이지에서
+        // 받는다. tour_settings 에서 이름을 읽어 오므로 이름을 바꿔도 따라간다.
         fetch("/api/settings")
             .then((r) => r.json())
-            .then((d) => setTourOptions((d.tourSettings ?? d ?? []).filter((x: TourOption) => x.is_active !== false)))
+            .then((d) => setTourOptions(
+                (d.tourSettings ?? d ?? []).filter((x: TourOption) => x.tour_id === "private"),
+            ))
             .catch(() => { /* 옵션을 못 받으면 선택지가 빈다 */ });
     }, []);
 
@@ -234,7 +238,7 @@ export default function CustomBookingForm({
                         <div>
                             <label className={LABEL}>{t.pax}</label>
                             <input type="number" min="1" step="1" value={pax} disabled={running}
-                                placeholder={t.paxUnit}
+                                placeholder={t.paxPlaceholder}
                                 onChange={(e) => setPax(e.target.value)} className={FIELD} />
                         </div>
                         <div>
@@ -244,7 +248,7 @@ export default function CustomBookingForm({
                                 <option value="">{t.select}</option>
                                 {tourOptions.map((x) => (
                                     <option key={x.tour_id} value={x.tour_id}>
-                                        {lang === "en" ? (x.name_en || x.name) : x.name}
+                                        {lang === "en" ? (x.name_en || "Private Charter") : x.name}
                                     </option>
                                 ))}
                             </select>
