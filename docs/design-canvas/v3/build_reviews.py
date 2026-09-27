@@ -138,10 +138,11 @@ def site_card(r, long_cut=150):
         ph = (f'<figure class="rc-ph"><img src="{photos[0]}" alt="{mask(name)} 님이 올린 투어 사진">'
               f'{extra}</figure>')
     more = '<button class="more">더보기</button>' if len(body) > long_cut else ""
-    q = "" if photos else '<span class="rq" aria-hidden="true">“</span>'
-    return (f'<article class="rc{"" if photos else " tx"}">{ph}<div class="rc-b">'
+    # 사진이 있든 없든 같은 순서: 별점 줄 → (사진) → 글 → 이름. 별점과 '예약 확인 후기'는
+    # 모든 카드에서 같은 높이에 선다(운영자 요청).
+    return (f'<article class="rc{"" if photos else " tx"}"><div class="rc-b">'
             f'<div class="rc-top">{stars()}<span class="ok">{I_SHIELD}예약 확인 후기</span></div>'
-            f'<div class="rc-m">{q}<p class="rc-t{" clamp" if more else ""}">{br(body)}</p>{more}</div>'
+            f'{ph}<div class="rc-m"><p class="rc-t{" clamp" if more else ""}">{br(body)}</p>{more}</div>'
             f'<div class="rc-by"><b>{mask(name)}</b><span class="n">{date}</span></div>'
             f'</div></article>')
 
@@ -186,6 +187,15 @@ def tabs():
             '<a href="#gyg">GetYourGuide</a></nav>')
 
 
+def carousel(cls, cards, mobile, what):
+    """옆으로 넘기는 줄. 넘김 버튼은 줄의 왼쪽·오른쪽 끝, 세로 가운데(운영자 요청)."""
+    if mobile:
+        return f'<div class="{cls} rise">{cards}</div>'
+    return (f'<div class="car rise"><button class="car-b l" aria-label="이전 {what}">{I_LEFT}</button>'
+            f'<div class="{cls}">{cards}</div>'
+            f'<button class="car-b r" aria-label="다음 {what}">{I_RIGHT}</button></div>')
+
+
 def site_sec(mobile):
     """홈페이지 후기. 구글 리뷰와 같이 옆으로 넘겨 보는 한 줄(운영자 요청).
     앞 9건을 싣고, 줄 끝 칸에서 나머지 후기로 넘어간다."""
@@ -194,29 +204,23 @@ def site_sec(mobile):
     rest = len(SITE) - n
     end = (f'<a href="#" class="rc-end"><b>후기 {rest}개 더 보기</b>'
            f'<span>전체 후기를 최신순으로 볼 수 있어요</span>{I_ARROW}</a>')
-    arrows = ("" if mobile else
-              f'<div class="arr"><button aria-label="이전 후기">{I_LEFT}</button>'
-              f'<button aria-label="다음 후기">{I_RIGHT}</button></div>')
     return (f'<section class="sect" id="site">'
             f'<div class="rv-h"><div class="sh"><h2>홈페이지 후기</h2>'
             f'<p class="lede">오션스타에서 예약하고 다녀오신 분만 남길 수 있어요.<br>'
             f'예약번호로 한 번 더 확인한 후기입니다.</p></div>'
-            f'<div class="rv-act"><a href="#" class="book-pill write">{I_PEN}후기 작성하기</a>{arrows}</div></div>'
-            f'<div class="rrow rise">{cards}{end}</div>'
+            f'<div class="rv-act"><a href="#" class="book-pill write">{I_PEN}후기 작성하기</a></div></div>'
+            f'{carousel("rrow", cards + end, mobile, "후기")}'
             f'</section>')
 
 
 def google_sec(mobile):
     cards = "".join(google_card(r) for r in GOOGLE)
-    arrows = ("" if mobile else
-              f'<div class="arr"><button aria-label="이전 리뷰">{I_LEFT}</button>'
-              f'<button aria-label="다음 리뷰">{I_RIGHT}</button></div>')
     return (f'<section class="sect" id="google">'
             f'<div class="src-h"><img src="plat_google.png" alt="Google" class="src-logo">'
             f'<div class="src-t"><h2>구글 리뷰</h2>'
             f'<p><b class="n">4.9</b>{stars()}<span>구글 맵 기준 <b class="n">5,000+</b>개의 실제 고객 리뷰</span></p></div>'
-            f'<a href="{GOOGLE_URL}" class="src-go">구글에서 전체 리뷰 보기 {I_ARROW}</a>{arrows}</div>'
-            f'<div class="grow rise">{cards}</div></section>')
+            f'<a href="{GOOGLE_URL}" class="src-go">구글에서 전체 리뷰 보기 {I_ARROW}</a></div>'
+            f'{carousel("grow", cards, mobile, "리뷰")}</section>')
 
 
 def gyg_sec(mobile):
@@ -282,15 +286,10 @@ CSS_COMMON = """
 .rc-b{flex:1;display:flex;flex-direction:column}
 .rc-by{margin-top:auto!important}
 .rc-t{margin-bottom:18px}
-.rc-t.clamp{-webkit-line-clamp:4}
-/* 사진 없는 후기는 글이 주인공 — 크게, 따옴표 하나로 빈 자리를 읽을 거리로 바꾼다. */
-.rc.tx .rc-t{font-size:18px;line-height:1.75;font-weight:600;letter-spacing:-.01em}
-.rc.tx .rc-t.clamp{-webkit-line-clamp:8}
-/* 글 칸은 별점과 이름 사이 남는 높이의 가운데에 둔다. */
-.rc.tx .rc-m{flex:1;display:flex;flex-direction:column;justify-content:center;padding:6px 0 22px}
-.rc.tx .rc-t{margin-top:0;margin-bottom:0}
-.rq{display:block;height:30px;font-family:'SUIT',system-ui,sans-serif;font-size:60px;
-  font-weight:800;line-height:.9;color:var(--sky)}
+.rc-t.clamp{-webkit-line-clamp:5}
+/* 사진은 별점 줄 아래, 카드 안쪽에 둥근 틀로. 글은 사진 유무와 상관없이 같은 크기. */
+.rc-ph{margin-top:14px;border-radius:14px;overflow:hidden}
+.rc-t{font-weight:500}
 .rc-ph img{aspect-ratio:16 / 10;height:auto;max-height:none!important}
 /* 줄 끝 칸 — 나머지 후기로 */
 .rc-end{display:flex;flex-direction:column;justify-content:center;gap:8px;padding:28px;border-radius:22px;
@@ -301,7 +300,7 @@ CSS_COMMON = """
   color:var(--ink);box-sizing:border-box}
 .rv-act{display:flex;align-items:center;gap:14px}
 .rc-ph{position:relative}
-.rc-ph img{width:100%;height:auto;max-height:340px;object-fit:cover}
+.rc-ph img{width:100%;object-fit:cover}
 .ph-n{position:absolute;right:12px;bottom:12px;height:28px;padding:0 11px;border-radius:999px;
   display:inline-flex;align-items:center;background:rgba(16,20,24,.62);color:#fff;
   font-size:13px;font-weight:700}
@@ -397,9 +396,16 @@ CSS_RD = """
 .rrow{margin:44px calc(var(--pad) * -1) 0;padding:0 var(--pad);display:grid;grid-auto-flow:column;
   grid-auto-columns:344px;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;
   scroll-padding:0 var(--pad);scrollbar-width:none}
-.arr{margin-left:0}
 .rc-b{padding:22px 24px 20px}
-.rc-t{margin-top:14px;font-size:16px;line-height:1.75}
+.rc-t{margin-top:16px;font-size:17px;line-height:1.75}
+/* 넘김 버튼 — 줄의 양쪽 가장자리, 세로 가운데. 페이지 여백 안에 반쯤 걸친다. */
+.car{position:relative}
+.car-b{position:absolute;top:50%;z-index:3;display:inline-flex;align-items:center;justify-content:center;
+  width:52px;height:52px;margin-top:-26px;border-radius:50%;border:1px solid var(--line);background:#fff;
+  color:var(--ink);box-shadow:0 6px 18px rgba(16,20,24,.12);cursor:pointer}
+/* 페이지 양쪽 여백 안, 화면 가장자리에서 14px. 줄이 화면 끝까지 흐르므로 오른쪽은 걸친 카드 위에 선다. */
+.car-b.l{left:calc(14px - var(--pad))}
+.car-b.r{right:calc(14px - var(--pad))}
 .rc-by{margin-top:18px;padding-top:14px}
 .src-h{gap:22px}
 .src-logo{width:72px;height:72px;padding:14px}
@@ -407,9 +413,6 @@ CSS_RD = """
 .src-t p{font-size:16px}
 .src-t p > b{font-size:22px}
 .src-go{margin-left:auto;font-size:15.5px}
-.arr{display:flex;gap:8px;margin-left:14px}
-.arr button{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;
-  border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--ink)}
 .grow{margin:36px calc(var(--pad) * -1) 0;padding:0 var(--pad);display:grid;
   grid-auto-flow:column;grid-auto-columns:388px;gap:20px;overflow-x:auto;scrollbar-width:none}
 .gc{padding:24px 26px}
@@ -454,7 +457,7 @@ CSS_RM = """
 .rrow::after{content:"";width:10px}
 .rc-end{padding:24px}
 .rc-b{padding:18px 18px 16px}
-.rc-t{margin-top:12px;font-size:16px;line-height:1.75}
+.rc-t{margin-top:14px;font-size:16px;line-height:1.75}
 .rc-by{margin-top:14px;padding-top:12px}
 .src-h{flex-direction:column;text-align:center;gap:14px}
 .src-logo{width:64px;height:64px;padding:12px}
