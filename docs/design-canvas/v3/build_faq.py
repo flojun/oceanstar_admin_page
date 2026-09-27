@@ -320,5 +320,5 @@ def build(mobile, lang):
 OUT = [build(m, "ko") for m in (False, True)]
 D.embed_fonts_exact(OUT)
 OUT_EN = [build(m, "en") for m in (False, True)]
-D.embed_fonts_exact(OUT_EN)
+D.embed_fonts_en(OUT_EN)
 D.C = _detail_ko

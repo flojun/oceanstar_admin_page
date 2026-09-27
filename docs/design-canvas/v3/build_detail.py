@@ -1477,8 +1477,39 @@ def visible_text(html):
     return html + " " + keep
 
 
-def embed_fonts(files):
+def _glyph_text(chars):
+    """서브셋에 넣을 글자. 띄어쓰기(U+0020)와 붙는 빈칸(U+00A0)은 isspace() 라서 예전엔
+    빠졌고, 그 탓에 모든 보드의 빈칸만 시스템 글꼴 폭으로 그려져 낱말 사이가 벌어졌다."""
+    return "".join(sorted(c for c in chars if (c in "  ") or
+                          (c.isprintable() and not c.isspace() and ord(c) < 0x1F000)))
+
+
+def _subset_b64(src, text):
     import base64, subprocess, sys, tempfile
+    out = os.path.join(tempfile.mkdtemp(), "f.woff2")
+    subprocess.run([sys.executable, "-m", "fontTools.subset", src, "--text=" + text,
+                    "--flavor=woff2", "--layout-features=*", "--no-hinting", "--desubroutinize",
+                    "--output-file=" + out], check=True, capture_output=True)
+    return base64.b64encode(open(out, "rb").read()).decode()
+
+
+def _face(family, weight, b64):
+    return ("@font-face{font-family:'%s';font-style:normal;font-weight:%s;"
+            "font-display:block;src:url(data:font/woff2;base64,%s) format('woff2')}"
+            % (family, weight, b64))
+
+
+def _write_block(files, css):
+    block = "/*__FONTS__*/" + "".join(css) + "/*__FONTS_END__*/"
+    for f in files:
+        p = os.path.join(HERE, f)
+        s = io.open(p, encoding="utf-8").read()
+        s = re.sub(r"/\*__FONTS__\*/.*?/\*__FONTS_END__\*/", lambda m: block, s, flags=re.S)
+        io.open(p, "w", encoding="utf-8").write(s)
+    return block
+
+
+def embed_fonts(files):
     try:
         import fontTools  # noqa: F401
     except ImportError:
@@ -1487,25 +1518,10 @@ def embed_fonts(files):
     chars = set(BASE_CHARS)
     for f in files:
         chars |= set(visible_text(io.open(os.path.join(HERE, f), encoding="utf-8").read()))
-    text = "".join(sorted(c for c in chars if c.isprintable() and not c.isspace()
-                          and ord(c) < 0x1F000))
-    css, tmp = [], tempfile.mkdtemp()
-    for fname, family, weight in FACES:
-        out = os.path.join(tmp, fname)
-        subprocess.run([sys.executable, "-m", "fontTools.subset",
-                        os.path.join(FONTDIR, fname), "--text=" + text, "--flavor=woff2",
-                        "--layout-features=*", "--no-hinting", "--desubroutinize",
-                        "--output-file=" + out], check=True, capture_output=True)
-        b64 = base64.b64encode(open(out, "rb").read()).decode()
-        css.append("@font-face{font-family:'%s';font-style:normal;font-weight:%d;"
-                   "font-display:block;src:url(data:font/woff2;base64,%s) format('woff2')}"
-                   % (family, weight, b64))
-    block = "/*__FONTS__*/" + "".join(css) + "/*__FONTS_END__*/"
-    for f in files:
-        p = os.path.join(HERE, f)
-        s = io.open(p, encoding="utf-8").read()
-        s = re.sub(r"/\*__FONTS__\*/.*?/\*__FONTS_END__\*/", lambda m: block, s, flags=re.S)
-        io.open(p, "w", encoding="utf-8").write(s)
+    text = _glyph_text(chars)
+    css = [_face(family, weight, _subset_b64(os.path.join(FONTDIR, fname), text))
+           for fname, family, weight in FACES]
+    block = _write_block(files, css)
     print(f"폰트: 글자 {len(text)}자, 블록 {len(block) // 1024} KB")
 
 
@@ -1527,7 +1543,7 @@ def embed_fonts_exact(files):
     """embed_fonts 와 같되, 글꼴마다 그 글꼴로 실제로 그려지는 글자만 담는다.
     글자는 브라우저에서 잰다(font_usage.mjs). 본문 글자가 제목용 SUIT 에까지 들어가지
     않아 보드가 훨씬 가볍다. 브라우저가 없으면 embed_fonts 로 물러선다."""
-    import base64, json, subprocess, sys, tempfile
+    import json, subprocess
     try:
         import fontTools  # noqa: F401
         r = subprocess.run(["node", os.path.join(HERE, "font_usage.mjs"), *files],
@@ -1544,29 +1560,54 @@ def embed_fonts_exact(files):
         fam, wt = key.rsplit(" ", 1)
         if fam in have:
             per[(fam, _pick_weight(int(wt), have[fam]))] |= set(chars)
-    css, tmp, total = [], tempfile.mkdtemp(), 0
+    css, total = [], 0
     for fname, family, weight in FACES:
-        text = "".join(sorted(c for c in per[(family, weight)]
-                              if c.isprintable() and not c.isspace() and ord(c) < 0x1F000))
+        text = _glyph_text(per[(family, weight)])
         total += len(text)
-        out = os.path.join(tmp, fname)
-        subprocess.run([sys.executable, "-m", "fontTools.subset",
-                        os.path.join(FONTDIR, fname), "--text=" + text, "--flavor=woff2",
-                        "--layout-features=*", "--no-hinting", "--desubroutinize",
-                        "--output-file=" + out], check=True, capture_output=True)
-        b64 = base64.b64encode(open(out, "rb").read()).decode()
-        css.append("@font-face{font-family:'%s';font-style:normal;font-weight:%d;"
-                   "font-display:block;src:url(data:font/woff2;base64,%s) format('woff2')}"
-                   % (family, weight, b64))
-    block = "/*__FONTS__*/" + "".join(css) + "/*__FONTS_END__*/"
+        css.append(_face(family, weight, _subset_b64(os.path.join(FONTDIR, fname), text)))
+    block = _write_block(files, css)
+    print(f"폰트(글꼴별): 글자 {total}자, 블록 {len(block) // 1024} KB")
+
+
+# 영문 보드 글꼴 — Plus Jakarta Sans(운영자 선택, SIL OFL · fonts/OFL-PlusJakartaSans.txt).
+# 가변 글꼴 한 벌(200~800)로 제목 · 본문을 모두 그린다. 한글 보드는 SUIT · Pretendard 그대로.
+# 글꼴 이름표를 'Plus Jakarta Sans','SUIT' 처럼 앞에 끼워 넣으므로, Jakarta 에 없는 글자
+# (내비의 '한국어', ₩, 화살표 등)는 뒤의 SUIT · Pretendard 로 그려진다 — 그 글자만 따로 잘라 심는다.
+EN_FONT = ("PlusJakartaSans-latin.woff2", "Plus Jakarta Sans")
+EN_TRACK = "/*__EN_TRACK__*/h1,h2,h3,h4{letter-spacing:-.03em!important}"   # 한글용 -.035em 보다 한 단계 풀어 줌
+
+
+def embed_fonts_en(files):
+    try:
+        from fontTools.ttLib import TTFont
+    except ImportError:
+        print("fontTools 없음 — 영문 글꼴을 넣지 않는다")
+        return
+    fam = EN_FONT[1]
+    chars = set(BASE_CHARS)
     for f in files:
         p = os.path.join(HERE, f)
         s = io.open(p, encoding="utf-8").read()
-        s = re.sub(r"/\*__FONTS__\*/.*?/\*__FONTS_END__\*/", lambda m: block, s, flags=re.S)
-        io.open(p, "w", encoding="utf-8").write(s)
-    print(f"폰트(글꼴별): 글자 {total}자, 블록 {len(block) // 1024} KB")
+        # 글꼴 블록은 자리만 남기고 비운다(이름표 바꾸기에 걸리지 않게). 아래에서 다시 채운다.
+        body = re.sub(r"/\*__FONTS__\*/.*?/\*__FONTS_END__\*/", "/*__FONTS__*//*__FONTS_END__*/", s, flags=re.S)
+        body = re.sub(rf"(?<!{fam}',)'(SUIT|Pretendard)',system-ui", rf"'{fam}','\1',system-ui", body)
+        if EN_TRACK not in body:
+            body = body.replace("</style>", EN_TRACK + "</style>", 1)
+        io.open(p, "w", encoding="utf-8").write(body)
+        chars |= set(visible_text(body))
+        chars |= set(" ".join(re.findall(r'(?:placeholder|value)="([^"]*)"', body)))
+    src = os.path.join(FONTDIR, EN_FONT[0])
+    cmap = TTFont(src).getBestCmap()
+    latin = _glyph_text(c for c in chars if ord(c) in cmap)
+    rest = _glyph_text(c for c in chars if ord(c) not in cmap and not c.isspace())
+    css = [_face(fam, "200 800", _subset_b64(src, latin))]
+    if rest:
+        css += [_face(family, weight, _subset_b64(os.path.join(FONTDIR, fname), rest))
+                for fname, family, weight in FACES]
+    block = _write_block(files, css)
+    print(f"영문 글꼴: Jakarta {len(latin)}자 + 한글 글꼴 {len(rest)}자({rest}), 블록 {len(block) // 1024} KB")
 
 
 embed_fonts(BUILT)
 if BUILT_EN:
-    embed_fonts(BUILT_EN)      # 영문 보드는 영문 글자만으로 따로 자른다
+    embed_fonts_en(BUILT_EN)

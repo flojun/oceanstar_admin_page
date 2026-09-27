@@ -574,3 +574,10 @@ build("C", False, "시안 1 · 콤보 · 패러세일링/제트스키 — 데스
 build("C", True,  "시안 1 · 콤보 · 패러세일링/제트스키 — 모바일",   "Sian1C_M.dc.html")
 build("D", False, "시안 1 · 콤보 · 서핑 — 데스크탑", "Sian1D.dc.html")
 build("D", True,  "시안 1 · 콤보 · 서핑 — 모바일",   "Sian1D_M.dc.html")
+
+# 폰트 — 모달 보드는 랜딩(SianB)의 글꼴 블록을 빌려 쓴다(_sian1_base.fonts). 그 블록을
+# 랜딩 두 장과 모달 여덟 장에 실제로 그려지는 글자로 다시 잘라 열 장 모두에 심는다.
+# 예전 블록엔 띄어쓰기 글자가 빠져 빈칸만 시스템 글꼴 폭으로 그려졌다.
+import build_detail as D      # 불러오면 상세 보드도 다시 찍힌다(결과는 같다)
+D.embed_fonts_exact(["SianB.dc.html", "SianB_M.dc.html"]
+                    + [f"Sian1{s}{m}.dc.html" for s in "ABCD" for m in ("", "_M")])

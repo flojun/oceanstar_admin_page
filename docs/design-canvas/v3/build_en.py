@@ -307,3 +307,7 @@ def build(src_name, out_name, en_css, title):
 
 build("SianB.dc.html", "SianB_EN.dc.html", EN_CSS_DESK, "시안 B · 드론 뷰 · 영문")
 build("SianB_M.dc.html", "SianB_EN_M.dc.html", EN_CSS_MOB, "시안 B · 드론 뷰 · 영문 모바일")
+
+# 영문 글꼴(Plus Jakarta Sans)로 바꿔 심는다. 한글판에서 옮겨 온 글꼴 블록을 갈아 끼운다.
+import build_detail as D      # 불러오면 상세 보드도 다시 찍힌다(결과는 같다)
+D.embed_fonts_en(["SianB_EN.dc.html", "SianB_EN_M.dc.html"])

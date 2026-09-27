@@ -617,5 +617,5 @@ def build(mobile, write=False, lang="ko"):
 OUT = [build(m, w) for w in (False, True) for m in (False, True)]
 D.embed_fonts(OUT)
 OUT_EN = [build(m, w, "en") for w in (False, True) for m in (False, True)]
-D.embed_fonts(OUT_EN)
+D.embed_fonts_en(OUT_EN)
 D.C = _detail_ko

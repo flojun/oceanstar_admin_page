@@ -139,4 +139,4 @@ for stem, title in BOARDS:
         print(f"{dst:<22} {len(out):>7} bytes")
 
 import build_detail as D      # 폰트 서브셋 도구(불러오면 상세 보드도 다시 찍힌다)
-D.embed_fonts(OUT)
+D.embed_fonts_en(OUT)
