@@ -1509,6 +1509,64 @@ def embed_fonts(files):
     print(f"폰트: 글자 {len(text)}자, 블록 {len(block) // 1024} KB")
 
 
+def _pick_weight(want, have):
+    """CSS 글꼴 굵기 고르기 규칙(CSS Fonts 4 §5.2) — 있는 굵기 중 브라우저가 쓸 것."""
+    have = sorted(have)
+    if want in have:
+        return want
+    if 400 <= want <= 500:
+        up = [w for w in have if want < w <= 500]
+        down = [w for w in have if w < want][::-1]
+        return (up + down + [w for w in have if w > 500])[0]
+    if want < 400:
+        return ([w for w in have if w < want][::-1] + [w for w in have if w > want])[0]
+    return ([w for w in have if w > want] + [w for w in have if w < want][::-1])[0]
+
+
+def embed_fonts_exact(files):
+    """embed_fonts 와 같되, 글꼴마다 그 글꼴로 실제로 그려지는 글자만 담는다.
+    글자는 브라우저에서 잰다(font_usage.mjs). 본문 글자가 제목용 SUIT 에까지 들어가지
+    않아 보드가 훨씬 가볍다. 브라우저가 없으면 embed_fonts 로 물러선다."""
+    import base64, json, subprocess, sys, tempfile
+    try:
+        import fontTools  # noqa: F401
+        r = subprocess.run(["node", os.path.join(HERE, "font_usage.mjs"), *files],
+                           check=True, capture_output=True, text=True)
+        used = json.loads(r.stdout)
+    except Exception as e:                       # noqa: BLE001
+        print("글자 재기 실패, 전체 서브셋으로:", e)
+        return embed_fonts(files)
+    have = {}
+    for _, fam, wt in FACES:
+        have.setdefault(fam, []).append(wt)
+    per = {(fam, wt): set(BASE_CHARS) for _, fam, wt in FACES}
+    for key, chars in used.items():
+        fam, wt = key.rsplit(" ", 1)
+        if fam in have:
+            per[(fam, _pick_weight(int(wt), have[fam]))] |= set(chars)
+    css, tmp, total = [], tempfile.mkdtemp(), 0
+    for fname, family, weight in FACES:
+        text = "".join(sorted(c for c in per[(family, weight)]
+                              if c.isprintable() and not c.isspace() and ord(c) < 0x1F000))
+        total += len(text)
+        out = os.path.join(tmp, fname)
+        subprocess.run([sys.executable, "-m", "fontTools.subset",
+                        os.path.join(FONTDIR, fname), "--text=" + text, "--flavor=woff2",
+                        "--layout-features=*", "--no-hinting", "--desubroutinize",
+                        "--output-file=" + out], check=True, capture_output=True)
+        b64 = base64.b64encode(open(out, "rb").read()).decode()
+        css.append("@font-face{font-family:'%s';font-style:normal;font-weight:%d;"
+                   "font-display:block;src:url(data:font/woff2;base64,%s) format('woff2')}"
+                   % (family, weight, b64))
+    block = "/*__FONTS__*/" + "".join(css) + "/*__FONTS_END__*/"
+    for f in files:
+        p = os.path.join(HERE, f)
+        s = io.open(p, encoding="utf-8").read()
+        s = re.sub(r"/\*__FONTS__\*/.*?/\*__FONTS_END__\*/", lambda m: block, s, flags=re.S)
+        io.open(p, "w", encoding="utf-8").write(s)
+    print(f"폰트(글꼴별): 글자 {total}자, 블록 {len(block) // 1024} KB")
+
+
 embed_fonts(BUILT)
 if BUILT_EN:
     embed_fonts(BUILT_EN)      # 영문 보드는 영문 글자만으로 따로 자른다
