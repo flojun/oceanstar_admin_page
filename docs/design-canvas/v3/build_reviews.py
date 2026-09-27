@@ -130,19 +130,42 @@ def br(t):
     return t.replace("\n", "<br>")
 
 
-def site_card(r, long_cut=150):
+# 카드 높이는 고정(데스크탑 532 · 폰 511). 글은 별점 줄 바로 아래 같은 자리에서 시작하고,
+# 사진은 이름 줄 위 바닥에 붙인다. 넘치는 글은 줄 수를 자르고 '더보기'.
+# (줄 수, 한 줄 글자 수) — 사진 있음 / 없음
+CLAMP = {False: {True: 6, False: 12}, True: {True: 7, False: 13}}
+CPL = {False: 17, True: 16}
+
+
+def est_lines(body, mobile):
+    import math
+    return sum(max(1, math.ceil(len(x.strip()) / CPL[mobile])) for x in body.split("\n"))
+
+
+# 실제로 줄 수를 넘는 카드(브라우저에서 잰 값). 없으면 글자 수 어림으로 대신한다.
+try:
+    import json as _json
+    MORE_AT = _json.load(open(os.path.join(HERE, "_reviews_more.json")))
+except OSError:
+    MORE_AT = None
+
+
+def site_card(r, mobile=False, i=None):
     name, date, body, photos = r
     ph = ""
     if photos:
         extra = (f'<span class="ph-n">+{len(photos) - 1}</span>' if len(photos) > 1 else "")
         ph = (f'<figure class="rc-ph"><img src="{photos[0]}" alt="{mask(name)} 님이 올린 투어 사진">'
               f'{extra}</figure>')
-    more = '<button class="more">더보기</button>' if len(body) > long_cut else ""
+    n = CLAMP[mobile][bool(photos)]
+    over = (i in MORE_AT["m" if mobile else "d"]) if (MORE_AT and i is not None) else est_lines(body, mobile) > n
+    more = '<button class="more">더보기</button>' if over else ""
     # 사진이 있든 없든 같은 순서: 별점 줄 → (사진) → 글 → 이름. 별점과 '예약 확인 후기'는
     # 모든 카드에서 같은 높이에 선다(운영자 요청).
     return (f'<article class="rc{"" if photos else " tx"}"><div class="rc-b">'
             f'<div class="rc-top">{stars()}<span class="ok">{I_SHIELD}예약 확인 후기</span></div>'
-            f'{ph}<div class="rc-m"><p class="rc-t{" clamp" if more else ""}">{br(body)}</p>{more}</div>'
+            f'<div class="rc-m"><p class="rc-t{" clamp" if more else ""}" style="-webkit-line-clamp:{n}">{br(body)}</p>{more}</div>'
+            f'{ph}'
             f'<div class="rc-by"><b>{mask(name)}</b><span class="n">{date}</span></div>'
             f'</div></article>')
 
@@ -200,7 +223,7 @@ def site_sec(mobile):
     """홈페이지 후기. 구글 리뷰와 같이 옆으로 넘겨 보는 한 줄(운영자 요청).
     앞 9건을 싣고, 줄 끝 칸에서 나머지 후기로 넘어간다."""
     n = 9
-    cards = "".join(site_card(r) for r in SITE[:n])
+    cards = "".join(site_card(r, mobile, i) for i, r in enumerate(SITE[:n]))
     rest = len(SITE) - n
     end = (f'<a href="#" class="rc-end"><b>후기 {rest}개 더 보기</b>'
            f'<span>전체 후기를 최신순으로 볼 수 있어요</span>{I_ARROW}</a>')
@@ -285,10 +308,11 @@ CSS_COMMON = """
   overflow:hidden;scroll-snap-align:start}
 .rc-b{flex:1;display:flex;flex-direction:column}
 .rc-by{margin-top:auto!important}
-.rc-t{margin-bottom:18px}
-.rc-t.clamp{-webkit-line-clamp:5}
-/* 사진은 별점 줄 아래, 카드 안쪽에 둥근 틀로. 글은 사진 유무와 상관없이 같은 크기. */
-.rc-ph{margin-top:14px;border-radius:14px;overflow:hidden}
+.rc-t{margin-bottom:0}
+.rc-m{margin-bottom:16px}
+/* 사진은 이름 줄 바로 위 바닥에 붙인다 — 글은 모든 카드에서 같은 자리에서 시작한다. */
+.rc-ph{margin-top:auto;border-radius:14px;overflow:hidden}
+.rc-ph + .rc-by{margin-top:16px!important}
 .rc-t{font-weight:500}
 .rc-ph img{aspect-ratio:16 / 10;height:auto;max-height:none!important}
 /* 줄 끝 칸 — 나머지 후기로 */
@@ -396,6 +420,7 @@ CSS_RD = """
 .rrow{margin:44px calc(var(--pad) * -1) 0;padding:0 var(--pad);display:grid;grid-auto-flow:column;
   grid-auto-columns:344px;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;
   scroll-padding:0 var(--pad);scrollbar-width:none}
+.rc{height:532px}
 .rc-b{padding:22px 24px 20px}
 .rc-t{margin-top:16px;font-size:17px;line-height:1.75}
 /* 넘김 버튼 — 줄의 양쪽 가장자리, 세로 가운데. 페이지 여백 안에 반쯤 걸친다. */
@@ -456,6 +481,7 @@ CSS_RM = """
   scroll-padding:0 var(--pad);scrollbar-width:none}
 .rrow::after{content:"";width:10px}
 .rc-end{padding:24px}
+.rc{height:511px}
 .rc-b{padding:18px 18px 16px}
 .rc-t{margin-top:14px;font-size:16px;line-height:1.75}
 .rc-by{margin-top:14px;padding-top:12px}
