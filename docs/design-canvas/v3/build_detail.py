@@ -477,10 +477,11 @@ CSS_D = BASE + """
   padding:0 10px;border-radius:999px;background:var(--soft);
   font-family:'SUIT',system-ui,sans-serif;font-size:15px;font-weight:800;color:var(--deep)}
 
-.ft h3{margin-top:16px;font-size:25px;line-height:1.3}
-.ft .sub{margin-top:8px;font-size:16.5px;font-weight:700;color:var(--deep)}
-.ft p{margin-top:16px;font-size:16.5px;line-height:1.8;color:var(--text)}
-.ft .em{margin-top:16px;font-size:16.5px;line-height:1.8;font-weight:700;color:var(--deep)}
+.ft h3{margin-top:16px;font-size:26px;line-height:1.3}
+.ft .sub{margin-top:8px;font-size:17.5px;font-weight:700;color:var(--deep)}
+/* 특장점 본문 — 회색(--text)이 흐리다는 운영자 의견으로 한 단계 짙게, 글자는 1px 키움. */
+.ft p{margin-top:16px;font-size:17.5px;line-height:1.8;color:#2C3137}
+.ft .em{margin-top:16px;font-size:17.5px;line-height:1.8;font-weight:700;color:var(--deep)}
 /* 카드 안 본문도 섹션 소개글과 같은 규칙: 제목보다 한 단 안쪽, 브랜드색 2px 선.
    카드는 섹션보다 작으니 들이는 폭도 한 단계 작게(20+18). 본문이 이미 오른쪽 단으로
    갈라진 넓은 칸(w6)은 그 자체로 떨어져 있어 두지 않는다. */
@@ -857,13 +858,14 @@ CSS_M = BASE + """
   width:36px;height:36px;border-radius:999px;background:var(--soft);flex:none;
   font-family:'SUIT',system-ui,sans-serif;font-size:14.5px;font-weight:800;color:var(--deep)}
 .ac-t{flex:1;display:flex;flex-direction:column;gap:5px}
-.ac-t b{font-family:'SUIT',system-ui,sans-serif;font-size:19px;font-weight:800;
+.ac-t b{font-family:'SUIT',system-ui,sans-serif;font-size:20px;font-weight:800;
   color:var(--ink);line-height:1.35;letter-spacing:-.035em}
-.ac-t i{font-style:normal;font-size:14.5px;font-weight:700;color:var(--deep);line-height:1.45}
+.ac-t i{font-style:normal;font-size:15.5px;font-weight:700;color:var(--deep);line-height:1.45}
 .acc .chev{display:flex;color:var(--muted);flex:none}
 .acc[open] .chev{transform:rotate(180deg)}
 .ac-b{padding:0 20px 24px}
-.ac-b p{font-size:16px;line-height:1.85;color:var(--text)}
+/* 특장점 본문 — 데스크탑과 같게 한 단계 짙게, 글자 1px 키움(운영자 요청). */
+.ac-b p{font-size:17px;line-height:1.85;color:#2C3137}
 .ac-b p + p{margin-top:14px}
 .ac-b .em{font-weight:700;color:var(--deep)}
 
