@@ -62,6 +62,45 @@ CS_MEDIA = {
 }
 
 
+# 화면 고정 문구(한/영). 상품 문안은 문안 모듈(_detail_*_ko / _en)에, 버튼·머리 같은
+# 틀 문구는 여기에 둔다. 문안 모듈의 LANG 으로 고른다(없으면 한국어).
+UI = {
+    "ko": dict(logo="오션스타", manage="내 예약 관리", lang="EN", menu=("Home", "투어", "고객후기", "FAQ"),
+               book_tour="투어 예약하기", book="예약하기", rest="휴무", more_stars="인증샷 더 보기",
+               swipe="옆으로 넘겨 보세요", go="바로가기", about="오션스타 소개", hours_h="영업시간 · 연락처",
+               loc_h="위치", map="구글 지도로 바로보기", biz_h="사업자 정보", dock="성인 1인 · 4시간",
+               hero_alt="와이키키 앞바다 산호 위의 푸른바다거북", mobile="모바일", desktop="데스크탑"),
+    "en": dict(logo="OceanStar", manage="Manage My Booking", lang="한국어", menu=("Home", "Tours", "Reviews", "FAQ"),
+               book_tour="Book a Tour", book="Book Now", rest="Closed", more_stars="See more photos",
+               swipe="Swipe for more", go="View", about="About OceanStar", hours_h="Hours & contact",
+               loc_h="Location", map="View on Google Maps", biz_h="Business info", dock="Per adult · 4 hours",
+               hero_alt="Green sea turtle over the reef off Waikiki", mobile="모바일", desktop="데스크탑"),
+}
+
+
+def u(key):
+    return UI[getattr(C, "LANG", "ko")][key]
+
+
+# 코스 소개 사진의 영문 대체 문구(CS_MEDIA 와 같은 순서)
+CS_ALT_EN = {
+    "van": ["White Ford 15-seat van with the OceanStar logo on its side"],
+    "bowl": ["Cup noodles and Pop-Tarts held up against the Waikiki sea"],
+    "boat": ["OceanStar boat with its wooden rooftop moored off Waikiki"],
+    "turtle": ["Group of green sea turtles resting on the sandy reef"],
+    "sup2": ["Guest standing on a paddleboard with Diamond Head behind",
+             "Green sea turtle swimming past two people in a sea kayak"],
+    "dive": ["Guest jumping from the boat into the sea"],
+    "wine": ["Salami and cheese board with fruit, cake and wine on a gingham tablecloth"],
+    "sup3": ["Guest on a paddleboard raising both arms on the sunset sea",
+             "Green sea turtle swimming past two people in a sea kayak"],
+    "pv_free": ["Guest standing on a paddleboard with Diamond Head behind",
+                "Guest backflipping off the boat rail into the sea"],
+    "pv_cruise": ["Couple sitting side by side on deck with Diamond Head behind"],
+    "photo": ["Two people sitting on the bow with Diamond Head behind"],
+}
+
+
 def fonts():
     s = io.open(os.path.join(HERE, "SianB.dc.html"), encoding="utf-8").read()
     return re.search(r'/\*__FONTS__\*/.*?/\*__FONTS_END__\*/', s, re.S).group(0)
@@ -618,6 +657,7 @@ CSS_M = BASE + """
 .lang{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;
   border-radius:50%;background:rgba(255,255,255,.92);color:var(--ink);font-size:13.5px;
   font-weight:800;letter-spacing:.04em}
+.lang.wide{width:auto;padding:0 14px;border-radius:999px;letter-spacing:0}
 .burger{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;
   border-radius:50%;background:rgba(255,255,255,.22);
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
@@ -1000,22 +1040,26 @@ def bind_su(html):
 
 
 # ── 조각 ─────────────────────────────────────────────────────────────
-def nav(mobile):
+def nav(mobile, active=1):
+    """머리. active 는 메뉴에서 켜 둘 칸(0 Home · 1 투어 · 2 고객후기 · 3 FAQ)."""
+    lang = u("lang")
+    wide = " wide" if len(lang) > 2 else ""      # '한국어' 는 동그라미에 안 들어간다
     if mobile:
         return ('<header class="nav">'
-                '<img src="logo_full.png" alt="오션스타" class="logo">'
-                '<div class="nav-r"><a href="#" class="ghost-pill">내 예약 관리</a>'
-                '<a href="#" class="lang">EN</a>'
+                f'<img src="logo_full.png" alt="{u("logo")}" class="logo">'
+                f'<div class="nav-r"><a href="#" class="ghost-pill">{u("manage")}</a>'
+                f'<a href="#" class="lang{wide}">{lang}</a>'
                 '<a href="#" class="burger"><svg width="22" height="22" viewBox="0 0 24 24" '
                 'fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">'
                 '<path d="M4 7h16M4 12h16M4 17h16"/></svg></a></div></header>')
+    menu = "".join(f'<a href="#"{" class=on" if k == active else ""}>{m}</a>'
+                   for k, m in enumerate(u("menu"))).replace("class=on", 'class="on"')
     return ('<header class="nav">'
-            '<img src="logo_full.png" alt="오션스타" class="logo">'
-            '<div class="menu"><a href="#">Home</a><a href="#" class="on">투어</a>'
-            '<a href="#">고객후기</a><a href="#">FAQ</a></div>'
-            '<div class="nav-r"><a href="#" class="lang-pill">EN</a>'
-            '<a href="#" class="ghost-pill">내 예약 관리</a>'
-            f'<a href="#" class="book-pill">투어 예약하기 {I_ARROW}</a></div></header>')
+            f'<img src="logo_full.png" alt="{u("logo")}" class="logo">'
+            f'<div class="menu">{menu}</div>'
+            f'<div class="nav-r"><a href="#" class="lang-pill">{lang}</a>'
+            f'<a href="#" class="ghost-pill">{u("manage")}</a>'
+            f'<a href="#" class="book-pill">{u("book_tour")} {I_ARROW}</a></div></header>')
 
 
 def sh(h2, lede=None, cls=""):
@@ -1027,7 +1071,7 @@ def sh(h2, lede=None, cls=""):
 
 def hero(mobile):
     h = C.HERO
-    src, alt = getattr(C, "HERO_IMG", ("hero_turtle.webp", "와이키키 앞바다 산호 위의 푸른바다거북"))
+    src, alt = getattr(C, "HERO_IMG", ("hero_turtle.webp", u("hero_alt")))
     if mobile and hasattr(C, "HERO_IMG_M"):
         src, alt = C.HERO_IMG_M
     theme = f" {C.THEME}" if hasattr(C, "THEME") else ""
@@ -1046,7 +1090,7 @@ def hero(mobile):
   <div class="buy-r">
     <b class="amt n">{per(h.get('price_per'))}{h['price']}</b>
     <span class="amt-s">{h['price_sub']}</span>
-    <a href="#" class="book-pill">예약하기 {I_ARROW}</a>
+    <a href="#" class="book-pill">{u("book")} {I_ARROW}</a>
   </div>
   <p class="pure">{I_CLOCK}<span>{h['pure']}</span></p>
 </section>"""
@@ -1124,7 +1168,7 @@ def times(mobile):
     for name, lines, span, col in C.SLOTS:
         tm = "".join(f"<em>{x}</em>" for x in lines)
         rest = (f'<span class="rest" style="grid-column:{span+1} / -1">'
-                f'{getattr(C, "REST_LABEL", "휴무")}</span>' if span < 7 else "")
+                f'{getattr(C, "REST_LABEL", u("rest"))}</span>' if span < 7 else "")
         rows.append(f'<div class="wrow"><div class="slot {col}" '
                     f'style="grid-column:1 / span {span}"><b>{name}</b>{tm}</div>{rest}</div>')
     notes = "".join(f"<li>{x}</li>" for x in C.TIME_NOTES)
@@ -1166,7 +1210,8 @@ def cs_media(key):
     kind, v = CS_MEDIA[key]
     if kind == "icon":
         return f'<div class="cs-m ic" aria-hidden="true">{PERK_ICONS[v]}</div>'
-    imgs = "".join(f'<img src="{src}" alt="{alt}">' for src, alt in v)
+    alts = CS_ALT_EN[key] if getattr(C, "LANG", "ko") == "en" else [a for _, a in v]
+    imgs = "".join(f'<img src="{src}" alt="{alt}">' for (src, _), alt in zip(v, alts))
     return f'<div class="cs-m{" two" if len(v) == 2 else ""}">{imgs}</div>'
 
 
@@ -1196,7 +1241,7 @@ def stars(mobile):
         # 계정을 열여섯째 칸으로 세워 격자를 닫고 다음 행동도 붙여 둔다.
         tail = (f'<a class="star-c ig-c" href="#">{I_IG}'
                 f'<b>{C.STAR_TAG.replace("_", "_<wbr>")}</b>'
-                f'<span>인증샷 더 보기</span></a>')
+                f'<span>{u("more_stars")}</span></a>')
         return (f'<section class="sect center">{sh(C.STAR_H2, C.STAR_SUB)}'
                 f'<span class="pill" style="margin-top:18px">{C.STAR_BADGE}</span>'
                 f'<div class="stars rise">{tiles}{tail}</div></section>')
@@ -1245,12 +1290,12 @@ def combo(mobile):
         f'<article class="cb rise"><span class="act-tag">{tag}</span><h3>{t}</h3>'
         f'{cb_price(tag)}'
         f'<ul>{"".join(f"<li>{x}</li>" for x in lines)}</ul>'
-        f'<a href="#" class="book-pill">예약하기 {I_ARROW}</a></article>'
+        f'<a href="#" class="book-pill">{u("book")} {I_ARROW}</a></article>'
         for tag, t, lines in C.COMBOS)
     n3 = len(C.COMBOS) == 3
     n1 = len(C.COMBOS) == 1
     # 폰에서 세 장은 세로로 쌓으면 1,200px 가까이 되어 가로로 넘기게 한다(운영자 요청).
-    hint = (f'<p class="cs-hint">옆으로 넘겨 보세요 {I_SWIPE}</p>'
+    hint = (f'<p class="cs-hint">{u("swipe")} {I_SWIPE}</p>'
             if mobile and n3 else "")
     return (f'<section class="sect">{sh(C.COMBO_H2, C.COMBO_LEDE)}{hint}'
             f'<div class="combo{" n3" if n3 else ""}{" n1" if n1 else ""}">{cards}</div></section>')
@@ -1321,7 +1366,7 @@ def more(mobile):
     cards = "".join(
         f'<a class="mc rise" href="#"><img src="{img}" alt="{t}">'
         f'<span class="tx"><h3>{t}</h3><p>{b}</p>'
-        f'<span class="go">바로가기 {I_ARROW}</span></span></a>'
+        f'<span class="go">{u("go")} {I_ARROW}</span></span></a>'
         for img, t, b in C.MORE)
     return (f'<section class="sect">{sh(C.MORE_H2)}'
             f'<div class="more">{cards}</div></section>')
@@ -1330,19 +1375,19 @@ def more(mobile):
 def foot():
     """맺음 띠와 푸터를 한 덩어리로. 문안은 랜딩 보드(SianB)에서 그대로 옮겼다."""
     cols = "".join(f'<div>{x}</div>' for x in [
-        (f'<img src="logo_full.png" alt="오션스타" class="f-logo">'
+        (f'<img src="logo_full.png" alt="{u("logo")}" class="f-logo">'
          f'<p>{C.FOOT_ABOUT}</p>'
-         f'<a href="#" class="f-more">오션스타 소개 {I_ARROW}</a>'),
-        (f'<span class="c-h">{I_CLOCK} 영업시간 · 연락처</span>'
+         f'<a href="#" class="f-more">{u("about")} {I_ARROW}</a>'),
+        (f'<span class="c-h">{I_CLOCK} {u("hours_h")}</span>'
          + "".join(f'<p>{x}</p>' for x in C.FOOT_HOURS)),
-        (f'<span class="c-h">{I_PIN} 위치</span><p>{C.FOOT_ADDR}</p>'
-         f'<a href="#" class="f-more">구글 지도로 바로보기 {I_ARROW}</a>'),
-        (f'<span class="c-h">사업자 정보</span>'
+        (f'<span class="c-h">{I_PIN} {u("loc_h")}</span><p>{C.FOOT_ADDR}</p>'
+         f'<a href="#" class="f-more">{u("map")} {I_ARROW}</a>'),
+        (f'<span class="c-h">{u("biz_h")}</span>'
          + "".join(f'<p>{x}</p>' for x in C.FOOT_BIZ)),
     ])
     return (f'<footer class="foot">'
             f'<div class="end rise"><h2>{C.END_H2}</h2><p>{C.END_SUB}</p>'
-            f'<a href="#" class="book-pill light">예약하기 {I_ARROW}</a></div>'
+            f'<a href="#" class="book-pill light">{u("book")} {I_ARROW}</a></div>'
             f'<div class="cols rise">{cols}</div>'
             f'<div class="f-bot"><span>{C.FOOT_COPY}</span></div></footer>')
 
@@ -1350,8 +1395,8 @@ def foot():
 def dock():
     return (f'<div class="dock"><span class="d-l"><b class="n">'
             f'{per(C.HERO.get("price_per"))}{C.HERO["price"]}</b>'
-            f'<span>{getattr(C, "DOCK_SUB", "성인 1인 · 4시간")}</span></span>'
-            f'<a href="#" class="book-pill">예약하기 {I_ARROW}</a></div>')
+            f'<span>{getattr(C, "DOCK_SUB", u("dock"))}</span></span>'
+            f'<a href="#" class="book-pill">{u("book")} {I_ARROW}</a></div>')
 
 
 def build(mobile):
@@ -1369,7 +1414,7 @@ def build(mobile):
     if mobile:
         body += dock()
     html = f"""<!doctype html>
-<html>
+<html lang="{getattr(C, "LANG", "ko")}">
 <head>
   <meta charset="utf-8">
   <script src="./support.js"></script>
@@ -1395,13 +1440,19 @@ def build(mobile):
 
 
 # 상품마다 문안 모듈을 바꿔 끼워 같은 꼴로 찍는다.
-BUILT = []
-for _mod in ("_detail_ko", "_detail_sunset_ko", "_detail_combo_ko", "_detail_private_ko",
-             "_detail_surf_ko"):
-    C = importlib.import_module(_mod)
-    for _m in (False, True):
-        build(_m)
-        BUILT.append(f"{getattr(C, 'STEM', 'DetailKo')}{'_M' if _m else ''}.dc.html")
+BUILT, BUILT_EN = [], []
+_PRODUCTS = ("_detail", "_detail_sunset", "_detail_combo", "_detail_private", "_detail_surf")
+for _lang, _out in (("ko", BUILT), ("en", BUILT_EN)):
+    for _p in _PRODUCTS:
+        try:
+            C = importlib.import_module(f"{_p}_{_lang}")
+        except ModuleNotFoundError:
+            if _lang == "en":
+                continue          # 영문 문안이 아직 없는 상품은 건너뛴다
+            raise
+        for _m in (False, True):
+            build(_m)
+            _out.append(f"{getattr(C, 'STEM', 'DetailKo')}{'_M' if _m else ''}.dc.html")
 
 
 # 폰트. 처음엔 랜딩(SianB)의 서브셋을 빌려 썼는데, 그 서브셋엔 랜딩에 쓰인 글자만
@@ -1459,3 +1510,5 @@ def embed_fonts(files):
 
 
 embed_fonts(BUILT)
+if BUILT_EN:
+    embed_fonts(BUILT_EN)      # 영문 보드는 영문 글자만으로 따로 자른다

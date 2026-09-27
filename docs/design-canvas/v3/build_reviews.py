@@ -16,9 +16,67 @@ GetYourGuide 후기는 저장소·DB 에 없어 지어내지 않는다 — 연�
 """
 import io, os, re
 import build_detail as D          # 불러오면 상세 보드도 다시 찍힌다(결과는 같다)
-import _detail_ko
+import _detail_ko, _detail_en
+import _reviews_en
 
 D.C = _detail_ko                  # 푸터·맺음 문안은 브랜드 공통(오전 상세의 것)
+LANG = "ko"                       # build() 가 보드마다 바꾼다
+
+# 화면 문구(한/영). 한국어는 src/locales/ko.ts, 영어는 en.ts 의 review·reviewModal 값을 따른다.
+TX = {
+    "ko": dict(star="별점 {n}점", photo_alt="{name} 님이 올린 투어 사진", more="더보기", verified="예약 확인 후기",
+               hero_alt="다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람",
+               h1='생생한 <span class="hl">리얼 후기</span>', sub="당일 취소, 노쇼 없이 검증된 고객님들의 찐 후기입니다.",
+               g_alt="구글", mrt_alt="마이리얼트립", loved="업계 통합 누적 리뷰 15,000+",
+               tabs="후기 모아보기", tab_site="홈페이지 후기", tab_google="구글 리뷰",
+               prev="이전 {w}", next="다음 {w}", w_site="후기", w_google="리뷰",
+               end_b="후기 {n}개 더 보기", end_s="전체 후기를 최신순으로 볼 수 있어요",
+               site_h2="홈페이지 후기",
+               site_lede="오션스타에서 예약하고 다녀오신 분만 남길 수 있어요.<br>예약번호로 한 번 더 확인한 후기입니다.",
+               write="후기 작성하기", google_h2="구글 리뷰",
+               google_line='구글 맵 기준 <b class="n">5,000+</b>개의 실제 고객 리뷰', google_go="구글에서 전체 리뷰 보기",
+               gyg_h2="GetYourGuide 리뷰", gyg_line="해외 여행객이 GetYourGuide 에서 예약하고 남긴 후기",
+               gyg_go="GetYourGuide에서 전체 리뷰 보기", gyg_note="배포 때 GetYourGuide 후기를 불러와 이 자리에 보여 줍니다.",
+               oid_label="예약 번호 (영숫자 6자리)", oid_aria="예약 번호", checked="확인됨",
+               ok_line="예약이 확인되었어요. 이제 후기를 남길 수 있어요.",
+               oid_help="예약 확정 및 결제 후 전송된 바우처에서 확인하실 수 있습니다.",
+               name_label="이름 (초성 또는 닉네임 가능)", name_ph="김오션", name_aria="이름", rating="별점", pts="5점",
+               content_label="후기 내용", content_ph="다녀오신 투어의 소중한 경험을 들려주세요!",
+               photo_label="사진 첨부 <span>(선택, 최대 5장)</span>", add_photo="사진 추가",
+               photo_help="JPG · PNG · WEBP, 장당 1.5MB까지", rule1="예약 1건당 후기는 1개만 남길 수 있어요.",
+               rule2="취소 · 환불되었거나 결제 대기 중인 예약은 후기를 남길 수 없어요.", submit="리뷰 등록하기",
+               m_aria="후기 작성", m_h2="솔직한 후기를 남겨주세요", close="닫기",
+               k_write="후기 작성 창", k_page="고객후기", suffix=""),
+    "en": dict(star="Rated {n} out of 5", photo_alt="Tour photo from {name}", more="Read more", verified="Verified booking",
+               hero_alt="Two people sitting on the bow with Diamond Head behind",
+               h1='Real <span class="hl">reviews</span>',
+               sub="Verified guests only. No same-day cancellations or no-shows.",
+               g_alt="Google", mrt_alt="MyRealTrip", loved="15,000+ reviews across platforms",
+               tabs="Review sources", tab_site="Our site", tab_google="Google",
+               prev="Previous {w}", next="Next {w}", w_site="review", w_google="review",
+               end_b="{n} more reviews", end_s="See every review, newest first",
+               site_h2="Reviews on our site",
+               site_lede="Only guests who booked with OceanStar can post here.<br>Every review is checked against a booking number.",
+               write="Write a Review", google_h2="Google reviews",
+               google_line='<b class="n">5,000+</b> real customer reviews on Google Maps', google_go="View all reviews on Google",
+               gyg_h2="GetYourGuide reviews", gyg_line="Reviews from travelers who booked on GetYourGuide",
+               gyg_go="View all on GetYourGuide", gyg_note="GetYourGuide reviews will load here when the site goes live.",
+               oid_label="Booking number (6 letters and digits)", oid_aria="Booking number", checked="Verified",
+               ok_line="Booking verified. You can write your review now.",
+               oid_help="You can find this on the voucher sent after booking confirmation and payment.",
+               name_label="Name (initials or nickname)", name_ph="John D.", name_aria="Name", rating="Rating", pts="5 / 5",
+               content_label="Your review", content_ph="Please share your experience from the tour!",
+               photo_label="Photos <span>(optional, up to 5)</span>", add_photo="Add photos",
+               photo_help="JPG · PNG · WEBP, up to 1.5MB each", rule1="One review per booking.",
+               rule2="Cancelled, refunded or unpaid bookings can’t be reviewed.", submit="Submit Review",
+               m_aria="Write a review", m_h2="Share your honest review", close="Close",
+               k_write="후기 작성 창", k_page="고객후기", suffix=" · 영문"),
+}
+
+
+def t(k, **kw):
+    v = TX[LANG][k]
+    return v.format(**kw) if kw else v
 HERE = D.HERE
 I_ARROW, I_STAR, icon = D.I_ARROW, D.I_STAR, D.icon
 
@@ -47,7 +105,7 @@ def mask(name):
 
 
 def stars(n=5):
-    return f'<span class="rstars" aria-label="별점 {n}점">' + I_STAR_F * n + "</span>"
+    return f'<span class="rstars" aria-label="{t("star", n=n)}">' + I_STAR_F * n + "</span>"
 
 
 # 홈페이지 후기 — 운영 DB reviews (is_hidden = false), 최신순. 본문 원문 그대로.
@@ -152,18 +210,21 @@ except OSError:
 
 def site_card(r, mobile=False, i=None):
     name, date, body, photos = r
+    if LANG == "en":
+        date, body = _reviews_en.SITE_EN[name.strip()]
     ph = ""
     if photos:
         extra = (f'<span class="ph-n">+{len(photos) - 1}</span>' if len(photos) > 1 else "")
-        ph = (f'<figure class="rc-ph"><img src="{photos[0]}" alt="{mask(name)} 님이 올린 투어 사진">'
+        ph = (f'<figure class="rc-ph"><img src="{photos[0]}" alt="{t("photo_alt", name=mask(name))}">'
               f'{extra}</figure>')
     n = CLAMP[mobile][bool(photos)]
-    over = (i in MORE_AT["m" if mobile else "d"]) if (MORE_AT and i is not None) else est_lines(body, mobile) > n
-    more = '<button class="more">더보기</button>' if over else ""
+    key = ("en_" if LANG == "en" else "") + ("m" if mobile else "d")
+    over = (i in MORE_AT[key]) if (MORE_AT and key in MORE_AT and i is not None) else est_lines(body, mobile) > n
+    more = f'<button class="more">{t("more")}</button>' if over else ""
     # 사진이 있든 없든 같은 순서: 별점 줄 → (사진) → 글 → 이름. 별점과 '예약 확인 후기'는
     # 모든 카드에서 같은 높이에 선다(운영자 요청).
     return (f'<article class="rc{"" if photos else " tx"}"><div class="rc-b">'
-            f'<div class="rc-top">{stars()}<span class="ok">{I_SHIELD}예약 확인 후기</span></div>'
+            f'<div class="rc-top">{stars()}<span class="ok">{I_SHIELD}{t("verified")}</span></div>'
             f'<div class="rc-m"><p class="rc-t{" clamp" if more else ""}" style="-webkit-line-clamp:{n}">{br(body)}</p>{more}</div>'
             f'{ph}'
             f'<div class="rc-by"><b>{mask(name)}</b><span class="n">{date}</span></div>'
@@ -183,30 +244,29 @@ def hero(mobile):
     # 위쪽 하늘만 늘렸다(GPT Image 2.5 편집). 하늘 아래는 원본 픽셀을 다시 얹어
     # 사람·배·바다는 원본과 같다(차이 0). 제목은 늘린 하늘 위에 앉는다.
     src, alt = (("hero_reviews_m.webp" if mobile else "act_photo.webp"),
-                "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람")
+                t("hero_alt"))
     return f"""<section class="hero rv-hero">
   <img src="{src}" alt="{alt}" class="hero-img">
   <span class="veil"></span>
   {nav(mobile)}
   <div class="hero-in">
-    <h1>생생한 <span class="hl">리얼 후기</span></h1>
-    <p class="rv-sub">당일 취소, 노쇼 없이 검증된 고객님들의 찐 후기입니다.</p>
-    <div class="loved"><span class="dots"><i><img src="plat_google.png" alt="구글"></i>
-      <i><img src="plat_gyg.png" alt="GetYourGuide"></i><i><img src="plat_mrt.png" alt="마이리얼트립"></i></span>
-      <b>업계 통합 누적 리뷰 15,000+</b></div>
+    <h1>{t("h1")}</h1>
+    <p class="rv-sub">{t("sub")}</p>
+    <div class="loved"><span class="dots"><i><img src="plat_google.png" alt="{t("g_alt")}"></i>
+      <i><img src="plat_gyg.png" alt="GetYourGuide"></i><i><img src="plat_mrt.png" alt="{t("mrt_alt")}"></i></span>
+      <b>{t("loved")}</b></div>
   </div>
 </section>"""
 
 
 def nav(mobile):
-    return D.nav(mobile).replace('<a href="#" class="on">투어</a>', '<a href="#">투어</a>') \
-                        .replace('<a href="#">고객후기</a>', '<a href="#" class="on">고객후기</a>')
+    return D.nav(mobile, active=2)        # 메뉴에서 '고객후기' 를 켠다
 
 
 def tabs():
-    return ('<nav class="tabs" aria-label="후기 모아보기">'
-            '<a href="#site" class="on">홈페이지 후기 <span class="n">14</span></a>'
-            '<a href="#google">구글 리뷰 <span class="n">5,000+</span></a>'
+    return (f'<nav class="tabs" aria-label="{t("tabs")}">'
+            f'<a href="#site" class="on">{t("tab_site")} <span class="n">14</span></a>'
+            f'<a href="#google">{t("tab_google")} <span class="n">5,000+</span></a>'
             '<a href="#gyg">GetYourGuide</a></nav>')
 
 
@@ -214,9 +274,9 @@ def carousel(cls, cards, mobile, what):
     """옆으로 넘기는 줄. 넘김 버튼은 줄의 왼쪽·오른쪽 끝, 세로 가운데(운영자 요청)."""
     if mobile:
         return f'<div class="{cls} rise">{cards}</div>'
-    return (f'<div class="car rise"><button class="car-b l" aria-label="이전 {what}">{I_LEFT}</button>'
+    return (f'<div class="car rise"><button class="car-b l" aria-label="{t("prev", w=what)}">{I_LEFT}</button>'
             f'<div class="{cls}">{cards}</div>'
-            f'<button class="car-b r" aria-label="다음 {what}">{I_RIGHT}</button></div>')
+            f'<button class="car-b r" aria-label="{t("next", w=what)}">{I_RIGHT}</button></div>')
 
 
 def site_sec(mobile):
@@ -225,25 +285,24 @@ def site_sec(mobile):
     n = 9
     cards = "".join(site_card(r, mobile, i) for i, r in enumerate(SITE[:n]))
     rest = len(SITE) - n
-    end = (f'<a href="#" class="rc-end"><b>후기 {rest}개 더 보기</b>'
-           f'<span>전체 후기를 최신순으로 볼 수 있어요</span>{I_ARROW}</a>')
+    end = (f'<a href="#" class="rc-end"><b>{t("end_b", n=rest)}</b>'
+           f'<span>{t("end_s")}</span>{I_ARROW}</a>')
     return (f'<section class="sect" id="site">'
-            f'<div class="rv-h"><div class="sh"><h2>홈페이지 후기</h2>'
-            f'<p class="lede">오션스타에서 예약하고 다녀오신 분만 남길 수 있어요.<br>'
-            f'예약번호로 한 번 더 확인한 후기입니다.</p></div>'
-            f'<div class="rv-act"><a href="#" class="book-pill write">{I_PEN}후기 작성하기</a></div></div>'
-            f'{carousel("rrow", cards + end, mobile, "후기")}'
+            f'<div class="rv-h"><div class="sh"><h2>{t("site_h2")}</h2>'
+            f'<p class="lede">{t("site_lede")}</p></div>'
+            f'<div class="rv-act"><a href="#" class="book-pill write">{I_PEN}{t("write")}</a></div></div>'
+            f'{carousel("rrow", cards + end, mobile, t("w_site"))}'
             f'</section>')
 
 
 def google_sec(mobile):
-    cards = "".join(google_card(r) for r in GOOGLE)
+    cards = "".join(google_card(r) for r in (_reviews_en.GOOGLE_EN if LANG == "en" else GOOGLE))
     return (f'<section class="sect" id="google">'
             f'<div class="src-h"><img src="plat_google.png" alt="Google" class="src-logo">'
-            f'<div class="src-t"><h2>구글 리뷰</h2>'
-            f'<p><b class="n">4.9</b>{stars()}<span>구글 맵 기준 <b class="n">5,000+</b>개의 실제 고객 리뷰</span></p></div>'
-            f'<a href="{GOOGLE_URL}" class="src-go">구글에서 전체 리뷰 보기 {I_ARROW}</a></div>'
-            f'{carousel("grow", cards, mobile, "리뷰")}</section>')
+            f'<div class="src-t"><h2>{t("google_h2")}</h2>'
+            f'<p><b class="n">4.9</b>{stars()}<span>{t("google_line")}</span></p></div>'
+            f'<a href="{GOOGLE_URL}" class="src-go">{t("google_go")} {I_ARROW}</a></div>'
+            f'{carousel("grow", cards, mobile, t("w_google"))}</section>')
 
 
 def gyg_sec(mobile):
@@ -252,39 +311,39 @@ def gyg_sec(mobile):
                     for _ in range(2 if mobile else 3))
     return (f'<section class="sect" id="gyg">'
             f'<div class="src-h"><span class="src-logo gy"><img src="plat_gyg.png" alt="GetYourGuide"></span>'
-            f'<div class="src-t"><h2>GetYourGuide 리뷰</h2>'
-            f'<p><span>해외 여행객이 GetYourGuide 에서 예약하고 남긴 후기</span></p></div>'
-            f'<a href="#" class="src-go">GetYourGuide에서 전체 리뷰 보기 {I_ARROW}</a></div>'
+            f'<div class="src-t"><h2>{t("gyg_h2")}</h2>'
+            f'<p><span>{t("gyg_line")}</span></p></div>'
+            f'<a href="#" class="src-go">{t("gyg_go")} {I_ARROW}</a></div>'
             f'<div class="gy-slot rise"><div class="gy-row">{ghost}</div>'
-            f'<p class="gy-note">배포 때 GetYourGuide 후기를 불러와 이 자리에 보여 줍니다.</p></div>'
+            f'<p class="gy-note">{t("gyg_note")}</p></div>'
             f'</section>')
 
 
 def modal(mobile):
     fields = f"""
     <div class="fld">
-      <label>예약 번호 (영숫자 6자리)</label>
-      <div class="oid"><input value="A4X9T2" maxlength="6" aria-label="예약 번호">
-        <button class="oid-go done" type="button">{I_CHECK}확인됨</button></div>
-      <p class="ok-line">{I_CHECK}예약이 확인되었어요. 이제 후기를 남길 수 있어요.</p>
-      <p class="help">예약 확정 및 결제 후 전송된 바우처에서 확인하실 수 있습니다.</p>
+      <label>{t("oid_label")}</label>
+      <div class="oid"><input value="A4X9T2" maxlength="6" aria-label="{t("oid_aria")}">
+        <button class="oid-go done" type="button">{I_CHECK}{t("checked")}</button></div>
+      <p class="ok-line">{I_CHECK}{t("ok_line")}</p>
+      <p class="help">{t("oid_help")}</p>
     </div>
-    <div class="fld"><label>이름 (초성 또는 닉네임 가능)</label>
-      <input placeholder="김오션" aria-label="이름"></div>
-    <div class="fld"><label>별점</label>
-      <div class="rate">{I_STAR_F * 5}<b>5점</b></div></div>
-    <div class="fld"><label>후기 내용</label>
-      <textarea rows="5" placeholder="다녀오신 투어의 소중한 경험을 들려주세요!" aria-label="후기 내용"></textarea></div>
-    <div class="fld"><label>사진 첨부 <span>(선택, 최대 5장)</span></label>
-      <div class="drop">{I_CAM}<span>사진 추가</span></div>
-      <p class="help">JPG · PNG · WEBP, 장당 1.5MB까지</p></div>
-    <ul class="rules-s"><li>예약 1건당 후기는 1개만 남길 수 있어요.</li>
-      <li>취소 · 환불되었거나 결제 대기 중인 예약은 후기를 남길 수 없어요.</li></ul>
-    <div class="sub-w"><a href="#" class="submit">리뷰 등록하기</a></div>"""
+    <div class="fld"><label>{t("name_label")}</label>
+      <input placeholder="{t("name_ph")}" aria-label="{t("name_aria")}"></div>
+    <div class="fld"><label>{t("rating")}</label>
+      <div class="rate">{I_STAR_F * 5}<b>{t("pts")}</b></div></div>
+    <div class="fld"><label>{t("content_label")}</label>
+      <textarea rows="5" placeholder="{t("content_ph")}" aria-label="{t("content_label")}"></textarea></div>
+    <div class="fld"><label>{t("photo_label")}</label>
+      <div class="drop">{I_CAM}<span>{t("add_photo")}</span></div>
+      <p class="help">{t("photo_help")}</p></div>
+    <ul class="rules-s"><li>{t("rule1")}</li>
+      <li>{t("rule2")}</li></ul>
+    <div class="sub-w"><a href="#" class="submit">{t("submit")}</a></div>"""
     grab = '<span class="grab"></span>' if mobile else ""
     return (f'<div class="dim"></div><div class="modal{" sheet" if mobile else ""}" role="dialog" '
-            f'aria-label="후기 작성">{grab}<div class="m-h"><h2>솔직한 후기를 남겨주세요</h2>'
-            f'<button class="m-x" aria-label="닫기">{I_X}</button></div>'
+            f'aria-label="{t("m_aria")}">{grab}<div class="m-h"><h2>{t("m_h2")}</h2>'
+            f'<button class="m-x" aria-label="{t("close")}">{I_X}</button></div>'
             f'<form class="m-b">{fields}</form></div>')
 
 
@@ -521,12 +580,15 @@ def page(mobile, write=False):
     return body
 
 
-def build(mobile, write=False):
+def build(mobile, write=False, lang="ko"):
+    global LANG
+    LANG = lang
+    D.C = _detail_en if lang == "en" else _detail_ko     # 내비·푸터 문구도 같은 언어로
     css = (D.CSS_M if mobile else D.CSS_D) + CSS_COMMON + (CSS_RM if mobile else CSS_RD)
-    kind = "후기 작성 창" if write else "고객후기"
-    title = f"{kind} — {'모바일' if mobile else '데스크탑'}"
+    kind = t("k_write") if write else t("k_page")
+    title = f"{kind}{t('suffix')} — {'모바일' if mobile else '데스크탑'}"
     html = f"""<!doctype html>
-<html>
+<html lang="{lang}">
 <head>
   <meta charset="utf-8">
   <script src="./support.js"></script>
@@ -545,7 +607,7 @@ def build(mobile, write=False):
 </body>
 </html>
 """
-    stem = "ReviewWriteKo" if write else "ReviewsKo"
+    stem = ("ReviewWrite" if write else "Reviews") + ("En" if lang == "en" else "Ko")
     name = f"{stem}{'_M' if mobile else ''}.dc.html"
     io.open(os.path.join(HERE, name), "w", encoding="utf-8").write(html)
     print(f"{name:<22} {len(html):>7} bytes")
@@ -554,3 +616,6 @@ def build(mobile, write=False):
 
 OUT = [build(m, w) for w in (False, True) for m in (False, True)]
 D.embed_fonts(OUT)
+OUT_EN = [build(m, w, "en") for w in (False, True) for m in (False, True)]
+D.embed_fonts(OUT_EN)
+D.C = _detail_ko
