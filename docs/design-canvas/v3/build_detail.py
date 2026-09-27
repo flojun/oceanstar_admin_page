@@ -1610,6 +1610,6 @@ def embed_fonts_en(files):
     print(f"영문 글꼴: Jakarta {len(latin)}자 + 한글 글꼴 {len(rest)}자({rest}), 블록 {len(block) // 1024} KB")
 
 
-embed_fonts(BUILT)
+embed_fonts_exact(BUILT)
 if BUILT_EN:
     embed_fonts_en(BUILT_EN)
