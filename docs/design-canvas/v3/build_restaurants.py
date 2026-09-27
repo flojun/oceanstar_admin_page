@@ -144,7 +144,7 @@ def sections():
             h, a, b = R.POKE_TIP[LANG]
             tip = f'<div class="tip"><span class="tip-h">{h}</span><b>{a}</b><p>{b}</p></div>'
         out.append(f'<section class="cat rise" id="{k}"><header class="cat-h"><span class="ic">{CAT_ICON[k]}</span>'
-                   f'<h2>{title}</h2><span class="n">{len(items)}{t("places")}</span>{tip}</header>'
+                   f'<h2>{title}</h2>{tip}</header>'   # 제목 아래 가게 수는 뺐다(운영자 요청)
                    f'<ul class="ents">{"".join(entry(n, d) for n, d in items)}</ul></section>')
     return "".join(out)
 
