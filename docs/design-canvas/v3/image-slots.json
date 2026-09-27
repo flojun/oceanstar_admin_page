@@ -1,0 +1,1002 @@
+{
+ "unit": "CSS px; recommended/min are image pixels",
+ "generated_from": "canvas boards, measured in Chromium",
+ "slots": [
+  {
+   "id": "landing.hero",
+   "page": "랜딩",
+   "name": "히어로",
+   "display_desktop": [
+    1440,
+    880
+   ],
+   "display_mobile": [
+    375,
+    640
+   ],
+   "ratio_desktop": "1.64:1",
+   "ratio_mobile": "0.59:1",
+   "recommended_upload": [
+    2880,
+    1760
+   ],
+   "recommended_upload_mobile": [
+    750,
+    1280
+   ],
+   "min_upload": [
+    1920,
+    1174
+   ],
+   "separate_mobile_image": true,
+   "text_safe_zone_desktop": [
+    0,
+    186,
+    1440,
+    816
+   ],
+   "text_safe_zone_mobile": [
+    20,
+    150,
+    355,
+    564
+   ],
+   "fit": "cover",
+   "note": "지금은 한 장을 데스크탑·모바일에 같이 쓰고 모바일은 가운데를 세로로 잘라 씁니다. 모바일용 세로 사진을 따로 올릴 수 있게 하세요.",
+   "current_files": [
+    {
+     "file": "hero_waikiki.jpg",
+     "natural": [
+      1900,
+      805
+     ],
+     "scale_vs_display": 0.91
+    }
+   ]
+  },
+  {
+   "id": "landing.tour_card",
+   "page": "랜딩",
+   "name": "추천 프로그램 카드",
+   "display_desktop": [
+    250,
+    167
+   ],
+   "display_mobile": [
+    266,
+    177
+   ],
+   "ratio_desktop": "3:2",
+   "ratio_mobile": "3:2",
+   "recommended_upload": [
+    1200,
+    800
+   ],
+   "min_upload": [
+    600,
+    400
+   ],
+   "separate_mobile_image": false,
+   "fit": "cover",
+   "note": "데스크탑·모바일 모두 3:2. 카드 5장이 같은 비율이어야 줄이 가지런합니다.",
+   "current_files": [
+    {
+     "file": "sunset.jpg",
+     "natural": [
+      760,
+      428
+     ],
+     "scale_vs_display": 2.42
+    },
+    {
+     "file": "surf.jpg",
+     "natural": [
+      700,
+      500
+     ],
+     "scale_vs_display": 2.63
+    },
+    {
+     "file": "turtle.jpg",
+     "natural": [
+      1000,
+      562
+     ],
+     "scale_vs_display": 3.18
+    },
+    {
+     "file": "boat_private.webp",
+     "natural": [
+      1024,
+      688
+     ],
+     "scale_vs_display": 3.85
+    },
+    {
+     "file": "parasail.jpg",
+     "natural": [
+      1400,
+      933
+     ],
+     "scale_vs_display": 5.26
+    }
+   ]
+  },
+  {
+   "id": "landing.video",
+   "page": "랜딩",
+   "name": "영상 썸네일",
+   "display_desktop": [
+    1288,
+    725
+   ],
+   "display_mobile": [
+    335,
+    188
+   ],
+   "ratio_desktop": "16:9",
+   "ratio_mobile": "16:9",
+   "recommended_upload": [
+    1920,
+    1080
+   ],
+   "min_upload": [
+    1280,
+    720
+   ],
+   "separate_mobile_image": false,
+   "fit": "cover",
+   "note": "16:9. 가운데에 재생 버튼이 올라가니 가운데에 중요한 얼굴을 두지 마세요.",
+   "current_files": [
+    {
+     "file": "video_yano.jpg",
+     "natural": [
+      1280,
+      720
+     ],
+     "scale_vs_display": 0.99
+    }
+   ]
+  },
+  {
+   "id": "booking.background",
+   "page": "예약 창",
+   "name": "뒤 배경",
+   "display_desktop": [
+    1440,
+    1405
+   ],
+   "display_mobile": [
+    375,
+    1856
+   ],
+   "ratio_desktop": "1.02:1",
+   "ratio_mobile": "0.20:1",
+   "recommended_upload": [
+    1920,
+    1080
+   ],
+   "min_upload": [
+    1280,
+    720
+   ],
+   "separate_mobile_image": false,
+   "fit": "cover",
+   "note": "예약 창 뒤에 어둡게 깔리는 배경. 창 길이에 따라 높이가 변하고 대부분 가려지므로 해상도보다 색감이 중요합니다.",
+   "current_files": [
+    {
+     "file": "hero_waikiki.jpg",
+     "natural": [
+      1900,
+      805
+     ],
+     "scale_vs_display": 0.31
+    }
+   ]
+  },
+  {
+   "id": "detail.hero",
+   "page": "상세 (5개 상품)",
+   "name": "히어로",
+   "display_desktop": [
+    1440,
+    694
+   ],
+   "display_mobile": [
+    375,
+    587
+   ],
+   "ratio_desktop": "2.07:1",
+   "ratio_mobile": "0.64:1",
+   "recommended_upload": [
+    2880,
+    1390
+   ],
+   "recommended_upload_mobile": [
+    750,
+    1175
+   ],
+   "min_upload": [
+    1600,
+    772
+   ],
+   "separate_mobile_image": true,
+   "text_safe_zone_desktop": [
+    76,
+    196,
+    587,
+    467
+   ],
+   "text_safe_zone_mobile": [
+    22,
+    84,
+    353,
+    272
+   ],
+   "covered_from_y_desktop": 516,
+   "covered_from_y_mobile": 462,
+   "fit": "cover",
+   "note": "스크롤 때 사진이 살짝 움직여서 실제 사진 칸은 보이는 칸보다 12% 깁니다(데스크탑 1440×694, 모바일 375×587). 아래쪽은 예약 패널이 덮습니다. 인물은 데스크탑 오른쪽 절반, 모바일 아래쪽 절반에 두세요.",
+   "current_files": [
+    {
+     "file": "hero_turtle.webp",
+     "natural": [
+      1440,
+      617
+     ],
+     "scale_vs_display": 0.89
+    },
+    {
+     "file": "hero_sunset.webp",
+     "natural": [
+      1600,
+      772
+     ],
+     "scale_vs_display": 1.11
+    },
+    {
+     "file": "hero_para.webp",
+     "natural": [
+      1600,
+      773
+     ],
+     "scale_vs_display": 1.11
+    },
+    {
+     "file": "hero_private.webp",
+     "natural": [
+      1600,
+      773
+     ],
+     "scale_vs_display": 1.11
+    },
+    {
+     "file": "hero_surf.webp",
+     "natural": [
+      1600,
+      773
+     ],
+     "scale_vs_display": 1.11
+    },
+    {
+     "file": "hero_sunset_m.webp",
+     "natural": [
+      820,
+      1281
+     ],
+     "scale_vs_display": 2.18
+    },
+    {
+     "file": "hero_para_m.webp",
+     "natural": [
+      820,
+      1281
+     ],
+     "scale_vs_display": 2.18
+    },
+    {
+     "file": "hero_private_m.webp",
+     "natural": [
+      820,
+      1281
+     ],
+     "scale_vs_display": 2.18
+    },
+    {
+     "file": "hero_surf_m.webp",
+     "natural": [
+      820,
+      1281
+     ],
+     "scale_vs_display": 2.18
+    }
+   ]
+  },
+  {
+   "id": "detail.intro",
+   "page": "상세",
+   "name": "상품 소개 사진",
+   "display_desktop": [
+    460,
+    345
+   ],
+   "display_mobile": [
+    331,
+    221
+   ],
+   "ratio_desktop": "4:3",
+   "ratio_mobile": "3:2",
+   "recommended_upload": [
+    1200,
+    900
+   ],
+   "min_upload": [
+    920,
+    690
+   ],
+   "separate_mobile_image": false,
+   "fit": "cover",
+   "note": "데스크탑 4:3(서핑 상세는 3:2), 모바일 3:2. 모바일에서 위아래가 조금씩 잘리니 주인공은 가운데 띠에 두세요.",
+   "current_files": [
+    {
+     "file": "crew_briefing.webp",
+     "natural": [
+      960,
+      644
+     ],
+     "scale_vs_display": 1.87
+    },
+    {
+     "file": "intro_bay.webp",
+     "natural": [
+      960,
+      720
+     ],
+     "scale_vs_display": 2.09
+    },
+    {
+     "file": "private_boat.webp",
+     "natural": [
+      960,
+      720
+     ],
+     "scale_vs_display": 2.09
+    },
+    {
+     "file": "surf_kid.webp",
+     "natural": [
+      1200,
+      805
+     ],
+     "scale_vs_display": 2.61
+    }
+   ]
+  },
+  {
+   "id": "detail.course",
+   "page": "상세",
+   "name": "코스 소개 카드 (한 장)",
+   "display_desktop": [
+    300,
+    169
+   ],
+   "display_mobile": [
+    290,
+    164
+   ],
+   "ratio_desktop": "16:9",
+   "ratio_mobile": "16:9",
+   "recommended_upload": [
+    1280,
+    720
+   ],
+   "min_upload": [
+    600,
+    338
+   ],
+   "separate_mobile_image": false,
+   "fit": "cover",
+   "note": "16:9. 한 카드에 사진 두 장이 들어가는 칸은 아래 \"반 칸\"을 쓰세요.",
+   "current_files": [
+    {
+     "file": "course_snack.webp",
+     "natural": [
+      640,
+      357
+     ],
+     "scale_vs_display": 2.11
+    },
+    {
+     "file": "course_van.webp",
+     "natural": [
+      640,
+      362
+     ],
+     "scale_vs_display": 2.13
+    },
+    {
+     "file": "act_roof.webp",
+     "natural": [
+      640,
+      429
+     ],
+     "scale_vs_display": 2.13
+    },
+    {
+     "file": "act_dive.webp",
+     "natural": [
+      640,
+      430
+     ],
+     "scale_vs_display": 2.13
+    },
+    {
+     "file": "act_photo.webp",
+     "natural": [
+      640,
+      430
+     ],
+     "scale_vs_display": 2.13
+    },
+    {
+     "file": "course_wine.webp",
+     "natural": [
+      640,
+      360
+     ],
+     "scale_vs_display": 2.13
+    },
+    {
+     "file": "pv_couple.webp",
+     "natural": [
+      640,
+      360
+     ],
+     "scale_vs_display": 2.13
+    },
+    {
+     "file": "turtle.jpg",
+     "natural": [
+      1000,
+      562
+     ],
+     "scale_vs_display": 3.33
+    }
+   ]
+  },
+  {
+   "id": "detail.course_half",
+   "page": "상세",
+   "name": "코스 소개 카드 (반 칸)",
+   "display_desktop": [
+    149,
+    169
+   ],
+   "display_mobile": [
+    144,
+    164
+   ],
+   "ratio_desktop": "0.88:1",
+   "ratio_mobile": "0.88:1",
+   "recommended_upload": [
+    600,
+    680
+   ],
+   "min_upload": [
+    300,
+    340
+   ],
+   "separate_mobile_image": false,
+   "fit": "cover",
+   "note": "세로가 조금 긴 비율(약 0.88:1). 패들보드·카약처럼 두 장을 나란히 놓는 칸입니다.",
+   "current_files": [
+    {
+     "file": "act_sup.webp",
+     "natural": [
+      480,
+      322
+     ],
+     "scale_vs_display": 1.91
+    },
+    {
+     "file": "act_kayak.webp",
+     "natural": [
+      480,
+      322
+     ],
+     "scale_vs_display": 1.91
+    },
+    {
+     "file": "course_sup_sunset.webp",
+     "natural": [
+      640,
+      360
+     ],
+     "scale_vs_display": 2.13
+    },
+    {
+     "file": "pv_sup.webp",
+     "natural": [
+      640,
+      360
+     ],
+     "scale_vs_display": 2.13
+    },
+    {
+     "file": "pv_dive.webp",
+     "natural": [
+      640,
+      360
+     ],
+     "scale_vs_display": 2.13
+    }
+   ]
+  },
+  {
+   "id": "detail.stars",
+   "page": "상세",
+   "name": "스타 인증샷",
+   "display_desktop": [
+    244,
+    254
+   ],
+   "display_mobile": [
+    158,
+    163
+   ],
+   "ratio_desktop": "0.96:1",
+   "ratio_mobile": "0.97:1",
+   "recommended_upload": [
+    640,
+    666
+   ],
+   "min_upload": [
+    488,
+    508
+   ],
+   "separate_mobile_image": false,
+   "fit": "cover",
+   "note": "거의 정사각(0.96:1). 15장이 격자로 놓이니 얼굴 높이를 비슷하게 맞추면 가지런합니다.",
+   "current_files": [
+    {
+     "file": "star01.webp",
+     "natural": [
+      315,
+      327
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star02.webp",
+     "natural": [
+      317,
+      327
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star03.webp",
+     "natural": [
+      315,
+      327
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star04.webp",
+     "natural": [
+      315,
+      328
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star05.webp",
+     "natural": [
+      317,
+      328
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star06.webp",
+     "natural": [
+      315,
+      328
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star07.webp",
+     "natural": [
+      315,
+      328
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star08.webp",
+     "natural": [
+      317,
+      328
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star09.webp",
+     "natural": [
+      315,
+      328
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star10.webp",
+     "natural": [
+      315,
+      327
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star11.webp",
+     "natural": [
+      317,
+      327
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star12.webp",
+     "natural": [
+      315,
+      327
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star13.webp",
+     "natural": [
+      315,
+      327
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star14.webp",
+     "natural": [
+      317,
+      327
+     ],
+     "scale_vs_display": 1.29
+    },
+    {
+     "file": "star15.webp",
+     "natural": [
+      315,
+      327
+     ],
+     "scale_vs_display": 1.29
+    }
+   ]
+  },
+  {
+   "id": "detail.activity",
+   "page": "상세 (콤보)",
+   "name": "패러·제트 소개 사진",
+   "display_desktop": [
+    701,
+    633
+   ],
+   "display_mobile": [
+    329,
+    247
+   ],
+   "ratio_desktop": "1.11:1",
+   "ratio_mobile": "4:3",
+   "recommended_upload": [
+    1600,
+    1400
+   ],
+   "min_upload": [
+    701,
+    633
+   ],
+   "separate_mobile_image": false,
+   "fit": "cover",
+   "note": "데스크탑은 옆 글 길이에 따라 높이가 576~633px로 변합니다(약 1.1~1.2:1). 모바일은 4:3. 주인공은 가운데에.",
+   "current_files": [
+    {
+     "file": "act_para.webp",
+     "natural": [
+      1080,
+      718
+     ],
+     "scale_vs_display": 1.13
+    },
+    {
+     "file": "act_jet.webp",
+     "natural": [
+      1080,
+      810
+     ],
+     "scale_vs_display": 1.41
+    }
+   ]
+  },
+  {
+   "id": "detail.meet",
+   "page": "상세 (서핑)",
+   "name": "이동 및 픽업 사진",
+   "display_desktop": [
+    730,
+    347
+   ],
+   "display_mobile": [
+    331,
+    186
+   ],
+   "ratio_desktop": "2.10:1",
+   "ratio_mobile": "16:9",
+   "recommended_upload": [
+    1600,
+    900
+   ],
+   "min_upload": [
+    1460,
+    694
+   ],
+   "separate_mobile_image": false,
+   "fit": "cover",
+   "note": "데스크탑은 옆으로 긴 2.1:1, 모바일은 16:9. 16:9로 올리면 데스크탑에서 위아래가 조금 잘립니다.",
+   "current_files": [
+    {
+     "file": "surf_boards.webp",
+     "natural": [
+      1280,
+      548
+     ],
+     "scale_vs_display": 1.58
+    }
+   ]
+  },
+  {
+   "id": "detail.rules",
+   "page": "상세 (서핑)",
+   "name": "유의사항 옆 사진",
+   "display_desktop": [
+    540,
+    313
+   ],
+   "display_mobile": [
+    331,
+    186
+   ],
+   "ratio_desktop": "1.73:1",
+   "ratio_mobile": "16:9",
+   "recommended_upload": [
+    1200,
+    675
+   ],
+   "min_upload": [
+    1080,
+    626
+   ],
+   "separate_mobile_image": false,
+   "fit": "cover",
+   "note": "데스크탑은 옆 목록 높이를 따라가고(지금 1.73:1), 모바일은 16:9.",
+   "current_files": [
+    {
+     "file": "surf_wave.webp",
+     "natural": [
+      960,
+      720
+     ],
+     "scale_vs_display": 1.78
+    }
+   ]
+  },
+  {
+   "id": "detail.more",
+   "page": "상세",
+   "name": "다른 상품 카드",
+   "display_desktop": [
+    250,
+    201
+   ],
+   "display_mobile": [
+    329,
+    196
+   ],
+   "ratio_desktop": "1.24:1",
+   "ratio_mobile": "5:3",
+   "recommended_upload": [
+    1000,
+    750
+   ],
+   "min_upload": [
+    658,
+    392
+   ],
+   "separate_mobile_image": false,
+   "fit": "cover",
+   "note": "데스크탑은 카드 높이에 따라 250×172~201, 모바일은 329×196(1.68:1). 4:3으로 올리고 주인공을 가운데에.",
+   "current_files": [
+    {
+     "file": "course_sup_sunset.webp",
+     "natural": [
+      640,
+      360
+     ],
+     "scale_vs_display": 1.84
+    },
+    {
+     "file": "sunset.jpg",
+     "natural": [
+      760,
+      428
+     ],
+     "scale_vs_display": 2.13
+    },
+    {
+     "file": "turtle.jpg",
+     "natural": [
+      1000,
+      562
+     ],
+     "scale_vs_display": 2.8
+    },
+    {
+     "file": "private_boat.webp",
+     "natural": [
+      960,
+      720
+     ],
+     "scale_vs_display": 2.92
+    },
+    {
+     "file": "boat_private.webp",
+     "natural": [
+      1024,
+      688
+     ],
+     "scale_vs_display": 3.11
+    }
+   ]
+  },
+  {
+   "id": "reviews.hero",
+   "page": "고객후기",
+   "name": "히어로",
+   "display_desktop": [
+    1440,
+    526
+   ],
+   "display_mobile": [
+    375,
+    506
+   ],
+   "ratio_desktop": "2.74:1",
+   "ratio_mobile": "3:4",
+   "recommended_upload": [
+    2880,
+    1052
+   ],
+   "recommended_upload_mobile": [
+    750,
+    1327
+   ],
+   "min_upload": [
+    1600,
+    584
+   ],
+   "separate_mobile_image": true,
+   "text_safe_zone_desktop": [
+    76,
+    168,
+    489,
+    351
+   ],
+   "text_safe_zone_mobile": [
+    22,
+    88,
+    353,
+    258
+   ],
+   "covered_from_y_desktop": 441,
+   "covered_from_y_mobile": 426,
+   "fit": "cover",
+   "note": "모바일은 세로 사진을 따로 씁니다(지금 파일은 위쪽 하늘을 늘린 750×1327). 아래쪽은 후기 탭이 덮습니다.",
+   "current_files": [
+    {
+     "file": "act_photo.webp",
+     "natural": [
+      640,
+      430
+     ],
+     "scale_vs_display": 0.44
+    },
+    {
+     "file": "hero_reviews_m.webp",
+     "natural": [
+      750,
+      1327
+     ],
+     "scale_vs_display": 2.0
+    }
+   ]
+  },
+  {
+   "id": "reviews.card",
+   "page": "고객후기",
+   "name": "후기 카드 사진 (고객 업로드)",
+   "display_desktop": [
+    294,
+    184
+   ],
+   "display_mobile": [
+    254,
+    159
+   ],
+   "ratio_desktop": "16:10",
+   "ratio_mobile": "16:10",
+   "min_upload": [
+    600,
+    375
+   ],
+   "separate_mobile_image": false,
+   "fit": "cover",
+   "note": "고객이 올린 사진을 16:10으로 가운데 잘라 보여 줍니다. 원본은 그대로 보관. 사이트 규칙: JPG·PNG·WEBP, 최대 5장, 장당 1.5MB.",
+   "current_files": [
+    {
+     "file": "rv_1.webp",
+     "natural": [
+      375,
+      500
+     ],
+     "scale_vs_display": 1.28
+    },
+    {
+     "file": "rv_2.webp",
+     "natural": [
+      375,
+      500
+     ],
+     "scale_vs_display": 1.28
+    },
+    {
+     "file": "rv_4.webp",
+     "natural": [
+      500,
+      278
+     ],
+     "scale_vs_display": 1.51
+    },
+    {
+     "file": "rv_3.webp",
+     "natural": [
+      453,
+      500
+     ],
+     "scale_vs_display": 1.54
+    },
+    {
+     "file": "rv_5.webp",
+     "natural": [
+      495,
+      500
+     ],
+     "scale_vs_display": 1.68
+    },
+    {
+     "file": "rv_6.webp",
+     "natural": [
+      500,
+      417
+     ],
+     "scale_vs_display": 1.7
+    }
+   ]
+  }
+ ]
+}

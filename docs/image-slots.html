@@ -1,0 +1,398 @@
+<title>오션스타 사진 규격</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --ink:#101418; --text:#454b52; --muted:#6a7077; --paper:#F6F5F2; --card:#ffffff; --line:#E2E0DA;
+  --sea:#177B9C; --sea-soft:#E3F1F6; --sky:#7FD4E8; --food:#C45014; --food-soft:#FBEBE2; --ok:#2F7A4F; --ok-soft:#E4F2E9;
+  --shade:rgba(16,20,24,.07);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ink:#EEF2F4; --text:#C5CCD2; --muted:#98A1A9; --paper:#12171B; --card:#1A2126; --line:#2B343B;
+    --sea:#6CC3DE; --sea-soft:#17323D; --sky:#7FD4E8; --food:#F0935F; --food-soft:#3A2419; --ok:#7CCB9B; --ok-soft:#1B3326;
+    --shade:rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ink:#EEF2F4; --text:#C5CCD2; --muted:#98A1A9; --paper:#12171B; --card:#1A2126; --line:#2B343B;
+  --sea:#6CC3DE; --sea-soft:#17323D; --sky:#7FD4E8; --food:#F0935F; --food-soft:#3A2419; --ok:#7CCB9B; --ok-soft:#1B3326;
+  --shade:rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--text);font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  font-size:15px;line-height:1.65;word-break:keep-all}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:40px 80px}
+h1,h2,h3{color:var(--ink);text-wrap:balance;margin:0;letter-spacing:-.02em}
+h1{font-size:34px;line-height:1.25;font-weight:700}
+h2{font-size:22px;margin-top:48px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+h3{font-size:17px;font-weight:700}
+p{margin:0}
+code,.n{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.lede{margin-top:12px;max-width:68ch;font-size:16px}
+.sum{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:22px;color:var(--muted);font-size:14px}
+.sum b{color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:18px;margin-right:4px}
+.rules{margin-top:26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.rules div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.rules b{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
+.rules p{font-size:14px}
+nav.toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+nav.toc a{padding:6px 12px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px;background:var(--card)}
+nav.toc a:focus-visible,nav.toc a:hover{border-color:var(--sea);color:var(--sea);outline:none}
+.slot{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.slot header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
+.where{font-size:13px;color:var(--muted)}
+.sid{margin-left:auto;font-size:12px;color:var(--sea);background:var(--sea-soft);padding:2px 8px;border-radius:6px}
+.body{margin-top:14px;display:grid;grid-template-columns:220px 1fr;gap:22px;align-items:start}
+@media (max-width:640px){.body{grid-template-columns:1fr}.sid{margin-left:0}}
+.diag{display:flex;flex-direction:column;gap:8px}
+.master{position:relative;width:100%;max-width:100%;background:repeating-linear-gradient(135deg,var(--shade) 0 6px,transparent 6px 12px);
+  border:1px solid var(--line);border-radius:6px}
+.master i{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:3px}
+.cd{border:2px solid var(--sea)}
+.cm{border:2px dashed var(--food)}
+.leg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--muted)}
+.leg span{display:inline-flex;align-items:center;gap:5px}
+.k{display:inline-block;width:14px;height:10px;border-radius:2px}
+.k.d{border:2px solid var(--sea)}
+.k.m{border:2px dashed var(--food)}
+.diag.hero{flex-direction:row;align-items:flex-end;gap:10px}
+.dev{margin:0}
+.dev.dsk{flex:3}
+.dev.mob{flex:1}
+.frame{position:relative;width:100%;max-width:100%;border:1px solid var(--line);border-radius:6px;overflow:hidden;
+  background:repeating-linear-gradient(135deg,var(--shade) 0 6px,transparent 6px 12px)}
+.frame i{position:absolute}
+.navz{left:0;right:0;top:0;background:var(--line);opacity:.8}
+.safe{background:color-mix(in srgb,var(--sea) 22%,transparent);border:1.5px solid var(--sea);border-radius:2px}
+.cov{left:0;right:0;bottom:0;background:color-mix(in srgb,var(--food) 22%,transparent);border-top:1.5px dashed var(--food)}
+figcaption{margin-top:4px;font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:0}
+.nums div{padding:8px 10px;border-radius:8px;background:var(--paper)}
+.nums .hi{background:var(--sea-soft)}
+dt{font-size:12px;color:var(--muted)}
+dd{margin:2px 0 0;color:var(--ink);font-size:15px;font-weight:600}
+dd small{font-size:12px;color:var(--muted);font-weight:500;margin-left:4px}
+.note{margin-top:12px;font-size:14px;max-width:68ch}
+.safe-t{margin-top:8px;font-size:13px;color:var(--muted)}
+.safe-t b{color:var(--sea);margin-right:4px}
+.files{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.files li{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;font-size:12.5px}
+.files code{color:var(--ink)}
+.files .n{color:var(--muted)}
+.pill{padding:1px 6px;border-radius:999px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--food-soft);color:var(--food)}
+.admin{margin-top:16px;display:grid;gap:12px}
+.admin section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.admin h3{margin-bottom:8px}
+.admin ol,.admin ul{margin:0;padding-left:20px}
+.admin li{margin:4px 0}
+pre{margin:10px 0 0;padding:14px;border-radius:10px;background:var(--paper);border:1px solid var(--line);overflow-x:auto;font-size:12.5px;line-height:1.55;color:var(--ink)}
+.foot{margin-top:40px;font-size:13px;color:var(--muted)}
+</style>
+
+<div class="wrap">
+  <h1>오션스타 사진 규격</h1>
+  <p class="lede">디자인 캔버스의 모든 보드를 브라우저에서 직접 재서 만든 사진 칸 목록입니다. 관리자 사이트에서 사진을 바꿀 때 어떤 비율과 크기로 올려야 하는지, 어디에 글이 올라가는지 칸마다 적었습니다.</p>
+  <div class="sum"><span><b>15</b>개 사진 칸</span><span><b>37</b>개 파일이 표시 크기의 2배 미만</span><span><b>1440 / 375</b>데스크탑 / 모바일 기준 폭(px)</span></div>
+
+  <div class="rules">
+    <div><b>2배로 올리기</b><p>선명한 화면(레티나)을 위해 표시 크기의 2배 픽셀로 올립니다. 표의 “권장 업로드”가 그 값입니다.</p></div>
+    <div><b>모든 칸은 꽉 채움(cover)</b><p>비율이 다르면 잘립니다. 파란 실선은 데스크탑, 주황 점선은 모바일에서 보이는 부분입니다.</p></div>
+    <div><b>히어로는 모바일 사진 따로</b><p>히어로는 데스크탑 가로 사진과 모바일 세로 사진을 따로 받습니다. 없으면 데스크탑 사진을 초점 기준으로 잘라 씁니다.</p></div>
+    <div><b>파일</b><p>WebP로 저장(자동 변환), 원본은 따로 보관. 사람 얼굴은 보정하지 않습니다.</p></div>
+  </div>
+
+  <nav class="toc" aria-label="페이지로 이동"><a href="#랜딩">랜딩</a><a href="#예약">예약 창</a><a href="#상세">상세</a><a href="#고객후기">고객후기</a><a href="#admin">관리자 편집 기능</a></nav>
+
+  <h2 id="랜딩">랜딩</h2>
+<article class="slot" id="landing.hero">
+  <header><h3>히어로</h3><span class="where">랜딩</span><code class="sid">landing.hero</code></header>
+  <div class="body">
+    <div class="diag hero"><figure class="dev dsk"><div class="frame" style="aspect-ratio:1440/880"><i class="navz" style="height:8.2%"></i><i class="safe" style="left:0.0%;top:21.1%;width:100.0%;height:71.6%"></i></div><figcaption>데스크탑 1440×880</figcaption></figure><figure class="dev mob"><div class="frame" style="aspect-ratio:375/640"><i class="navz" style="height:10.0%"></i><i class="safe" style="left:5.3%;top:23.4%;width:89.3%;height:64.7%"></i></div><figcaption>모바일 375×640</figcaption></figure></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">1440×880 <small>1.64:1</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">375×640 <small>0.59:1</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">2880×1760</dd></div><div><dt>모바일 사진</dt><dd class="n">750×1280</dd></div>
+        <div><dt>최소</dt><dd class="n">1920×1174</dd></div>
+      </dl>
+      <p class="note">지금은 한 장을 데스크탑·모바일에 같이 쓰고 모바일은 가운데를 세로로 잘라 씁니다. 모바일용 세로 사진을 따로 올릴 수 있게 하세요.</p><p class="safe-t"><b>글 안전 영역</b> 데스크탑 x 0–1440, y 186–816 (글·버튼·리뷰 줄 (가운데 넓게)) · 모바일 x 20–355, y 150–564</p>
+      <ul class="files"><li><code>hero_waikiki.jpg</code><span class="n">1900×805</span><span class="pill warn">0.9×</span></li></ul>
+    </div>
+  </div>
+</article>
+<article class="slot" id="landing.tour_card">
+  <header><h3>추천 프로그램 카드</h3><span class="where">랜딩</span><code class="sid">landing.tour_card</code></header>
+  <div class="body">
+    <div class="diag"><div class="master" style="aspect-ratio:1200/800"><i class="cd" style="width:99.8%;height:100.0%"></i><i class="cm" style="width:100.0%;height:99.8%"></i></div><div class="leg"><span><b class="k d"></b>데스크탑 3:2</span><span><b class="k m"></b>모바일 3:2</span></div></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">250×167 <small>3:2</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">266×177 <small>3:2</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">1200×800</dd></div>
+        <div><dt>최소</dt><dd class="n">600×400</dd></div>
+      </dl>
+      <p class="note">데스크탑·모바일 모두 3:2. 카드 5장이 같은 비율이어야 줄이 가지런합니다.</p>
+      <ul class="files"><li><code>sunset.jpg</code><span class="n">760×428</span><span class="pill ok">2.4×</span></li><li><code>surf.jpg</code><span class="n">700×500</span><span class="pill ok">2.6×</span></li><li><code>turtle.jpg</code><span class="n">1000×562</span><span class="pill ok">3.2×</span></li><li><code>boat_private.webp</code><span class="n">1024×688</span><span class="pill ok">3.9×</span></li><li><code>parasail.jpg</code><span class="n">1400×933</span><span class="pill ok">5.3×</span></li></ul>
+    </div>
+  </div>
+</article>
+<article class="slot" id="landing.video">
+  <header><h3>영상 썸네일</h3><span class="where">랜딩</span><code class="sid">landing.video</code></header>
+  <div class="body">
+    <div class="diag"><div class="master" style="aspect-ratio:1920/1080"><i class="cd" style="width:99.9%;height:100.0%"></i><i class="cm" style="width:100.0%;height:99.8%"></i></div><div class="leg"><span><b class="k d"></b>데스크탑 16:9</span><span><b class="k m"></b>모바일 16:9</span></div></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">1288×725 <small>16:9</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">335×188 <small>16:9</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">1920×1080</dd></div>
+        <div><dt>최소</dt><dd class="n">1280×720</dd></div>
+      </dl>
+      <p class="note">16:9. 가운데에 재생 버튼이 올라가니 가운데에 중요한 얼굴을 두지 마세요.</p>
+      <ul class="files"><li><code>video_yano.jpg</code><span class="n">1280×720</span><span class="pill warn">1.0×</span></li></ul>
+    </div>
+  </div>
+</article>
+<h2 id="예약">예약</h2>
+<article class="slot" id="booking.background">
+  <header><h3>뒤 배경</h3><span class="where">예약 창</span><code class="sid">booking.background</code></header>
+  <div class="body">
+    <div class="diag"><div class="master" style="aspect-ratio:1920/1080"><i class="cd" style="width:57.7%;height:100.0%"></i><i class="cm" style="width:11.4%;height:100.0%"></i></div><div class="leg"><span><b class="k d"></b>데스크탑 1.02:1</span><span><b class="k m"></b>모바일 0.20:1</span></div></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">1440×1405 <small>1.02:1</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">375×1856 <small>0.20:1</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">1920×1080</dd></div>
+        <div><dt>최소</dt><dd class="n">1280×720</dd></div>
+      </dl>
+      <p class="note">예약 창 뒤에 어둡게 깔리는 배경. 창 길이에 따라 높이가 변하고 대부분 가려지므로 해상도보다 색감이 중요합니다.</p>
+      <ul class="files"><li><code>hero_waikiki.jpg</code><span class="n">1900×805</span><span class="pill warn">0.3×</span></li></ul>
+    </div>
+  </div>
+</article>
+<h2 id="상세">상세</h2>
+<article class="slot" id="detail.hero">
+  <header><h3>히어로</h3><span class="where">상세 (5개 상품)</span><code class="sid">detail.hero</code></header>
+  <div class="body">
+    <div class="diag hero"><figure class="dev dsk"><div class="frame" style="aspect-ratio:1440/620"><i class="navz" style="height:11.6%"></i><i class="safe" style="left:5.3%;top:31.6%;width:35.5%;height:43.7%"></i><i class="cov" style="top:83.2%"></i></div><figcaption>데스크탑 1440×620</figcaption></figure><figure class="dev mob"><div class="frame" style="aspect-ratio:375/524"><i class="navz" style="height:12.2%"></i><i class="safe" style="left:5.9%;top:16.0%;width:88.3%;height:35.9%"></i><i class="cov" style="top:88.2%"></i></div><figcaption>모바일 375×524</figcaption></figure></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">1440×694 <small>2.07:1</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">375×587 <small>0.64:1</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">2880×1390</dd></div><div><dt>모바일 사진</dt><dd class="n">750×1175</dd></div>
+        <div><dt>최소</dt><dd class="n">1600×772</dd></div>
+      </dl>
+      <p class="note">스크롤 때 사진이 살짝 움직여서 실제 사진 칸은 보이는 칸보다 12% 깁니다(데스크탑 1440×694, 모바일 375×587). 아래쪽은 예약 패널이 덮습니다. 인물은 데스크탑 오른쪽 절반, 모바일 아래쪽 절반에 두세요.</p><p class="safe-t"><b>글 안전 영역</b> 데스크탑 x 76–587, y 196–467 (제목·배지 (왼쪽)) · 모바일 x 22–353, y 84–272</p>
+      <ul class="files"><li><code>hero_turtle.webp</code><span class="n">1440×617</span><span class="pill warn">0.9×</span></li><li><code>hero_sunset.webp</code><span class="n">1600×772</span><span class="pill warn">1.1×</span></li><li><code>hero_para.webp</code><span class="n">1600×773</span><span class="pill warn">1.1×</span></li><li><code>hero_private.webp</code><span class="n">1600×773</span><span class="pill warn">1.1×</span></li><li><code>hero_surf.webp</code><span class="n">1600×773</span><span class="pill warn">1.1×</span></li><li><code>hero_sunset_m.webp</code><span class="n">820×1281</span><span class="pill ok">2.2×</span></li><li><code>hero_para_m.webp</code><span class="n">820×1281</span><span class="pill ok">2.2×</span></li><li><code>hero_private_m.webp</code><span class="n">820×1281</span><span class="pill ok">2.2×</span></li><li><code>hero_surf_m.webp</code><span class="n">820×1281</span><span class="pill ok">2.2×</span></li></ul>
+    </div>
+  </div>
+</article>
+<article class="slot" id="detail.intro">
+  <header><h3>상품 소개 사진</h3><span class="where">상세</span><code class="sid">detail.intro</code></header>
+  <div class="body">
+    <div class="diag"><div class="master" style="aspect-ratio:1200/900"><i class="cd" style="width:100.0%;height:100.0%"></i><i class="cm" style="width:100.0%;height:89.0%"></i></div><div class="leg"><span><b class="k d"></b>데스크탑 4:3</span><span><b class="k m"></b>모바일 3:2</span></div></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">460×345 <small>4:3</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">331×221 <small>3:2</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">1200×900</dd></div>
+        <div><dt>최소</dt><dd class="n">920×690</dd></div>
+      </dl>
+      <p class="note">데스크탑 4:3(서핑 상세는 3:2), 모바일 3:2. 모바일에서 위아래가 조금씩 잘리니 주인공은 가운데 띠에 두세요.</p>
+      <ul class="files"><li><code>crew_briefing.webp</code><span class="n">960×644</span><span class="pill warn">1.9×</span></li><li><code>intro_bay.webp</code><span class="n">960×720</span><span class="pill ok">2.1×</span></li><li><code>private_boat.webp</code><span class="n">960×720</span><span class="pill ok">2.1×</span></li><li><code>surf_kid.webp</code><span class="n">1200×805</span><span class="pill ok">2.6×</span></li></ul>
+    </div>
+  </div>
+</article>
+<article class="slot" id="detail.course">
+  <header><h3>코스 소개 카드 (한 장)</h3><span class="where">상세</span><code class="sid">detail.course</code></header>
+  <div class="body">
+    <div class="diag"><div class="master" style="aspect-ratio:1280/720"><i class="cd" style="width:99.9%;height:100.0%"></i><i class="cm" style="width:99.5%;height:100.0%"></i></div><div class="leg"><span><b class="k d"></b>데스크탑 16:9</span><span><b class="k m"></b>모바일 16:9</span></div></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">300×169 <small>16:9</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">290×164 <small>16:9</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">1280×720</dd></div>
+        <div><dt>최소</dt><dd class="n">600×338</dd></div>
+      </dl>
+      <p class="note">16:9. 한 카드에 사진 두 장이 들어가는 칸은 아래 &quot;반 칸&quot;을 쓰세요.</p>
+      <ul class="files"><li><code>course_snack.webp</code><span class="n">640×357</span><span class="pill ok">2.1×</span></li><li><code>course_van.webp</code><span class="n">640×362</span><span class="pill ok">2.1×</span></li><li><code>act_roof.webp</code><span class="n">640×429</span><span class="pill ok">2.1×</span></li><li><code>act_dive.webp</code><span class="n">640×430</span><span class="pill ok">2.1×</span></li><li><code>act_photo.webp</code><span class="n">640×430</span><span class="pill ok">2.1×</span></li><li><code>course_wine.webp</code><span class="n">640×360</span><span class="pill ok">2.1×</span></li><li><code>pv_couple.webp</code><span class="n">640×360</span><span class="pill ok">2.1×</span></li><li><code>turtle.jpg</code><span class="n">1000×562</span><span class="pill ok">3.3×</span></li></ul>
+    </div>
+  </div>
+</article>
+<article class="slot" id="detail.course_half">
+  <header><h3>코스 소개 카드 (반 칸)</h3><span class="where">상세</span><code class="sid">detail.course_half</code></header>
+  <div class="body">
+    <div class="diag"><div class="master" style="aspect-ratio:600/680"><i class="cd" style="width:99.9%;height:100.0%"></i><i class="cm" style="width:99.5%;height:100.0%"></i></div><div class="leg"><span><b class="k d"></b>데스크탑 0.88:1</span><span><b class="k m"></b>모바일 0.88:1</span></div></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">149×169 <small>0.88:1</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">144×164 <small>0.88:1</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">600×680</dd></div>
+        <div><dt>최소</dt><dd class="n">300×340</dd></div>
+      </dl>
+      <p class="note">세로가 조금 긴 비율(약 0.88:1). 패들보드·카약처럼 두 장을 나란히 놓는 칸입니다.</p>
+      <ul class="files"><li><code>act_sup.webp</code><span class="n">480×322</span><span class="pill warn">1.9×</span></li><li><code>act_kayak.webp</code><span class="n">480×322</span><span class="pill warn">1.9×</span></li><li><code>course_sup_sunset.webp</code><span class="n">640×360</span><span class="pill ok">2.1×</span></li><li><code>pv_sup.webp</code><span class="n">640×360</span><span class="pill ok">2.1×</span></li><li><code>pv_dive.webp</code><span class="n">640×360</span><span class="pill ok">2.1×</span></li></ul>
+    </div>
+  </div>
+</article>
+<article class="slot" id="detail.stars">
+  <header><h3>스타 인증샷</h3><span class="where">상세</span><code class="sid">detail.stars</code></header>
+  <div class="body">
+    <div class="diag"><div class="master" style="aspect-ratio:640/666"><i class="cd" style="width:100.0%;height:100.0%"></i><i class="cm" style="width:100.0%;height:99.1%"></i></div><div class="leg"><span><b class="k d"></b>데스크탑 0.96:1</span><span><b class="k m"></b>모바일 0.97:1</span></div></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">244×254 <small>0.96:1</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">158×163 <small>0.97:1</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">640×666</dd></div>
+        <div><dt>최소</dt><dd class="n">488×508</dd></div>
+      </dl>
+      <p class="note">거의 정사각(0.96:1). 15장이 격자로 놓이니 얼굴 높이를 비슷하게 맞추면 가지런합니다.</p>
+      <ul class="files"><li><code>star01.webp</code><span class="n">315×327</span><span class="pill warn">1.3×</span></li><li><code>star02.webp</code><span class="n">317×327</span><span class="pill warn">1.3×</span></li><li><code>star03.webp</code><span class="n">315×327</span><span class="pill warn">1.3×</span></li><li><code>star04.webp</code><span class="n">315×328</span><span class="pill warn">1.3×</span></li><li><code>star05.webp</code><span class="n">317×328</span><span class="pill warn">1.3×</span></li><li><code>star06.webp</code><span class="n">315×328</span><span class="pill warn">1.3×</span></li><li><code>star07.webp</code><span class="n">315×328</span><span class="pill warn">1.3×</span></li><li><code>star08.webp</code><span class="n">317×328</span><span class="pill warn">1.3×</span></li><li><code>star09.webp</code><span class="n">315×328</span><span class="pill warn">1.3×</span></li><li><code>star10.webp</code><span class="n">315×327</span><span class="pill warn">1.3×</span></li><li><code>star11.webp</code><span class="n">317×327</span><span class="pill warn">1.3×</span></li><li><code>star12.webp</code><span class="n">315×327</span><span class="pill warn">1.3×</span></li><li><code>star13.webp</code><span class="n">315×327</span><span class="pill warn">1.3×</span></li><li><code>star14.webp</code><span class="n">317×327</span><span class="pill warn">1.3×</span></li><li><code>star15.webp</code><span class="n">315×327</span><span class="pill warn">1.3×</span></li></ul>
+    </div>
+  </div>
+</article>
+<article class="slot" id="detail.activity">
+  <header><h3>패러·제트 소개 사진</h3><span class="where">상세 (콤보)</span><code class="sid">detail.activity</code></header>
+  <div class="body">
+    <div class="diag"><div class="master" style="aspect-ratio:1600/1400"><i class="cd" style="width:96.9%;height:100.0%"></i><i class="cm" style="width:100.0%;height:85.8%"></i></div><div class="leg"><span><b class="k d"></b>데스크탑 1.11:1</span><span><b class="k m"></b>모바일 4:3</span></div></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">701×633 <small>1.11:1</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">329×247 <small>4:3</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">1600×1400</dd></div>
+        <div><dt>최소</dt><dd class="n">701×633</dd></div>
+      </dl>
+      <p class="note">데스크탑은 옆 글 길이에 따라 높이가 576~633px로 변합니다(약 1.1~1.2:1). 모바일은 4:3. 주인공은 가운데에.</p>
+      <ul class="files"><li><code>act_para.webp</code><span class="n">1080×718</span><span class="pill warn">1.1×</span></li><li><code>act_jet.webp</code><span class="n">1080×810</span><span class="pill warn">1.4×</span></li></ul>
+    </div>
+  </div>
+</article>
+<article class="slot" id="detail.meet">
+  <header><h3>이동 및 픽업 사진</h3><span class="where">상세 (서핑)</span><code class="sid">detail.meet</code></header>
+  <div class="body">
+    <div class="diag"><div class="master" style="aspect-ratio:1600/900"><i class="cd" style="width:100.0%;height:84.5%"></i><i class="cm" style="width:100.0%;height:99.9%"></i></div><div class="leg"><span><b class="k d"></b>데스크탑 2.10:1</span><span><b class="k m"></b>모바일 16:9</span></div></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">730×347 <small>2.10:1</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">331×186 <small>16:9</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">1600×900</dd></div>
+        <div><dt>최소</dt><dd class="n">1460×694</dd></div>
+      </dl>
+      <p class="note">데스크탑은 옆으로 긴 2.1:1, 모바일은 16:9. 16:9로 올리면 데스크탑에서 위아래가 조금 잘립니다.</p>
+      <ul class="files"><li><code>surf_boards.webp</code><span class="n">1280×548</span><span class="pill warn">1.6×</span></li></ul>
+    </div>
+  </div>
+</article>
+<article class="slot" id="detail.rules">
+  <header><h3>유의사항 옆 사진</h3><span class="where">상세 (서핑)</span><code class="sid">detail.rules</code></header>
+  <div class="body">
+    <div class="diag"><div class="master" style="aspect-ratio:1200/675"><i class="cd" style="width:97.0%;height:100.0%"></i><i class="cm" style="width:100.0%;height:99.9%"></i></div><div class="leg"><span><b class="k d"></b>데스크탑 1.73:1</span><span><b class="k m"></b>모바일 16:9</span></div></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">540×313 <small>1.73:1</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">331×186 <small>16:9</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">1200×675</dd></div>
+        <div><dt>최소</dt><dd class="n">1080×626</dd></div>
+      </dl>
+      <p class="note">데스크탑은 옆 목록 높이를 따라가고(지금 1.73:1), 모바일은 16:9.</p>
+      <ul class="files"><li><code>surf_wave.webp</code><span class="n">960×720</span><span class="pill warn">1.8×</span></li></ul>
+    </div>
+  </div>
+</article>
+<article class="slot" id="detail.more">
+  <header><h3>다른 상품 카드</h3><span class="where">상세</span><code class="sid">detail.more</code></header>
+  <div class="body">
+    <div class="diag"><div class="master" style="aspect-ratio:1000/750"><i class="cd" style="width:93.3%;height:100.0%"></i><i class="cm" style="width:100.0%;height:79.4%"></i></div><div class="leg"><span><b class="k d"></b>데스크탑 1.24:1</span><span><b class="k m"></b>모바일 5:3</span></div></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">250×201 <small>1.24:1</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">329×196 <small>5:3</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">1000×750</dd></div>
+        <div><dt>최소</dt><dd class="n">658×392</dd></div>
+      </dl>
+      <p class="note">데스크탑은 카드 높이에 따라 250×172~201, 모바일은 329×196(1.68:1). 4:3으로 올리고 주인공을 가운데에.</p>
+      <ul class="files"><li><code>course_sup_sunset.webp</code><span class="n">640×360</span><span class="pill warn">1.8×</span></li><li><code>sunset.jpg</code><span class="n">760×428</span><span class="pill ok">2.1×</span></li><li><code>turtle.jpg</code><span class="n">1000×562</span><span class="pill ok">2.8×</span></li><li><code>private_boat.webp</code><span class="n">960×720</span><span class="pill ok">2.9×</span></li><li><code>boat_private.webp</code><span class="n">1024×688</span><span class="pill ok">3.1×</span></li></ul>
+    </div>
+  </div>
+</article>
+<h2 id="고객후기">고객후기</h2>
+<article class="slot" id="reviews.hero">
+  <header><h3>히어로</h3><span class="where">고객후기</span><code class="sid">reviews.hero</code></header>
+  <div class="body">
+    <div class="diag hero"><figure class="dev dsk"><div class="frame" style="aspect-ratio:1440/470"><i class="navz" style="height:15.3%"></i><i class="safe" style="left:5.3%;top:35.7%;width:28.7%;height:38.9%"></i><i class="cov" style="top:93.8%"></i></div><figcaption>데스크탑 1440×470</figcaption></figure><figure class="dev mob"><div class="frame" style="aspect-ratio:375/452"><i class="navz" style="height:14.2%"></i><i class="safe" style="left:5.9%;top:19.5%;width:88.3%;height:37.6%"></i><i class="cov" style="top:94.2%"></i></div><figcaption>모바일 375×452</figcaption></figure></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">1440×526 <small>2.74:1</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">375×506 <small>3:4</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">2880×1052</dd></div><div><dt>모바일 사진</dt><dd class="n">750×1327</dd></div>
+        <div><dt>최소</dt><dd class="n">1600×584</dd></div>
+      </dl>
+      <p class="note">모바일은 세로 사진을 따로 씁니다(지금 파일은 위쪽 하늘을 늘린 750×1327). 아래쪽은 후기 탭이 덮습니다.</p><p class="safe-t"><b>글 안전 영역</b> 데스크탑 x 76–489, y 168–351 (제목·소개·리뷰 줄 (왼쪽)) · 모바일 x 22–353, y 88–258</p>
+      <ul class="files"><li><code>act_photo.webp</code><span class="n">640×430</span><span class="pill warn">0.4×</span></li><li><code>hero_reviews_m.webp</code><span class="n">750×1327</span><span class="pill ok">2.0×</span></li></ul>
+    </div>
+  </div>
+</article>
+<article class="slot" id="reviews.card">
+  <header><h3>후기 카드 사진 (고객 업로드)</h3><span class="where">고객후기</span><code class="sid">reviews.card</code></header>
+  <div class="body">
+    <div class="diag"><div class="master" style="aspect-ratio:16/10"><i class="cd" style="width:99.9%;height:100.0%"></i><i class="cm" style="width:99.8%;height:100.0%"></i></div><div class="leg"><span><b class="k d"></b>데스크탑 16:10</span><span><b class="k m"></b>모바일 16:10</span></div></div>
+    <div class="spec">
+      <dl class="nums">
+        <div><dt>데스크탑 표시</dt><dd class="n">294×184 <small>16:10</small></dd></div>
+        <div><dt>모바일 표시</dt><dd class="n">254×159 <small>16:10</small></dd></div>
+        <div class="hi"><dt>권장 업로드</dt><dd class="n">제한 없음 (자동 자르기)</dd></div>
+        <div><dt>최소</dt><dd class="n">600×375</dd></div>
+      </dl>
+      <p class="note">고객이 올린 사진을 16:10으로 가운데 잘라 보여 줍니다. 원본은 그대로 보관. 사이트 규칙: JPG·PNG·WEBP, 최대 5장, 장당 1.5MB.</p>
+      <ul class="files"><li><code>rv_1.webp</code><span class="n">375×500</span><span class="pill warn">1.3×</span></li><li><code>rv_2.webp</code><span class="n">375×500</span><span class="pill warn">1.3×</span></li><li><code>rv_4.webp</code><span class="n">500×278</span><span class="pill warn">1.5×</span></li><li><code>rv_3.webp</code><span class="n">453×500</span><span class="pill warn">1.5×</span></li><li><code>rv_5.webp</code><span class="n">495×500</span><span class="pill warn">1.7×</span></li><li><code>rv_6.webp</code><span class="n">500×417</span><span class="pill warn">1.7×</span></li></ul>
+    </div>
+  </div>
+</article>
+
+  <h2 id="admin">관리자 편집 기능 제안</h2>
+  <div class="admin">
+    <section>
+      <h3>사진 칸 등록표</h3>
+      <p>위 칸들을 저장소의 <code>docs/design-canvas/v3/image-slots.json</code>에 같은 이름(id)으로 적어 두었습니다. 관리자 화면은 이 표를 읽어 칸마다 자르기 틀과 경고를 보여 주면 됩니다.</p>
+<pre>{
+  "id": "detail.hero",
+  "ratio_desktop": "2.07:1",  "ratio_mobile": "0.64:1",
+  "recommended_upload": [2880, 1390],  "recommended_upload_mobile": [750, 1175],
+  "min_upload": [1600, 772],  "separate_mobile_image": true,
+  "text_safe_zone_desktop": [76, 196, 587, 467],
+  "covered_from_y_desktop": 516
+}</pre>
+    </section>
+    <section>
+      <h3>올리는 흐름</h3>
+      <ol>
+        <li>원본 업로드 (JPG · PNG · WEBP). 최소 크기보다 작으면 올리기 전에 알려 줍니다.</li>
+        <li>칸 비율대로 데스크탑·모바일 자르기 틀을 겹쳐 보여 주고, 글 안전 영역과 예약 패널이 덮는 자리를 반투명으로 표시합니다.</li>
+        <li>사진에서 가장 중요한 지점(초점)을 한 번 누릅니다. 잘리는 방향이 이 점을 기준으로 정해집니다.</li>
+        <li>대체 문구(alt)를 적습니다. 비워 두면 저장되지 않게 합니다.</li>
+        <li>저장하면 원본은 그대로 두고 1배·2배 WebP를 만들어 씁니다.</li>
+      </ol>
+    </section>
+    <section>
+      <h3>저장하는 값</h3>
+      <ul>
+        <li>원본 파일 주소, 가로·세로 픽셀</li>
+        <li>초점 좌표 <code>focal: {x: 0.62, y: 0.40}</code> → 화면에서는 <code>object-position: 62% 40%</code></li>
+        <li>필요하면 칸별 수동 자르기 좌표(비율 %)</li>
+        <li>모바일 전용 사진(히어로), 대체 문구</li>
+      </ul>
+    </section>
+    <section>
+      <h3>같이 고려할 점</h3>
+      <ul>
+        <li><b>사진 모음(미디어 라이브러리)</b>: 거북이 사진처럼 여러 상품 페이지에 같이 쓰는 사진이 많습니다. 한 번 올리고 여러 칸에서 골라 쓰게 하면 교체가 한 번에 끝납니다.</li>
+        <li><b>높이가 글 길이에 따라 변하는 칸</b>(패러·제트, 유의사항, 다른 상품 카드): 비율이 고정되지 않으니 초점을 꼭 받습니다.</li>
+        <li><b>고객 후기 사진</b>은 관리자가 올리지 않습니다. 16:10 가운데 자르기로 자동 처리하고, 숨김·삭제만 관리자 화면에 둡니다.</li>
+      </ul>
+    </section>
+  </div>
+  <p class="foot">표시 크기는 CSS 픽셀, 업로드 크기는 이미지 픽셀입니다. 파일 옆 배수(예: 1.3×)는 지금 파일이 가장 크게 보이는 칸의 몇 배인지이며, 2배 미만은 주황으로 표시했습니다.</p>
+</div>
