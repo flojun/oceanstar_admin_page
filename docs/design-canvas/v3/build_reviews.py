@@ -378,7 +378,9 @@ CSS_COMMON = """
 
 CSS_RD = """
 .rv-hero{height:470px}
-.rv-hero .hero-in{top:168px}
+/* 사진을 더 밝게(운영자). 글이 놓인 왼쪽만 덮고 사람이 있는 오른쪽은 걷는다. */
+.rv-hero .veil{background:linear-gradient(100deg,rgba(9,16,22,.74) 0%,rgba(9,16,22,.5) 30%,rgba(9,16,22,.08) 56%,rgba(9,16,22,0) 76%,rgba(9,16,22,.16) 100%)}
+.rv-hero .hero-in{top:168px;text-shadow:0 1px 14px rgba(9,16,22,.4)}
 .rv-hero .hero-in h1{font-size:60px}
 .rv-sub{margin-top:16px;font-size:19px;line-height:1.7}
 .loved{gap:12px;margin-top:26px}
@@ -427,8 +429,8 @@ CSS_RM = """
 /* 글은 내비 바로 아래로 올리고(운영자 요청), 사진도 함께 올려 두 사람이 탭 줄에
    눌리지 않게 한다. 글 뒤가 흰 구름이라 글 자리만 덮개를 짙게 하고 그림자를 준다. */
 .rv-hero .hero-img{object-position:50% 70%}
-.rv-hero .veil{background:linear-gradient(180deg,rgba(9,16,22,.62) 0%,rgba(9,16,22,.6) 57%,
-  rgba(9,16,22,.24) 72%,rgba(9,16,22,.14) 84%,rgba(9,16,22,.5) 100%)}
+.rv-hero .veil{background:linear-gradient(180deg,rgba(9,16,22,.62) 0%,rgba(9,16,22,.58) 56%,
+  rgba(9,16,22,.1) 70%,rgba(9,16,22,.02) 84%,rgba(9,16,22,.3) 100%)}   /* 사람 쪽은 거의 걷는다(운영자: 더 밝게) */
 .rv-hero .hero-in{top:88px;text-align:center;text-shadow:0 1px 14px rgba(9,16,22,.45)}
 .rv-hero .hero-in h1{font-size:40px}
 .rv-sub{margin-top:12px;font-size:16.5px;line-height:1.7}

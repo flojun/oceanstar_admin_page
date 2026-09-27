@@ -576,7 +576,9 @@ p,li,blockquote,figcaption{text-wrap:pretty}
   background:var(--ink);color:#fff;font-size:16px;font-weight:700}
 
 .rv-hero{height:470px}
-.rv-hero .hero-in{top:168px}
+/* 사진을 더 밝게(운영자). 글이 놓인 왼쪽만 덮고 사람이 있는 오른쪽은 걷는다. */
+.rv-hero .veil{background:linear-gradient(100deg,rgba(9,16,22,.74) 0%,rgba(9,16,22,.5) 30%,rgba(9,16,22,.08) 56%,rgba(9,16,22,0) 76%,rgba(9,16,22,.16) 100%)}
+.rv-hero .hero-in{top:168px;text-shadow:0 1px 14px rgba(9,16,22,.4)}
 .rv-hero .hero-in h1{font-size:60px}
 .rv-sub{margin-top:16px;font-size:19px;line-height:1.7}
 .loved{gap:12px;margin-top:26px}
