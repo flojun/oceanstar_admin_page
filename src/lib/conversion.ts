@@ -5,11 +5,11 @@
  * 같은 예약으로 두 번 세지 않도록 브라우저에 보낸 예약번호를 남기고, transaction_id 도 함께 보낸다
  * (Google Ads 가 같은 transaction_id 를 중복 제거한다).
  *
- * Google Ads 의 '구매' 전환 액션 라벨은 NEXT_PUBLIC_GADS_PURCHASE_LABEL 로 넣는다
- * (Google Ads → 목표 → 전환 → 해당 전환 → 태그 설정의 send_to 'AW-17755406251/<라벨>' 중 <라벨>).
- * 라벨이 없으면 표준 'purchase' 이벤트만 보낸다.
+ * 라벨은 Google Ads 전환 액션 'Purchase'(2026-09-28 생성)의 이벤트 스니펫 send_to 값이다.
+ * 공개 식별자(페이지 HTML 에 그대로 노출됨)라 코드에 둔다. 바꿀 때는 NEXT_PUBLIC_GADS_PURCHASE_LABEL 로 덮어쓴다.
  */
 const ADS_ID = "AW-17755406251";
+const PURCHASE_LABEL = "WYXwCPvglokdEKv_t5JC";
 
 type Gtag = (...args: unknown[]) => void;
 
@@ -35,7 +35,7 @@ export function reportPurchase({ orderId, value, currency }: { orderId: string; 
     }
     const g = gtag();
     const money = value !== undefined && currency ? { value, currency } : {};
-    const label = process.env.NEXT_PUBLIC_GADS_PURCHASE_LABEL;
-    if (label) g("event", "conversion", { send_to: `${ADS_ID}/${label}`, transaction_id: orderId, ...money });
+    const label = process.env.NEXT_PUBLIC_GADS_PURCHASE_LABEL || PURCHASE_LABEL;
+    g("event", "conversion", { send_to: `${ADS_ID}/${label}`, transaction_id: orderId, ...money });
     g("event", "purchase", { transaction_id: orderId, ...money });
 }

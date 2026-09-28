@@ -410,7 +410,7 @@ QA_BASE_URL=https://www.oceanstarhi.com QA_EXPECT_RENEWAL=1 npx playwright test 
 |---|---|---|
 | `GOOGLE_PLACES_API_KEY` | 구글 평점·리뷰 수를 Places API (New) 에서 하루 한 번 읽는 **서버용** 키 (Google Cloud 에서 Places API (New) 사용 설정) | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` 로 시도, 그것도 막히면 `src/components/site/siteConfig.ts` 의 고정값 |
 | `GOOGLE_PLACE_ID` | 오션스타 구글 지도 place ID (`ChIJ…`) | 이름·주소(케왈로 베이슨)로 한 번 찾는다 |
-| `NEXT_PUBLIC_GADS_PURCHASE_LABEL` | Google Ads '구매' 전환 라벨 (`AW-17755406251/<라벨>` 의 `<라벨>`) | 표준 `purchase` 이벤트만 나가고 Ads 전환은 잡히지 않는다 |
+| `NEXT_PUBLIC_GADS_PURCHASE_LABEL` | (선택) Google Ads '구매' 전환 라벨을 바꿀 때만. 기본값 `WYXwCPvglokdEKv_t5JC` 이 코드(src/lib/conversion.ts)에 있다 | 기본 라벨로 보낸다 |
 | `PREVIEW_DATA_ORIGIN` | **설정하지 않는다.** 컨테이너 미리보기 전용 (운영 사이트의 공개 읽기 API 를 빌려 씀) | — |
 
 전환 확인: 테스트 키로 결제 → `/booking/payment-success` 에서 Google 태그 어시스턴트로 `conversion`(send_to 라벨) · `purchase` 가 **한 번** 나가는지, 같은 주소를 새로 고쳐도 다시 나가지 않는지.
