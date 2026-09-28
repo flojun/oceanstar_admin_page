@@ -42,7 +42,7 @@ REPL = [
     ("[단독] 프라이빗 와이키키 거북이 스노클링", "[Private] Waikiki Turtle Snorkeling Trip"),
     ("거북이 스노클링 + 패러세일링 / 제트스키", "Turtle Snorkeling + Parasailing / Jet Ski"),
     ("거북이 스노클링 + 패러세일링 + 제트스키", "Turtle Snorkeling + Parasailing + Jet Ski"),
-    ("2시간 완전 단독 · 1-10명 / 팀", "2 hours, fully private · 1-10 guests / team"),
+    ("<i>2시간</i>", "<i>2 hours</i>"),   # 단독 · 인원은 이름 [Private] 과 오른쪽 팀 요금에 이미 있어 뺐다
     ("선셋·와인 &amp; 와이키키 거북이 스노클링", "Sunset &amp; Wine Waikiki Turtle Snorkeling"),
     ("선셋·와인 & 와이키키 거북이 스노클링", "Sunset & Wine Waikiki Turtle Snorkeling"),
     ("서핑 하루 5회 07:30-14:30", "Surfing 5 times a day 07:30-14:30"),
