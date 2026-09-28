@@ -123,23 +123,46 @@ async function findPlaceId(key: string): Promise<string | null> {
     return data.places?.find((p) => /Kewalo|96814/i.test(p.formattedAddress ?? ""))?.id ?? null;
 }
 
+/** Places API (New) */
+async function ratingNew(key: string) {
+    const id = process.env.GOOGLE_PLACE_ID || (await findPlaceId(key));
+    if (!id) throw new Error("place id not found");
+    const res = await fetch(`${PLACES}/places/${encodeURIComponent(id)}`, {
+        headers: { "X-Goog-Api-Key": key, "X-Goog-FieldMask": "rating,userRatingCount" },
+        next: { revalidate: DAY },
+    });
+    if (!res.ok) throw new Error(`place details ${res.status}`);
+    const data = (await res.json()) as { rating?: number; userRatingCount?: number };
+    return { rating: data.rating, count: data.userRatingCount };
+}
+
+/** 예전 Places API. 구글 클라우드에 예전 것만 켜져 있어도 동작하게 둔다. */
+async function ratingLegacy(key: string) {
+    const base = "https://maps.googleapis.com/maps/api/place";
+    let id = process.env.GOOGLE_PLACE_ID;
+    if (!id) {
+        const q = encodeURIComponent("Ocean Star turtle snorkeling, 1125 Kewalo Basin Harbor, Honolulu, HI 96814");
+        const f = await (await fetch(`${base}/findplacefromtext/json?input=${q}&inputtype=textquery&fields=place_id,formatted_address&key=${key}`, { next: { revalidate: DAY } })).json();
+        id = (f.candidates as { place_id: string; formatted_address?: string }[] | undefined)?.find((c) => /Kewalo|96814/i.test(c.formatted_address ?? ""))?.place_id;
+        if (!id) throw new Error(`legacy find ${f.status}`);
+    }
+    const d = await (await fetch(`${base}/details/json?place_id=${encodeURIComponent(id)}&fields=rating,user_ratings_total&key=${key}`, { next: { revalidate: DAY } })).json();
+    if (d.status !== "OK") throw new Error(`legacy details ${d.status}`);
+    return { rating: d.result?.rating as number | undefined, count: d.result?.user_ratings_total as number | undefined };
+}
+
 export async function getGoogleSummary(fallback: { rating: number; count: number; asOf: string }): Promise<GoogleSummary> {
     const key = process.env.GOOGLE_PLACES_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!key) return { ...fallback, live: false };
-    try {
-        const id = process.env.GOOGLE_PLACE_ID || (await findPlaceId(key));
-        if (!id) throw new Error("place id not found");
-        const res = await fetch(`${PLACES}/places/${encodeURIComponent(id)}`, {
-            headers: { "X-Goog-Api-Key": key, "X-Goog-FieldMask": "rating,userRatingCount" },
-            next: { revalidate: DAY },
-        });
-        if (!res.ok) throw new Error(`place details ${res.status}`);
-        const data = (await res.json()) as { rating?: number; userRatingCount?: number };
-        if (!data.rating || !data.userRatingCount) throw new Error("no rating in response");
-        const asOf = new Date().toLocaleDateString("en-CA", { timeZone: "Pacific/Honolulu" });
-        return { rating: data.rating, count: data.userRatingCount, asOf, live: true };
-    } catch (e) {
-        console.error("[siteData] google places", e);
-        return { ...fallback, live: false };
+    for (const get of [ratingNew, ratingLegacy]) {
+        try {
+            const r = await get(key);
+            if (!r.rating || !r.count) throw new Error("no rating in response");
+            const asOf = new Date().toLocaleDateString("en-CA", { timeZone: "Pacific/Honolulu" });
+            return { rating: r.rating, count: r.count, asOf, live: true };
+        } catch (e) {
+            console.error(`[siteData] google places (${get.name})`, e);
+        }
     }
+    return { ...fallback, live: false };
 }
