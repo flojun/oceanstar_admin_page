@@ -131,6 +131,13 @@ for stem, title in BOARDS:
         head, body = h[:i], translate(h[i:])
         head = re.sub(r"<title>[^<]*</title>",
                       f"<title>{title} · 영문 — {'모바일' if mob else '데스크탑'}</title>", head, count=1)
+        # 영문은 'Session 1' 이 한글 '1부'보다 길어 좁은 칸에서 숫자만 다음 줄로 떨어졌다. 한 줄로 묶는다.
+        extra = ".opt span,.opt em{white-space:nowrap}"
+        if mob:   # 폰의 두 칸짜리는 한 줄에 다 안 들어가 칸이 화면 밖으로 밀렸다. 이름 위 · 시간 아래로 쌓는다.
+            extra += (".opts.two-up{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}"
+                      ".two-up .opt{flex-wrap:wrap;row-gap:2px;padding:9px 14px}"
+                      ".two-up .opt span{flex:0 0 100%}")
+        head = head.replace("</style>", extra + "</style>", 1)
         out = (head + body).replace("<html>", '<html lang="en">', 1)
         left = visible_korean(out)
         assert not left, f"{dst}: 안 옮긴 한글 {left}"
