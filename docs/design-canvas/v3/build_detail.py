@@ -1049,8 +1049,8 @@ def nav(mobile, active=1):
     if mobile:
         return ('<header class="nav">'
                 f'<img src="logo_full.png" alt="{u("logo")}" class="logo">'
-                f'<div class="nav-r"><a href="#" class="ghost-pill">{u("manage")}</a>'
-                f'<a href="#" class="lang{wide}">{lang}</a>'
+                # 폰 머리엔 '내 예약 관리'를 두지 않는다(운영자 요청) — 더보기 메뉴(build_menu.py) 안에 있다.
+                f'<div class="nav-r"><a href="#" class="lang{wide}">{lang}</a>'
                 '<a href="#" class="burger"><svg width="22" height="22" viewBox="0 0 24 24" '
                 'fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">'
                 '<path d="M4 7h16M4 12h16M4 17h16"/></svg></a></div></header>')
