@@ -17,7 +17,7 @@ import { getTourNameByLang, type TourSetting } from "@/lib/tourUtils";
 import type { BlockedDate } from "@/lib/siteData";
 import { getPickupDisplayNameByLang } from "@/constants/pickupLocations";
 import { EXTERNAL } from "../links";
-import { ampm, type Lang } from "../tours";
+import { TOURS, ampm, type Lang } from "../tours";
 
 const libraries: "places"[] = ["places"];
 const svg = (p: React.ReactNode, size = 18, sw = 1.8) => (
@@ -112,6 +112,15 @@ const T = {
     },
 };
 
+/** 캔버스처럼 '와이키키 거북이 스노클링 · 1부'. 상품 목록에 없는 옵션은 예전 이름 규칙 그대로 */
+function tourLabel(tourId: string, option: string, lang: Lang) {
+    const def = TOURS.find((t) => t.tourIds.includes(tourId));
+    if (!def) return getTourNameByLang(tourId, option, lang);
+    if (def.key !== "turtle") return def.name[lang];
+    const n = tourId === "morning2" ? 2 : 1;
+    return `${def.name[lang]} · ${lang === "en" ? `Session ${n}` : `${n}부`}`;
+}
+
 type Booking = {
     tourId: string; tourDate: Date; tourDateStr: string; tourName: string; guests: number;
     pickupLocation: string; status: string; name: string;
@@ -173,7 +182,7 @@ export default function ManageClient({ lang, tourSettings, blockedDates }: { lan
                 : option.includes("3부") || option.includes("선셋") ? "sunset" : option.includes("단독") || option.includes("프라이빗") ? "private" : "morning1";
             const [y, m, d] = r.tour_date.split("-").map(Number);
             setBk({
-                tourId, tourDate: new Date(y, m - 1, d), tourDateStr: r.tour_date, tourName: getTourNameByLang(tourId, option, lang),
+                tourId, tourDate: new Date(y, m - 1, d), tourDateStr: r.tour_date, tourName: tourLabel(tourId, option, lang),
                 guests, pickupLocation: r.pickup_location || "", status: r.status, name: r.name,
             });
         } catch (err) {
