@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, Suspense } from "react";
+import { reportPurchase } from "@/lib/conversion";
 
 function PaymentSuccessContent() {
     const searchParams = useSearchParams();
@@ -21,6 +22,8 @@ function PaymentSuccessContent() {
                 });
                 const data = await res.json();
                 if (data.success && data.order_id) {
+                    // 결제 확인이 끝난 뒤 한 번만 전환을 보낸다 (새로고침·재방문은 conversion.ts 가 거른다)
+                    reportPurchase({ orderId: data.order_id, value: data.amount, currency: data.currency });
                     router.replace(`/booking/success?order_id=${data.order_id}`);
                 } else {
                     setVerifyFailed(true);

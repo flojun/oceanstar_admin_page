@@ -5,6 +5,7 @@
  */
 import Link from "next/link";
 import type { TourSetting } from "@/lib/tourUtils";
+import type { GoogleSummary } from "@/lib/siteData";
 import { BookButton } from "../BookingContext";
 import { Arrow, Instagram } from "../Icons";
 import { EXTERNAL, links } from "../links";
@@ -81,7 +82,7 @@ const MORE_KEY: Record<string, TourKey> = {
 };
 /** 콤보 패키지 카드 → 예약 창에서 고를 상품 (서핑 콤보 카드는 서핑) */
 
-export default function DetailPage({ lang, tour, tourSettings }: { lang: Lang; tour: TourKey; tourSettings: TourSetting[] }) {
+export default function DetailPage({ lang, tour, tourSettings, google }: { lang: Lang; tour: TourKey; tourSettings: TourSetting[]; google: GoogleSummary }) {
     const C = DETAIL[`${tour}_${lang}`];
     const u = UI[lang];
     const L = links(lang);
@@ -403,7 +404,7 @@ export default function DetailPage({ lang, tour, tourSettings }: { lang: Lang; t
     };
 
     const plain = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
-    const ld = detailJsonLd(lang, tourSettings, tour, `${plain(C.HERO.eyebrow)}. ${plain(C.HERO.pure)}`);
+    const ld = detailJsonLd(lang, tourSettings, tour, `${plain(C.HERO.eyebrow)}. ${plain(C.HERO.pure)}`, google);
 
     const FN: Record<string, () => React.ReactNode> = { perks, features, times, flow, course, stars, more, acts, combo, days, reco, sessions, meet, rules };
     let order: string[] = C.SECTIONS ?? ["perks", "features", "times", "flow", "course", "stars", "more"];

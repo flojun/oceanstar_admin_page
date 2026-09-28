@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import HomePage from "@/components/site/HomePage";
 import SiteShell from "@/components/site/SiteShell";
-import { getGoogleReviews, getTourData } from "@/lib/siteData";
+import { getGoogleReviews, getGoogleSummary, getTourData } from "@/lib/siteData";
+import { GOOGLE_SUMMARY } from "@/components/site/siteConfig";
 
 export const revalidate = 300;
 
@@ -25,10 +26,10 @@ export const metadata: Metadata = {
 };
 
 export default async function KoHomePage() {
-  const [{ tourSettings, blockedDates }, googleReviews] = await Promise.all([getTourData(), getGoogleReviews()]);
+  const [{ tourSettings, blockedDates }, googleReviews, google] = await Promise.all([getTourData(), getGoogleReviews(), getGoogleSummary(GOOGLE_SUMMARY)]);
   return (
     <SiteShell lang="ko" tourSettings={tourSettings} blockedDates={blockedDates}>
-      <HomePage lang="ko" tourSettings={tourSettings} googleReviews={googleReviews} />
+      <HomePage lang="ko" tourSettings={tourSettings} googleReviews={googleReviews} google={google} />
     </SiteShell>
   );
 }

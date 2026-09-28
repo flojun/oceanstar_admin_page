@@ -5,13 +5,12 @@
  */
 import { maskName } from "@/lib/utils";
 import type { TourSetting } from "@/lib/tourUtils";
-import type { GoogleReview, SiteReview } from "@/lib/siteData";
+import type { GoogleReview, GoogleSummary, SiteReview } from "@/lib/siteData";
 import { BookButton } from "../BookingContext";
 import { Arrow } from "../Icons";
 import { EXTERNAL } from "../links";
 import SiteFooter from "../SiteFooter";
 import SiteHeader from "../SiteHeader";
-import { GOOGLE_SUMMARY } from "../siteConfig";
 import { availableTours, type Lang } from "../tours";
 import { Carousel, SiteReviews, Stars, WriteReview } from "./ReviewsClient";
 import "../detail/detail.css";
@@ -38,10 +37,10 @@ const T = {
     },
 };
 
-export default function ReviewsPage({ lang, tourSettings, siteReviews, googleReviews }: { lang: Lang; tourSettings: TourSetting[]; siteReviews: SiteReview[]; googleReviews: GoogleReview[] }) {
+export default function ReviewsPage({ lang, tourSettings, siteReviews, googleReviews, google }: { lang: Lang; tourSettings: TourSetting[]; siteReviews: SiteReview[]; googleReviews: GoogleReview[]; google: GoogleSummary }) {
     const t = T[lang];
     const tours = availableTours(tourSettings);
-    const count = GOOGLE_SUMMARY.count.toLocaleString("en-US");
+    const count = google.count.toLocaleString("en-US");
     return (
         <div className="dp reviews">
             <section className="hero rv-hero">
@@ -82,7 +81,7 @@ export default function ReviewsPage({ lang, tourSettings, siteReviews, googleRev
                     <img src="/renewal/plat_google.png" alt="Google" className="src-logo" />
                     <div className="src-t">
                         <h2>{t.googleH}</h2>
-                        <p><b className="n">{GOOGLE_SUMMARY.rating.toFixed(1)}</b><Stars label={t.star(5)} /><span>{t.googleLine(count)}</span></p>
+                        <p><b className="n">{google.rating.toFixed(1)}</b><Stars label={t.star(5)} /><span>{t.googleLine(count)}</span></p>
                     </div>
                     <a href={EXTERNAL.googleReviews} className="src-go" target="_blank" rel="noopener noreferrer">{t.googleGo} <Arrow /></a>
                 </div>

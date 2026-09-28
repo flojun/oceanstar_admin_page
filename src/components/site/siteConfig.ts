@@ -1,6 +1,6 @@
 /**
- * 화면에 박아 두는 숫자. DB 에 없는 값이라 바뀌면 여기서 고친다.
- * 구글 리뷰 수는 구글 지도에서 직접 확인한 값이다 (자동으로 갱신되지 않는다).
+ * 구글 평점 · 리뷰 수의 대체값. 평소에는 Google Places API 에서 하루 한 번 읽고
+ * (src/lib/siteData.ts getGoogleSummary), API 키가 없거나 호출이 실패할 때만 이 값이 보인다.
  */
 export const GOOGLE_SUMMARY = {
     rating: 5.0,

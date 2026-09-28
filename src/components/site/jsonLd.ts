@@ -2,7 +2,7 @@ import { SITE_URL } from "@/lib/site";
 import type { TourSetting } from "@/lib/tourUtils";
 import { FAQ, REFUND_ROWS } from "./faqData";
 import { links } from "./links";
-import { GOOGLE_SUMMARY } from "./siteConfig";
+import type { GoogleSummary } from "@/lib/siteData";
 import { availableTours, fromPrice, type Lang, type TourDef } from "./tours";
 
 /**
@@ -11,7 +11,9 @@ import { availableTours, fromPrice, type Lang, type TourDef } from "./tours";
  */
 const abs = (p: string) => `${SITE_URL}${p}`;
 
-const business = (lang: Lang) => ({
+const rating = (g: GoogleSummary) => ({ "@type": "AggregateRating", ratingValue: g.rating, reviewCount: g.count, bestRating: 5 });
+
+const business = (lang: Lang, g: GoogleSummary) => ({
     "@type": "TravelAgency",
     "@id": `${SITE_URL}/#business`,
     name: lang === "en" ? "Ocean Star Hawaii" : "오션스타 하와이",
@@ -20,10 +22,10 @@ const business = (lang: Lang) => ({
     email: "hioceanstar@gmail.com",
     image: abs("/renewal/hero_waikiki.jpg"),
     address: { "@type": "PostalAddress", streetAddress: "1125 Kewalo Basin Harbor, Gate D #110", addressLocality: "Honolulu", addressRegion: "HI", postalCode: "96814", addressCountry: "US" },
-    aggregateRating: { "@type": "AggregateRating", ratingValue: GOOGLE_SUMMARY.rating, reviewCount: GOOGLE_SUMMARY.count, bestRating: 5 },
+    aggregateRating: rating(g),
 });
 
-function product(def: TourDef, settings: TourSetting[], lang: Lang) {
+function product(def: TourDef, settings: TourSetting[], lang: Lang, g: GoogleSummary) {
     const p = fromPrice(def, settings, "USD");
     const url = abs(links(lang).tour(def.key));
     return {
@@ -32,19 +34,19 @@ function product(def: TourDef, settings: TourSetting[], lang: Lang) {
         image: abs(def.img),
         url,
         brand: { "@type": "Brand", name: "Ocean Star Hawaii" },
-        aggregateRating: { "@type": "AggregateRating", ratingValue: GOOGLE_SUMMARY.rating, reviewCount: GOOGLE_SUMMARY.count, bestRating: 5 },
+        aggregateRating: rating(g),
         ...(p && { offers: { "@type": "Offer", price: p.amount, priceCurrency: "USD", availability: "https://schema.org/InStock", url } }),
     };
 }
 
-export function homeJsonLd(lang: Lang, settings: TourSetting[]) {
-    return { "@context": "https://schema.org", "@graph": [business(lang), ...availableTours(settings).map((d) => product(d, settings, lang))] };
+export function homeJsonLd(lang: Lang, settings: TourSetting[], g: GoogleSummary) {
+    return { "@context": "https://schema.org", "@graph": [business(lang, g), ...availableTours(settings).map((d) => product(d, settings, lang, g))] };
 }
 
-export function detailJsonLd(lang: Lang, settings: TourSetting[], key: string, description: string) {
+export function detailJsonLd(lang: Lang, settings: TourSetting[], key: string, description: string, g: GoogleSummary) {
     const def = availableTours(settings).find((d) => d.key === key);
     if (!def) return null;
-    return { "@context": "https://schema.org", ...product(def, settings, lang), description };
+    return { "@context": "https://schema.org", ...product(def, settings, lang, g), description };
 }
 
 export function faqJsonLd(lang: Lang) {

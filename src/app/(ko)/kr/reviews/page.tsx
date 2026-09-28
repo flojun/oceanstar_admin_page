@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import ReviewsPage from "@/components/site/reviews/ReviewsPage";
 import SiteShell from "@/components/site/SiteShell";
-import { getGoogleReviews, getSiteReviews, getTourData } from "@/lib/siteData";
+import { getGoogleReviews, getGoogleSummary, getSiteReviews, getTourData } from "@/lib/siteData";
+import { GOOGLE_SUMMARY } from "@/components/site/siteConfig";
 
 export const revalidate = 300;
 
@@ -12,10 +13,10 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const [{ tourSettings, blockedDates }, siteReviews, googleReviews] = await Promise.all([getTourData(), getSiteReviews(), getGoogleReviews()]);
+  const [{ tourSettings, blockedDates }, siteReviews, googleReviews, google] = await Promise.all([getTourData(), getSiteReviews(), getGoogleReviews(), getGoogleSummary(GOOGLE_SUMMARY)]);
   return (
     <SiteShell lang="ko" tourSettings={tourSettings} blockedDates={blockedDates}>
-      <ReviewsPage lang="ko" tourSettings={tourSettings} siteReviews={siteReviews} googleReviews={googleReviews} />
+      <ReviewsPage lang="ko" tourSettings={tourSettings} siteReviews={siteReviews} googleReviews={googleReviews} google={google} />
     </SiteShell>
   );
 }

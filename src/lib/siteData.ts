@@ -96,3 +96,50 @@ export async function getSiteReviews(): Promise<SiteReview[]> {
         return [];
     }
 }
+
+/**
+ * 구글 지도 평점 · 리뷰 수. Google Places API (New) Place Details 에서 하루 한 번 읽는다.
+ *
+ * 필요한 서버 환경값:
+ *   GOOGLE_PLACES_API_KEY  Places API (New) 가 켜진 서버용 키 (없으면 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY 를 쓴다)
+ *   GOOGLE_PLACE_ID        오션스타의 place ID (ChIJ… ). 없으면 이름으로 한 번 찾는다.
+ * 실패하면 siteConfig 의 고정값(확인한 날짜 포함)을 쓴다. 화면이 비지 않게.
+ */
+export type GoogleSummary = { rating: number; count: number; asOf: string; live: boolean };
+
+const PLACES = "https://places.googleapis.com/v1";
+const DAY = 86400;
+
+async function findPlaceId(key: string): Promise<string | null> {
+    const res = await fetch(`${PLACES}/places:searchText`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Goog-Api-Key": key, "X-Goog-FieldMask": "places.id,places.formattedAddress" },
+        body: JSON.stringify({ textQuery: "Ocean Star turtle snorkeling, 1125 Kewalo Basin Harbor, Honolulu, HI 96814" }),
+        next: { revalidate: DAY },
+    });
+    if (!res.ok) throw new Error(`searchText ${res.status}`);
+    const data = (await res.json()) as { places?: { id: string; formattedAddress?: string }[] };
+    // 주소가 케왈로 베이슨인 것만 믿는다 (엉뚱한 가게를 집지 않게)
+    return data.places?.find((p) => /Kewalo|96814/i.test(p.formattedAddress ?? ""))?.id ?? null;
+}
+
+export async function getGoogleSummary(fallback: { rating: number; count: number; asOf: string }): Promise<GoogleSummary> {
+    const key = process.env.GOOGLE_PLACES_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!key) return { ...fallback, live: false };
+    try {
+        const id = process.env.GOOGLE_PLACE_ID || (await findPlaceId(key));
+        if (!id) throw new Error("place id not found");
+        const res = await fetch(`${PLACES}/places/${encodeURIComponent(id)}`, {
+            headers: { "X-Goog-Api-Key": key, "X-Goog-FieldMask": "rating,userRatingCount" },
+            next: { revalidate: DAY },
+        });
+        if (!res.ok) throw new Error(`place details ${res.status}`);
+        const data = (await res.json()) as { rating?: number; userRatingCount?: number };
+        if (!data.rating || !data.userRatingCount) throw new Error("no rating in response");
+        const asOf = new Date().toLocaleDateString("en-CA", { timeZone: "Pacific/Honolulu" });
+        return { rating: data.rating, count: data.userRatingCount, asOf, live: true };
+    } catch (e) {
+        console.error("[siteData] google places", e);
+        return { ...fallback, live: false };
+    }
+}

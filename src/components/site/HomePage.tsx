@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { maskName } from "@/lib/utils";
 import type { TourSetting } from "@/lib/tourUtils";
-import type { GoogleReview } from "@/lib/siteData";
+import type { GoogleReview, GoogleSummary } from "@/lib/siteData";
 import { BookButton } from "./BookingContext";
 import { Arrow, Check, Chevron, Play, Plus, Stars } from "./Icons";
 import { EXTERNAL, links } from "./links";
@@ -9,7 +9,6 @@ import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
 import TourScroller, { type CardData } from "./TourScroller";
 import { FAQ_TOP } from "./faqData";
-import { GOOGLE_SUMMARY } from "./siteConfig";
 import { homeJsonLd, ldJson } from "./jsonLd";
 import { FEATURES, availableTours, currencyOf, priceCaption, priceText, timeLines, type Lang } from "./tours";
 
@@ -62,7 +61,7 @@ const T = {
     },
 };
 
-export default function HomePage({ lang, tourSettings, googleReviews }: { lang: Lang; tourSettings: TourSetting[]; googleReviews: GoogleReview[] }) {
+export default function HomePage({ lang, tourSettings, googleReviews, google }: { lang: Lang; tourSettings: TourSetting[]; googleReviews: GoogleReview[]; google: GoogleSummary }) {
     const t = T[lang];
     const L = links(lang);
     const cur = currencyOf(lang);
@@ -91,7 +90,7 @@ export default function HomePage({ lang, tourSettings, googleReviews }: { lang: 
 
     return (
         <>
-            <script type="application/ld+json" dangerouslySetInnerHTML={ldJson(homeJsonLd(lang, tourSettings))} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={ldJson(homeJsonLd(lang, tourSettings, google))} />
             <section className="hero home-hero">
                 <img src="/renewal/hero_waikiki.jpg" alt={t.heroAlt} className="hero-img" data-image-slot="landing.hero" fetchPriority="high" width={1900} height={805} />
                 <span className="veil" />
@@ -184,8 +183,8 @@ export default function HomePage({ lang, tourSettings, googleReviews }: { lang: 
                     </div>
                     <div className="rv-sum">
                         <span className="lab">{t.rvLab}</span>
-                        <div className="rv-score"><b>{GOOGLE_SUMMARY.rating.toFixed(1)}</b><Stars /></div>
-                        <span className="rv-n">{t.rvN(GOOGLE_SUMMARY.count.toLocaleString("en-US"), GOOGLE_SUMMARY.asOf)}</span>
+                        <div className="rv-score"><b>{google.rating.toFixed(1)}</b><Stars /></div>
+                        <span className="rv-n">{t.rvN(google.count.toLocaleString("en-US"), google.asOf)}</span>
                         <div className="rv-btn">
                             <a href={EXTERNAL.googleReviews} className="dark-pill" target="_blank" rel="noopener noreferrer">{t.rvAll} <Arrow /></a>
                             <Link href={L.reviews} className="line-pill">{t.rvSite} <Arrow /></Link>

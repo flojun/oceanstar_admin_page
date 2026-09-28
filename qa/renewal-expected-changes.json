@@ -53,6 +53,12 @@
       "code": "new-missing-anchor",
       "subjectPrefix": "src/components/site/food/FoodClient.tsx",
       "reason": "분류 칩 앵커는 FoodPage 가 카테고리 id 로 만든 섹션을 가리킨다. 템플릿 id 오탐"
+    },
+    {
+      "code": "capability-removed",
+      "surface": "customer",
+      "subject": "fetch GET {SUPABASE}/storage/v1/object/public/website-assets/versions.json?t=:param",
+      "reason": "운영자 결정(2026-09-28): 투어 카드 사진은 확정 캔버스 사진으로 고정. 관리자 '사진 및 배너 관리' 의 투어 카드 사진(option_*_list)은 새 화면에 쓰지 않는다"
     }
   ]
 }

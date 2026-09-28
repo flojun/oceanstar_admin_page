@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getTourData } from "@/lib/siteData";
+import { getGoogleSummary, getTourData } from "@/lib/siteData";
+import { GOOGLE_SUMMARY } from "../siteConfig";
 import SiteShell from "../SiteShell";
 import { links } from "../links";
 import { TOURS, availableTours, tourByKey, type Lang, type TourKey } from "../tours";
@@ -29,12 +30,12 @@ export function detailMetadata(lang: Lang, tour: string): Metadata {
 }
 
 export async function DetailRoute({ lang, tour }: { lang: Lang; tour: string }) {
-    const { tourSettings, blockedDates } = await getTourData();
+    const [{ tourSettings, blockedDates }, google] = await Promise.all([getTourData(), getGoogleSummary(GOOGLE_SUMMARY)]);
     // 판매 중인 상품만 연다 (DB 에 행이 없는 서핑 등은 404)
     if (!availableTours(tourSettings).some((t) => t.key === tour)) notFound();
     return (
         <SiteShell lang={lang} tourSettings={tourSettings} blockedDates={blockedDates}>
-            <DetailPage lang={lang} tour={tour as TourKey} tourSettings={tourSettings} />
+            <DetailPage lang={lang} tour={tour as TourKey} tourSettings={tourSettings} google={google} />
         </SiteShell>
     );
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { stripeClient, createReservationFromSession } from '@/lib/stripeBooking';
+import { fromMinor } from '@/lib/money';
 
 export async function POST(req: Request) {
     if (!stripeClient) {
@@ -28,6 +29,9 @@ export async function POST(req: Request) {
             success: true,
             order_id: result.order_id,
             status: result.status,
+            // 결제 완료 화면의 전환 이벤트용 (손님이 실제로 낸 금액)
+            amount: session.amount_total != null && session.currency ? fromMinor(session.amount_total, session.currency) : undefined,
+            currency: session.currency ? session.currency.toUpperCase() : undefined,
         });
     } catch (error) {
         console.error('Verify Session Error:', error);
