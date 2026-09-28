@@ -360,7 +360,7 @@ export default function BookingModal({
         if (d.key === "private") return lang === "en" ? "2 hours" : "2시간";
         return "";
     };
-    const errText = (k: string) => errors[k] ? <p className="err" role="alert">{errors[k]}</p> : null;
+    const errText = (k: string) => errors[k] ? <p className="err">{errors[k]}</p> : null;
     const paxLabel = isFlat ? s.paxTotal(pax) : lang === "en" ? s.paxVal(adult, child) : child ? `성인 ${adult}명 · 아동 ${child}명` : `성인 ${adult}명`;
     const dateLabel = (d?: Date) => d ? `${format(d, "yyyy-MM-dd")} (${S[lang].dows[d.getDay()]})` : "-";
     const shortDate = (d?: Date) => d ? `${format(d, "MM-dd")} (${S[lang].dows[d.getDay()]})` : "-";

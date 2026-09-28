@@ -3,6 +3,7 @@
  * 투어를 마친 손님이 배에서 QR 로 여는 페이지라, 인사와 재예약 혜택을 맨 위에, 친구에게 넘길 QR 을 맨 끝에 둔다.
  * 가게 목록은 카드 없이 안내서처럼: 분류 제목은 왼쪽 기둥(폰은 위), 가게는 오른쪽에 두 줄로 흐른다.
  */
+import { SITE_URL } from "@/lib/site";
 import type { TourSetting } from "@/lib/tourUtils";
 import { BookButton } from "../BookingContext";
 import { Arrow } from "../Icons";
@@ -42,7 +43,7 @@ const T = {
         book: "투어 예약하기", catsAria: "맛집 분류", map: "지도 보기",
         endH: "하와이에서 더 맛있고 즐거운 여행 되세요", endP: "마할로! 더 궁금한 점은 카카오톡으로 물어봐 주세요.", endBtn: "카카오톡 문의",
         qrH: "친구에게 이 페이지 보내기", qrP: "휴대폰 카메라로 찍으면 바로 열려요.", qrDl: "QR 코드 다운로드",
-        qrUrl: "https://oceanstarhi.com/kr/restaurants", qrAlt: "맛집 추천 페이지 QR 코드",
+        qrUrl: `${SITE_URL}/kr/restaurants`, qrAlt: "맛집 추천 페이지 QR 코드",
         footH: "지금 바다로 나가 볼까요", footSub: "일요일을 제외하고 매일 출항합니다.<br>원하시는 날짜를 골라 주세요.", footBtn: "예약하기",
     },
     en: {
@@ -55,7 +56,7 @@ const T = {
         book: "Book a Tour", catsAria: "Food categories", map: "View map",
         endH: "Enjoy great food in Hawaii!", endP: "Mahalo! Questions? Send us an email or give us a call.", endBtn: "Email Us",
         qrH: "Share this page", qrP: "Point your phone camera here to open it.", qrDl: "Download QR code",
-        qrUrl: "https://oceanstarhi.com/restaurants", qrAlt: "QR code for this page",
+        qrUrl: `${SITE_URL}/restaurants`, qrAlt: "QR code for this page",
         footH: "Ready to head out to sea?", footSub: "We sail every day except Sunday.<br>Pick the date that works for you.", footBtn: "Book Now",
     },
 };

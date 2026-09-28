@@ -40,12 +40,17 @@ const FALLBACK: Record<Surface, string[]> = {
 /** 쿼리 없이 열면 영원히 로딩하거나 의미 없는 페이지 — 스모크에서는 제외하고 흐름 테스트에서 다룬다 */
 const NEEDS_QUERY = new Set(["/booking/payment-success", "/kr/booking/payment-success"]);
 
-/** 동적 세그먼트 예시값: QA_ROUTE_SAMPLES='{"/blog/[slug]":"hawaii-restaurants"}' */
-const samples: Record<string, string> = (() => {
+/**
+ * 동적 세그먼트 값. 상품 상세는 판매 중인 네 상품을 기본으로 모두 연다 (서핑은 DB 행이 없어 404).
+ * 더 넣으려면 QA_ROUTE_SAMPLES='{"/blog/[slug]":"hawaii-restaurants"}' (값은 문자열 또는 배열)
+ */
+const TOUR_KEYS = ["turtle", "sunset", "combo", "private"];
+const samples: Record<string, string | string[]> = (() => {
+    const base = { "/tours/[tour]": TOUR_KEYS, "/kr/tours/[tour]": TOUR_KEYS };
     try {
-        return JSON.parse(process.env.QA_ROUTE_SAMPLES ?? "{}");
+        return { ...base, ...JSON.parse(process.env.QA_ROUTE_SAMPLES ?? "{}") };
     } catch {
-        return {};
+        return base;
     }
 })();
 
@@ -59,7 +64,7 @@ export function routesFor(surface: Surface): string[] {
         if (p.route === "/dashboard/website-settings") continue; // 서버 redirect 전용
         if (/\[.+\]/.test(p.route)) {
             const s = samples[p.route];
-            if (s) out.push(p.route.replace(/\[[^\]]+\]/, s));
+            for (const v of Array.isArray(s) ? s : s ? [s] : []) out.push(p.route.replace(/\[[^\]]+\]/, v));
             continue;
         }
         out.push(p.route);

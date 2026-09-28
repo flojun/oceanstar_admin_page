@@ -19,7 +19,7 @@ const T = {
         me: "한국어", logo: "오션스타",
     },
     en: {
-        tours: "Tours", reviews: "Reviews", faq: "FAQ", food: "Where we eat", manage: "Manage booking",
+        tours: "Tours", reviews: "Reviews", faq: "FAQ", food: "Where we eat", manage: "Manage My Booking",
         manageSub: "Check · change date · cancel", book: "Book a tour", other: "한국어", otherLong: "한국어",
         menu: "Open menu", close: "Close menu", kakao: "Ask on KakaoTalk", hours: "Mon to Sat, 09:00-17:00 (HST)",
         me: "EN", logo: "Oceanstar",

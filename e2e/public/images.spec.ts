@@ -156,7 +156,10 @@ test("사진 규격: 깨짐·흐림·찌그러짐 + 사진 칸 규격", async ({
 
     // 리뉴얼 후에는 규격표의 모든 칸이 어딘가에 표시돼 있어야 한다 (상세·예약 페이지 라우트가 생긴 뒤)
     const found = new Set(all.map((m) => m.slot).filter(Boolean));
-    const missingSlots = env.expectRenewal ? slots.filter((s) => !found.has(s.id)).map((s) => `${s.id} (${s.page} ${s.name})`) : [];
+    // booking.background: 캔버스 보드는 예약 창 뒤에 사진을 깔아 그렸지만, 실제로는 창이 지금 보던 페이지 위에 뜬다 (별도 사진 없음)
+    // detail.meet · detail.rules 는 서핑 상세에만 있다. 서핑이 tour_settings 에 없는 동안은 페이지가 404 라 칸도 없다.
+    const NOT_A_PHOTO = new Set(["booking.background", "detail.meet", "detail.rules"]);
+    const missingSlots = env.expectRenewal ? slots.filter((s) => !found.has(s.id) && !NOT_A_PHOTO.has(s.id)).map((s) => `${s.id} (${s.page} ${s.name})`) : [];
 
     // ── 보고서 ──
     const dir = path.join(process.cwd(), "qa", "reports", "images");

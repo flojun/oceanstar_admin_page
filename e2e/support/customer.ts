@@ -3,6 +3,7 @@ import en from "../../src/locales/en";
 import ko from "../../src/locales/ko";
 import { getTourNameByLang } from "../../src/lib/tourUtils";
 import { env } from "./env";
+import { TOURS } from "../../src/components/site/tours";
 
 /**
  * 고객 사이트 조작 모음 (page object).
@@ -49,13 +50,18 @@ export async function pickPlainTour(page: Page): Promise<Tour> {
     return tour;
 }
 
-/** ★ 예약 화면 열기. 리뉴얼 전: 홈 히어로 버튼 → 모달 / 리뉴얼 후: /booking 페이지 */
+/**
+ * ★ 예약 창 열기. 리뉴얼 전: 옛 메인 히어로 버튼 → 모달
+ *   리뉴얼 후(확정 캔버스 Sian1): 메인 히어로 '바로 예약하기' → 예약 창(.bk-modal). 페이지가 아니라 창이다.
+ */
 export async function openBooking(page: Page, lang: Lang): Promise<Locator> {
-    if (env.expectRenewal) {
-        await gotoReady(page, `${prefix(lang)}/booking`);
-        return page.locator("main");
-    }
     await gotoReady(page, home(lang));
+    if (env.expectRenewal) {
+        await page.locator(".hero-foot").getByRole("button").first().click();
+        const root = page.locator(".bk-modal");
+        await expect(root.getByRole("heading", { name: L[lang].bookingModal.title, exact: true })).toBeVisible();
+        return root;
+    }
     await page.getByRole("button", { name: L[lang].hero.mainBtn, exact: true }).click();
     // 모달 패널: 제목과 폼을 함께 품은 가장 안쪽 div (결제 버튼은 폼 밖 하단 바에 있음)
     const root = page
@@ -67,35 +73,72 @@ export async function openBooking(page: Page, lang: Lang): Promise<Locator> {
     return root;
 }
 
-/** ★ 1단계: 투어 카드 선택 */
+/** ★ 1단계: 투어 고르기. 리뉴얼 후에는 1부·2부가 한 상품(거북이 스노클링)이고 시간은 따로 고른다. */
 export async function chooseTour(root: Locator, tour: Tour, lang: Lang) {
+    if (env.expectRenewal) {
+        const def = TOURS.find((t) => t.tourIds.includes(tour.tour_id));
+        expect(def, `캔버스 상품에 없는 tour_id: ${tour.tour_id}`).toBeTruthy();
+        await root.locator("button.t").filter({ hasText: def!.name[lang] }).first().click();
+        if (def!.key === "turtle") {
+            const n = tour.tour_id === "morning2" ? 2 : 1;
+            await root.locator("button.opt").filter({ hasText: lang === "en" ? `Session ${n}` : `${n}부` }).first().click();
+        }
+        return;
+    }
     const name = getTourNameByLang(tour.tour_id, tour.name, lang);
     await root.getByRole("heading", { name, exact: true }).first().click();
 }
 
-/** 2단계: 인원 */
+/** ★ 2단계: 인원. 리뉴얼 후에는 +/- 버튼 */
 export async function setPax(root: Locator, adults: number, children = 0) {
+    if (env.expectRenewal) {
+        const rows = root.locator(".prow");
+        const set = async (row: Locator, want: number) => {
+            for (let i = 0; i < 40; i++) {
+                const now = Number(await row.locator("b.n").textContent());
+                if (now === want) return;
+                await row.locator("button.stp").nth(now < want ? 1 : 0).click();
+            }
+            throw new Error("인원 스테퍼가 원하는 값에 닿지 않음");
+        };
+        await set(rows.nth(0), adults);
+        if ((await rows.count()) > 1) await set(rows.nth(1), children);
+        return;
+    }
     await root.locator('input[name="adultCount"]').fill(String(adults));
     const child = root.locator('input[name="childCount"]');
     if (await child.isVisible().catch(() => false)) await child.fill(String(children));
 }
 
-/** 3단계: 예약 가능한 첫 날짜 (없으면 다음 달로, 최대 4개월) */
+/** ★ 3단계: 예약 가능한 첫 날짜 (없으면 다음 달로, 최대 4개월) */
 export async function pickFirstAvailableDate(page: Page, root: Locator): Promise<void> {
+    const renewal = env.expectRenewal;
     for (let i = 0; i < 4; i++) {
         await page.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
-        const day = root.locator(".rdp-day_button:not([disabled])").first();
+        if (renewal) await expect(root.locator(".cal.loading")).toHaveCount(0);
+        const day = renewal ? root.locator(".cgrid button.d:not([disabled])").first() : root.locator(".rdp-day_button:not([disabled])").first();
         if (await day.count()) {
             await day.click();
             return;
         }
-        await root.getByRole("button", { name: "Go to the Next Month" }).first().click();
+        if (renewal) await root.locator("button.marr").nth(1).click();
+        else await root.getByRole("button", { name: "Go to the Next Month" }).first().click();
     }
     throw new Error("4개월 안에 예약 가능한 날짜가 없음 (정원/차단일 설정 확인)");
 }
 
-/** 4단계: 픽업 장소(목록 첫 항목) + 예약자 정보 */
+/** ★ 4단계: 픽업 장소(목록 첫 항목) + 예약자 정보 */
 export async function fillBooker(root: Locator, who = { name: "QA 테스트", email: "qa-test@example.com", phone: "010-0000-0000" }) {
+    if (env.expectRenewal) {
+        const pickup = root.locator("#bk-pick1");
+        await expect(pickup).toBeVisible();
+        await expect(pickup.locator("option")).not.toHaveCount(1);
+        await pickup.selectOption({ index: 1 });
+        await root.locator("#bk-name").fill(who.name);
+        await root.locator("#bk-email").fill(who.email);
+        await root.locator("#bk-phone").fill(who.phone);
+        return;
+    }
     const pickup = root.locator("select").first();
     await expect(pickup).toBeVisible();
     await pickup.selectOption({ index: 1 });
@@ -104,8 +147,13 @@ export async function fillBooker(root: Locator, who = { name: "QA 테스트", em
     await root.locator('input[name="bookerPhone"]').fill(who.phone);
 }
 
-/** ★ 결제하기 → 통화 선택 모달 → 통화 선택 */
+/** ★ 결제. 리뉴얼 후: 창 안에서 통화를 고르고 결제하기 (통화 선택 창 없음) */
 export async function checkout(page: Page, root: Locator, lang: Lang, currency: "KRW" | "USD") {
+    if (env.expectRenewal) {
+        await root.getByRole("radio", { name: currency }).first().click();
+        await root.getByRole("button", { name: L[lang].bookingModal.checkout_btn }).first().click();
+        return;
+    }
     await root.getByRole("button", { name: L[lang].bookingModal.checkout_btn, exact: true }).click();
     await page.getByRole("button", { name: new RegExp(currency) }).click();
 }

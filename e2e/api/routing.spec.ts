@@ -41,21 +41,34 @@ test("robots.txt · sitemap.xml", async ({ request }) => {
     for (const p of locs) expect((await request.get(p)).status(), `sitemap ${p}`).toBeLessThan(400);
 });
 
-test.describe("리뉴얼 리다이렉트 (QA_EXPECT_RENEWAL=1 일 때)", () => {
+test.describe("리뉴얼 주소 (QA_EXPECT_RENEWAL=1 일 때)", () => {
     test.skip(!env.expectRenewal, "리뉴얼 배포 검증 때만");
-    // PRD §8.1: 현장 QR 이 /restaurants 를 가리키므로 404 가 나면 안 된다. Next 의 permanent 리다이렉트는 308.
+    // 확정 캔버스: 맛집은 주소 그대로(현장 QR 이 /restaurants 를 가리킨다). /en 은 없고 영문은 루트.
+    test("맛집 주소가 그대로 열린다 (현장 QR)", async ({ request }) => {
+        for (const p of ["/restaurants", "/kr/restaurants"]) expect((await request.get(p, noFollow)).status(), p).toBe(200);
+    });
     for (const [from, to] of [
-        ["/restaurants", "/blog/hawaii-restaurants"],
-        ["/kr/restaurants", "/kr/blog/hawaii-restaurants"],
+        ["/en", "/"],
+        ["/en/faq", "/faq"],
+        ["/tours", "/"],        // → /#tours (location() 은 경로만 본다)
+        ["/kr/tours", "/kr"],
     ]) {
         test(`${from} → ${to}`, async ({ request }) => {
             const res = await request.get(from, noFollow);
             expect([301, 308]).toContain(res.status());
             expect(location(res.headers())).toBe(to);
-            expect((await request.get(to)).status()).toBe(200);
         });
     }
     test("신규 페이지가 열린다", async ({ request }) => {
-        for (const p of ["/kr/reviews", "/reviews", "/kr/faq", "/faq", "/kr/blog", "/blog", "/kr/booking", "/booking"]) expect((await request.get(p)).status(), p).toBe(200);
+        for (const p of ["/kr/reviews", "/reviews", "/kr/faq", "/faq", "/kr/tours/turtle", "/tours/turtle", "/kr/tours/sunset", "/tours/sunset", "/kr/tours/combo", "/tours/combo", "/kr/tours/private", "/tours/private"]) {
+            expect((await request.get(p)).status(), p).toBe(200);
+        }
+    });
+    test("첫 HTML 에 가격 · 후기 · 구조화 데이터가 있다 (SSR)", async ({ request }) => {
+        const html = await (await request.get("/kr")).text();
+        expect(html).toMatch(/₩\d{2,3},\d{3}/);
+        expect(html).toContain('"@type":"Product"');
+        const faq = await (await request.get("/kr/faq")).text();
+        expect(faq).toContain('"@type":"FAQPage"');
     });
 });
