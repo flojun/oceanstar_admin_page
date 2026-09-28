@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import ReservationClientPage from "@/components/landing/ReservationClientPage";
+import HomePage from "@/components/site/HomePage";
+import SiteShell from "@/components/site/SiteShell";
+import { getGoogleReviews, getTourData } from "@/lib/siteData";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   alternates: {
@@ -20,6 +24,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function EnHomePage() {
-  return <ReservationClientPage lang="en" />;
+export default async function EnHomePage() {
+  const [{ tourSettings, blockedDates }, googleReviews] = await Promise.all([getTourData(), getGoogleReviews()]);
+  return (
+    <SiteShell lang="en" tourSettings={tourSettings} blockedDates={blockedDates}>
+      <HomePage lang="en" tourSettings={tourSettings} googleReviews={googleReviews} />
+    </SiteShell>
+  );
 }
