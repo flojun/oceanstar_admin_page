@@ -130,7 +130,9 @@ export function WriteReview({ lang }: { lang: Lang }) {
     const [open, setOpen] = useState(false);
     const [done, setDone] = useState(false);
     useEffect(() => {
-        if (new URLSearchParams(window.location.search).get("write") !== null) setOpen(true);
+        if (new URLSearchParams(window.location.search).get("write") === null) return;
+        const id = setTimeout(() => setOpen(true), 0);
+        return () => clearTimeout(id);
     }, []);
     return (
         <>

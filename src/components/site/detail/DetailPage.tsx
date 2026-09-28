@@ -12,6 +12,7 @@ import SiteFooter from "../SiteFooter";
 import SiteHeader from "../SiteHeader";
 import { availableTours, currencyOf, priceText, type Lang, type TourKey } from "../tours";
 import { DETAIL } from "./content";
+import { detailJsonLd, ldJson } from "../jsonLd";
 import "./detail.css";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -401,12 +402,16 @@ export default function DetailPage({ lang, tour, tourSettings }: { lang: Lang; t
         );
     };
 
+    const plain = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
+    const ld = detailJsonLd(lang, tourSettings, tour, `${plain(C.HERO.eyebrow)}. ${plain(C.HERO.pure)}`);
+
     const FN: Record<string, () => React.ReactNode> = { perks, features, times, flow, course, stars, more, acts, combo, days, reco, sessions, meet, rules };
     let order: string[] = C.SECTIONS ?? ["perks", "features", "times", "flow", "course", "stars", "more"];
     if (C.SHOW_STARS === false) order = order.filter((x) => x !== "stars");
 
     return (
         <div className={`dp${C.THEME ? ` ${C.THEME}` : ""}`}>
+            {ld && <script type="application/ld+json" dangerouslySetInnerHTML={ldJson(ld)} />}
             {hero}
             {order.map((k) => FN[k]())}
             <SiteFooter lang={lang} end={{ h2: C.END_H2, sub: C.END_SUB, button: book("book-pill light") }} />

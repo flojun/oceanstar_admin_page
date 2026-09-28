@@ -1,16 +1,58 @@
 {
-  "_설명": "리뉴얼로 '의도적으로' 바뀌는 것들. scripts/qa/audit-ui.mjs --compare 가 기준선과 비교할 때 여기 적힌 항목은 차단하지 않는다. 사유 없는 항목은 추가하지 말 것. 근거: docs/renewal-prd.md",
-
-  "requiredRedirects": [
-    { "source": "/restaurants", "destination": "/blog/hawaii-restaurants", "reason": "PRD §8.1 — 현장 QR 코드가 이 주소를 가리킴 (협상 불가)" },
-    { "source": "/kr/restaurants", "destination": "/kr/blog/hawaii-restaurants", "reason": "PRD §8.1" }
-  ],
-
+  "_설명": "리뉴얼로 '의도적으로' 바뀌는 것들. scripts/qa/audit-ui.mjs --compare 가 기준선과 비교할 때 여기 적힌 항목은 차단하지 않는다. 사유 없는 항목은 추가하지 말 것. 근거: 확정 캔버스 docs/design-canvas/v3 (claude/admiring-keller-ph7sxk)",
+  "requiredRedirects": [],
   "accept": [
-    { "code": "feature-unwired", "surface": "customer", "subjectPrefix": "anchor #", "reason": "PRD §3.1 — 헤더 메뉴가 #앵커 스크롤에서 페이지 링크(<Link>)로 바뀜. 대신 /kr/reviews, /kr/faq 등 새 링크가 생겨야 함 (feature-added 로 확인)" },
-    { "code": "feature-unwired", "surface": "customer", "subject": "nav /restaurants", "reason": "PRD §3.2 — 맛집은 블로그 1호 글로 이전 (nav /blog/hawaii-restaurants 로 대체)" },
-    { "code": "feature-unwired", "surface": "customer", "subject": "nav /kr/restaurants", "reason": "PRD §3.2 — 동일 (KO)" },
-    { "code": "label-missing", "surface": "customer", "subject": "Tours / 투어", "reason": "PRD §3.3 — '투어' 메뉴는 헤더에서 제거, 홈 섹션으로 유지" },
-    { "code": "label-missing", "surface": "customer", "subject": "About Us / 회사소개", "reason": "PRD §3.3 — '회사소개'는 전역 푸터로 승격" }
+    {
+      "code": "feature-unwired",
+      "surface": "customer",
+      "subjectPrefix": "anchor #",
+      "reason": "헤더 메뉴가 #앵커 스크롤에서 페이지 링크로 바뀜 (/kr/reviews, /kr/faq, /kr/tours/*). 메인에는 #tours #reviews #faq 섹션이 남아 있다"
+    },
+    {
+      "code": "label-missing",
+      "surface": "customer",
+      "subject": "About Us / 회사소개",
+      "reason": "확정 캔버스 메뉴는 Home · 투어 · 고객후기 · FAQ. 회사 정보는 푸터"
+    },
+    {
+      "code": "capability-removed",
+      "surface": "customer",
+      "subject": "fetch GET /api/google-reviews",
+      "reason": "구글 리뷰는 서버에서 읽어 첫 HTML 에 싣는다 (src/lib/siteData.ts getGoogleReviews). 같은 테이블·같은 조건"
+    },
+    {
+      "code": "capability-removed",
+      "surface": "customer",
+      "subject": "fetch GET /api/reviews",
+      "reason": "홈페이지 후기는 서버에서 읽어 첫 HTML 에 싣는다 (getSiteReviews). 작성(POST /api/reviews)은 /kr/reviews 의 후기 작성 창에 그대로 있다"
+    },
+    {
+      "code": "feature-unwired",
+      "surface": "customer",
+      "subject": "fetch GET /api/reviews",
+      "reason": "후기 등록 뒤 목록 새로 고침: 예전엔 GET 을 다시 불렀고, 지금은 페이지를 새로 읽는다 (서버 렌더)"
+    },
+    {
+      "code": "capability-removed",
+      "surface": "customer",
+      "subject": "fetch GET https://api.qrserver.com/v1/create-qr-code/",
+      "reason": "맛집 QR 은 브라우저에서 qrcode.react 로 그리고 PNG 로 내려받는다 (외부 QR 서비스 호출 없음)"
+    },
+    {
+      "code": "feature-unwired",
+      "surface": "customer",
+      "subject": "fetch GET https://api.qrserver.com/v1/create-qr-code/",
+      "reason": "위와 같음 — 'QR 코드 다운로드' 는 FoodClient 의 다운로드 버튼이 한다"
+    },
+    {
+      "code": "new-missing-anchor",
+      "subjectPrefix": "src/components/site/faq/FaqList.tsx",
+      "reason": "분류 앵커 #c0…#c6 은 같은 컴포넌트가 id={`c${i}`} 로 만든다. 검사기가 템플릿 id 를 읽지 못해 생기는 오탐"
+    },
+    {
+      "code": "new-missing-anchor",
+      "subjectPrefix": "src/components/site/food/FoodClient.tsx",
+      "reason": "분류 칩 앵커는 FoodPage 가 카테고리 id 로 만든 섹션을 가리킨다. 템플릿 id 오탐"
+    }
   ]
 }

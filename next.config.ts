@@ -17,6 +17,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // 영문은 루트(/)라 /en 주소는 없다. 캔버스 초안과 옛 링크의 /en 을 받아 준다.
+  // /tours, /kr/tours 는 목록 페이지가 따로 없어 메인의 투어 섹션으로 보낸다.
+  async redirects() {
+    return [
+      { source: "/en", destination: "/", permanent: true },
+      { source: "/en/:path*", destination: "/:path*", permanent: true },
+      { source: "/tours", destination: "/#tours", permanent: true },
+      { source: "/kr/tours", destination: "/kr#tours", permanent: true },
+    ];
+  },
   async rewrites() {
     const origin = process.env.PREVIEW_DATA_ORIGIN;
     if (!origin) return [];

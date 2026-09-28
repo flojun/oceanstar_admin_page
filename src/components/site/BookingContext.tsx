@@ -32,11 +32,15 @@ export function BookingProvider({
         const q = new URLSearchParams(window.location.search).get("book");
         if (q === null) return;
         const key = tourByKey(q)?.key;
-        // 주소창의 book= 은 지워 둔다. 새로고침마다 창이 다시 뜨지 않게.
-        const url = new URL(window.location.href);
-        url.searchParams.delete("book");
-        window.history.replaceState(null, "", url.pathname + url.search + url.hash);
-        open(key);
+        // 첫 렌더가 끝난 뒤 연다 (effect 안에서 바로 setState 하지 않게).
+        // 주소창의 book= 도 그때 지운다. 새로고침마다 창이 다시 뜨지 않게.
+        const id = setTimeout(() => {
+            const url = new URL(window.location.href);
+            url.searchParams.delete("book");
+            window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+            open(key);
+        }, 0);
+        return () => clearTimeout(id);
     }, [open]);
 
     return (

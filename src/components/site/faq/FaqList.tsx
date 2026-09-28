@@ -53,8 +53,11 @@ export default function FaqList({ lang }: { lang: Lang }) {
     useEffect(() => {
         const id = decodeURIComponent(window.location.hash.slice(1));
         if (!id || !/^q\d+-\d+$/.test(id)) return;
-        setOpen((s) => new Set(s).add(id));
-        requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: "center" }));
+        const raf = requestAnimationFrame(() => {
+            setOpen((s) => new Set(s).add(id));
+            requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: "center" }));
+        });
+        return () => cancelAnimationFrame(raf);
     }, []);
 
     // 스크롤하는 동안 지금 보고 있는 분류를 켠다

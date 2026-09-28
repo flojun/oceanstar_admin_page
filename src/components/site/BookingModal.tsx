@@ -458,7 +458,7 @@ export default function BookingModal({
         ];
 
     const payBtn = !def
-        ? <button type="button" className="pay wait" disabled>{s.pickFirst}</button>
+        ? <p className="pay wait" role="status">{s.pickFirst}</p>
         : <button type="button" className="pay" onClick={pay} disabled={submitting}>{submitting ? tr("bookingModal.waiting") : tr("bookingModal.checkout_btn")} {!submitting && <Arrow size={16} />}</button>;
     const curBtns = (
         <div className="cur" role="radiogroup" aria-label={lang === "en" ? "Currency" : "결제 통화"}>

@@ -9,6 +9,7 @@ import SiteFooter from "../SiteFooter";
 import SiteHeader from "../SiteHeader";
 import { availableTours, type Lang } from "../tours";
 import FaqList, { FaqSearch } from "./FaqList";
+import { faqJsonLd, ldJson } from "../jsonLd";
 import "../detail/detail.css";
 import "./faq.css";
 
@@ -50,6 +51,7 @@ export default function FaqPage({ lang, tourSettings }: { lang: Lang; tourSettin
     const tours = availableTours(tourSettings);
     return (
         <div className="dp faq">
+            <script type="application/ld+json" dangerouslySetInnerHTML={ldJson(faqJsonLd(lang))} />
             <section className="hero fq-hero">
                 <img src="/renewal/hero_waikiki.jpg" alt={t.heroAlt} className="hero-img" fetchPriority="high" />
                 <span className="veil" />

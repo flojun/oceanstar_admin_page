@@ -10,6 +10,7 @@ import SiteHeader from "./SiteHeader";
 import TourScroller, { type CardData } from "./TourScroller";
 import { FAQ_TOP } from "./faqData";
 import { GOOGLE_SUMMARY } from "./siteConfig";
+import { homeJsonLd, ldJson } from "./jsonLd";
 import { FEATURES, availableTours, currencyOf, priceCaption, priceText, timeLines, type Lang } from "./tours";
 
 const T = {
@@ -90,6 +91,7 @@ export default function HomePage({ lang, tourSettings, googleReviews }: { lang: 
 
     return (
         <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={ldJson(homeJsonLd(lang, tourSettings))} />
             <section className="hero home-hero">
                 <img src="/renewal/hero_waikiki.jpg" alt={t.heroAlt} className="hero-img" data-image-slot="landing.hero" fetchPriority="high" width={1900} height={805} />
                 <span className="veil" />
