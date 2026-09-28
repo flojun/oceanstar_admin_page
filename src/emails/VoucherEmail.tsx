@@ -22,6 +22,8 @@ interface VoucherEmailProps {
   pax: string;
   option: string;
   pickup_location: string;
+  /** 맞춤 예약처럼 정규 시간표가 없을 때 "별도 안내" 행을 넣는다. */
+  pickupTimeTbd?: boolean;
 }
 
 export const VoucherEmail = ({
@@ -34,6 +36,7 @@ export const VoucherEmail = ({
   pax,
   option,
   pickup_location,
+  pickupTimeTbd,
 }: VoucherEmailProps) => {
   const t = getTranslation(lang);
   const rows: [string, string][] = [
@@ -44,6 +47,10 @@ export const VoucherEmail = ({
     [t('voucherEmail.label_pax'), pax],
     [t('voucherEmail.label_pickup'), pickup_location],
   ];
+
+  if (pickupTimeTbd) {
+    rows.push([t('voucherEmail.label_pickup_time'), t('voucherEmail.pickup_time_tbd')]);
+  }
 
   return (
     <Html lang={lang}>

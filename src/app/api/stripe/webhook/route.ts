@@ -59,6 +59,22 @@ export async function POST(req: Request) {
             { expand: ['payment_intent'] }
         );
 
+        // 예약이 아닌 결제(관리자가 만든 맞춤 결제 링크, 대시보드 Payment Link)도
+        // 같은 이벤트로 들어온다. 예약 메타데이터가 없으면 저장할 게 없으므로
+        // 200 으로 넘긴다. 400 을 돌려주면 Stripe 가 3일간 재시도하면서
+        // 웹훅 엔드포인트를 실패 상태로 만든다.
+        if (!session.metadata?.order_id) {
+            return NextResponse.json({ received: true, ignored: 'non-booking session' });
+        }
+
+        // 맞춤 결제 링크는 1회용이다. Price 를 닫아 다시 못 쓰게 한다.
+        // 실패해도 예약 생성은 막지 않는다.
+        const customPriceId = session.metadata?.custom_price_id;
+        if (customPriceId) {
+            await stripeClient.prices.update(customPriceId, { active: false })
+                .catch((err) => console.error('[stripe webhook] 맞춤 링크를 닫지 못함:', customPriceId, err));
+        }
+
         const result = await createReservationFromSession(session);
         if (!result.ok) {
             // Non-2xx makes Stripe retry, which is what we want for a DB failure.
