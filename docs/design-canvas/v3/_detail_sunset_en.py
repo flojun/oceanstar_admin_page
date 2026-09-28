@@ -45,7 +45,7 @@ PERKS = [
     ("sup",    "5 activities",       "Paddleboard, kayak and diving included"),
     ("van",    "Round-trip pickup",  "Free pickup from Waikiki hotels"),
     ("gear",   "Gear included",      "All snorkeling gear provided"),
-    ("guide",  "Korean guide",       "A safe tour guided in Korean"),
+    ("guide",  "Crew in the water",      "Friendly guides swim right beside you"),   # 영문 손님용 문구(운영자 선택)
 ]
 PERK_NOTES = [
     "🌞 Snorkel worry-free on our covered boat, shaded from the sun's UV rays.",

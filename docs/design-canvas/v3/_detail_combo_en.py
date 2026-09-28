@@ -49,7 +49,7 @@ PERKS = [
     ("jet",    "Jet ski",                "30 minutes on Maunalua Bay, 2 per ski"),
     ("turtle", "Turtle snorkeling",      "3+ hours of snorkeling time"),
     ("cal",    "Separate dates",         "Book once, pick a date for each"),
-    ("guide",  "Korean crew",            "Korean-owned boat, professional Korean crew"),
+    ("guide",  "Crew in the water",      "Friendly guides swim right beside you"),   # 영문 손님용 문구(운영자 선택)
 ]
 PERK_NOTES = [
     "Public transit is limited in Hawaii, so be sure to check for pickup service.<br>"
