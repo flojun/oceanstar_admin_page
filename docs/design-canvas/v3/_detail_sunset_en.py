@@ -81,7 +81,7 @@ COURSE_HINT = "7 steps · Swipe to see more"
 # (title, duration or None, body, note or None, photo key)
 COURSE = [
     ("Hotel pickup", "20 min",
-     "Aloha! Your Korean guide will pick you up at the pickup spot closest to your hotel. "
+     "Aloha! Your guide will pick you up at the pickup spot closest to your hotel. "
      "We'll send you your pickup time individually.", None, "van"),
     ("Turtle snorkeling", "180 min",
      "Snorkel with wild sea turtles and all kinds of Pacific fish at Turtle Canyon "

@@ -90,10 +90,10 @@ ACTS_NOTE = ("We pick you up right at your hotel for an easy ride.<br>Most other
              "don't include pickup, and add-on pickup is usually shared with other groups.")
 
 FEAT_H2 = 'Turtle snorkeling, <span class="hl">one&nbsp;full&nbsp;hour&nbsp;more</span>'
-FEAT_LEDE = ("Our boat is run by a Korean owner and captain, so you get one full hour more "
+FEAT_LEDE = ("We run our own boat, so you get one full hour more "
              "of snorkeling!<br>Over 3 hours of snorkeling in total, with wild sea turtles "
-             "guaranteed. No worries about swimming or English. OceanStar is a Korean-owned "
-             "boat with a professional Korean crew on board.")
+             "guaranteed. No worries if you're not a strong swimmer: our friendly crew "
+             "swims right beside you.")
 
 TIME_H2 = "Activity schedule"
 TIME_SUB = "Choose your own dates for turtle snorkeling, parasailing and jet ski."

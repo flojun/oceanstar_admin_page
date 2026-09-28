@@ -41,10 +41,10 @@ PERKS = [
 FEAT_H2 = 'OceanStar’s <span class="hl">6&nbsp;standout&nbsp;features</span>'
 # (number, title, subtitle, body paragraphs, highlight line)
 FEATURES = [
-    ("01", "The Hawaii original", "Turtle snorkeling for Korean travelers",
-     ["The first company in Waikiki to offer turtle snorkeling for Korean travelers.<br>Communicate "
-      "easily with our professional, friendly Korean staff and experience the quality of a Hawaii "
-      "best seller for yourself."],
+    ("01", "The Hawaii original", "The original Turtle Canyon tour",
+     ["We have run turtle snorkeling off Waikiki since 2019 and know Turtle Canyon better than "
+      "anyone.<br>Our professional, friendly crew looks after you, so you can experience the quality "
+      "of a Hawaii best seller for yourself."],
      None),
     ("02", "Waikiki’s only wooden rooftop", "Blocks 100% of UV, rain & seasickness",
      ["The rooftop keeps out the hot sun and rain, and its stable roof structure minimizes rocking and seasickness."],
@@ -125,7 +125,7 @@ END_H2 = "Ready to head out to sea?"
 END_SUB = "We sail every day except Sunday.<br>Pick the date that works for you."
 
 # Footer - same values as the English landing footer (src/locales/en.ts).
-FOOT_ABOUT = "First Korean-owned Turtle Snorkeling in Hawaii.<br>Travel Platform 8,000+ Reviews · Google 5,000+ Reviews."
+FOOT_ABOUT = "The original Turtle Canyon snorkeling tour.<br>Travel Platform 8,000+ Reviews · Google 5,000+ Reviews."
 FOOT_HOURS = ["Hawaii Time: Mon - Sat 09:00 - 17:00", "hioceanstar@gmail.com", "8083081792"]
 FOOT_ADDR = "1125 Kewalo Basin Harbor,<br>Gate D #110, Honolulu, HI 96814"
 FOOT_BIZ = ["Company: Oceanview Activity LLC",
@@ -140,7 +140,7 @@ COURSE_HINT = "8 steps · Swipe to see more"
 # (title, duration or None, body, note or None, photo key)
 COURSE = [
     ("🚐 Waikiki hotel pickup", "20 min",
-     "🌺 Aloha! Our Korean guide will pick you up in a 15-passenger van at the designated Waikiki "
+     "🌺 Aloha! Our guide will pick you up in a 15-passenger van at the designated Waikiki "
      "pickup spot closest to your hotel. Ride to the harbor in comfort! Pickup times are sent to "
      "each guest individually. Pickup from the Kahala Hotel costs extra. If you’re coming to the "
      "boat on your own, we’ll send you parking info and directions😊",
@@ -175,9 +175,9 @@ COURSE = [
      "the photos and videos, right?!",
      None, "dive"),
     ("🍜 Snack time after the swim", None,
-     "The one thing every Korean craves after a swim!❤️ We serve hot kimchi and shrimp cup ramen "
+     "The perfect treat after a swim!❤️ We serve hot kimchi and shrimp cup ramen "
      "right in the middle of the Pacific🍜 Help yourself to America’s favorite snack, Pop-Tarts🍪, "
-     "plus Korean coffee mix and hot tea! Recharge your sugar & energy and fill the rest of "
+     "plus instant coffee mix and hot tea! Recharge your sugar & energy and fill the rest of "
      "your time with activities!",
      None, "bowl"),
     ("Photo time with Diamond Head", None,

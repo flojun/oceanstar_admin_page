@@ -135,7 +135,7 @@ KO = [
 EN = [
     ("Participation & Safety", [
         ("Can I participate even if I can't swim at all?",
-         "Yes! Our Korean-speaking crew will provide high-buoyancy life jackets and assist you right next to "
+         "Yes! Our crew will provide high-buoyancy life jackets and assist you right next to "
          "you in the water. We safely guide you to the turtles. Many non-swimmers tell us it was their best "
          "decision. You can also just enjoy from the boat."),
         ("Can children join? From what age?",
@@ -218,7 +218,7 @@ EN = [
         ("Can I bring my luggage?",
          "Small bags are fine, but please leave large suitcases at your hotel due to limited boat space."),
         ("Why choose OceanStar?",
-         "We are the first Korean-operated Turtle Snorkeling tour, with 15,000+ reviews across platforms. We "
+         "We are the original Turtle Canyon snorkeling tour, with 15,000+ reviews across platforms. We "
          "offer rooftop boats, full care, 4 activities, and guaranteed turtle sightings."),
         ("Can I touch the sea turtles?",
          "No. Federal law prohibits touching sea turtles; a 10-foot distance must be maintained. Our guides "
