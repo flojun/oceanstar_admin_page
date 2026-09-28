@@ -647,3 +647,5 @@
 @media (max-width: 767px) {
   body:has(.os .dock) .os-float { bottom: calc(92px + env(safe-area-inset-bottom)) !important }
 }
+/* 메뉴 서랍 · 예약 창 · 후기/취소 창이 열려 있을 때는 떠 있는 버튼을 숨긴다 (서랍 위에 겹친다) */
+body:has(.os-drawer-root, .bk-root, .rw-root, .mg-root) .os-float { display: none !important }
