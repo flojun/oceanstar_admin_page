@@ -35,7 +35,7 @@ REPL = [
      "Your hotel (we suggest the nearest pickup point)"),
     ("서핑 · 스노클링 10-17 (토), 서핑 10-21 (수)",
      "Surfing · Snorkeling Sat, Oct 17 · Surfing Wed, Oct 21"),
-    ("1부 07:30-11:30 · 2부 10:30-14:30", "Session 1 07:30-11:30 · Session 2 10:30-14:30"),
+    ("1부 07:30-11:30 · 2부 10:30-14:30", "Session 1 07:30-11:30<br>Session 2 10:30-14:30"),   # 영문은 길어 2부에서 줄을 나눈다
     ("성인 2명 기준으로 10월에 고를 수 있는 날짜는", "For 2 adults, the dates you can pick in October:"),
     ("※ 서핑의 운휴 요일은 아직 받지 못했습니다.", "* We don't have the surf closing days yet."),
     ("지금은 스노클링과 같은 날만 막아 두었습니다.", "For now only the snorkeling date is blocked."),

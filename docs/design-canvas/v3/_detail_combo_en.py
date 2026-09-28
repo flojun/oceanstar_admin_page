@@ -124,7 +124,8 @@ COMBOS = [
       "Round-trip hotel pickup for both"]),
 ]
 COMBO_PRICE = "Special combo price"
-COMBO_PRICES = {"Combo A": ("$210", "Adults and children same price", "")}
+# A · B 두 패키지 가격이 같아 둘 다 COMBO_PRICE 로 적는다(운영자). 한쪽만 금액이 있으면 달라 보인다.
+COMBO_PRICES = {}
 
 MORE_H2 = "OceanStar exclusives"
 MORE = [
