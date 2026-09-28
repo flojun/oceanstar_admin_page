@@ -9,7 +9,6 @@ export const links = (lang: Lang) => {
         home: p || "/",
         tour: (key: TourKey) => `${p}/tours/${key}`,
         reviews: `${p}/reviews`,
-        reviewWrite: `${p}/reviews/write`,
         faq: `${p}/faq`,
         manage: `${p}/manage-booking`,
         restaurants: `${p}/restaurants`,

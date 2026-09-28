@@ -1,0 +1,113 @@
+/* 맛집 추천 (캔버스 FoodKo/FoodEn). docs/design-canvas/v3/build_restaurants.py 의 CSS 를 .os .dp.food 아래로 옮겼다. 상세 CSS(detail.css) 위에 얹는다. */
+.os .dp.food .rs-sub { color:rgba(255,255,255,.9) }
+.os .dp.food .hello { display:grid;align-items:center;border-bottom:1px solid var(--line) }
+.os .dp.food .hi h2 { line-height:1.3 }
+.os .dp.food .hi p { margin-top:6px;color:var(--text) }
+.os .dp.food .perks { display:grid }
+.os .dp.food .perks li { display:flex;align-items:center;gap:14px }
+.os .dp.food .perks .ic { flex:none;display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:14px; background:#E4F3F8;color:var(--sea-d) }
+.os .dp.food .perks div { display:flex;flex-direction:column;gap:2px;min-width:0 }
+.os .dp.food .perks b { font-size:16px;color:var(--ink);line-height:1.4 }
+.os .dp.food .perks span { font-size:14.5px;color:var(--text);line-height:1.55 }
+.os .dp.food .perks .say b { display:inline;font-size:inherit;color:var(--sea-d) }
+.os .dp.food .hello .book-pill { justify-content:center;white-space:nowrap }
+.os .dp.food .chips { display:flex;gap:8px;overflow-x:auto;scrollbar-width:none }
+.os .dp.food .chips a { flex:none;display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 18px 0 14px;border-radius:999px; background:#fff;border:1px solid var(--line);font-weight:700;color:var(--text);white-space:nowrap }
+.os .dp.food .chips a svg { width:18px;height:18px;color:var(--sea) }
+.os .dp.food .chips a .n { font-size:13px;color:var(--muted) }
+.os .dp.food .chips a.on { background:var(--ink);border-color:var(--ink);color:#fff }
+.os .dp.food .chips a.on svg { color:var(--sky) }
+.os .dp.food .chips a.on .n { color:var(--sky-2) }
+.os .dp.food .cat { display:grid }
+.os .dp.food .cat + .cat { border-top:1px solid var(--line) }
+.os .dp.food .cat-h .ic { display:flex;align-items:center;justify-content:center;border-radius:14px;background:#E4F3F8;color:var(--sea-d) }
+.os .dp.food .cat-h h2 { line-height:1.2 }
+.os .dp.food .cat-h .n { display:block;font-weight:700;color:var(--muted) }
+.os .dp.food .tip { display:flex;flex-direction:column;gap:6px;border-left:2px solid var(--sky) }
+.os .dp.food .tip-h { font-size:13px;font-weight:800;color:var(--sea-d) }
+.os .dp.food .tip b { font-size:16px;color:var(--ink);line-height:1.5 }
+.os .dp.food .tip p { font-size:14.5px;line-height:1.65;color:var(--text) }
+.os .dp.food .ents { display:grid }
+.os .dp.food .ents h3 { font-family:var(--f-body);font-weight:700;color:var(--ink);line-height:1.3;letter-spacing:-.01em }
+.os .dp.food .ents p { color:var(--text);word-break:keep-all;overflow-wrap:anywhere }
+.os .dp.food .map { display:inline-flex;align-items:center;gap:5px;min-height:32px;font-size:14.5px;font-weight:700;color:var(--sea-d); text-decoration:underline;text-decoration-color:rgba(23,123,156,.35);text-underline-offset:4px }
+.os .dp.food .ending { display:grid;align-items:center;background:#E4F3F8;border:1px solid #D2EAF2;border-radius:20px }
+.os .dp.food .e-l h2 { line-height:1.25 }
+.os .dp.food .e-l p { color:var(--text) }
+.os .dp.food .e-l .book-pill { justify-content:center;gap:8px }
+.os .dp.food .e-l .book-pill svg { width:auto;height:auto;padding:0;background:none;color:#fff }
+.os .dp.food .e-r { display:flex;align-items:center;gap:18px;border-radius:16px;background:#fff }
+.os .dp.food .e-r .qr { flex:none;border-radius:10px;background:#fff }
+.os .dp.food .e-r div { display:flex;flex-direction:column;gap:4px }
+.os .dp.food .e-r b { font-size:16px;color:var(--ink) }
+.os .dp.food .e-r span { font-size:14px;line-height:1.55;color:var(--text) }
+.os .dp.food .ending + .foot { margin-top:96px }
+@media (min-width: 768px) {
+  .os .dp.food .rs-hero { height:560px }
+  .os .dp.food .rs-hero .hero-img { object-position:50% 50% }
+  .os .dp.food .rs-hero .veil { background:linear-gradient(180deg,rgba(9,16,22,.42) 0,rgba(9,16,22,.2) 90px,rgba(9,16,22,0) 160px), linear-gradient(100deg,rgba(9,16,22,.7) 0%,rgba(9,16,22,.42) 32%,rgba(9,16,22,.06) 52%,rgba(9,16,22,0) 100%) }
+  .os .dp.food .rs-hero .hero-in { top:150px;text-shadow:0 1px 14px rgba(9,16,22,.4) }
+  .os .dp.food .rs-hero .hero-in h1 { margin-top:0;font-size:58px }
+  .os .dp.food .rs-sub { margin-top:14px;max-width:26em;font-size:19px;line-height:1.7 }
+  .os .dp.food .hello { margin:0 var(--pad);padding:40px 0;grid-template-columns:1fr 1.5fr auto;gap:0 40px }
+  .os .dp.food .hi h2 { font-size:26px }
+  .os .dp.food .hi p { font-size:16px }
+  .os .dp.food .perks { grid-template-columns:1fr 1fr;gap:24px;padding-left:40px;border-left:1px solid var(--line) }
+  .os .dp.food .hello .book-pill { height:52px;padding:0 24px;font-size:15.5px }
+  .os .dp.food .rs-body { padding:48px var(--pad) 0 }
+  .os .dp.food .cat { grid-template-columns:320px 1fr;gap:0 64px;padding:56px 0 }
+  .os .dp.food .cat:first-of-type { margin-top:24px }
+  .os .dp.food .cat-h { align-self:start }
+  .os .dp.food .cat-h .ic { width:48px;height:48px }
+  .os .dp.food .cat-h h2 { margin-top:18px;font-size:34px }
+  .os .dp.food .cat-h .n { margin-top:6px;font-size:16px }
+  .os .dp.food .tip { margin-top:26px;padding-left:18px }
+  .os .dp.food .ents { grid-template-columns:1fr 1fr;gap:40px 56px;padding-top:6px }
+  .os .dp.food .ents h3 { font-size:22px }
+  .os .dp.food .ents p { margin-top:6px;font-size:16.5px;line-height:1.7 }
+  .os .dp.food .map { margin-top:8px }
+  .os .dp.food .ending { margin:112px var(--pad) 0;padding:40px 44px;grid-template-columns:1fr auto;gap:48px }
+  .os .dp.food .e-l h2 { font-size:34px }
+  .os .dp.food .e-l p { margin-top:12px;font-size:17px;line-height:1.75 }
+  .os .dp.food .e-l .book-pill { margin-top:24px;height:54px;padding:0 28px;font-size:16px }
+  .os .dp.food .e-r { padding:20px 26px 20px 20px;max-width:420px }
+  .os .dp.food .e-r .qr { width:132px;height:132px }
+}
+@media (max-width: 767px) {
+  .os .dp.food .rs-hero { height:500px }
+  .os .dp.food .rs-hero .hero-img { object-position:51% 50% }
+  .os .dp.food .rs-hero .veil { background:linear-gradient(180deg,rgba(9,16,22,.64) 0%,rgba(9,16,22,.5) 38%,rgba(9,16,22,.08) 60%, rgba(9,16,22,0) 80%,rgba(9,16,22,.18) 100%) }
+  .os .dp.food .rs-hero .hero-in { top:96px;text-align:center;text-shadow:0 1px 14px rgba(9,16,22,.45) }
+  .os .dp.food .rs-hero .hero-in h1 { margin-top:0;font-size:36px }
+  .os .dp.food .rs-sub { margin:10px auto 0;max-width:24ch;font-size:16px;line-height:1.65;text-wrap:balance }
+  .os .dp.food .hello { margin:0 var(--pad);padding:32px 0 28px;gap:18px }
+  .os .dp.food .hi { text-align:center }
+  .os .dp.food .hi h2 { font-size:21px }
+  .os .dp.food .hi p { font-size:15px }
+  .os .dp.food .perks { gap:14px;padding-top:18px;border-top:1px solid var(--line) }
+  .os .dp.food .hello .book-pill { height:54px;font-size:16px }
+  .os .dp.food .rs-body { padding:32px 0 0 }
+  .os .dp.food .chips { padding:0 var(--pad) 4px }
+  .os .dp.food .chips::after { content:"";flex:none;width:8px }
+  .os .dp.food .chips a { height:44px;font-size:14.5px }
+  .os .dp.food .cat { margin:0 var(--pad);padding:40px 0;gap:22px }
+  .os .dp.food .cat:first-of-type { margin-top:16px }
+  .os .dp.food .cat-h { display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:14px;align-items:center }
+  .os .dp.food .cat-h .ic { grid-row:span 2;width:44px;height:44px;border-radius:12px }
+  .os .dp.food .cat-h h2 { font-size:25px }
+  .os .dp.food .cat-h .n { font-size:14.5px }
+  .os .dp.food .tip { grid-column:1 / -1;margin-top:18px;padding-left:16px }
+  .os .dp.food .ents { gap:24px }
+  .os .dp.food .ents h3 { font-size:19px }
+  .os .dp.food .ents p { margin-top:4px;font-size:15.5px;line-height:1.65 }
+  .os .dp.food .map { margin-top:4px }
+  .os .dp.food .ending { margin:64px var(--pad) 0;padding:28px 20px 20px;gap:24px;text-align:center }
+  .os .dp.food .e-l h2 { font-size:25px }
+  .os .dp.food .e-l p { margin-top:10px;font-size:15.5px;line-height:1.75;text-wrap:balance }
+  .os .dp.food .e-l .book-pill { margin-top:20px;height:54px;padding:0 20px;font-size:16px;width:100% }
+  .os .dp.food .e-r { padding:16px;text-align:left }
+  .os .dp.food .e-r .qr { width:104px;height:104px }
+  .os .dp.food .ending + .foot { margin-top:64px }
+}
+/* 캔버스에 없는 것: 예전 페이지의 QR 다운로드 버튼. 지도 보기 링크와 같은 꼴로 작게 붙인다. */
+.os .dp.food .qr-dl { align-self:flex-start;display:inline-flex;align-items:center;min-height:32px;margin-top:2px;padding:0;border:0;background:none;cursor:pointer; font:inherit;font-size:14px;font-weight:700;color:var(--sea-d); text-decoration:underline;text-decoration-color:rgba(23,123,156,.35);text-underline-offset:4px }

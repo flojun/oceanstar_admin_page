@@ -23,7 +23,7 @@ export default function KakaoChatWidget() {
 
   return (
     <div
-      className="fixed z-[60] flex flex-col items-center gap-3 animate-in slide-in-from-bottom-5 duration-500 scale-80 origin-bottom-right sm:scale-100 sm:origin-center"
+      className="os-float fixed z-[60] flex flex-col items-center gap-3 animate-in slide-in-from-bottom-5 duration-500 scale-80 origin-bottom-right sm:scale-100 sm:origin-center"
       // 옛 메인의 하단 예약 막대 위에 앉던 자리(100px). 리뉴얼에는 그 막대가 없어 화면 아래로 내린다.
       style={{ bottom: 'calc(16px + env(safe-area-inset-bottom))', right: '16px' }}
     >

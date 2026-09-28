@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import ManageBookingClient from "@/components/booking/ManageBookingClient";
+import ManagePage from "@/components/site/manage/ManagePage";
+import SiteShell from "@/components/site/SiteShell";
+import { getTourData } from "@/lib/siteData";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "예약 관리",
@@ -21,6 +25,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function KoManageBookingPage() {
-  return <ManageBookingClient lang="ko" />;
+export default async function KoManageBookingPage() {
+  const { tourSettings, blockedDates } = await getTourData();
+  return (
+    <SiteShell lang="ko" tourSettings={tourSettings} blockedDates={blockedDates}>
+      <ManagePage lang="ko" tourSettings={tourSettings} blockedDates={blockedDates} />
+    </SiteShell>
+  );
 }

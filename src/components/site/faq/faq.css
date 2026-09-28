@@ -1,0 +1,135 @@
+/* FAQ (캔버스 FaqKo/FaqEn). docs/design-canvas/v3/build_faq.py 의 CSS 를 .os .dp.faq 아래로 옮겼다. detail.css 위에 얹는다. */
+.os .dp.faq .fq-sub { color:rgba(255,255,255,.9) }
+.os .dp.faq .search { display:flex;align-items:center;gap:12px;background:#fff;border-radius:999px;color:var(--muted); box-shadow:0 10px 30px rgba(9,16,22,.18) }
+.os .dp.faq .search input { flex:1;min-width:0;border:0;outline:0;background:none;font:inherit;color:var(--ink) }
+.os .dp.faq .search input::placeholder { color:#6B7076 }
+.os .dp.faq .quick { position:relative;z-index:6;background:#fff;border:1px solid var(--line);border-radius:22px;display:grid }
+.os .dp.faq .quick li { display:flex;align-items:center;gap:14px }
+.os .dp.faq .quick .ic { flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px; background:var(--soft);color:var(--sea) }
+.os .dp.faq .quick div { display:flex;flex-direction:column;gap:3px;min-width:0 }
+.os .dp.faq .quick b { font-weight:700;color:var(--ink);line-height:1.35 }
+.os .dp.faq .quick div span { color:var(--muted);line-height:1.5 }
+.os .dp.faq .cats a, .os .dp.faq .chips a { display:flex;align-items:center;justify-content:space-between;gap:10px;border-radius:999px; font-weight:700;color:var(--text);white-space:nowrap }
+.os .dp.faq .cats a .n, .os .dp.faq .chips a .n { font-size:13px;font-weight:700;color:var(--muted) }
+.os .dp.faq .cats a.on, .os .dp.faq .chips a.on { background:var(--ink);color:#fff }
+.os .dp.faq .cats a.on .n, .os .dp.faq .chips a.on .n { color:var(--sky-2) }
+.os .dp.faq .grp-h { display:flex;align-items:baseline;gap:10px }
+.os .dp.faq .grp-h h2 { line-height:1.25 }
+.os .dp.faq .grp-h .n { font-weight:700;color:var(--muted) }
+.os .dp.faq .qa { background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden }
+.os .dp.faq details + details { border-top:1px solid var(--line) }
+.os .dp.faq summary { display:flex;align-items:flex-start;list-style:none;cursor:pointer;color:var(--ink) }
+.os .dp.faq summary::-webkit-details-marker { display:none }
+.os .dp.faq .qm { flex:none;display:inline-flex;align-items:center;justify-content:center;border-radius:50%; background:var(--soft);font-family:var(--f-head);font-weight:800;color:var(--sea-d) }
+.os .dp.faq .qt { flex:1;min-width:0;font-weight:700;text-wrap:balance }
+.os .dp.faq .pm { flex:none;display:inline-flex;align-items:center;justify-content:center;border-radius:50%; border:1px solid var(--line);color:var(--ink);transition:transform .2s ease }
+.os .dp.faq details[open] .pm { transform:rotate(45deg);background:var(--ink);border-color:var(--ink);color:#fff }
+.os .dp.faq details[open] .qm { background:var(--sea-d);color:#fff }
+.os .dp.faq .ans p { color:var(--text);word-break:keep-all;overflow-wrap:anywhere }
+.os .dp.faq .refund { display:grid;border:1px solid var(--line);border-radius:16px;overflow:hidden }
+.os .dp.faq .rf-c { display:flex;background:var(--paper) }
+.os .dp.faq .rf-c span { font-size:14px;font-weight:700;color:var(--muted) }
+.os .dp.faq .rf-c b { font-family:var(--f-head);font-weight:800;letter-spacing:-.02em }
+.os .dp.faq .rf-c.ok b { color:var(--sea-d) }
+.os .dp.faq .rf-c.mid b { color:var(--ink) }
+.os .dp.faq .rf-c.no b { color:var(--food-d) }
+.os .dp.faq .rf-note { font-size:14px!important;line-height:1.7!important;color:var(--muted)!important }
+.os .dp.faq .ask { background:#fff;border:1px solid var(--line);border-radius:22px;display:flex }
+.os .dp.faq .ask h2 { line-height:1.25 }
+.os .dp.faq .ask p { color:var(--text) }
+.os .dp.faq .ask-b { display:flex }
+.os .dp.faq .ask .book-pill { justify-content:center;gap:8px }
+.os .dp.faq .ask .book-pill svg { width:auto;height:auto;padding:0;background:none;color:#fff }
+.os .dp.faq .line-pill { display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px; border:1px solid #CFCCC4;background:#fff;font-weight:700;color:var(--ink);white-space:nowrap }
+@media (min-width: 768px) {
+  .os .dp.faq .fq-hero { height:500px }
+  .os .dp.faq .fq-hero .hero-img { object-position:50% 38% }
+  .os .dp.faq .fq-hero .veil { background:linear-gradient(180deg,rgba(9,16,22,.42) 0,rgba(9,16,22,.2) 90px,rgba(9,16,22,0) 150px), linear-gradient(100deg,rgba(9,16,22,.72) 0%,rgba(9,16,22,.5) 34%,rgba(9,16,22,.14) 62%,rgba(9,16,22,.06) 100%) }
+  .os .dp.faq .fq-hero .hero-in { top:160px;text-shadow:0 1px 14px rgba(9,16,22,.4) }
+  .os .dp.faq .fq-hero .hero-in h1 { margin-top:0;font-size:60px }
+  .os .dp.faq .fq-sub { margin-top:16px;font-size:19px;line-height:1.7 }
+  .os .dp.faq .search { width:560px;height:60px;margin-top:30px;padding:0 24px;text-shadow:none }
+  .os .dp.faq .search input { font-size:16.5px }
+  .os .dp.faq .quick { margin:-58px var(--pad) 0;grid-template-columns:repeat(4,1fr) }
+  .os .dp.faq .quick li { padding:26px 26px }
+  .os .dp.faq .quick li + li { border-left:1px solid var(--line) }
+  .os .dp.faq .quick .ic { width:48px;height:48px }
+  .os .dp.faq .quick b { font-size:17px }
+  .os .dp.faq .quick div span { font-size:14.5px }
+  .os .dp.faq .fq-body { display:grid;grid-template-columns:260px 1fr;gap:0 64px;align-items:start;padding:96px var(--pad) 0 }
+  .os .dp.faq .cats { position:sticky;top:28px }
+  .os .dp.faq .cats-h { display:block;margin:0 0 12px 18px;font-size:13px;font-weight:800;letter-spacing:.06em;color:var(--muted) }
+  .os .dp.faq .cats nav { display:flex;flex-direction:column;gap:4px }
+  .os .dp.faq .cats a { height:48px;padding:0 18px;font-size:15.5px }
+  .os .dp.faq .grp + .grp { margin-top:64px }
+  .os .dp.faq .grp-h h2 { font-size:30px }
+  .os .dp.faq .grp-h .n { font-size:16px }
+  .os .dp.faq .qa { margin-top:20px }
+  .os .dp.faq summary { gap:18px;padding:24px 26px 24px 28px }
+  .os .dp.faq .qm { width:34px;height:34px;font-size:15px }
+  .os .dp.faq .qt { padding-top:4px;font-size:18px;line-height:1.5 }
+  .os .dp.faq .pm { width:34px;height:34px }
+  .os .dp.faq .ans { padding:0 76px 28px 80px }
+  .os .dp.faq .ans p { max-width:68ch;font-size:16.5px;line-height:1.85 }
+  .os .dp.faq .refund { grid-template-columns:repeat(3,1fr) }
+  .os .dp.faq .rf-c { flex-direction:column;gap:6px;padding:20px 22px }
+  .os .dp.faq .rf-c + .rf-c { border-left:1px solid var(--line) }
+  .os .dp.faq .rf-c b { font-size:21px }
+  .os .dp.faq .rf-note { margin-top:14px }
+  .os .dp.faq .ask { margin:112px var(--pad) 0;padding:44px 48px;align-items:center;justify-content:space-between;gap:40px }
+  .os .dp.faq .ask h2 { font-size:34px }
+  .os .dp.faq .ask p { margin-top:12px;font-size:17px;line-height:1.75 }
+  .os .dp.faq .ask-b { gap:12px }
+  .os .dp.faq .ask .book-pill, .os .dp.faq .line-pill { height:56px;padding:0 28px;font-size:16px }
+  .os .dp.faq .ask + .foot { margin-top:96px }
+}
+@media (max-width: 767px) {
+  .os .dp.faq .fq-hero { height:436px }
+  .os .dp.faq .fq-hero .hero-img { object-position:52% 50% }
+  .os .dp.faq .fq-hero .veil { background:linear-gradient(180deg,rgba(9,16,22,.6) 0%,rgba(9,16,22,.5) 55%, rgba(9,16,22,.22) 80%,rgba(9,16,22,.3) 100%) }
+  .os .dp.faq .fq-hero .hero-in { top:104px;text-align:center;text-shadow:0 1px 14px rgba(9,16,22,.45) }
+  .os .dp.faq .fq-hero .hero-in h1 { margin-top:0;font-size:40px }
+  .os .dp.faq .fq-sub { margin:12px auto 0;max-width:30ch;font-size:16.5px;line-height:1.7;text-wrap:balance }
+  .os .dp.faq .search { height:54px;margin-top:24px;padding:0 18px;text-align:left;text-shadow:none }
+  .os .dp.faq .search input { font-size:16px }
+  .os .dp.faq .quick { margin:-52px var(--pad) 0;grid-template-columns:1fr 1fr }
+  .os .dp.faq .quick li { flex-direction:column;align-items:flex-start;gap:12px;padding:18px 16px }
+  .os .dp.faq .quick li:nth-child(2n) { border-left:1px solid var(--line) }
+  .os .dp.faq .quick li:nth-child(n+3) { border-top:1px solid var(--line) }
+  .os .dp.faq .quick .ic { width:42px;height:42px;border-radius:12px }
+  .os .dp.faq .quick b { font-size:15.5px }
+  .os .dp.faq .quick div span { font-size:13.5px }
+  .os .dp.faq .fq-body { padding:48px 0 0 }
+  .os .dp.faq .chips { display:flex;gap:8px;overflow-x:auto;padding:0 var(--pad) 4px;scrollbar-width:none }
+  .os .dp.faq .chips::after { content:"";flex:none;width:8px }
+  .os .dp.faq .chips a { flex:none;height:44px;padding:0 16px;font-size:14.5px;background:#fff;border:1px solid var(--line) }
+  .os .dp.faq .chips a.on { border-color:var(--ink) }
+  .os .dp.faq .grps { padding:0 var(--pad) }
+  .os .dp.faq .grp { padding-top:44px }
+  .os .dp.faq .grp-h h2 { font-size:24px }
+  .os .dp.faq .grp-h .n { font-size:15px }
+  .os .dp.faq .qa { margin-top:16px }
+  .os .dp.faq summary { gap:12px;padding:18px 16px 18px 16px }
+  .os .dp.faq .qm { width:28px;height:28px;font-size:13.5px }
+  .os .dp.faq .qt { padding-top:2px;font-size:16.5px;line-height:1.5 }
+  .os .dp.faq .pm { width:28px;height:28px }
+  .os .dp.faq .pm svg { width:14px;height:14px }
+  .os .dp.faq .ans { padding:0 16px 20px 56px }
+  .os .dp.faq .ans p { font-size:16px;line-height:1.8 }
+  .os .dp.faq .refund { grid-template-columns:1fr }
+  .os .dp.faq .rf-c { align-items:center;justify-content:space-between;gap:10px;padding:14px 16px }
+  .os .dp.faq .rf-c + .rf-c { border-top:1px solid var(--line) }
+  .os .dp.faq .rf-c b { font-size:17px;text-align:right }
+  .os .dp.faq .rf-note { margin-top:12px }
+  .os .dp.faq .ask { margin:64px var(--pad) 0;padding:28px 22px;flex-direction:column;text-align:center;gap:22px }
+  .os .dp.faq .ask h2 { font-size:26px }
+  .os .dp.faq .ask p { margin-top:10px;font-size:16px;line-height:1.75;text-wrap:balance }
+  .os .dp.faq .ask-b { flex-direction:column;gap:10px }
+  .os .dp.faq .ask .book-pill, .os .dp.faq .line-pill { height:54px;padding:0 20px;font-size:16px }
+  .os .dp.faq .ask + .foot { margin-top:64px }
+}
+/* 캔버스에 없는 것: 검색 결과가 없을 때, 푸터 위 간격 */
+.os .dp.faq .fq-none { padding: 28px; border-radius: 22px; background: #fff; border: 1px solid var(--line); font-size: 16px; color: var(--muted) }
+.os .dp.faq .ask + .foot { margin-top: 96px }
+.os .dp.faq .search input::-webkit-search-cancel-button { cursor: pointer }
+@media (max-width: 767px) { .os .dp.faq .ask + .foot { margin-top: 64px } }

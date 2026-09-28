@@ -1,0 +1,209 @@
+/* 고객후기 (캔버스 ReviewsKo/En · ReviewWriteKo/En). docs/design-canvas/v3/build_reviews.py 의 CSS 를 .os .dp.reviews 아래로 옮겼다. detail.css 위에 얹는다. */
+.os .dp.reviews .rv-hero .hero-in h1 { margin-top:0 }
+.os .dp.reviews .rv-sub { color:rgba(255,255,255,.88) }
+.os .dp.reviews .loved { display:flex;align-items:center }
+.os .dp.reviews .dots { display:flex }
+.os .dp.reviews .dots i { border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center }
+.os .dp.reviews .dots i img { display:block;height:auto }
+.os .dp.reviews .loved b { font-weight:600;color:rgba(255,255,255,.92) }
+.os .dp.reviews .tabs { display:flex;background:#fff;border:1px solid var(--line);border-radius:999px;width:max-content }
+.os .dp.reviews .tabs a { display:inline-flex;align-items:center;gap:7px;border-radius:999px;font-weight:700;color:var(--text) }
+.os .dp.reviews .tabs a .n { font-weight:700;color:var(--muted) }
+.os .dp.reviews .tabs a.on { background:var(--ink);color:#fff }
+.os .dp.reviews .tabs a.on .n { color:var(--sky-2) }
+.os .dp.reviews .rstars { display:inline-flex;gap:1px;color:#F5B400 }
+.os .dp.reviews .book-pill.write { gap:8px }
+.os .dp.reviews .book-pill.write svg { width:auto;height:auto;padding:0;background:none;color:#fff }
+.os .dp.reviews .rc { display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:22px; overflow:hidden;scroll-snap-align:start }
+.os .dp.reviews .rc-b { flex:1;display:flex;flex-direction:column }
+.os .dp.reviews .rc-by { margin-top:auto!important }
+.os .dp.reviews .rc-t { margin-bottom:0 }
+.os .dp.reviews .rc-m { margin-bottom:16px }
+.os .dp.reviews .rc-ph { margin-top:auto;border-radius:14px;overflow:hidden }
+.os .dp.reviews .rc-ph + .rc-by { margin-top:16px!important }
+.os .dp.reviews .rc-t { font-weight:500 }
+.os .dp.reviews .rc-ph img { aspect-ratio:16 / 10;height:auto;max-height:none!important }
+.os .dp.reviews .rc-end { display:flex;flex-direction:column;justify-content:center;gap:8px;padding:28px;border-radius:22px; background:var(--ink);color:#fff;scroll-snap-align:start }
+.os .dp.reviews .rc-end b { font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em }
+.os .dp.reviews .rc-end span { font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.72) }
+.os .dp.reviews .rc-end svg { margin-top:10px;width:40px;height:40px;padding:11px;border-radius:50%;background:#fff; color:var(--ink);box-sizing:border-box }
+.os .dp.reviews .rv-act { display:flex;align-items:center;gap:14px }
+.os .dp.reviews .rc-ph { position:relative }
+.os .dp.reviews .rc-ph img { width:100%;object-fit:cover }
+.os .dp.reviews .ph-n { position:absolute;right:12px;bottom:12px;height:28px;padding:0 11px;border-radius:999px; display:inline-flex;align-items:center;background:rgba(16,20,24,.62);color:#fff; font-size:13px;font-weight:700 }
+.os .dp.reviews .rc-top { display:flex;align-items:center;justify-content:space-between;gap:10px }
+.os .dp.reviews .ok { display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:var(--sea-d) }
+.os .dp.reviews .rc-t { color:var(--ink);word-break:keep-all;overflow-wrap:anywhere }
+.os .dp.reviews .rc-t.clamp { display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;overflow:hidden }
+.os .dp.reviews .rc-more { margin-top:6px;padding:0;border:0;background:none;font:inherit;font-size:14px;font-weight:700; color:var(--sea-d);cursor:pointer }
+.os .dp.reviews .rc-by { display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line) }
+.os .dp.reviews .rc-by b { font-size:14.5px;color:var(--ink) }
+.os .dp.reviews .rc-by span { font-size:13.5px;color:var(--muted) }
+.os .dp.reviews .src-h { display:flex;align-items:center }
+.os .dp.reviews .src-logo { flex:none;background:#fff;border:1px solid var(--line);border-radius:18px;object-fit:contain }
+.os .dp.reviews .src-logo.gy { display:flex;align-items:center;justify-content:center }
+.os .dp.reviews .src-logo.gy img { width:62%;height:auto }
+.os .dp.reviews .src-t { flex:1;min-width:0 }
+.os .dp.reviews .src-t h2 { line-height:1.2 }
+.os .dp.reviews .src-t p { display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-top:8px;color:var(--text) }
+.os .dp.reviews .src-t p > b { font-family:var(--f-head);font-weight:800;color:var(--ink) }
+.os .dp.reviews .src-t p span b { color:var(--ink) }
+.os .dp.reviews .src-go { display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--ink);white-space:nowrap }
+.os .dp.reviews .src-go svg { width:30px;height:30px;padding:7px;border-radius:50%;background:var(--ink);color:#fff;box-sizing:border-box }
+.os .dp.reviews .gc { background:#fff;border:1px solid var(--line);border-radius:22px }
+.os .dp.reviews .gc-h { display:flex;align-items:center;gap:12px }
+.os .dp.reviews .gc-h > div { display:flex;flex-direction:column;gap:3px;flex:1 }
+.os .dp.reviews .gc-h b { font-size:15px;color:var(--ink) }
+.os .dp.reviews .av { flex:none;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px; border-radius:50%;background:var(--soft);font-family:var(--f-head);font-weight:800;color:var(--deep) }
+.os .dp.reviews .gc-g { width:20px;height:20px }
+.os .dp.reviews .gc p { color:var(--ink);word-break:keep-all;overflow-wrap:anywhere }
+.os .dp.reviews .gy-slot { border:1.5px dashed #C9C6BE;border-radius:22px }
+.os .dp.reviews .gy-row { display:grid }
+.os .dp.reviews .gy-sk { background:#fff;border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;gap:12px }
+.os .dp.reviews .sk { display:block;height:12px;border-radius:6px;background:var(--soft) }
+.os .dp.reviews .sk.w40 { width:40% }
+.os .dp.reviews .sk.w60 { width:60% }
+.os .dp.reviews .sk.w80 { width:80% }
+.os .dp.reviews .sk.w90 { width:90% }
+.os .dp.reviews .gy-note { text-wrap:balance;text-align:center;font-size:14.5px;font-weight:600;color:var(--muted) }
+.os .dp.reviews .board-modal { position:relative;overflow:hidden }
+.os .dp.reviews .dim { position:absolute;inset:0;background:rgba(16,20,24,.58);z-index:20 }
+.os .dp.reviews .modal { position:absolute;z-index:21;background:#fff;overflow:hidden }
+.os .dp.reviews .m-h { display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line) }
+.os .dp.reviews .m-h h2 { font-size:22px }
+.os .dp.reviews .m-x { display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:0; border-radius:50%;background:var(--soft);color:var(--ink) }
+.os .dp.reviews .m-b { display:flex;flex-direction:column }
+.os .dp.reviews .fld label { display:block;margin-bottom:8px;font-size:14.5px;font-weight:700;color:var(--ink) }
+.os .dp.reviews .fld label span { font-weight:600;color:var(--muted) }
+.os .dp.reviews .fld input, .os .dp.reviews .fld textarea { width:100%;border:1px solid #CFCCC4;border-radius:14px;background:#fff; font:inherit;font-size:16px;color:var(--ink);padding:0 16px;height:52px }
+.os .dp.reviews .fld input::placeholder, .os .dp.reviews .fld textarea::placeholder { color:#6B7076 }
+.os .dp.reviews .fld textarea { height:auto;padding:14px 16px;line-height:1.7;resize:none }
+.os .dp.reviews .oid { display:flex;gap:8px }
+.os .dp.reviews .oid input { font-family:var(--f-head);font-weight:800;letter-spacing:.24em; text-transform:uppercase;border-color:var(--sea-d);box-shadow:0 0 0 3px rgba(30,157,196,.16) }
+.os .dp.reviews .oid-go { flex:none;height:52px;padding:0 22px;border:0;border-radius:14px;background:var(--ink); color:#fff;font:inherit;font-size:15px;font-weight:700 }
+.os .dp.reviews .oid-go.done { display:inline-flex;align-items:center;gap:5px;background:#E4F3F8;color:var(--sea-d) }
+.os .dp.reviews .ok-line { display:flex;align-items:center;gap:6px;margin-top:10px;font-size:14px;font-weight:700;color:var(--sea-d) }
+.os .dp.reviews .help { margin-top:6px;font-size:13.5px;line-height:1.6;color:var(--muted) }
+.os .dp.reviews .rate { display:flex;align-items:center;gap:4px;color:#F5B400 }
+.os .dp.reviews .rate svg { width:34px;height:34px }
+.os .dp.reviews .rate b { margin-left:8px;font-size:15px;color:var(--ink) }
+.os .dp.reviews .drop { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px; width:96px;height:96px;border:1.5px dashed #C9C6BE;border-radius:16px;color:var(--muted); font-size:13px;font-weight:700 }
+.os .dp.reviews .rules-s { padding:14px 16px;border-radius:14px;background:var(--paper) }
+.os .dp.reviews .rules-s li { position:relative;padding-left:14px;font-size:13.5px;line-height:1.7;color:var(--text) }
+.os .dp.reviews .rules-s li::before { content:"";position:absolute;left:2px;top:.72em;width:4px;height:4px;border-radius:50%;background:var(--muted) }
+.os .dp.reviews .submit { display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border-radius:999px; background:var(--ink);color:#fff;font-size:16px;font-weight:700 }
+@media (min-width: 768px) {
+  .os .dp.reviews .rv-hero { height:470px }
+  .os .dp.reviews .rv-hero .veil { background:linear-gradient(100deg,rgba(9,16,22,.74) 0%,rgba(9,16,22,.5) 30%,rgba(9,16,22,.08) 56%,rgba(9,16,22,0) 76%,rgba(9,16,22,.16) 100%) }
+  .os .dp.reviews .rv-hero .hero-in { top:168px;text-shadow:0 1px 14px rgba(9,16,22,.4) }
+  .os .dp.reviews .rv-hero .hero-in h1 { font-size:60px }
+  .os .dp.reviews .rv-sub { margin-top:16px;font-size:19px;line-height:1.7 }
+  .os .dp.reviews .loved { gap:12px;margin-top:26px }
+  .os .dp.reviews .dots { gap:8px }
+  .os .dp.reviews .dots i { width:40px;height:40px }
+  .os .dp.reviews .dots i img { width:22px }
+  .os .dp.reviews .loved b { font-size:15px }
+  .os .dp.reviews .tabs { position:relative;z-index:6;margin:-29px auto 0;padding:5px }
+  .os .dp.reviews .tabs a { height:48px;padding:0 22px;font-size:15.5px }
+  .os .dp.reviews .sect { padding-top:96px }
+  .os .dp.reviews #site { padding-top:88px }
+  .os .dp.reviews .rv-h { display:flex;align-items:flex-end;justify-content:space-between;gap:40px }
+  .os .dp.reviews .book-pill.write { height:52px;padding:0 26px;font-size:16px }
+  .os .dp.reviews .rrow { margin:44px calc(var(--pad) * -1) 0;padding:0 var(--pad);display:grid;grid-auto-flow:column; grid-auto-columns:344px;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory; scroll-padding:0 var(--pad);scrollbar-width:none }
+  .os .dp.reviews .rc { height:532px }
+  .os .dp.reviews .rc-b { padding:22px 24px 20px }
+  .os .dp.reviews .rc-t { margin-top:16px;font-size:17px;line-height:1.75 }
+  .os .dp.reviews .car { position:relative }
+  .os .dp.reviews .car-b { position:absolute;top:50%;z-index:3;display:inline-flex;align-items:center;justify-content:center; width:52px;height:52px;margin-top:-26px;border-radius:50%;border:1px solid var(--line);background:#fff; color:var(--ink);box-shadow:0 6px 18px rgba(16,20,24,.12);cursor:pointer }
+  .os .dp.reviews .car-b.l { left:calc(14px - var(--pad)) }
+  .os .dp.reviews .car-b.r { right:calc(14px - var(--pad)) }
+  .os .dp.reviews .rc-by { margin-top:18px;padding-top:14px }
+  .os .dp.reviews .src-h { gap:22px }
+  .os .dp.reviews .src-logo { width:72px;height:72px;padding:14px }
+  .os .dp.reviews .src-t h2 { font-size:36px }
+  .os .dp.reviews .src-t p { font-size:16px }
+  .os .dp.reviews .src-t p > b { font-size:22px }
+  .os .dp.reviews .src-go { margin-left:auto;font-size:15.5px }
+  .os .dp.reviews .grow { margin:36px calc(var(--pad) * -1) 0;padding:0 var(--pad);display:grid; grid-auto-flow:column;grid-auto-columns:388px;gap:20px;overflow-x:auto;scrollbar-width:none }
+  .os .dp.reviews .gc { padding:24px 26px }
+  .os .dp.reviews .gc p { margin-top:16px;font-size:16px;line-height:1.75 }
+  .os .dp.reviews .gy-slot { margin-top:36px;padding:22px 22px 20px }
+  .os .dp.reviews .gy-row { grid-template-columns:repeat(3,1fr);gap:18px }
+  .os .dp.reviews .gy-sk { padding:24px;height:170px }
+  .os .dp.reviews .gy-note { margin-top:18px }
+  .os .dp.reviews .board-modal { height:1090px }
+  .os .dp.reviews .modal { left:50%;top:56px;width:560px;transform:translateX(-50%);border-radius:24px }
+  .os .dp.reviews .m-h { padding:20px 24px 18px 28px }
+  .os .dp.reviews .m-b { gap:22px;padding:24px 28px 28px }
+}
+@media (max-width: 767px) {
+  .os .dp.reviews .rv-hero { height:452px }
+  .os .dp.reviews .rv-hero .hero-img { object-position:50% 70% }
+  .os .dp.reviews .rv-hero .veil { background:linear-gradient(180deg,rgba(9,16,22,.62) 0%,rgba(9,16,22,.58) 56%, rgba(9,16,22,.1) 70%,rgba(9,16,22,.02) 84%,rgba(9,16,22,.3) 100%) }
+  .os .dp.reviews .rv-hero .hero-in { top:88px;text-align:center;text-shadow:0 1px 14px rgba(9,16,22,.45) }
+  .os .dp.reviews .rv-hero .hero-in h1 { font-size:40px }
+  .os .dp.reviews .rv-sub { margin-top:12px;font-size:16.5px;line-height:1.7 }
+  .os .dp.reviews .loved { justify-content:center;flex-wrap:wrap;gap:8px 10px;margin-top:20px }
+  .os .dp.reviews .dots { gap:6px }
+  .os .dp.reviews .dots i { width:34px;height:34px }
+  .os .dp.reviews .dots i img { width:19px }
+  .os .dp.reviews .loved b { font-size:14px }
+  .os .dp.reviews .tabs { position:relative;z-index:6;margin:-26px var(--pad) 0;width:auto;padding:4px;justify-content:space-between }
+  .os .dp.reviews .tabs a { flex:1;justify-content:center;height:44px;padding:0 6px;font-size:13.5px;gap:5px }
+  .os .dp.reviews .tabs a { white-space:nowrap }
+  .os .dp.reviews .tabs a .n { display:none }
+  .os .dp.reviews .sect { padding-top:64px }
+  .os .dp.reviews #site { padding-top:56px }
+  .os .dp.reviews .rv-h { display:flex;flex-direction:column;align-items:center;gap:22px }
+  .os .dp.reviews .rv-h .lede { text-wrap:balance }
+  .os .dp.reviews .book-pill.write { height:52px;padding:0 26px;font-size:16px }
+  .os .dp.reviews .rrow { margin:28px calc(var(--pad) * -1) 0;padding:0 var(--pad);display:grid;grid-auto-flow:column; grid-auto-columns:292px;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory; scroll-padding:0 var(--pad);scrollbar-width:none }
+  .os .dp.reviews .rrow::after { content:"";width:10px }
+  .os .dp.reviews .rc-end { padding:24px }
+  .os .dp.reviews .rc { height:511px }
+  .os .dp.reviews .rc-b { padding:18px 18px 16px }
+  .os .dp.reviews .rc-t { margin-top:14px;font-size:16px;line-height:1.75 }
+  .os .dp.reviews .rc-by { margin-top:14px;padding-top:12px }
+  .os .dp.reviews .src-h { flex-direction:column;text-align:center;gap:14px }
+  .os .dp.reviews .src-logo { width:64px;height:64px;padding:12px }
+  .os .dp.reviews .src-t h2 { font-size:30px }
+  .os .dp.reviews .src-t p { justify-content:center;font-size:15px }
+  .os .dp.reviews .src-t p > b { font-size:20px }
+  .os .dp.reviews .src-go { font-size:15px }
+  .os .dp.reviews .grow { margin:26px calc(var(--pad) * -1) 0;padding:0 var(--pad);display:grid;grid-auto-flow:column; grid-auto-columns:300px;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none }
+  .os .dp.reviews .grow::after { content:"";width:10px }
+  .os .dp.reviews .gc { padding:20px;scroll-snap-align:start }
+  .os .dp.reviews .gc p { margin-top:14px;font-size:15.5px;line-height:1.75 }
+  .os .dp.reviews .gy-slot { margin-top:26px;padding:14px 14px 16px }
+  .os .dp.reviews .gy-row { gap:12px }
+  .os .dp.reviews .gy-sk { padding:20px;height:140px }
+  .os .dp.reviews .gy-note { margin-top:14px;font-size:14px;line-height:1.6;padding:0 8px }
+  .os .dp.reviews .board-modal { height:812px }
+  .os .dp.reviews .modal.sheet { left:0;right:0;bottom:0;top:52px;border-radius:24px 24px 0 0 }
+  .os .dp.reviews .grab { display:block;width:40px;height:5px;margin:10px auto 0;border-radius:3px;background:#D6D3CC }
+  .os .dp.reviews .m-h { padding:8px 16px 14px 22px }
+  .os .dp.reviews .m-h h2 { font-size:20px }
+  .os .dp.reviews .m-b { gap:20px;padding:20px 22px 110px }
+  .os .dp.reviews .sheet .sub-w { position:absolute;left:0;right:0;bottom:0;padding:12px 22px 26px;background:#fff; border-top:1px solid var(--line) }
+}
+/* 캔버스는 보드 위에 그린 창이다. 실제로는 화면에 고정해 띄운다. */
+.os .dp.reviews .rw-root { position: fixed; inset: 0; z-index: 300; overflow-y: auto; overscroll-behavior: contain }
+.os .dp.reviews .rw-root .dim { position: fixed }
+.os .dp.reviews .rw-root .modal { position: relative; margin: 56px auto; left: auto; top: auto; transform: none; max-width: calc(100% - 32px) }
+.os .dp.reviews .rate button { color: #D6D3CC; display: inline-flex }
+.os .dp.reviews .rate button.on { color: #F5B400 }
+.os .dp.reviews .drop { cursor: pointer }
+.os .dp.reviews .thumbs { display: flex; flex-wrap: wrap; gap: 8px }
+.os .dp.reviews .thumbs figure { position: relative; width: 96px; height: 96px; border-radius: 16px; overflow: hidden }
+.os .dp.reviews .thumbs img { width: 100%; height: 100%; object-fit: cover }
+.os .dp.reviews .thumbs button { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; border-radius: 50%; background: rgba(16,20,24,.7); color: #fff; display: flex; align-items: center; justify-content: center }
+.os .dp.reviews .rw-err { padding: 12px 14px; border-radius: 12px; background: #FDECEA; color: #8E2A1E; font-size: 14px; font-weight: 700 }
+.os .dp.reviews .rw-ok { margin: 24px var(--pad) 0; padding: 16px 20px; border-radius: 16px; background: #E4F3F8; color: var(--deep); font-weight: 700 }
+.os .dp.reviews .submit:disabled { opacity: .6 }
+.os .dp.reviews .rc-ph button { display: block; width: 100%; padding: 0 }
+.os .dp.reviews .lightbox { position: fixed; inset: 0; z-index: 320; background: rgba(0,0,0,.9); display: flex; align-items: center; justify-content: center; padding: 24px }
+.os .dp.reviews .lightbox img { max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 8px }
+@media (max-width: 767px) {
+  .os .dp.reviews .rw-root .modal.sheet { position: fixed; top: 52px; left: 0; right: 0; bottom: 0; margin: 0; max-width: none; overflow-y: auto }
+  .os .dp.reviews .rw-root .sheet .sub-w { position: sticky }
+}

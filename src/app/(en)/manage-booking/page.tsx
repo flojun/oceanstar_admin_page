@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import ManageBookingClient from "@/components/booking/ManageBookingClient";
+import ManagePage from "@/components/site/manage/ManagePage";
+import SiteShell from "@/components/site/SiteShell";
+import { getTourData } from "@/lib/siteData";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Manage Booking",
@@ -21,6 +25,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function EnManageBookingPage() {
-  return <ManageBookingClient lang="en" />;
+export default async function EnManageBookingPage() {
+  const { tourSettings, blockedDates } = await getTourData();
+  return (
+    <SiteShell lang="en" tourSettings={tourSettings} blockedDates={blockedDates}>
+      <ManagePage lang="en" tourSettings={tourSettings} blockedDates={blockedDates} />
+    </SiteShell>
+  );
 }

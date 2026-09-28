@@ -642,3 +642,8 @@
   .os .bk-modal .cgrid { gap: 1px }
   .os .bk-modal .two { grid-template-columns: 1fr; gap: 12px }
 }
+
+/* 떠 있는 카카오·인스타 버튼(KakaoChatWidget)이 상세 페이지 하단 예약 막대를 가리지 않게 */
+@media (max-width: 767px) {
+  body:has(.os .dock) .os-float { bottom: calc(92px + env(safe-area-inset-bottom)) !important }
+}
