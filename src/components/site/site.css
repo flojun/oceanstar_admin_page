@@ -91,7 +91,9 @@
   border: 1px solid rgba(255,255,255,.44); color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .06em; white-space: nowrap }
 .os .nav-r .book-pill { background: #fff; color: var(--ink) }
 .os .nav-r .book-pill svg { background: var(--ink); color: #fff }
-.os .m-only { display: none !important }
+/* 한쪽 판에만 있는 마크업. 숨기기만 하고 보일 때는 각자 display 를 그대로 쓴다. */
+@media (min-width: 768px) { .os .m-only { display: none !important } }
+@media (max-width: 767px) { .os .d-only { display: none !important } }
 .os .burger, .os .lang { display: none }
 
 /* ── 모바일 메뉴 서랍 (MenuKo_M) ─────────────────────────────────── */
@@ -283,11 +285,14 @@
 .os .cols { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.1fr; gap: 40px; padding: 48px 0 40px }
 .os .f-logo { height: 42px; width: auto; filter: brightness(0) invert(1) }
 .os .c-brand p { font-size: 14.5px; font-weight: 600; line-height: 1.85; margin-top: 16px; max-width: 330px }
-.os .more { display: inline-flex; align-items: center; gap: 7px; margin-top: 16px; font-size: 13px; font-weight: 700; color: #fff }
+.os .fmore { display: inline-flex; align-items: center; gap: 7px; margin-top: 16px; font-size: 13px; font-weight: 700; color: #fff }
 .os .c-h { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 16px }
 .os .c-h svg { color: var(--sky) }
 .os .cols p { font-size: 14.5px; font-weight: 600; line-height: 1.9 }
 .os .cols a:hover { text-decoration: underline; text-underline-offset: 3px }
+/* 상세 페이지 맺음 띠 */
+.os .foot .end { text-align: center; padding-bottom: 56px; border-bottom: 1px solid rgba(255,255,255,.18) }
+.os .foot .end + .cols { padding-top: 48px }
 .os .f-bot { display: flex; align-items: center; gap: 20px; padding-top: 26px; border-top: 1px solid rgba(255,255,255,.18);
   font-size: 13px; font-weight: 600; color: rgba(255,255,255,.9) }
 
@@ -340,8 +345,6 @@
 /* ── 모바일 (캔버스 375px 판) ─────────────────────────────────────── */
 @media (max-width: 767px) {
   .os { --pad: 20px }
-  .os .d-only { display: none !important }
-  .os .m-only { display: revert !important }
   .os .pill { height: 32px; padding: 0 15px; font-size: 12.5px }
   .os .book-pill { height: 50px; font-size: 15px }
   .os .book-pill svg { width: 32px; height: 32px; padding: 8px }
@@ -455,7 +458,7 @@
   .os .c-brand { display: none }
   .os .c-h { margin-bottom: 12px }
   .os .cols p { font-size: 13.5px; font-weight: 400 }
-  .os .cols .more { display: none }
+  .os .cols .fmore { display: none }
   .os .f-bot { display: block; margin-top: 30px; padding-top: 20px; font-size: 12px; font-weight: 400; color: rgba(255,255,255,.8) }
 
   @media (prefers-reduced-motion: no-preference) {

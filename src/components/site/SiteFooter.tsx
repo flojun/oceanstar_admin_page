@@ -26,12 +26,19 @@ const T = {
     },
 };
 
-export default function SiteFooter({ lang, cta = true }: { lang: Lang; cta?: boolean }) {
+/** end: 상세 페이지의 맺음 띠(제목 + 예약 버튼). 없으면 메인의 문의 버튼 묶음을 쓴다. */
+export default function SiteFooter({ lang, end }: { lang: Lang; end?: { h2: string; sub: string; button: React.ReactNode } }) {
     const t = T[lang];
     const L = links(lang);
     return (
         <footer className="foot">
-            {cta && (
+            {end ? (
+                <div className="end rise">
+                    <h2 dangerouslySetInnerHTML={{ __html: end.h2 }} />
+                    <p dangerouslySetInnerHTML={{ __html: end.sub }} />
+                    {end.button}
+                </div>
+            ) : (
                 <div className="foot-sub rise">
                     <div>
                         <h2>{t.h}</h2>
@@ -58,7 +65,7 @@ export default function SiteFooter({ lang, cta = true }: { lang: Lang; cta?: boo
                 <div>
                     <span className="c-h"><Pin size={15} /> {t.whereH}</span>
                     <p>1125 Kewalo Basin Harbor,<br />Gate D #110, Honolulu, HI 96814</p>
-                    <a href={EXTERNAL.googleMaps} className="more" target="_blank" rel="noopener noreferrer">{t.map} <Arrow size={14} /></a>
+                    <a href={EXTERNAL.googleMaps} className="fmore" target="_blank" rel="noopener noreferrer">{t.map} <Arrow size={14} /></a>
                 </div>
                 <div>
                     <span className="c-h">{t.bizH}</span>
