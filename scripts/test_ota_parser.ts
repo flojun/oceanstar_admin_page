@@ -6,7 +6,7 @@
  *    (파싱 실패 시 메일을 읽음 처리하지 않으므로 데이터가 망가지지는 않는다)
  */
 import assert from 'node:assert';
-import { parseOtaEmail } from '../src/lib/otaEmailParser.ts';
+import { parseOtaEmail, isCustomerMessageSubject } from '../src/lib/otaEmailParser.ts';
 
 const row = (label: string, value: string) => `<tr><td>${label}:</td><td>${value}</td></tr>`;
 
@@ -203,6 +203,26 @@ assert.ok(gygUpdate2, 'gyg 변경(2) 파싱 실패');
 assert.equal(gygUpdate2.pax, '5명');   // 새 값 5 (옛 값 6 이 아니라)
 assert.ok(gygUpdate2.pickupLocation.startsWith('Hilton Garden Inn'));
 
+// 클룩은 "요청 시간: NA" 로 시각을 비워 보내기도 한다. 그러면 '여행자' 줄에도 시각이 없어서
+// 옵션이 빈 채로 들어왔다 (김덕범 TGQ451034). 패키지명의 '선셋' 이 유일한 단서다.
+const klookNoTime = parseOtaEmail(
+    `<table>
+      ${row('예약 확인 ID', 'TGQ451034')}
+      ${row('요청 날짜', '2026-10-22')}
+      ${row('요청 시간', 'NA')}
+      ${row('패키지', '선셋 크루즈 + 거북이 스노클링 + 해양 액티비티')}
+      ${row('여행자', '2 x 성인')}
+      ${row('영문 성', '김')}
+      ${row('영문 이름', '덕범')}
+      ${row('숙박하시는 호텔 주소를 적어주세요.', 'Holiday Inn Express WAIKIKI by IHG')}
+      ${row('전화번호', '+82-1064078052')}
+    </table>`,
+    '클룩 예약 요청', 'Klook <noreply@klook.com>',
+);
+assert.ok(klookNoTime, '클룩 시각없음 파싱 실패');
+assert.equal(klookNoTime.option, '3부');        // 선셋 → 3부
+assert.equal(klookNoTime.pax, '2명');
+
 // ---------------------------------------------------------------- Viator
 const viatorNew = parseOtaEmail(
     `<div>
@@ -278,6 +298,50 @@ assert.equal(viatorCancel.tourDate, '2026-09-08');
 assert.equal(viatorCancel.option, '2부');              // 10:30 = 2부 픽업 시각
 assert.equal(viatorCancel.name, 'Jillian Lane');
 
+// Viator "Amended Booking" — 실제로 온 BR-1447817855 메일을 그대로 옮긴 것.
+// 제목과 "Travel Date" 는 **옛 날짜(9/22)** 이고 바뀐 날짜(9/23)는 변경 내역 줄에만 있다.
+// 이걸 놓쳐서 손님이 하루 전 날짜로 남아 있었다.
+const viatorAmended = parseOtaEmail(
+    `<div>
+      <p>No action is required. This booking has been amended.</p>
+      <h1>Booking Amended</h1>
+      <p>The following booking for [Free Pick-Up] Sunset &amp; Wine Waikiki Turtle Canyon Snorkeling on Tue, Sep 22, 2026 has been amended. Here are the changes:</p>
+      <li>Travel date changed from 22 Sep 2026 to 23 Sep 2026.</li>
+      <p>Booking Details</p>
+      <p>Booking Reference: #BR-1447817855</p>
+      <p>Travel Date: Tue, Sep 22, 2026</p>
+      <p>Lead traveler name: David Williams</p>
+      <p>Product Code: 339097P1</p>
+      <p>Hotel Pickup: Holiday Inn Express Waikiki By IHG, 2058 Kuhio Avenue</p>
+      <p>Phone: (Alternate Phone)US+1 5745143588 Send the customer a message</p>
+    </div>`,
+    'Amended Booking: Tue, Sep 22, 2026 (#BR-1447817855)',
+    'Viator <booking@t1.viator.com>',
+);
+assert.ok(viatorAmended, 'viator amended 파싱 실패');
+assert.equal(viatorAmended.kind, 'update');          // 신규로 읽으면 중복으로 버려진다
+assert.equal(viatorAmended.orderId, 'BR-1447817855');
+assert.equal(viatorAmended.tourDate, '2026-09-23');  // 변경 내역 줄의 날짜여야 한다
+assert.equal(viatorAmended.name, 'David Williams');  // 라벨 대소문자가 신규 메일과 다르다
+assert.equal(viatorAmended.pax, '');                 // 변경 메일엔 인원이 없다 → 기존 값을 덮어쓰지 않는다
+assert.equal(viatorAmended.option, '');
+
+// 배(부)가 바뀌는 변경도 온다. 상세 블록엔 Tour Grade 가 없어서 변경 내역 줄이 유일한 단서다.
+const viatorGradeChange = parseOtaEmail(
+    `<div>
+      <p>No action is required. This booking has been amended.</p>
+      <li>Tour grade changed from Private Turtle Snorkeling Tour (TG2) to Waikiki Turtle Canyon Snorkeling Adventure 10:30 (TG1~10:30).</li>
+      <p>Booking Reference: #BR-1450313301</p>
+      <p>Travel Date: Mon, Jun 07, 2027</p>
+      <p>Lead traveler name: Elizabeth Christian</p>
+    </div>`,
+    'Amended Booking: Mon, Jun 07, 2027 (#BR-1450313301)',
+    'Viator <booking@t1.viator.com>',
+);
+assert.ok(viatorGradeChange, 'viator 등급변경 파싱 실패');
+assert.equal(viatorGradeChange.tourDate, '2027-06-07');   // 날짜 변경이 없으면 상세 블록 값을 쓴다
+assert.equal(viatorGradeChange.option, '2부');            // 10:30
+
 // Viator 는 "Canceled Booking"(L 하나) 으로도 보낸다.
 assert.equal(
     parseOtaEmail('<p>Booking Reference: BR-1447442765</p><p>Travel Date: Thu, Jan 28, 2027</p><p>Lead Traveler Name: Jazmine Passley-Jones</p>',
@@ -335,3 +399,27 @@ assert.equal(
 );
 
 console.log('OK — 17건 파싱 + 여기어때 취소 보류 확인');
+
+// ---------------------------------------------------------------- 손님 메시지 알림 거르기
+// 실제로 받은 제목들. 왼쪽은 디스코드로 울리면 안 되고, 오른쪽은 울려야 한다.
+for (const subject of [
+    'You have a message about a booking',
+    'Re: You have a message about a booking',
+    'ACTION NEEDED (booking changes): You have a message about a booking',
+    'URGENT (pickup plans): Terry Frandsen has messaged you about booking GYG996WFY2FF',
+    'Conversation with Peter N about Viator booking BR-1447773993',
+    'Re: TripAdvisor Experiences Booking BR-1447817855    [ ref:!00Dd00gJSL.!500Vu01SyaUg:ref ]',
+]) {
+    assert.ok(isCustomerMessageSubject(subject), `손님 메시지로 걸러야 함: ${subject}`);
+}
+
+for (const subject of [
+    'Booking detail change: - S257755 - GYG6H752G95M',
+    'Urgent: New booking received - S257755 - GYG2Q89X43KX',
+    'Booking - S257755 - GYGLMRNQ4HWM',
+    'Amended Booking: Tue, Sep 22, 2026 (#BR-1447817855)',
+    'New Booking for Tue, Sep 22, 2026 (#BR-1447817855)',
+    'Cancelled Booking: Thu, Jan 28, 2027',
+]) {
+    assert.ok(!isCustomerMessageSubject(subject), `예약 메일인데 걸러짐: ${subject}`);
+}

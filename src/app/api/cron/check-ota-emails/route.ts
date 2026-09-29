@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
-import { parseOtaEmail, OTA_FROM, OTA_LABEL, OTA_SUBJECT, type OtaPlatform, type OtaBooking } from '@/lib/otaEmailParser';
+import { parseOtaEmail, isCustomerMessageSubject, OTA_FROM, OTA_LABEL, OTA_SUBJECT, type OtaPlatform, type OtaBooking } from '@/lib/otaEmailParser';
 import { isUrgentTourDate } from '@/lib/reservationUrgency';
 import { sendDiscordUrgentAlert } from '@/lib/discordWebhook';
 import { getHawaiiDateStr } from '@/lib/timeUtils';
@@ -34,6 +34,15 @@ const PLATFORMS: OtaPlatform[] = ['klook', 'gyg', 'viator', 'yeogi'];
  * 읽음 처리도 그대로 유지해서 받은편지함이 보이던 대로 보이게 둔다.
  */
 const PROCESSED = 'OceanstarDone';
+
+/**
+ * 파서가 못 읽은 메일 표식. 표식은 붙이되 PROCESSED 는 아니라서 **다음 실행에서 다시 시도한다**
+ * (파서를 고쳐 배포하면 2일 안에 저절로 들어온다). 알림은 이 표식으로 딱 한 번만 보낸다.
+ *
+ * 예전에는 그냥 안읽음으로 두고 넘어갔는데, 아무도 눈치채지 못한 채
+ * Viator 날짜변경(Amended Booking)이 사흘을 지나갔다. 조용한 실패가 제일 비싸다.
+ */
+const UNPARSED = 'OceanstarUnparsed';
 
 export async function GET(request: Request) {
     try {
@@ -80,9 +89,24 @@ export async function GET(request: Request) {
                         try {
                             const booking = parseOtaEmail(msg.html, msg.subject, msg.from);
                             if (!booking) {
-                                // 안읽음으로 남겨 다음 cron 에서 재시도 + 사람 눈에 띄게 한다.
+                                // 안읽음으로 남겨 다음 cron 에서 재시도한다. 다만 사람에게 한 번은 알린다.
                                 console.log(`[OTA Cron] 파싱 스킵 (${platform}): ${msg.subject}`);
                                 skipped++;
+
+                                if (!isCustomerMessageSubject(msg.subject) && !msg.flags.has(UNPARSED)) {
+                                    await client.messageFlagsAdd(msg.uid, [UNPARSED], { uid: true });
+                                    const sent = await sendDiscordUrgentAlert({
+                                        title: `⚠️ [확인 필요] ${OTA_LABEL[platform]} 메일을 읽지 못했습니다`,
+                                        customerName: '(메일에서 못 읽음)',
+                                        tourDate: '',
+                                        option: '',
+                                        source: OTA_LABEL[platform],
+                                        orderNumber: msg.subject.match(/BR-\d+|GYG[A-Z0-9]{6,}|[A-Z]{3}\d{6,}/)?.[0] || undefined,
+                                        detail: `제목: ${msg.subject}
+예약에 반영되지 않았습니다. 메일함에서 직접 확인해주세요.`,
+                                    });
+                                    if (sent) alertsSent++;
+                                }
                                 continue;
                             }
 
@@ -445,8 +469,8 @@ async function searchEmails(
     client: ImapFlow,
     from: string,
     subjects: string[],
-): Promise<Array<{ uid: number; subject: string; html: string; from: string }>> {
-    const results: Array<{ uid: number; subject: string; html: string; from: string }> = [];
+): Promise<Array<{ uid: number; subject: string; html: string; from: string; flags: Set<string> }>> {
+    const results: Array<{ uid: number; subject: string; html: string; from: string; flags: Set<string> }> = [];
     const since = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
 
     const uidSet = new Set<number>();
@@ -457,7 +481,7 @@ async function searchEmails(
 
     for (const uid of uidSet) {
         try {
-            const message = await client.fetchOne(String(uid), { source: true }, { uid: true });
+            const message = await client.fetchOne(String(uid), { source: true, flags: true }, { uid: true });
             if (!message || !message.source) continue;
 
             const source = message.source.toString();
@@ -468,6 +492,7 @@ async function searchEmails(
                 subject: parsed.subject || message.envelope?.subject || '',
                 html: parsed.html || parsed.textAsHtml || source,
                 from: parsed.from?.text || from,
+                flags: message.flags ?? new Set<string>(),
             });
         } catch (fetchError) {
             console.error(`[OTA Cron] UID ${uid} fetch 실패:`, fetchError);
