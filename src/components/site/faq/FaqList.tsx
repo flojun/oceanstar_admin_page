@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { FAQ, REFUND_NOTE, REFUND_ROWS } from "../faqData";
+import { Arrow } from "../Icons";
 import type { Lang } from "../tours";
+import FaqSheet, { ASK_EVENT } from "./FaqSheet";
 
 const I_SEARCH = (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
@@ -16,38 +18,38 @@ const I_PLUS = (
 );
 
 const T = {
-    ko: { search: "멀미, 픽업, 환불처럼 궁금한 말을 검색해 보세요", searchM: "멀미, 픽업, 환불 검색", aria: "질문 검색", cats: "분류", catsAria: "FAQ 분류", unit: "개", none: "찾는 질문이 없어요. 아래 카카오톡으로 물어봐 주세요." },
-    en: { search: "Search seasickness, pickup, refunds…", searchM: "Search pickup, refunds…", aria: "Search questions", cats: "Topics", catsAria: "FAQ topics", unit: "", none: "No matching question. Ask us below." },
+    ko: { search: "궁금한 걸 물어보세요 · 예) 아기도 탈 수 있어요?", aria: "질문 검색", send: "물어보기", cats: "분류", catsAria: "FAQ 분류", unit: "개" },
+    en: { search: "Ask anything · e.g. Can kids join?", aria: "Search questions", send: "Ask", cats: "Topics", catsAria: "FAQ topics", unit: "" },
 };
 
-/** 검색 칸은 히어로 안에 있고 목록은 아래에 있어 둘 다 이 컴포넌트가 그린다 (slot 으로 나눠 놓는다) */
+/** 히어로 안의 검색 칸. 물어보면(엔터·버튼) 목록 쪽 FaqSheet 가 아래에서 올라온다 */
 export function FaqSearch({ lang }: { lang: Lang }) {
     const t = T[lang];
     return (
-        <label className="search">
+        <form className="search" role="search" onSubmit={(e) => {
+            e.preventDefault();
+            const input = e.currentTarget.elements.namedItem("q") as HTMLInputElement;
+            input.blur(); // 폰 키보드를 내려야 창이 보인다
+            window.dispatchEvent(new CustomEvent(ASK_EVENT, { detail: input.value }));
+        }}>
             {I_SEARCH}
-            <input
-                type="search"
-                aria-label={t.aria}
-                placeholder={t.search}
-                onChange={(e) => window.dispatchEvent(new CustomEvent("os-faq-search", { detail: e.target.value }))}
-            />
-        </label>
+            <input name="q" type="search" aria-label={t.aria} placeholder={t.search} enterKeyHint="search" />
+            <button type="submit" className="go" aria-label={t.send}><Arrow size={16} /></button>
+        </form>
     );
 }
 
 export default function FaqList({ lang }: { lang: Lang }) {
     const t = T[lang];
     const groups = FAQ[lang];
-    const [q, setQ] = useState("");
     const [active, setActive] = useState(0);
     const [open, setOpen] = useState<Set<string>>(() => new Set(groups.flatMap((g, gi) => g.items.filter((it, qi) => (gi === 0 && qi === 0) || it.a === null).map((it) => it.id))));
 
-    useEffect(() => {
-        const on = (e: Event) => setQ(String((e as CustomEvent).detail ?? ""));
-        window.addEventListener("os-faq-search", on);
-        return () => window.removeEventListener("os-faq-search", on);
-    }, []);
+    // 안내 창의 'FAQ 목록에서 보기': 그 질문을 펴고 화면 가운데로
+    const show = (id: string) => {
+        setOpen((s) => new Set(s).add(id));
+        requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
+    };
 
     // 메인에서 /faq#q2-2 로 오면 그 질문을 펴고 그 자리로 간다
     useEffect(() => {
@@ -60,7 +62,7 @@ export default function FaqList({ lang }: { lang: Lang }) {
         return () => cancelAnimationFrame(raf);
     }, []);
 
-    // 스크롤하는 동안 지금 보고 있는 분류를 켠다. 검색을 지우면 섹션이 새로 붙으니 q 로 다시 건다
+    // 스크롤하는 동안 지금 보고 있는 분류를 켠다
     useEffect(() => {
         const els = groups.map((_, i) => document.getElementById(`c${i}`)).filter(Boolean) as HTMLElement[];
         const io = new IntersectionObserver((entries) => {
@@ -69,17 +71,9 @@ export default function FaqList({ lang }: { lang: Lang }) {
         }, { rootMargin: "-20% 0px -70% 0px" });
         els.forEach((el) => io.observe(el));
         return () => io.disconnect();
-    }, [groups, q]);
+    }, [groups]);
 
-    const norm = (s: string) => s.replace(/<[^>]+>/g, "").toLowerCase();
-    const needle = q.trim().toLowerCase();
-    const shown = useMemo(() => groups.map((g) => ({
-        ...g,
-        items: needle ? g.items.filter((it) => norm(it.q).includes(needle) || norm(it.a ?? "환불 refund").includes(needle)) : g.items,
-    })), [groups, needle]);
-    const total = shown.reduce((n, g) => n + g.items.length, 0);
-
-    const links = shown.map((g, i) => (
+    const links = groups.map((g, i) => (
         <a key={g.group} href={`#c${i}`} className={i === active ? "on" : undefined}>
             {g.group}<span className="n">{g.items.length}</span>
         </a>
@@ -89,17 +83,16 @@ export default function FaqList({ lang }: { lang: Lang }) {
         <div className="fq-body">
             <aside className="cats d-only"><span className="cats-h">{t.cats}</span><nav aria-label={t.catsAria}>{links}</nav></aside>
             <nav className="chips m-only" aria-label={t.catsAria}>{links}</nav>
+            <FaqSheet lang={lang} onShow={show} />
             <div className="grps">
-                {total === 0 && <p className="fq-none">{t.none}</p>}
-                {shown.map((g, gi) => g.items.length > 0 && (
+                {groups.map((g, gi) => (
                     <section className="grp" id={`c${gi}`} key={g.group}>
                         <div className="grp-h"><h2>{g.group}</h2><span className="n">{g.items.length}{t.unit}</span></div>
                         <div className="qa">
                             {g.items.map((it) => (
-                                <details key={it.id} id={it.id} open={!!needle || open.has(it.id)}
+                                <details key={it.id} id={it.id} open={open.has(it.id)}
                                     onToggle={(e) => {
                                         const isOpen = (e.currentTarget as HTMLDetailsElement).open;
-                                        if (needle) return;
                                         setOpen((s) => { const n = new Set(s); if (isOpen) n.add(it.id); else n.delete(it.id); return n; });
                                     }}>
                                     <summary><span className="qm">Q</span><span className="qt">{it.q}</span><span className="pm">{I_PLUS}</span></summary>
