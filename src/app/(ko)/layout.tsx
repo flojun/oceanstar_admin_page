@@ -17,7 +17,7 @@ export const metadata: Metadata = {
         url: "/og-image.jpg", // 임시 이미지 URL
         width: 1200,
         height: 630,
-        alt: "오션스타 하와이 거북이 스노클링 투어",
+        alt: "오션스타 하와이 보트",
       },
     ],
   },
