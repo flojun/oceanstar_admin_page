@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
-import { parseOtaEmail, OTA_FROM, OTA_LABEL, OTA_SUBJECT, type OtaPlatform, type OtaBooking } from '@/lib/otaEmailParser';
+import { parseOtaEmail, isCustomerMessageSubject, OTA_FROM, OTA_LABEL, OTA_SUBJECT, type OtaPlatform, type OtaBooking } from '@/lib/otaEmailParser';
 import { isUrgentTourDate } from '@/lib/reservationUrgency';
 import { sendDiscordUrgentAlert } from '@/lib/discordWebhook';
 import { getHawaiiDateStr } from '@/lib/timeUtils';
@@ -93,7 +93,7 @@ export async function GET(request: Request) {
                                 console.log(`[OTA Cron] 파싱 스킵 (${platform}): ${msg.subject}`);
                                 skipped++;
 
-                                if (!msg.flags.has(UNPARSED)) {
+                                if (!isCustomerMessageSubject(msg.subject) && !msg.flags.has(UNPARSED)) {
                                     await client.messageFlagsAdd(msg.uid, [UNPARSED], { uid: true });
                                     const sent = await sendDiscordUrgentAlert({
                                         title: `⚠️ [확인 필요] ${OTA_LABEL[platform]} 메일을 읽지 못했습니다`,

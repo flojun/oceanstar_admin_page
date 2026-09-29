@@ -6,7 +6,7 @@
  *    (파싱 실패 시 메일을 읽음 처리하지 않으므로 데이터가 망가지지는 않는다)
  */
 import assert from 'node:assert';
-import { parseOtaEmail } from '../src/lib/otaEmailParser.ts';
+import { parseOtaEmail, isCustomerMessageSubject } from '../src/lib/otaEmailParser.ts';
 
 const row = (label: string, value: string) => `<tr><td>${label}:</td><td>${value}</td></tr>`;
 
@@ -399,3 +399,27 @@ assert.equal(
 );
 
 console.log('OK — 17건 파싱 + 여기어때 취소 보류 확인');
+
+// ---------------------------------------------------------------- 손님 메시지 알림 거르기
+// 실제로 받은 제목들. 왼쪽은 디스코드로 울리면 안 되고, 오른쪽은 울려야 한다.
+for (const subject of [
+    'You have a message about a booking',
+    'Re: You have a message about a booking',
+    'ACTION NEEDED (booking changes): You have a message about a booking',
+    'URGENT (pickup plans): Terry Frandsen has messaged you about booking GYG996WFY2FF',
+    'Conversation with Peter N about Viator booking BR-1447773993',
+    'Re: TripAdvisor Experiences Booking BR-1447817855    [ ref:!00Dd00gJSL.!500Vu01SyaUg:ref ]',
+]) {
+    assert.ok(isCustomerMessageSubject(subject), `손님 메시지로 걸러야 함: ${subject}`);
+}
+
+for (const subject of [
+    'Booking detail change: - S257755 - GYG6H752G95M',
+    'Urgent: New booking received - S257755 - GYG2Q89X43KX',
+    'Booking - S257755 - GYGLMRNQ4HWM',
+    'Amended Booking: Tue, Sep 22, 2026 (#BR-1447817855)',
+    'New Booking for Tue, Sep 22, 2026 (#BR-1447817855)',
+    'Cancelled Booking: Thu, Jan 28, 2027',
+]) {
+    assert.ok(!isCustomerMessageSubject(subject), `예약 메일인데 걸러짐: ${subject}`);
+}

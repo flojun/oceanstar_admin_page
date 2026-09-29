@@ -47,6 +47,22 @@ export const OTA_LABEL: Record<OtaPlatform, string> = {
     yeogi: '여기어때',
 };
 
+/**
+ * 손님이 OTA 메신저로 보낸 **메시지 알림**인가.
+ *
+ * 제목에 'booking' 이 들어 있어 예약 메일 검색에 같이 딸려오지만 예약 데이터가 없어
+ * 파싱할 수 없다. 받은편지함에서 사람이 읽고 답하는 메일이라, 못 읽었다고 디스코드까지
+ * 울리면 정작 놓치면 안 되는 알림이 그 사이에 묻힌다.
+ *
+ *   "URGENT (pickup plans): Terry Frandsen has messaged you about booking GYG…"
+ *   "ACTION NEEDED (booking changes): You have a message about a booking"
+ *   "Conversation with Peter N about Viator booking BR-…"
+ */
+export function isCustomerMessageSubject(subject: string): boolean {
+    return /message about a booking|messaged you about|conversation with|tripadvisor experiences booking/i
+        .test(subject || '');
+}
+
 /** IMAP `from` 검색어. imapflow 의 from 은 값을 하나만 받아서 플랫폼별로 따로 검색한다. */
 export const OTA_FROM: Record<OtaPlatform, string> = {
     klook: 'klook',
