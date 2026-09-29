@@ -7,6 +7,19 @@ import type { NextConfig } from "next";
  */
 const PREVIEW_READ_APIS = ["/api/settings", "/api/pickup", "/api/availability", "/api/google-reviews"];
 
+/** 옛 PHP 사이트의 tourid → 지금 상품. 제목은 웹 아카이브에서 확인했다. */
+const OLD_TOURS: Record<string, string> = { "1626030673": "turtle", "1626508977": "sunset", "1626509274": "private" };
+const oldSite = (dir: string, p: string) => [
+  ...Object.entries(OLD_TOURS).map(([id, key]) => ({
+    source: `/maincontents/${dir}/oceanstartourdetail.php`,
+    has: [{ type: "query" as const, key: "tourid", value: id }],
+    destination: `${p}/tours/${key}`,
+    permanent: true,
+  })),
+  { source: `/maincontents/${dir}/oceanstarfaq.php`, destination: `${p}/faq`, permanent: true },
+  { source: `/maincontents/${dir}/:page*`, destination: p || "/", permanent: true },
+];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
@@ -25,6 +38,13 @@ const nextConfig: NextConfig = {
       { source: "/en/:path*", destination: "/:path*", permanent: true },
       { source: "/tours", destination: "/#tours", permanent: true },
       { source: "/kr/tours", destination: "/kr#tours", permanent: true },
+      // 옛 PHP 사이트·그 다음 사이트 주소가 아직 검색에 남아 있다. 쌓인 점수를 새 주소로 넘긴다.
+      // (.php 는 Vercel 방화벽이 403 으로 먼저 막으면 여기까지 오지 않는다)
+      { source: "/index_kr.php", destination: "/kr", permanent: true },
+      { source: "/index.php", destination: "/", permanent: true },
+      { source: "/hawaii-private-boat-charter", destination: "/tours/private", permanent: true },
+      ...oldSite("korean", "/kr"),
+      ...oldSite("english", ""),
     ];
   },
   async rewrites() {
