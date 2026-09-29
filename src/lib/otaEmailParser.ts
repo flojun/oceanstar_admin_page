@@ -159,6 +159,13 @@ export function parseOtaDate(s: string): string {
         const mi = MONTHS.indexOf(m[1].slice(0, 3).toLowerCase());
         if (mi >= 0) return `${m[3]}-${pad(mi + 1)}-${pad(m[2])}`;
     }
+
+    // "23 Sep 2026" — 일이 먼저 오는 형식. Viator 변경 메일의 변경 내역 줄이 이렇게 온다.
+    m = s.match(/(\d{1,2})\s+([A-Za-z]{3,9})\.?\s+(\d{4})/);
+    if (m) {
+        const mi = MONTHS.indexOf(m[2].slice(0, 3).toLowerCase());
+        if (mi >= 0) return `${m[3]}-${pad(mi + 1)}-${pad(m[1])}`;
+    }
     return '';
 }
 
@@ -176,7 +183,9 @@ export function parseOtaDate(s: string): string {
  */
 export function optionFromTime(text: string): string {
     const m = text.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-    if (!m) return '';
+    // 시각이 없어도 '선셋' 이면 3부다. 클룩은 "요청 시간: NA" 로 시각을 비워 보내는 예약이 있고,
+    // 그러면 옵션이 빈 채로 들어와 어느 배에 태울지 아무도 모른다.
+    if (!m) return /선셋|sunset/i.test(text) ? '3부' : '';
 
     let h = Number(m[1]);
     const mer = m[3]?.toUpperCase();
@@ -239,6 +248,8 @@ function detectKind(platform: OtaPlatform, subject: string, text: string): OtaEm
             if (/부분\s*취소/.test(subject)) return 'partial_cancel';
             return /Klook Canceled|예약\s*취소/i.test(subject) ? 'cancel' : 'new';
         case 'viator':
+            // "Amended Booking: …" 은 기존 예약이 바뀐 것이다. 신규로 오인하면 조용히 버려진다.
+            if (/Amended Booking/i.test(subject) || /has been amended/i.test(text)) return 'update';
             // 제목이 "Cancelled Booking" 과 "Canceled Booking" 두 철자로 온다.
             return /Cancell?ed Booking/i.test(subject) || /Booking Cancell?ed/i.test(text) ? 'cancel' : 'new';
         case 'gyg':
@@ -284,7 +295,8 @@ function parseKlook(text: string): ParsedFields | null {
         orderId,
         name,
         tourDate,
-        option: optionFromTime(travelers),
+        // 여행자 줄에 시각이 없으면("2 x 성인") 패키지명에서 찾는다("선셋 크루즈 + …").
+        option: optionFromTime(travelers) || optionFromTime(pkg),
         pax: paxLabel(adult, child),
         adultCount: adult,
         childCount: child,
@@ -336,6 +348,42 @@ function parseGyg(text: string): ParsedFields | null {
         bookerEmail: emailPart.trim() || text.match(/[\w.+-]+@[\w.-]+\.\w+/)?.[0] || '',
         note: [lang && `언어: ${lang}`, price && `금액: ${price}`, reason && `취소사유: ${reason}`]
             .filter(Boolean).join(' / '),
+    };
+}
+
+/**
+ * Viator "Amended Booking" → 기존 예약의 날짜/픽업이 바뀐 것.
+ *
+ * **바뀐 날짜는 변경 내역 줄에만 있다.** 제목도 상세 블록의 "Travel Date" 도 **옛 날짜 그대로** 온다.
+ *   Travel date changed from 22 Sep 2026 to 23 Sep 2026.
+ * 그래서 상세 블록만 믿으면 "바뀐 게 없다" 로 읽혀 변경이 통째로 사라진다.
+ *
+ * 이름 라벨도 신규 메일과 대소문자가 다르다 ("Lead traveler name" vs "Lead Traveler Name").
+ * 인원·옵션은 변경 메일에 없으므로 공란으로 두고 기존 값을 덮어쓰지 않는다.
+ */
+function parseViatorUpdate(text: string): ParsedFields | null {
+    const orderId = text.match(/BR-\d+/)?.[0] || '';                 // "Booking Reference: #BR-…" 의 # 포함 대응
+    const changedTo = text.match(/Travel date changed from .*? to ([^.]+)/i)?.[1];
+    const tourDate = parseOtaDate(changedTo || field(text, 'Travel Date'));
+    if (!orderId || !tourDate) return null;
+
+    // 배(부)가 바뀌는 변경도 온다.
+    //   "Tour grade changed from Private Turtle Snorkeling Tour (TG2) to … 10:30 (TG1~10:30)."
+    // 상세 블록에는 Tour Grade 가 아예 없어서 이 줄이 유일한 단서다.
+    const gradeTo = text.match(/Tour grade changed from .*? to ([^.]+)/i)?.[1] || '';
+
+    return {
+        orderId,
+        name: clean(field(text, 'Lead traveler name')) || clean(field(text, 'Lead Traveler Name')),
+        tourDate,
+        option: optionFromTime(gradeTo),   // 시각이 없으면 '' → 기존 옵션을 덮어쓰지 않는다
+        pax: '',                           // 변경 메일에 인원은 없다
+        adultCount: 0,
+        childCount: 0,
+        pickupLocation: clean(field(text, 'Hotel Pickup')),
+        contact: phoneOf(field(text, 'Phone')),
+        bookerEmail: '',
+        note: '',
     };
 }
 
@@ -463,7 +511,7 @@ export function parseOtaEmail(html: string, subject: string, from: string): OtaB
     const parsed =
         platform === 'klook' ? parseKlook(text)
             : platform === 'gyg' ? (kind === 'update' ? parseGygUpdate(text) : parseGyg(text))
-                : platform === 'viator' ? parseViator(text)
+                : platform === 'viator' ? (kind === 'update' ? parseViatorUpdate(text) : parseViator(text))
                     : parseYeogi(text);
 
     if (!parsed) return null;
