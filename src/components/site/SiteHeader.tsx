@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { setLanguageCookie } from "@/lib/translations";
 import { BookButton } from "./BookingContext";
 import { Arrow, Burger, Chevron, Close, KakaoLine, Ticket } from "./Icons";
@@ -35,6 +36,10 @@ export default function SiteHeader({ lang, active, tours }: { lang: Lang; active
     const [pinDrop, setPinDrop] = useState(false);
     const [drawer, setDrawer] = useState(false);
     const [pinned, setPinned] = useState(false);
+    // 서랍과 고정 머리줄은 히어로 밖(.os 바로 아래)에 그린다. 히어로(overflow:hidden) 안에 두면
+    // iOS 사파리에서 fixed 서랍이 히어로 높이에서 잘리고 아래 섹션에 가려진다. 서버·첫 렌더는 그리지 않는다
+    const mounted = useSyncExternalStore(noSubscribe, () => true, () => false);
+    const root = mounted ? document.querySelector<HTMLElement>(".os") ?? document.body : null;
     const navRef = useRef<HTMLElement>(null);
     const ddRef = useRef<HTMLDivElement>(null);
     const pinDdRef = useRef<HTMLDivElement>(null);
@@ -101,8 +106,9 @@ export default function SiteHeader({ lang, active, tours }: { lang: Lang; active
                 <a href={otherHref} className="lang" hrefLang={lang === "ko" ? "en" : "ko"} onClick={switchLang}>{lang === "ko" ? "EN" : "KO"}</a>
                 <button type="button" className="burger" aria-label={t.menu} aria-expanded={drawer} onClick={() => setDrawer(true)}><Burger /></button>
             </div>
+        </header>
 
-            {drawer && (
+            {drawer && root && createPortal(
                 <div className="os-drawer-root" role="dialog" aria-modal="true" aria-label={lang === "en" ? "Menu" : "메뉴"}>
                     <div className="dim" onClick={() => setDrawer(false)} />
                     <nav className="drawer">
@@ -143,12 +149,13 @@ export default function SiteHeader({ lang, active, tours }: { lang: Lang; active
                             </p>
                         </div>
                     </nav>
-                </div>
+                </div>,
+                root,
             )}
-        </header>
 
-        {/* 고정 머리줄. 숨었을 때는 inert 라 초점·클릭이 닿지 않는다. 서버 렌더는 숨은 상태, position:fixed 라 자리를 차지하지 않는다.
-            서랍은 위 .nav 안의 것을 같이 쓴다. */}
+        {/* 고정 머리줄. 숨었을 때는 inert 라 초점·클릭이 닿지 않는다. 처음엔 숨은 상태라 마운트 뒤에 그려도 된다.
+            서랍은 위의 것을 같이 쓴다. */}
+        {root && createPortal(
         <div className="pin" inert={!pinned} aria-hidden={!pinned || undefined}>
             <Link href={L.home} className="logo-link" aria-label={t.logo}>
                 <img src="/renewal/logo_full.png" alt={t.logo} className="pin-logo" width={46} height={44} />
@@ -159,10 +166,14 @@ export default function SiteHeader({ lang, active, tours }: { lang: Lang; active
                 <BookButton className="book-pill">{t.book} <Arrow /></BookButton>
                 <button type="button" className="burger" aria-label={t.menu} aria-expanded={drawer} onClick={() => setDrawer(true)}><Burger /></button>
             </div>
-        </div>
+        </div>,
+        root,
+        )}
         </>
     );
 }
+
+const noSubscribe = () => () => {};
 
 /** 바깥을 누르거나 Esc 를 누르면 목록을 닫는다 */
 function useDismiss(open: boolean, ref: React.RefObject<HTMLElement | null>, setOpen: (v: boolean) => void) {
