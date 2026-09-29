@@ -92,7 +92,7 @@ export default function HomePage({ lang, tourSettings, googleReviews, google }: 
         <>
             <script type="application/ld+json" dangerouslySetInnerHTML={ldJson(homeJsonLd(lang, tourSettings, google))} />
             <section className="hero home-hero">
-                <img src="/renewal/hero_waikiki.jpg" alt={t.heroAlt} className="hero-img" data-image-slot="landing.hero" fetchPriority="high" width={1900} height={805} />
+                <img src="/renewal/hero_waikiki.jpg" alt={t.heroAlt} className="hero-img" data-image-slot="landing.hero" fetchPriority="high" width={2880} height={1223} />
                 <span className="veil" />
                 <SiteHeader lang={lang} active="home" tours={tours.map((d) => ({ key: d.key, name: d.short[lang] }))} />
                 <div className="hero-mid">
@@ -151,7 +151,7 @@ export default function HomePage({ lang, tourSettings, googleReviews, google }: 
                         ))}
                     </div>
                     {featureRows.map((r, ri) => (
-                        <div key={r.label} className="crow rise" role="row" style={{ ...cols, animationRange: `entry ${6 + ri * 2}% cover ${30 + ri * 2}%` }}>
+                        <div key={r.label} className="crow rise" role="row" style={{ ...cols, ["--i" as string]: ri } as React.CSSProperties}>
                             <div className="cc lead" role="rowheader">{r.label}</div>
                             {r.cells.map((on, i) => (
                                 <div key={i} className={`cc${i === 0 ? " on" : ""}`} role="cell">

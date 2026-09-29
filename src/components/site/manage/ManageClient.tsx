@@ -196,7 +196,7 @@ export default function ManageClient({ lang, tourSettings, blockedDates }: { lan
     if (!bk) {
         return (
             <section className="mg-body look-w">
-                <form className="card look rise" onSubmit={verify}>
+                <form className="card look" onSubmit={verify}>
                     <h2>{t.fH}</h2><p className="card-p">{t.fP}</p>
                     <div className="fld"><label htmlFor="mg-oid">{t.resNum}</label>
                         <input id="mg-oid" className="oid" placeholder={t.resPh} maxLength={6} required value={resNumber} autoComplete="off" onChange={(e) => setResNumber(e.target.value.toUpperCase())} /></div>
@@ -209,7 +209,7 @@ export default function ManageClient({ lang, tourSettings, blockedDates }: { lan
                         ? <a href={EXTERNAL.kakaoChat} target="_blank" rel="noopener noreferrer">{t.fLostA} {I_ARROW}</a>
                         : <a href="mailto:hioceanstar@gmail.com">{t.fLostA} {I_ARROW}</a>}</p>
                 </form>
-                <aside className="card side rise">
+                <aside className="card side">
                     <h3>{t.canH}</h3>
                     <ul className="cans">{t.can.map(([k, h, s]) => <li key={h}><span className="ic">{IC[k]}</span><div><b>{h}</b><span>{s}</span></div></li>)}</ul>
                     <div className="mini"><div className="mini-h"><b>{t.ruleH}</b><span>{t.ruleNote}</span></div><Refund lang={lang} /></div>
@@ -232,7 +232,7 @@ export default function ManageClient({ lang, tourSettings, blockedDates }: { lan
     return (
         <>
             <section className="mg-body det-w">
-                <article className="card sum rise">
+                <article className="card sum">
                     <div className="sum-h">
                         <div><span className="mlab">{t.bkNo}</span><b className="bno">{resNumber.trim().toUpperCase()}</b></div>
                         <div className="tags">
@@ -248,7 +248,7 @@ export default function ManageClient({ lang, tourSettings, blockedDates }: { lan
                         <div><dt>{t.rowName}</dt><dd>{bk.name}</dd></div>
                     </dl>
                 </article>
-                <aside className="card mact rise">
+                <aside className="card mact">
                     <h3>{t.actH}</h3>
                     {msg && <p className={`mg-msg ${msg.kind}`} role="status">{msg.text}</p>}
                     <p className="note">{I_CLOCK}<span>
@@ -380,7 +380,7 @@ function Reschedule({ lang, bk, resNumber, email, pickups, tourSettings, blocked
 
     const input = <input id="mg-hotel" value={hotel} placeholder={t.hotelPh} onChange={(e) => setHotel(e.target.value)} />;
     return (
-        <section className="card rsp rise">
+        <section className="card rsp">
             <div className="rsp-h"><h2>{t.rsH}</h2><p className="card-p">{t.rsP}</p></div>
             <div className="rsp-g">
                 <div>

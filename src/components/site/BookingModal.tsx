@@ -46,7 +46,11 @@ const S = {
         fee: "결제 수수료", feeNote: "카드 결제 수수료가 포함된 금액입니다. 결제 화면에도 같은 금액이 나옵니다.",
         snorkelDate: "스노클링 날짜", snorkelPick: "스노클링 픽업", paraDate: "패러세일링 날짜", paraPick: "패러세일링 픽업",
         privateNote: "프라이빗 차터 픽업 시간은 예약 후 개별 조율됩니다.", close: "닫기",
+        surfH: "서핑 레슨 시간 선택", surfSub: "마지막 픽업 시간 기준", surf: "서핑 그룹 레슨", surfLine: "서핑 07:30-14:30 · 하루 5회",
+        surfTime: "서핑 시간", surfDate: "서핑 날짜", surfPick: "서핑 픽업",
+        surfNote: "서핑 픽업 장소 및 시간은 예약 후 개별 안내됩니다.",
         err: {
+            surf: "서핑 레슨 시간을 선택해주세요.", surfDate: "서핑 날짜를 선택해주세요.", surfPick: "서핑 픽업 장소를 입력해주세요.",
             session: "거북이 스노클링 시간을 선택해주세요.", combo: "패러세일링/제트스키 옵션을 선택해주세요.",
             date: "투어 날짜를 선택해주세요.", date2: "패러세일링/제트스키 날짜를 선택해주세요.",
             pick2: "패러세일링/제트스키 픽업 장소를 입력해주세요.", hotel: "숙소를 입력하거나 픽업 장소를 선택해주세요",
@@ -72,7 +76,11 @@ const S = {
         fee: "Card processing fee", feeNote: "Includes the card processing fee. The payment page shows the same amount.",
         snorkelDate: "Snorkeling date", snorkelPick: "Snorkeling pickup", paraDate: "Parasail date", paraPick: "Parasail pickup",
         privateNote: "Pickup time for private trips will be coordinated individually after booking.", close: "Close",
+        surfH: "Select surf lesson time", surfSub: "Last pickup time", surf: "Group surf lesson", surfLine: "Surf 07:30-14:30 · 5 a day",
+        surfTime: "Surf time", surfDate: "Surf date", surfPick: "Surf pickup",
+        surfNote: "Surf pickup location and time will be arranged individually after booking.",
         err: {
+            surf: "Please select a surf lesson time.", surfDate: "Please select a surf date.", surfPick: "Please enter pickup location for the surf lesson.",
             session: "Please select a snorkeling time.", combo: "Please select a combo option.",
             date: "Please select a tour date.", date2: "Please select a date for the second activity.",
             pick2: "Please enter pickup location for the second activity.", hotel: "Please enter your hotel or select a pickup location",
@@ -89,7 +97,10 @@ const COMBO_OPTS = [
     { id: "3", ko: "거북이 스노클링 + 패러세일링 + 제트스키", en: "Turtle Snorkeling + Parasailing + Jet Ski", usd: 310, short: { ko: "패러세일링 + 제트스키", en: "Parasail + jet ski" } },
 ];
 
-const today0 = () => new Date(new Date().setHours(0, 0, 0, 0));
+/** 서핑 레슨 시간 (마지막 픽업 기준). 상세 페이지 content.ts surf_ko.SESSIONS 와 같은 값 */
+const SURF_TIMES = ["07:30", "09:15", "11:00", "12:45", "14:30"];
+
+const today0 =() => new Date(new Date().setHours(0, 0, 0, 0));
 const ymd = (d: Date) => format(d, "yyyy-MM-dd");
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -117,7 +128,11 @@ export default function BookingModal({
     const row = tourSettings.find((t) => t.tour_id === selectedTour) ?? (def ? rows[0] : undefined);
     const isPrivate = !!row?.is_flat_rate && row?.tour_id === "private";
     const isFlat = !!row?.is_flat_rate;
-    const isCombo = def?.key === "combo";
+    // 두 활동 콤보: 패러/제트(combo) · 서핑(surf). 스노클링과 두 번째 활동을 날짜·픽업 따로 받는다
+    const isMarine = def?.key === "combo";
+    const isSurf = def?.key === "surf";
+    const isCombo = isMarine || isSurf;
+    const [surfTime, setSurfTime] = useState<string | null>(null);
 
     const [adult, setAdult] = useState(2);
     const [child, setChild] = useState(0);
@@ -130,6 +145,8 @@ export default function BookingModal({
     const [date2, setDate2] = useState<Date | undefined>();
     const [avail, setAvail] = useState<Avail>({});
     const [maxCap, setMaxCap] = useState(45);
+    const [avail2, setAvail2] = useState<Avail>({});
+    const [maxCap2, setMaxCap2] = useState(10);
     const [loadingAvail, setLoadingAvail] = useState(false);
 
     const [pickups, setPickups] = useState<PickupLocation[]>([]);
@@ -176,32 +193,47 @@ export default function BookingModal({
     // 상품을 고르면 기본값: 거북이·콤보는 1부
     useEffect(() => {
         setSessionId(def?.key === "turtle" ? morningRows[0]?.tour_id ?? null : null);
-        setComboTime(def?.key === "combo" ? morningRows[0]?.tour_id ?? null : null);
+        setComboTime(isCombo ? morningRows[0]?.tour_id ?? null : null);
         setComboOption(null);
+        setSurfTime(null);
         setDate(undefined);
         setDate2(undefined);
         if (def && activeRows(def, tourSettings)[0]?.is_flat_rate) setChild(0);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tourKey]);
 
-    const fetchAvail = useCallback(async (tourId: string, m: Date) => {
-        setLoadingAvail(true);
+    const fetchAvail = useCallback(async (tourId: string, m: Date): Promise<{ availability: Avail; maxCapacity: number } | null> => {
         try {
             const label = tourSettings.find((t) => t.tour_id === tourId)?.name ?? tourId;
             const res = await fetch(`/api/availability?month=${format(m, "yyyy-MM")}&option=${encodeURIComponent(label)}`);
             const data = await res.json();
-            if (data.success) { setAvail(data.availability); setMaxCap(data.maxCapacity); }
+            return data.success ? data : null;
         } catch (e) {
             console.error("Failed to fetch availability", e);
-        } finally {
-            setLoadingAvail(false);
+            return null;
         }
     }, [tourSettings]);
 
+    // 스노클링 날짜는 스노클링 배(1부·2부) 자리로 본다. 콤보도 콤보 행이 아니라 고른 시간의 행으로
+    const availTour = isCombo ? comboTime : selectedTour;
     useEffect(() => {
         setAvail({});
-        if (selectedTour) fetchAvail(selectedTour, month);
-    }, [selectedTour, month, fetchAvail]);
+        if (!availTour) return;
+        setLoadingAvail(true);
+        fetchAvail(availTour, month).then((d) => {
+            if (d) { setAvail(d.availability); setMaxCap(d.maxCapacity); }
+            setLoadingAvail(false);
+        });
+    }, [availTour, month, fetchAvail]);
+
+    // 서핑 날짜는 서핑 정원(combo_surf 행)으로 본다
+    useEffect(() => {
+        setAvail2({});
+        if (!isSurf || !selectedTour) return;
+        fetchAvail(selectedTour, month2).then((d) => {
+            if (d) { setAvail2(d.availability); setMaxCap2(d.maxCapacity); }
+        });
+    }, [isSurf, selectedTour, month2, fetchAvail]);
 
     // 시간(1부·2부)을 바꾸면 자리가 달라지므로 날짜를 다시 고른다
     useEffect(() => { setDate(undefined); }, [selectedTour]);
@@ -218,17 +250,24 @@ export default function BookingModal({
     };
     const day2Blocked = (d: Date) => {
         if (d < today0()) return true;
-        if (d.getDay() === 0 || d.getDay() === 6) return true;
         const ds = ymd(d);
         if (date && ds === ymd(date)) return true;
+        if (isSurf) {
+            if (blockedDates.some((b) => b.date === ds && (b.tour_id === "all" || b.tour_id === selectedTour))) return true;
+            const day = avail2[ds];
+            if (day && day.isAvailable === false) return true;
+            return (day ? day.remaining : maxCap2) < pax;
+        }
+        if (d.getDay() === 0 || d.getDay() === 6) return true;
         return blockedDates.some((b) => b.date === ds && (b.tour_id === "all" || b.tour_id === "combo_marine"));
     };
 
     // 인원을 늘려 고른 날짜에 자리가 없어지면 날짜를 비운다
     useEffect(() => {
         if (date && dayBlocked(date)) setDate(undefined);
+        if (date2 && day2Blocked(date2)) setDate2(undefined);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pax, avail]);
+    }, [pax, avail, avail2]);
     useEffect(() => {
         if (date2 && date && ymd(date2) === ymd(date)) setDate2(undefined);
     }, [date, date2]);
@@ -269,7 +308,7 @@ export default function BookingModal({
 
     // ── 금액 ──
     const priceRow = row;
-    const needsOption = isCombo && !comboOption;
+    const needsOption = isMarine && !comboOption;
     const base = priceRow && !needsOption ? basePrice(priceRow, currency, { adultCount: adult, childCount: child }, comboOption ?? undefined) : null;
     const total = base !== null && priceRow ? grossUp(base, currency, resolveExchangeRate(priceRow)) : null;
     const fee = base !== null && total !== null ? total - base : null;
@@ -284,12 +323,13 @@ export default function BookingModal({
         const e: Record<string, string> = {};
         if (!def) { e.tour = tr("bookingModal.alert_selectTour"); return e; }
         if (def.key === "turtle" && !sessionId) e.session = s.err.session;
-        if (isCombo && !comboOption) e.combo = s.err.combo;
+        if (isMarine && !comboOption) e.combo = s.err.combo;
+        if (isSurf && !surfTime) e.surf = s.err.surf;
         if (isCombo && !comboTime) e.session = s.err.session;
         if (adult < 1) e.pax = s.err.pax;
         if (!date) e.date = s.err.date;
-        if (isCombo && !date2) e.date2 = s.err.date2;
-        if (isCombo && !pick2?.location?.id && !hotel2.trim()) e.hotel2 = s.err.pick2;
+        if (isCombo && !date2) e.date2 = isSurf ? s.err.surfDate : s.err.date2;
+        if (isCombo && !pick2?.location?.id && !hotel2.trim()) e.hotel2 = isSurf ? s.err.surfPick : s.err.pick2;
         if (!pick?.location?.id && !hotel.trim()) e.hotel = s.err.hotel;
         if (!name.trim()) e.name = s.err.name;
         if (!EMAIL_RE.test(email.trim())) e.email = s.err.email;
@@ -304,7 +344,7 @@ export default function BookingModal({
         const first = Object.keys(e)[0];
         if (first) {
             setBanner(e[first]);
-            document.getElementById(`bk-${first}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+            document.getElementById(`bk-${first}`)?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
             return;
         }
         setSubmitting(true);
@@ -327,7 +367,8 @@ export default function BookingModal({
                     bookerEmail: email.trim(),
                     bookerPhone: phone.trim(),
                     secondaryDate: isCombo && date2 ? ymd(date2) : null,
-                    comboOption: isCombo ? comboOption : null,
+                    comboOption: isSurf ? "surf" : isMarine ? comboOption : null,
+                    surfTime: isSurf ? surfTime : undefined,
                     lang,
                     currency,
                 }),
@@ -358,6 +399,7 @@ export default function BookingModal({
         if (d.key === "sunset") return lang === "en" ? "Time varies by season" : "시즌별 시간 변동";
         if (d.key === "combo") return lang === "en" ? "Parasail/Jet 9:30-2:00" : "패러/제트 9:30-2:00";
         if (d.key === "private") return lang === "en" ? "2 hours" : "2시간";
+        if (d.key === "surf") return s.surfLine;
         return "";
     };
     const errText = (k: string) => errors[k] ? <p className="err">{errors[k]}</p> : null;
@@ -431,17 +473,20 @@ export default function BookingModal({
                     </div>
                 )}
                 {which === 1 && isPrivate && <p className="help strong">{s.privateNote}</p>}
+                {which === 2 && isSurf && <p className="help strong">{s.surfNote}</p>}
             </>
         );
     };
 
     const summaryRows: [string, string][] = !def ? [] : isCombo ? [
-        [s.option, comboOption ? `${COMBO_OPTS.find((o) => o.id === comboOption)!.short[lang]} ($${COMBO_OPTS.find((o) => o.id === comboOption)!.usd})` : "-"],
+        isSurf
+            ? [s.surfTime, surfTime ?? "-"]
+            : [s.option, comboOption ? `${COMBO_OPTS.find((o) => o.id === comboOption)!.short[lang]} ($${COMBO_OPTS.find((o) => o.id === comboOption)!.usd})` : "-"],
         [s.pax, paxLabel],
         [s.snorkelDate, date ? `${shortDate(date)} ${comboTime ? sessionLabel(tourSettings.find((t) => t.tour_id === comboTime)!, lang) : ""}` : "-"],
         [s.snorkelPick, pick ? pickupName(pick.location) : hotel || "-"],
-        [s.paraDate, shortDate(date2)],
-        [s.paraPick, pick2 ? pickupName(pick2.location) : hotel2 || "-"],
+        [isSurf ? s.surfDate : s.paraDate, shortDate(date2)],
+        [isSurf ? s.surfPick : s.paraPick, pick2 ? pickupName(pick2.location) : hotel2 || "-"],
     ] : [
         [s.date, dateLabel(date)],
         ...(timeText ? [[s.time, timeText] as [string, string]] : []),
@@ -508,7 +553,23 @@ export default function BookingModal({
                             {errText("tour")}
                         </div>
 
-                        {isCombo && (
+                        {isSurf && (
+                            <div className="grp" id="bk-surf">
+                                <div className="glab"><b>{s.surfH}</b><i>{s.surfSub}</i></div>
+                                <ul className="opts two-up">
+                                    {SURF_TIMES.map((t, i) => (
+                                        <li key={t}>
+                                            <button type="button" className={`opt${surfTime === t ? " on" : ""}`} aria-pressed={surfTime === t} onClick={() => setSurfTime(t)}>
+                                                <span>{lang === "en" ? `Lesson ${i + 1}` : `${i + 1}부`}</span><em>{ampm(t)}</em>{surfTime === t && <Check size={18} />}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                                {errText("surf")}
+                            </div>
+                        )}
+
+                        {isMarine && (
                             <div className="grp" id="bk-combo">
                                 <div className="glab"><b>{s.comboH}</b></div>
                                 <ul className="opts">
@@ -590,7 +651,7 @@ export default function BookingModal({
                                         </div>
                                     </div>
                                     <div className="act" id="bk-date2">
-                                        <div className="ahead"><span className="ano">2</span><b>{s.para}</b><i>{s.noWeekend}</i></div>
+                                        <div className="ahead"><span className="ano">2</span><b>{isSurf ? s.surf : s.para}</b><i>{isSurf ? surfTime ?? "" : s.noWeekend}</i></div>
                                         <div className="abody">
                                             <p className="recalc">{s.clash(date ? (lang === "en" ? format(date, "MMM d") : `${date.getMonth() + 1}월 ${date.getDate()}일`) : "")}</p>
                                             <Calendar lang={lang} month={month2} setMonth={setMonth2} selected={date2} onSelect={setDate2} blocked={day2Blocked}

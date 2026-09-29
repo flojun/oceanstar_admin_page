@@ -223,8 +223,8 @@ export default function DetailPage({ lang, tour, tourSettings, google }: { lang:
         <section className="sect" key="flow">
             {sh(C.FLOW_H2, C.FLOW_SUB)}
             <div className="hops rise" style={{ ["--n" as string]: C.JOURNEY.length } as React.CSSProperties}>
-                {C.JOURNEY.map(([name, anchor]: [string, string | null]) => (
-                    <span className={`hop${anchor ? " anchor" : ""}`} key={name}>
+                {C.JOURNEY.map(([name, anchor]: [string, string | null], i: number) => (
+                    <span className={`hop${anchor ? " anchor" : ""}`} key={name} style={{ ["--i" as string]: i } as React.CSSProperties}>
                         <span className="hop-d">{anchor ? ANCHOR_IC[anchor] : null}</span><H className="hop-l" html={name} />
                     </span>
                 ))}

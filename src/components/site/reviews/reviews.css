@@ -207,3 +207,28 @@
   .os .dp.reviews .rw-root .modal.sheet { position: fixed; top: 52px; left: 0; right: 0; bottom: 0; margin: 0; max-width: none; overflow-y: auto }
   .os .dp.reviews .rw-root .sheet .sub-w { position: sticky }
 }
+/* 스크롤 연출. .rv-h 와 #site 는 후기 쓰기 창(.rw-root, fixed)과 사진 창(.lightbox)의 조상이라 절대 움직이지 않는다 - 안의 .sh 와 카드만 */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* 가로 줄: 줄 이름표로. 세로 이동 없이 왼쪽부터 (#site 줄은 첫 화면 끝에 걸려 흐리지 않고 키우기만) */
+    .os .dp.reviews :is(.rrow, .grow) { view-timeline: --car }
+    .os :where(.dp.reviews) :where(.src-h > *, .rrow > *, .grow > *) {
+      animation: os-rise both ease-out; animation-timeline: view();
+      animation-range: cover calc(var(--in-a) + var(--k, 0) * var(--step)) cover calc(var(--in-b) + var(--k, 0) * var(--step)) }
+    .os .dp.reviews :is(.rrow, .grow) > * { animation-timeline: --car }
+    /* #site 줄은 첫 화면 아래 끝에 걸린다 - 반쯤 커진 채로 멈춰 보이지 않게 처음부터 제자리 */
+    .os .dp.reviews .rrow > * { animation: none }
+    .os .dp.reviews .grow > * { --rise: 0px; --rise-s: .9 }
+    .os .dp.reviews :is(.rrow, .grow, .src-h) > :nth-child(2) { --k: 1 }
+    .os .dp.reviews :is(.rrow, .grow, .src-h) > :nth-child(3) { --k: 2 }
+    .os .dp.reviews :is(.rrow, .grow) > :nth-child(4) { --k: 3 }
+    .os .dp.reviews :is(.rrow, .grow) > :nth-child(n+5) { --k: 4 }
+    .os .dp.reviews .rc-ph img { animation: os-unveil both ease-out; animation-timeline: --car;
+      animation-range: cover calc(var(--k, 0) * var(--step)) cover calc(var(--in-img) + var(--k, 0) * var(--step)) }
+    .os .dp.reviews .src-t .rstars { animation: os-wipe both ease-out; animation-timeline: view();
+      animation-range: cover calc(var(--in-a) + 2 * var(--step)) cover calc(var(--in-b) + 2 * var(--step)) }
+    /* 첫 화면: 탭은 히어로 위로 앞서 오르고(scroll 0 에선 제자리), 제목은 떠날 때만 사라진다 */
+    .os .dp.reviews .tabs { animation: os-lead linear both; animation-timeline: scroll(root); animation-range: 0px min(60vh, 540px) }
+    .os .dp.reviews .rv-h > .sh { animation: os-leave linear both; animation-timeline: view(); animation-range: cover 70% cover 100% }
+  }
+}

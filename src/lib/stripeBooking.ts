@@ -75,8 +75,12 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
 
     const insertRows = [];
     if (metadata.combo_option) {
-        const comboSuffix = metadata.combo_option === '1' ? '패러' : metadata.combo_option === '2' ? '제트' : '패러및제트';
+        // 서핑 콤보는 combo_option 'surf'. 서핑 행의 option '서핑' 이 tour_settings 이름
+        // '거북이 스노클링 + 서핑' 에 부분 일치해 combo_surf 정원(자리 조회)으로 잡힌다.
+        const isSurf = metadata.combo_option === 'surf';
+        const comboSuffix = isSurf ? '서핑' : metadata.combo_option === '1' ? '패러' : metadata.combo_option === '2' ? '제트' : '패러및제트';
         const timeOptionLabel = metadata.combo_time_option === 'morning1' ? '1부' : metadata.combo_time_option === 'morning2' ? '2부' : '거북이 스노클링';
+        const secondaryPickup = metadata.secondary_pickup || metadata.pickup_location;
         insertRows.push({
             ...baseRow,
             option: timeOptionLabel,
@@ -86,7 +90,8 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
             ...baseRow,
             tour_date: metadata.secondary_date,
             option: comboSuffix,
-            pickup_location: metadata.secondary_pickup || metadata.pickup_location,
+            // 서핑 레슨 시간은 픽업 시간이다 (상세 "마지막 픽업 시간 기준"). 패러 행의 "카라이 (9:25)" 와 같은 모양
+            pickup_location: isSurf && metadata.surf_time ? `${secondaryPickup} (${metadata.surf_time})` : secondaryPickup,
             note: `${metadata.note} [거북이+${comboSuffix} 콤보]`,
         });
     } else {

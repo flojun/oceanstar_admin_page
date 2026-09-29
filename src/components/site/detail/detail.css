@@ -222,10 +222,13 @@
   .os .dp .end .book-pill { margin-top:26px }
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
-      .os .dp .rise { animation-name:dp-rise;animation-timeline:view();animation-fill-mode:both; animation-timing-function:cubic-bezier(.22,.61,.36,1); animation-range:entry 6% cover 30% }
-      @keyframes dp-rise {from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
-      .os .dp .hero-img { animation:dp-pan linear both;animation-timeline:view(); animation-range:cover 0% cover 100% }
-      @keyframes dp-pan {from{transform:translateY(2.4%)} to{transform:translateY(-2.4%)}}
+      /* 하루 동선: 줄이 왼쪽부터 그어지고 줄이 닿는 순서대로 점이 나타난다(--i 는 DetailPage, --n 은 인라인). 768~1199 는 줄이 없어 점만 차례로 */
+      .os .dp .hops { view-timeline:--hops }
+      .os .dp .hops::before { transform-origin:left center;animation:dp-draw linear both;animation-timeline:--hops; animation-range:cover 18% cover 45% }
+      @keyframes dp-draw {from{transform:scaleX(0)}}
+      .os .dp .hop { animation-timeline:--hops; animation-range:cover calc(16% + var(--i,0) * 27% / (var(--n,9) - 1)) cover calc(26% + var(--i,0) * 27% / (var(--n,9) - 1)) }
+      /* 특장점 bento: 같은 줄 오른쪽 칸이 한 박자 늦게 */
+      .os .dp .ft:is(:nth-child(2), :nth-child(5)) { --k:1 }
     }
   }
 }
@@ -458,10 +461,19 @@
   .os .dp .dock .book-pill { height:52px;padding:0 8px 0 20px;font-size:15.5px }
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
-      .os .dp .rise { animation-name:dp-rise;animation-timeline:view();animation-fill-mode:both; animation-timing-function:cubic-bezier(.22,.61,.36,1); animation-range:entry 4% cover 26% }
-      @keyframes dp-rise {from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:none}}
-      .os .dp .hero-img { animation:dp-pan linear both;animation-timeline:view(); animation-range:cover 0% cover 100% }
-      @keyframes dp-pan {from{transform:translateY(2.2%)}to{transform:translateY(-2.2%)}}
+      /* 가로로 넘기는 코스·프라이빗 상품 줄: 줄 이름표로, 세로 이동 없이 왼쪽부터 커지며 (overflow-y:hidden 은 세로 스와이프를 지킨다) */
+      .os .dp :is(.cs, .combo.n3) { view-timeline:--dp-car;overflow-y:hidden }
+      .os .dp :is(.cs, .combo.n3) > .rise, .os .dp .cs .cs-m img { animation-timeline:--dp-car }
+      .os .dp .cs > .cs-s { --rise:0px;--rise-s:.9 }
+      .os .dp .combo.n3 > .cb { --lift:0px;--lift-s:.9 }
+      .os .dp :is(.cs > .cs-s, .combo.n3 > .cb):nth-child(2), .os .dp :is(.inc.n6 > .inc-c, .star-c, .reco li):nth-child(even), .os .dp .se:is(:nth-child(2), :nth-child(5)) { --k:1 }
+      .os .dp :is(.cs > .cs-s, .combo.n3 > .cb):nth-child(3), .os .dp .se:nth-child(3) { --k:2 }
+      .os .dp .cs > .cs-s:nth-child(n+4) { --k:3 }
+      /* 하루 동선: 세로 줄이 위에서부터, 점이 줄을 따라 */
+      .os .dp .hops { view-timeline:--hops }
+      .os .dp .hops::before { transform-origin:center top;animation:dp-draw-y linear both;animation-timeline:--hops; animation-range:cover 20% cover 60% }
+      @keyframes dp-draw-y {from{transform:scaleY(0)}}
+      .os .dp .hop { animation-timeline:--hops; animation-range:cover calc(18% + var(--i,0) * 40% / (var(--n,9) - 1)) cover calc(28% + var(--i,0) * 40% / (var(--n,9) - 1)) }
     }
   }
 }
@@ -497,4 +509,51 @@
   .os .dp .hops { grid-template-columns: repeat(3, 1fr); row-gap: 28px }
   .os .dp .hops::before { display: none }
   .os .dp .dl { grid-template-columns: 120px 1fr }
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .os .dp :is(.inc-c, .reco li):nth-child(even), .os .dp :is(.star-c, .se):nth-child(3n+2) { --k:1 }
+      .os .dp :is(.star-c, .se):nth-child(3n) { --k:2 }
+    }
+  }
+}
+/* 나란히 놓인 칸의 순서(--k): 4열 포함 사항 · 3열 n6 · 5열 인증샷/회차 · 3열 추천 · 2열 다른 상품 · 콤보 */
+@media (min-width: 1200px) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .os .dp :is(.inc-c:nth-child(4n+2), .star-c:nth-child(5n+2), .se:nth-child(5n+2), .reco li:nth-child(3n+2), .more > .mc:nth-child(2), .combo > .cb:nth-child(2)) { --k:1 }
+    .os .dp :is(.inc-c:nth-child(4n+3), .star-c:nth-child(5n+3), .se:nth-child(5n+3), .reco li:nth-child(3n), .combo.n3 > .cb:nth-child(3)) { --k:2 }
+    .os .dp :is(.inc-c:nth-child(4n), .star-c:nth-child(5n+4), .se:nth-child(5n+4)) { --k:3 }
+    .os .dp :is(.star-c:nth-child(5n), .se:nth-child(5n)) { --k:4 }
+    .os .dp .inc.n6 > .inc-c:nth-child(3n+1) { --k:0 }
+    .os .dp .inc.n6 > .inc-c:nth-child(3n+2) { --k:1 }
+    .os .dp .inc.n6 > .inc-c:nth-child(3n) { --k:2 }
+  }
+}
+/* 캔버스에 없는 것: 마지막 섹션과 푸터 사이 간격 (FAQ·맛집과 같은 값) */
+.os .dp .sect + .foot { margin-top: 96px }
+@media (max-width: 767px) { .os .dp .sect + .foot { margin-top: 64px } }
+/* 스크롤 연출 (모든 .dp 페이지). 블록을 통째로 올리지 않고 안의 칸·줄·사진이 하나씩 */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* 고정 상자 hidden → clip: 스크롤 상자가 아니게 되어 안의 칸·사진의 view() 가 페이지에 붙는다. 칠해지는 모습·배치는 같다
+       (모두 테두리가 있거나 grid/flex, float·sticky 자식 없음). min-* 0 = hidden 이 주던 grid 항목 최소 크기. 되돌리면 motion.spec 이 '멈춘 타임라인' 으로 잡는다 */
+    .os .dp :is(.inc, .act, .star-c, .mc, .cs-m, .sess, .week, .accs) { overflow: clip; min-width: 0; min-height: 0 }
+    .os .dp :is(.sh, .inc, .stars, .accs, .hops, .meet, .rules, .dlist, .reco, .sess, .pnotes, .tdays, .tlist, .intro-ph, .time > div).rise { animation: none }
+    .os :where(.dp) :where(.sh.rise > *, .inc-c, .pnotes li, .acc, .tlist li, .trow, .week, .tnote, .hop, .hnote, .cs-hint,
+      .sect.center > .pill, .star-c, .ig, .reco li, .se, .dl, .mt, .rl li) {
+      animation: os-rise both ease-out; animation-timeline: view();
+      animation-range: cover calc(var(--in-a) + var(--k, 0) * var(--step)) cover calc(var(--in-b) + var(--k, 0) * var(--step)) }
+    .os .dp :is(.acc, .dl, .rl li, .tlist li, .pnotes li, .trow) { --rise: var(--row) }
+    .os .dp .hop { --rise: 24px }
+    /* 예약 버튼을 품은 콤보 카드: 흐리지 않고 */
+    .os .dp .cb.rise { animation-name: os-lift }
+    /* 사진: 둥근 창에서 열리며 1.2 → 1. clip-path 가 늘 자기 상자 안이라 캡션을 덮지 않는다. 들어온 뒤 --in-img 안에 끝 */
+    .os :where(.dp) :where(.intro-ph, .act-ph, .meet-ph, .rules-ph, .star-c, .mc, .cs-m) img {
+      animation: os-unveil both ease-out; animation-timeline: view();
+      animation-range: cover calc(var(--k, 0) * var(--step)) cover calc(var(--in-img) + var(--k, 0) * var(--step)) }
+    /* 요일표: 투어 색 막대가 왼쪽부터 채워진다 */
+    .os .dp .week .slot { animation: os-wipe both ease-out; animation-timeline: view();
+      animation-range: cover calc(var(--in-a) + var(--step)) cover calc(var(--in-b) + var(--step)) }
+    /* 첫 화면 가격 카드: 떠날 때만 안내 줄이 사라진다 (.buy · .buy-r · 예약 버튼은 그대로) */
+    .os .dp .buy :is(.facts > div, .pure) { animation: os-leave linear both; animation-timeline: view(); animation-range: cover 70% cover 100% }
+  }
 }

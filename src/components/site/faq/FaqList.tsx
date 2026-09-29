@@ -60,7 +60,7 @@ export default function FaqList({ lang }: { lang: Lang }) {
         return () => cancelAnimationFrame(raf);
     }, []);
 
-    // 스크롤하는 동안 지금 보고 있는 분류를 켠다
+    // 스크롤하는 동안 지금 보고 있는 분류를 켠다. 검색을 지우면 섹션이 새로 붙으니 q 로 다시 건다
     useEffect(() => {
         const els = groups.map((_, i) => document.getElementById(`c${i}`)).filter(Boolean) as HTMLElement[];
         const io = new IntersectionObserver((entries) => {
@@ -69,7 +69,7 @@ export default function FaqList({ lang }: { lang: Lang }) {
         }, { rootMargin: "-20% 0px -70% 0px" });
         els.forEach((el) => io.observe(el));
         return () => io.disconnect();
-    }, [groups]);
+    }, [groups, q]);
 
     const norm = (s: string) => s.replace(/<[^>]+>/g, "").toLowerCase();
     const needle = q.trim().toLowerCase();

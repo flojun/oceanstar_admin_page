@@ -176,7 +176,8 @@ export async function POST(req: Request) {
                 combo_option: body.comboOption || '',
                 combo_time_option: body.comboTimeOption || '',
                 secondary_date: body.secondaryDate || '',
-                secondary_pickup: body.secondaryPickupLocationName || ''
+                secondary_pickup: body.secondaryPickupLocationName || '',
+                surf_time: body.surfTime || ''
             },
             success_url: `${origin}${isEn ? '' : '/kr'}/booking/payment-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}${isEn ? '' : '/kr'}/booking/payment-cancel?order_id=${order_id}`,

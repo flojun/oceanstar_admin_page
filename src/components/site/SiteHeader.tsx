@@ -32,17 +32,26 @@ export default function SiteHeader({ lang, active, tours }: { lang: Lang; active
     const pathname = usePathname() || L.home;
     const otherHref = otherLangPath(pathname, lang);
     const [drop, setDrop] = useState(false);
+    const [pinDrop, setPinDrop] = useState(false);
     const [drawer, setDrawer] = useState(false);
+    const [pinned, setPinned] = useState(false);
+    const navRef = useRef<HTMLElement>(null);
     const ddRef = useRef<HTMLDivElement>(null);
+    const pinDdRef = useRef<HTMLDivElement>(null);
+    useDismiss(drop, ddRef, setDrop);
+    useDismiss(pinDrop, pinDdRef, setPinDrop);
 
+    // 히어로 머리줄이 화면 밖으로 다 나가면 고정 머리줄(.pin)을 내리고, 돌아오면 거둔다
     useEffect(() => {
-        if (!drop) return;
-        const off = (e: MouseEvent) => { if (!ddRef.current?.contains(e.target as Node)) setDrop(false); };
-        const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setDrop(false); };
-        document.addEventListener("mousedown", off);
-        document.addEventListener("keydown", esc);
-        return () => { document.removeEventListener("mousedown", off); document.removeEventListener("keydown", esc); };
-    }, [drop]);
+        const io = new IntersectionObserver(([e]) => {
+            setPinned(!e.isIntersecting);
+            // 열려 있던 쪽 투어 목록을 닫는다 (히어로 목록은 .nav z 30 이라 막대 위에 떠 남는다)
+            if (e.isIntersecting) setPinDrop(false);
+            else setDrop(false);
+        });
+        io.observe(navRef.current!);
+        return () => io.disconnect();
+    }, []);
 
     useEffect(() => {
         if (!drawer) return;
@@ -55,30 +64,36 @@ export default function SiteHeader({ lang, active, tours }: { lang: Lang; active
 
     const switchLang = () => setLanguageCookie(lang === "ko" ? "en" : "ko");
 
+    // 히어로 머리줄과 고정 머리줄이 같은 메뉴를 쓴다. 투어 목록은 각자 열고 닫는다.
+    const menu = (open: boolean, setOpen: React.Dispatch<React.SetStateAction<boolean>>, ref: React.RefObject<HTMLDivElement | null>, label: string) => (
+        <nav className="menu" aria-label={label}>
+            <Link href={L.home} className={active === "home" ? "on" : undefined}>Home</Link>
+            <div className="dd" ref={ref}>
+                <button type="button" className={active === "tours" ? "on" : undefined} aria-expanded={open} aria-haspopup="true" onClick={() => setOpen((v) => !v)}>
+                    {t.tours} <Chevron dir="down" size={13} />
+                </button>
+                {open && (
+                    <div className="dd-list">
+                        {tours.map((x) => (
+                            <Link key={x.key} href={L.tour(x.key)} onClick={() => setOpen(false)}>
+                                {x.name} <Chevron size={14} />
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </div>
+            <Link href={L.reviews} className={active === "reviews" ? "on" : undefined}>{t.reviews}</Link>
+            <Link href={L.faq} className={active === "faq" ? "on" : undefined}>FAQ</Link>
+        </nav>
+    );
+
     return (
-        <header className="nav">
+        <>
+        <header className="nav" ref={navRef}>
             <Link href={L.home} className="logo-link" aria-label={t.logo}>
                 <img src="/renewal/logo_full.png" alt={t.logo} className="logo" width={46} height={44} />
             </Link>
-            <nav className="menu" aria-label={lang === "en" ? "Main" : "주 메뉴"}>
-                <Link href={L.home} className={active === "home" ? "on" : undefined}>Home</Link>
-                <div className="dd" ref={ddRef}>
-                    <button type="button" className={active === "tours" ? "on" : undefined} aria-expanded={drop} aria-haspopup="true" onClick={() => setDrop((v) => !v)}>
-                        {t.tours} <Chevron dir="down" size={13} />
-                    </button>
-                    {drop && (
-                        <div className="dd-list">
-                            {tours.map((x) => (
-                                <Link key={x.key} href={L.tour(x.key)} onClick={() => setDrop(false)}>
-                                    {x.name} <Chevron size={14} />
-                                </Link>
-                            ))}
-                        </div>
-                    )}
-                </div>
-                <Link href={L.reviews} className={active === "reviews" ? "on" : undefined}>{t.reviews}</Link>
-                <Link href={L.faq} className={active === "faq" ? "on" : undefined}>FAQ</Link>
-            </nav>
+            {menu(drop, setDrop, ddRef, lang === "en" ? "Main" : "주 메뉴")}
             <div className="nav-r">
                 <a href={otherHref} className="lang-pill" hrefLang={lang === "ko" ? "en" : "ko"} onClick={switchLang}>{t.other}</a>
                 <Link href={L.manage} className="ghost-pill">{t.manage}</Link>
@@ -131,7 +146,34 @@ export default function SiteHeader({ lang, active, tours }: { lang: Lang; active
                 </div>
             )}
         </header>
+
+        {/* 고정 머리줄. 숨었을 때는 inert 라 초점·클릭이 닿지 않는다. 서버 렌더는 숨은 상태, position:fixed 라 자리를 차지하지 않는다.
+            서랍은 위 .nav 안의 것을 같이 쓴다. */}
+        <div className="pin" inert={!pinned} aria-hidden={!pinned || undefined}>
+            <Link href={L.home} className="logo-link" aria-label={t.logo}>
+                <img src="/renewal/logo_full.png" alt={t.logo} className="pin-logo" width={46} height={44} />
+            </Link>
+            {menu(pinDrop, setPinDrop, pinDdRef, lang === "en" ? "Sticky menu" : "고정 메뉴")}
+            <div className="pin-r">
+                <a href={otherHref} className="lang-pill" hrefLang={lang === "ko" ? "en" : "ko"} onClick={switchLang}>{t.other}</a>
+                <BookButton className="book-pill">{t.book} <Arrow /></BookButton>
+                <button type="button" className="burger" aria-label={t.menu} aria-expanded={drawer} onClick={() => setDrawer(true)}><Burger /></button>
+            </div>
+        </div>
+        </>
     );
+}
+
+/** 바깥을 누르거나 Esc 를 누르면 목록을 닫는다 */
+function useDismiss(open: boolean, ref: React.RefObject<HTMLElement | null>, setOpen: (v: boolean) => void) {
+    useEffect(() => {
+        if (!open) return;
+        const off = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };
+        const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+        document.addEventListener("mousedown", off);
+        document.addEventListener("keydown", esc);
+        return () => { document.removeEventListener("mousedown", off); document.removeEventListener("keydown", esc); };
+    }, [open, ref, setOpen]);
 }
 
 function DrawerBook({ label, onDone }: { label: string; onDone: () => void }) {

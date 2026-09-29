@@ -148,22 +148,6 @@ input[type="date"].date-input-horizontal::-webkit-calendar-picker-indicator {
 }
 
 /* =========================================
-   [HubSpot Chat Widget 위치 조정]
-   하단 배너를 가리지 않도록 위로 올림.
-   HubSpot 기본 런처를 그대로 사용합니다.
-   ========================================= */
-#hubspot-messages-iframe-container {
-  bottom: 80px !important;
-}
-
-@media (max-width: 639px) {
-  #hubspot-messages-iframe-container {
-    transform: scale(0.8);
-    transform-origin: bottom right;
-  }
-}
-
-/* =========================================
    [Google Places Autocomplete 모바일 픽스]
    모바일에서 터치 시 리스트가 클릭되지 않는 문제와 z-index 문제 해결
    ========================================= */

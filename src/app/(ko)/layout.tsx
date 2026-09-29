@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import KakaoChatWidget from "@/components/common/KakaoChatWidget";
 import Script from "next/script";
 import { SITE_URL } from "@/lib/site";
 import "../globals.css";
@@ -50,10 +49,7 @@ export default function RootLayout({
             gtag('config', 'AW-17755406251');
           `}
         </Script>
-        {/* HubSpot Chat Widget */}
-        <Script id="hs-script-loader" src="//js-na2.hs-scripts.com/246714984.js" strategy="afterInteractive" />
         {children}
-        <KakaoChatWidget />
       </body>
     </html>
   );

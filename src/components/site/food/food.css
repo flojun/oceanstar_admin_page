@@ -111,3 +111,20 @@
 }
 /* 캔버스에 없는 것: 예전 페이지의 QR 다운로드 버튼. 지도 보기 링크와 같은 꼴로 작게 붙인다. */
 .os .dp.food .qr-dl { align-self:flex-start;display:inline-flex;align-items:center;min-height:32px;margin-top:2px;padding:0;border:0;background:none;cursor:pointer; font:inherit;font-size:14px;font-weight:700;color:var(--sea-d); text-decoration:underline;text-decoration-color:rgba(23,123,156,.35);text-underline-offset:4px }
+/* 스크롤 연출. section.cat 은 더 이상 통째로 움직이지 않는다 - 제목과 식당이 하나씩 */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .os .dp.food .cat.rise { animation: none }
+    .os :where(.dp.food) :where(.cat-h > *, .ents > li) {
+      animation: os-rise both ease-out; animation-timeline: view();
+      animation-range: cover calc(var(--in-a) + var(--k, 0) * var(--step)) cover calc(var(--in-b) + var(--k, 0) * var(--step)) }
+    .os .dp.food .ending.rise { animation-name: os-lift }
+    /* 첫 화면 인사 칸: 떠날 때만 글이 사라진다(예약 버튼·칸 자체는 그대로) */
+    .os .dp.food .hello :is(.hi, .perks li) { animation: os-leave linear both; animation-timeline: view(); animation-range: cover 70% cover 100% }
+    @media (min-width: 768px) { .os .dp.food .ents > li:nth-child(even) { --k: 1 } }
+    /* 분류 칩: ≥768 은 첫 화면이라 그대로, 휴대폰은 오른쪽에서 밀려 들어온다 */
+    @media (max-width: 767px) {
+      .os .dp.food .chips { animation: os-glide both ease-out; animation-timeline: view(); animation-range: cover var(--in-a) cover var(--in-b) }
+    }
+  }
+}

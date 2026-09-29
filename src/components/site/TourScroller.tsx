@@ -42,8 +42,9 @@ export default function TourScroller({
                 </div>
             </div>
             <div className="scroller">
+                {/* 순서(--i)만 넘긴다. 인라인 animationRange 는 CSS 미디어쿼리를 이겨버린다 */}
                 {shown.map((c, i) => (
-                    <div key={c.key} className="ac rise" style={{ animationRange: `entry ${6 + (i % 3) * 4}% cover ${30 + (i % 3) * 4}%` }}>
+                    <div key={c.key} className="ac" style={{ ["--i" as string]: i } as React.CSSProperties}>
                         <div className="ac-ph" data-image-slot="landing.tour_card">
                             <img src={c.img} alt={c.alt} width={600} height={400} loading="lazy" />
                         </div>

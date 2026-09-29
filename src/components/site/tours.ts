@@ -165,6 +165,8 @@ export function timeLines(def: TourDef, settings: TourSetting[], lang: Lang): st
             return [lang === "en" ? "Parasail / jet ski 09:30-14:00" : "패러/제트 9:30-2:00"];
         case "private":
             return [lang === "en" ? "Options and schedule customizable" : "옵션·일정 커스터마이징"];
+        case "surf":
+            return [lang === "en" ? "Surf 07:30-14:30 · 5 a day" : "서핑 07:30-14:30 · 하루 5회"];
         default:
             return rows[0]?.start_time ? [`${shiftTime(rows[0].start_time, 0)}-${shiftTime(rows[0].end_time, 0)}`] : [];
     }

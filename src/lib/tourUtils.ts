@@ -265,6 +265,7 @@ const TOUR_NAMES_EN: Record<string, string> = {
     sunset: 'Sunset Wine & Waikiki Turtle Snorkeling',
     private: '[Private] Waikiki Turtle Snorkeling Trip',
     combo_marine: 'Turtle Snorkeling + Parasailing / Jet Ski',
+    combo_surf: 'Turtle Snorkeling + Surf Lesson',
 };
 
 /**

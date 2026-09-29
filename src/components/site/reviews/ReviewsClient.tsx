@@ -53,9 +53,9 @@ const T = {
 export function Carousel({ cls, what, lang, children }: { cls: string; what: string; lang: Lang; children: React.ReactNode }) {
     const ref = useRef<HTMLDivElement>(null);
     const t = T[lang];
-    const go = (dir: 1 | -1) => ref.current?.scrollBy({ left: dir * ref.current.clientWidth * 0.8, behavior: "smooth" });
+    const go = (dir: 1 | -1) => ref.current?.scrollBy({ left: dir * ref.current.clientWidth * 0.8, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
     return (
-        <div className="car rise">
+        <div className="car">
             <button type="button" className="car-b l d-only" aria-label={t.prev(what)} onClick={() => go(-1)}>{I_LEFT}</button>
             <div className={cls} ref={ref}>{children}</div>
             <button type="button" className="car-b r d-only" aria-label={t.next(what)} onClick={() => go(1)}>{I_RIGHT}</button>

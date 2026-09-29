@@ -80,7 +80,7 @@ export default function FoodPage({ lang, tourSettings }: { lang: Lang; tourSetti
             </section>
 
             {/* 인사 · 재예약 혜택 (예전 페이지 맨 위 인사 칸) */}
-            <section className="hello rise">
+            <section className="hello">
                 <div className="hi"><h2>{t.hiH}</h2><p>{t.hiP}</p></div>
                 <ul className="perks">
                     <li><span className="ic">{I_TAG}</span><div><b>{t.dealH}</b><span>{t.dealP}</span></div></li>

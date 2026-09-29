@@ -2082,7 +2082,7 @@ export const DETAIL: Record<string, any> = {
   "PERK_NOTES": [],
   "PERK_PHOTO": [
    "private_boat.webp",
-   "와이키키 앞바다에 떠 있는 OCEAN STAR 보트와 선상의 손님들"
+   "와이키키 앞바다에 떠 있는 OCEAN STAR 보트"
   ],
   "RECO": [
    "아이 동반 가족",
@@ -2392,7 +2392,7 @@ export const DETAIL: Record<string, any> = {
   "PERK_NOTES": [],
   "PERK_PHOTO": [
    "private_boat.webp",
-   "The OCEAN STAR boat off Waikiki with guests on board"
+   "The OCEAN STAR boat off Waikiki"
   ],
   "RECO": [
    "Families with kids",

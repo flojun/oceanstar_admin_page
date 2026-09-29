@@ -10,7 +10,7 @@
 .os {
   --ink: #101418; --paper: #F6F5F2; --soft: #EFEDE8; --sky: #7FD4E8; --sea: #1E9DC4;
   --deep: #0D5C7A; --food: #D2591A; --sea-d: #177B9C; --food-d: #C45014; --sky-2: #A8E5F2;
-  --text: #4A4F55; --muted: #646A70; --line: #E2E0DA;
+  --text: #101418; --muted: #646A70; --line: #E2E0DA;
   --e1: 0 2px 8px rgba(16,20,24,.05), 0 16px 40px rgba(16,20,24,.08);
   --e2: 0 8px 22px rgba(16,20,24,.10), 0 30px 70px rgba(16,20,24,.16);
   --e3: 0 24px 60px rgba(16,20,24,.22), 0 60px 140px rgba(16,20,24,.28);
@@ -88,8 +88,10 @@
 .os .dd-list a svg { color: var(--muted) }
 .os .nav-r { display: flex; gap: 10px; align-items: center; justify-self: end }
 .os .lang-pill { display: inline-flex; align-items: center; height: 46px; padding: 0 20px; border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.44); color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .06em; white-space: nowrap }
-.os .nav-r .book-pill { background: #fff; color: var(--ink) }
+  background: rgba(255,255,255,.18); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .06em; white-space: nowrap }
+/* 화살표 원은 위·아래·오른쪽 8px 로 똑같이 띄우고, 글자는 화살표를 뺀 자리의 가운데 */
+.os .nav-r .book-pill { gap: 12px; padding: 0 8px 0 20px; background: #fff; color: var(--ink) }
 .os .nav-r .book-pill svg { background: var(--ink); color: #fff }
 /* 한쪽 판에만 있는 마크업. 숨기기만 하고 보일 때는 각자 display 를 그대로 쓴다. */
 @media (min-width: 768px) { .os .m-only { display: none !important } }
@@ -141,7 +143,7 @@
 .os.en .hero-mid h1 { font-size: clamp(42px, 4.45vw, 64px); line-height: 1.1 }
 /* 캔버스는 SUIT 300 을 싣지 않아 가장 가까운 700 으로 보였다. 확정된 화면이 그 모습이라 700 으로 맞춘다. */
 .os .hero-mid h1 .thin { font-weight: 700 }
-.os .hero-mid h1 em { font-style: normal; color: var(--sky); margin-right: .06em }
+.os .hero-mid h1 em { font-style: normal; font-weight: inherit; color: var(--sky); margin-right: .06em }
 .os .hero-foot { position: absolute; left: var(--pad); right: var(--pad); bottom: 64px; z-index: 3;
   display: flex; align-items: flex-end; justify-content: space-between; gap: 56px; color: #fff }
 .os .hf-left { width: 520px; max-width: 100%; flex: none }
@@ -297,21 +299,88 @@
   font-size: 13px; font-weight: 600; color: rgba(255,255,255,.9) }
 
 /* ── 스크롤 연출 ──────────────────────────────────────────────────── */
+/* view() 는 가장 가까운 스크롤 상자(overflow:hidden/auto)에 붙는다. 그런 상자(.hero .scroller .film-card) 안에서 움직일 것은 상자에 view-timeline 이름을 달고 그 이름을 쓴다.
+   키프레임은 늘 제자리로 끝난다. 예약·문의 버튼을 품은 것은 흐려지지 않는다(os-lift · os-lead · os-glide + --glide-o:1).
+   덮어쓸 때는 animation-name / -timeline / -range 낱개 속성만 (animation 줄임말은 timeline 과 range 를 지운다). */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    .os .rise { animation-name: os-rise; animation-timeline: view(); animation-fill-mode: both;
-      animation-timing-function: cubic-bezier(.22,.61,.36,1); animation-range: entry 6% cover 30% }
-    @keyframes os-rise { from { opacity: 0; transform: translateY(40px) } to { opacity: 1; transform: none } }
-    .os .faq-list li { animation-name: os-rise; animation-timeline: view(); animation-fill-mode: both;
-      animation-timing-function: cubic-bezier(.22,.61,.36,1); animation-range: entry 4% cover 26% }
-    .os .strip > span { animation-name: os-rise; animation-timeline: view(); animation-fill-mode: both;
-      animation-timing-function: cubic-bezier(.22,.61,.36,1) }
-    .os .strip > span:nth-child(1) { animation-range: entry 8% cover 24% }
-    .os .strip > span:nth-child(2) { animation-range: entry 12% cover 28% }
-    .os .strip > span:nth-child(3) { animation-range: entry 16% cover 32% }
-    .os .strip > span:nth-child(4) { animation-range: entry 20% cover 36% }
-    .os .ac img { animation: os-pan linear both; animation-timeline: view(); animation-range: cover 0% cover 100% }
-    @keyframes os-pan { from { transform: scale(1.1) translateY(1.8%) } to { transform: scale(1) translateY(-1.8%) } }
+    /* 값 한 벌 (≤767 은 모바일 블록이 값만 바꾼다). 나타나기: 들어오자마자 시작해 180px 안에 끝난다.
+       길게 잡으면 스크롤을 멈춘 자리에서 화면 아래 절반이 늘 '움직이는 중'으로 멈춰 보인다 */
+    .os { --rise: 84px; --row: 36px; --lift: 56px; --glide: 72px; --out: -160px;
+      --in-a: 0px; --in-b: min(20vh, 180px); --step: min(2vh, 18px); --in-img: calc(var(--in-b) * 1.6) }
+    @keyframes os-rise   { from { opacity: 0; translate: 0 var(--rise); scale: var(--rise-s, 1) } }
+    @keyframes os-lift   { from { translate: 0 var(--lift); scale: var(--lift-s, .96) } }
+    @keyframes os-glide  { from { opacity: var(--glide-o, 0); translate: var(--glide) 0 } }
+    @keyframes os-leave  { to { opacity: 0; translate: 0 calc(var(--rise) * -.4) } }
+    @keyframes os-lead   { to { translate: 0 calc(var(--lift) * -1) } }
+    @keyframes os-drift  { to { translate: 0 28%; scale: 1.15 } }
+    @keyframes os-out    { to { translate: 0 var(--out) } }
+    @keyframes os-unveil { from { clip-path: inset(18% 16% round 28px); scale: 1.2 } to { clip-path: inset(0); scale: 1 } }
+    @keyframes os-wipe   { from { clip-path: inset(0 100% 0 0) } to { clip-path: inset(0) } }
+    @keyframes os-band   { from { clip-path: inset(0 4% round 40px 40px 0 0) } to { clip-path: inset(0) } }
+    @keyframes os-play   { from { opacity: 0; transform: translate(-50%, -50%) scale(.5) } }
+
+    /* 나타나기 한 줄. :where 라 특이도 0,1,0 - 아래와 페이지 CSS 의 덮어쓰기가 늘 이긴다. --k = 옆으로 놓인 순서 */
+    .os :where(.rise, .strip > span, .rv-top > .pill, .faq-list > li, .faq-all, .rv-list > .rv-c, .foot .cols > *,
+      #tours > .rise > *, .panel > .center.rise > *, .rv-head.rise > *, .film > .rise:first-child > *, .faq-left.rise > *) {
+      animation: os-rise both ease-out; animation-timeline: view();
+      animation-range: cover calc(var(--in-a) + var(--k, 0) * var(--step)) cover calc(var(--in-b) + var(--k, 0) * var(--step)) }
+    /* 한 덩어리로 오르던 틀은 멈추고 안의 것이 하나씩 */
+    .os :is(.panel > .center, .rv-head, .film > :first-child, .faq-left, .rv-list, .cols).rise, .os #tours > .rise { animation: none }
+    .os .faq-list > li { --rise: var(--row) }
+    /* 버튼을 품은 것: 흐리지 않고 올리며 키운다 */
+    .os :is(.foot-sub, .end).rise { animation-name: os-lift }
+    .os .foot :is(.foot-sub, .end).rise { --lift-s: .92 }
+    .os .strip > span:nth-child(4n+2), .os .rv-head.rise > :nth-child(2) { --k: 1 }
+    .os .strip > span:nth-child(4n+3) { --k: 2 }
+    .os .strip > span:nth-child(4n) { --k: 3 }
+
+    /* 히어로(10개 페이지): scroll 0 에서는 그대로, 떠날 때만. 틀(.hero-mid/.hero-in)은 올리기만, 흐림은 자식마다
+       (틀에 opacity 를 걸면 .tag .eyebrow .rev 의 backdrop blur 가 사라진다). FAQ 검색창은 그대로 */
+    .os .hero { view-timeline: --hero }
+    .os .hero-img { animation: os-drift linear both; animation-timeline: --hero; animation-range: exit 0% exit 100% }
+    .os .hero:not(.fq-hero) :is(.hero-mid, .hero-in) { animation: os-out linear both; animation-timeline: --hero; animation-range: exit 0% exit 60% }
+    .os .hero :is(.hero-mid, .hero-in) > :not(.search) { animation: os-leave linear both; animation-timeline: --hero; animation-range: exit 0% exit 45% }
+
+    /* 상품 카드: 왼쪽부터(--i 는 TourScroller) 카드째 작게(0.88) 올라와 커진다. 사진은 잘라내지 않고(창 모양으로
+       자르면 카드 흰 바탕이 테두리처럼 보인다) 안에서 줌아웃만, 카드와 같이 끝난다 */
+    .os .scroller { view-timeline: --tours }
+    /* 짧은 나타나기로는 들어오자마자 끝나 눈에 안 띈다 - 줄 윗변이 화면 90% 에서 시작해 마지막 카드가 50% 에서 끝난다 */
+    .os .scroller > .ac { --k: var(--i, 0); --lift-s: .88; animation: os-lift both ease-out; animation-timeline: --tours;
+      animation-range: cover calc(10vh + var(--k) * 3vh) cover calc(38vh + var(--k) * 3vh) }
+    .os .scroller .ac img { animation: os-zoom both ease-out; animation-timeline: --tours;
+      animation-range: cover calc(10vh + var(--k, 0) * 3vh) cover calc(38vh + var(--k, 0) * 3vh) }
+    /* 영상 카드: 화면 대부분을 차지하는 큰 카드라 짧은 나타나기로는 윗변만 보일 때 끝나 버린다.
+       작게(0.86) 올라와 카드 전체가 화면에 들어올 때 제 크기가 되고, 사진은 잘라내지 않고 안에서 줌아웃만.
+       재생 버튼은 카드가 대부분 보일 때 나타난다 */
+    @keyframes os-film { from { scale: .86; translate: 0 48px } }
+    @keyframes os-zoom { from { scale: 1.18 } }
+    .os .film-card { view-timeline: --film }
+    .os .film-card.rise { animation: os-film both ease-out; animation-timeline: view(); animation-range: entry 0% entry 100% }
+    .os .film-card img { animation: os-zoom both ease-out; animation-timeline: --film; animation-range: entry 0% entry 100% }
+    /* .play 는 translate(-50%,-50%) 로 가운데 선다 - 키프레임이 그 값을 다시 적는다(scale 속성을 쓰면 26px 벗어남) */
+    .os .film-card .play { animation: os-play both ease-out; animation-timeline: --film; animation-range: entry 60% entry 100% }
+
+    /* 비교표 ≥1280: 표 윗변이 화면 가운데쯤(아래에서 40vh) 오면 줄마다 오른쪽에서 차례로 들어와
+       제목이 아직 보일 때 예약 줄까지 끝난다. 줄마다의 view() 면 마지막 줄은 제목이 가려질 만큼 내려야 끝나므로
+       표 하나의 이름표(--cmp)에 묶는다. 예약 줄은 흐리지 않는다 */
+    .os .cmp { view-timeline: --cmp }
+    .os .cmp > .crow { --k: calc(var(--i, -1) + 1) }
+    .os .cmp > .crow.cfoot { --k: 9; --glide-o: 1 }
+    .os .cmp > .crow.rise { animation-name: os-glide; animation-timeline: --cmp;
+      animation-range: cover calc(40vh + var(--k) * 8px) cover calc(40vh + 120px + var(--k) * 8px) }
+    /* 숫자 띠: 큰 화면에서는 첫 화면에 걸친다 - 반쯤 나온 채로 멈춰 보이지 않게 처음부터 제자리 */
+    .os .strip > span { animation: none }
+
+    .os .rv-sum .stars { animation: os-wipe both ease-out; animation-timeline: view();
+      animation-range: cover calc(var(--in-a) + 2 * var(--step)) cover calc(var(--in-b) + 2 * var(--step)) }
+
+    /* 푸터: 어두운 띠가 둥근 카드에서 끝까지 펼쳐진다(clip-path 만). 안의 것은 들어오는 동안 끝나 max scroll 에서도 닿는다 */
+    .os .foot { animation: os-band both ease-out; animation-timeline: view(); animation-range: entry 0% entry 60% }
+    .os .foot :where(.rise, .cols > *) { animation-range: entry calc(var(--k, 0) * 12%) entry 100% }
+    .os .foot .cols > :nth-child(2) { --k: 1 }
+    .os .foot .cols > :nth-child(3) { --k: 2 }
+    .os .foot .cols > :nth-child(4) { --k: 3 }
   }
 }
 
@@ -333,6 +402,16 @@
   .os .faq-wrap { grid-template-columns: 1fr; row-gap: 32px }
   .os .cols { grid-template-columns: 1fr 1fr }
   .os .foot-sub { flex-direction: column; align-items: flex-start; gap: 28px }
+  /* .cmp · .scroller 가 가로 스크롤러가 되는 폭: 줄마다의 view() 는 .cmp 에 붙어 멈추므로 표 전체를 흐리지 않고 오른쪽에서 들인다(옆으로 넘긴다는 신호).
+     카드는 세로로 움직이면 줄이 세로로도 스크롤되므로 키우기만 */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .os .panel .cmp > .crow.rise { animation: none }
+      .os .cmp { --glide-o: 1; animation: os-glide both ease-out; animation-timeline: view(); animation-range: cover var(--in-a) cover var(--in-b) }
+      .os .scroller { overflow-y: hidden }
+      .os .scroller > .ac { --lift: 0px; --lift-s: .9 }
+    }
+  }
 }
 @media (max-width: 1023px) {
   .os .menu { display: none }
@@ -463,7 +542,17 @@
 
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
-      .os .ac img { animation: none }
+      /* 값만 바꾼다. 나타나기: 들어오자마자 시작해 140px 안에 끝난다 */
+      .os { --rise: 52px; --row: 24px; --lift: 36px; --glide: 44px; --out: -96px;
+        --in-a: 0px; --in-b: min(18vh, 140px); --step: min(2vh, 16px) }
+      .os .strip > span:nth-child(odd) { --k: 0 }
+      .os .strip > span:nth-child(even) { --k: 1 }
+      /* 후기 줄이 가로 스크롤러가 된다: 줄 이름표로, 세로 이동 없이 흐림 + 키우기 */
+      .os .rv-list { view-timeline: --rv }
+      .os .rv-list > .rv-c { animation-timeline: --rv; --rise: 0px; --rise-s: .9 }
+      .os .rv-list > .rv-c:nth-child(2) { --k: 1 }
+      .os .rv-list > .rv-c:nth-child(3) { --k: 2 }
+      .os .rv-list > .rv-c:nth-child(n+4) { --k: 3 }
     }
   }
 }
@@ -643,9 +732,42 @@
   .os .bk-modal .two { grid-template-columns: 1fr; gap: 12px }
 }
 
-/* 떠 있는 카카오·인스타 버튼(KakaoChatWidget)이 상세 페이지 하단 예약 막대를 가리지 않게 */
+/* ── 고정 머리줄 (.pin) ───────────────────────────────────────────── */
+/* 히어로 머리줄(.nav)이 화면 밖으로 다 나가면 SiteHeader 가 inert 를 풀고 위에서 내려온다(스크롤 연동이 아닌 상태 전환).
+   z-index 25 = 페이지 내용(.buy .quick .tabs .mg-body 6, 상세 .dock 20)보다 위, 모든 겹창보다 아래:
+   서랍 .os-drawer-root 는 .nav(z 30) 안이라 실제 층 30, 예약 창 .bk-root · 후기 쓰기 .rw-root · 취소 창 .mg-root 300, 사진 .lightbox 320.
+   고정 요소가 안에 없으니 이 막대만은 transform · backdrop-filter 를 써도 된다(투어 목록 .dd-list 는 absolute). */
+.os { --pin-h: 64px }
+.os .pin { position: fixed; top: 0; left: 0; right: 0; z-index: 25; height: var(--pin-h); padding: 0 var(--pad);
+  display: grid; grid-template-columns: 1fr auto 1fr; column-gap: 16px; align-items: center; color: var(--ink);
+  background: rgba(255,255,255,.88); -webkit-backdrop-filter: saturate(1.6) blur(16px); backdrop-filter: saturate(1.6) blur(16px);
+  border-bottom: 1px solid var(--line); box-shadow: 0 1px 2px rgba(16,20,24,.04), 0 10px 30px rgba(16,20,24,.06);
+  transition: transform .28s cubic-bezier(.22,.61,.36,1) }
+/* 흐리지 않고 밀어 올리기만 한다(예약 버튼은 늘 opacity 1). 40px = 그림자(0 10px 30px)까지 화면 밖으로 */
+.os .pin[inert] { transform: translateY(calc(-100% - 40px)) }
+@media (prefers-reduced-motion: reduce) { .os .pin { transition: none } }
+.os .pin-logo { height: 38px; width: auto }
+/* 메뉴는 히어로의 .menu 를 그대로 쓰고 밝은 바탕용으로만 바꾼다. 켜진 칸은 히어로처럼 흰 알약 + 먹색 글자.
+   히어로는 1023 이하에서 메뉴를 숨기지만 이 막대에는 768 까지 들어간다. */
+.os .pin .menu { display: flex; padding: 4px; background: var(--soft); -webkit-backdrop-filter: none; backdrop-filter: none }
+.os .pin .menu > a, .os .pin .menu > .dd > button { color: var(--muted) }
+.os .pin .menu > a:hover, .os .pin .menu > .dd > button:hover { color: var(--ink) }
+.os .pin .menu .on { box-shadow: 0 1px 3px rgba(16,20,24,.12) }
+.os .pin-r { grid-column: 3; justify-self: end; display: flex; align-items: center; gap: 8px }
+.os .pin .lang-pill { height: 42px; padding: 0 16px; background: none; border: 1px solid var(--line); color: var(--ink);
+  -webkit-backdrop-filter: none; backdrop-filter: none }
+/* 예약은 기본 .book-pill(먹색 + 흰 화살표 원). manage.css 의 .os .dp.manage .book-pill svg (0,4,1) 가 원을 지워서 한 칸 높여 다시 적는다 */
+.os .pin-r .book-pill { height: 42px; padding: 0 6px 0 18px; gap: 10px; font-size: 13.5px }
+.os .pin-r .book-pill svg, .os .dp.manage .pin-r .book-pill svg { width: 30px; height: 30px; padding: 7px; background: #fff; color: var(--ink) }
+/* 제자리 이동(#tours #faq · 후기 탭 · FAQ 분류 #cN · 맛집 분류)과 Tab 초점이 막대 밑에 깔리지 않게.
+   html 의 scroll-padding 은 쓰지 않는다: view-timeline-inset(auto)이 그 값을 가져가 모든 스크롤 연출이 64px 밀리고 첫 화면 히어로가 움직인다 */
+.os section[id] { scroll-margin-top: var(--pin-h) }
+.os :focus:not([role="dialog"] *) { scroll-margin-top: calc(var(--pin-h) + 8px) }
 @media (max-width: 767px) {
-  body:has(.os .dock) .os-float { bottom: calc(92px + env(safe-area-inset-bottom)) !important }
+  .os { --pin-h: 56px }
+  .os .pin { display: flex; justify-content: space-between }
+  .os .pin-logo { height: 32px }
+  .os .pin .menu, .os .pin .lang-pill { display: none }
+  .os .pin-r .book-pill { height: 40px; padding: 0 5px 0 16px; font-size: 14px }
+  .os .pin .burger { width: 40px; height: 40px; background: var(--soft); -webkit-backdrop-filter: none; backdrop-filter: none }
 }
-/* 메뉴 서랍 · 예약 창 · 후기/취소 창이 열려 있을 때는 떠 있는 버튼을 숨긴다 (서랍 위에 겹친다) */
-body:has(.os-drawer-root, .bk-root, .rw-root, .mg-root) .os-float { display: none !important }

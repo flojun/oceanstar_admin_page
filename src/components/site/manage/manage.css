@@ -230,3 +230,9 @@
 @media (max-width: 767px) {
   .os .dp.manage .mg-root .modal.sheet { position: fixed; top: 64px; left: 0; right: 0; bottom: 0; margin: 0; max-width: none; overflow-y: auto }
 }
+/* 스크롤 연출: 첫 화면 카드가 히어로 위로 앞서 오른다. 옮기기만 해서 조회·변경 버튼은 흐려지지 않는다 */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .os .dp.manage :is(.look-w, .det-w) > .card { animation: os-lead linear both; animation-timeline: scroll(root); animation-range: 0px min(60vh, 540px) }
+  }
+}
