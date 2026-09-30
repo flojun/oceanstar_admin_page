@@ -46,8 +46,6 @@ const nextConfig: NextConfig = {
       // 워드프레스 시절 주소 (서치콘솔 404 목록, 2026-09-29)
       { source: "/kr/waikiki-turtle-snorkeling-tour", destination: "/kr/tours/turtle", permanent: true },
       { source: "/kr/home", destination: "/kr", permanent: true },
-      { source: "/kr/index", destination: "/kr", permanent: true },
-      { source: "/index", destination: "/", permanent: true },
       { source: "/home", destination: "/", permanent: true },
       { source: "/jp/:path*", destination: "/", permanent: true },
       ...oldSite("korean", "/kr"),
@@ -56,10 +54,11 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     const origin = process.env.PREVIEW_DATA_ORIGIN;
-    if (!origin) return [];
     return {
-      beforeFiles: PREVIEW_READ_APIS.map((p) => ({ source: p, destination: `${origin}${p}` })),
-      afterFiles: [],
+      beforeFiles: origin ? PREVIEW_READ_APIS.map((p) => ({ source: p, destination: `${origin}${p}` })) : [],
+      // 옛 사이트가 /kr → /kr/index 로 보낸 것을 기억하는 브라우저가 있다. 여기서 /kr 로 되돌려 보내면
+      // 그 브라우저는 둘 사이를 끝없이 오가므로, 이동 대신 같은 화면을 보여 준다 (canonical 은 /kr)
+      afterFiles: [{ source: "/kr/index", destination: "/kr" }, { source: "/index", destination: "/" }],
       fallback: [],
     };
   },
