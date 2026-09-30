@@ -205,12 +205,21 @@ async function findTarget(b: OtaBooking): Promise<Target | null> {
 async function handleNew(b: OtaBooking): Promise<Result> {
     const { data: existing } = await supabaseServer
         .from('reservations')
-        .select('id, status, note, pax, pickup_location, tour_date, option')
+        .select('id, status, note, pax, pickup_location, tour_date, option, booker_email')
         .eq('order_id', b.orderId)
         .maybeSingle();
 
     if (existing) {
         const target = existing as Target;
+
+        // 클룩 '예약 요청' 메일에는 대표 예약자 이메일이 없고 뒤에 오는 '예약내역 확정' 메일에만 있다.
+        // 요청 메일로 먼저 등록된 예약은 이메일이 빈 채로 남아, 손님이 메일로 문의하면 명단에서 못 찾는다.
+        if (!existing.booker_email && b.bookerEmail) {
+            const { error } = await supabaseServer
+                .from('reservations').update({ booker_email: b.bookerEmail }).eq('id', target.id);
+            if (error) console.error('[OTA Cron] 이메일 보충 실패:', error);
+        }
+
         // 클룩·Viator·여기어때는 '변경' 메일이 따로 없고 **같은 예약번호로 확정 메일이 다시** 온다.
         // 날짜가 다르면 그게 날짜 변경이다. 중복으로 버리면 손님이 엉뚱한 날 배에 없다.
         if (b.tourDate && b.tourDate !== target.tour_date && target.status !== '취소') {
