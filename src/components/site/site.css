@@ -462,6 +462,8 @@
   .os .hero-mid { top: 104px }
   .os .tag { height: 30px; padding: 0 15px; background: rgba(9,16,22,.42); font-size: 12px }
   .os .hero-mid h1, .os.en .hero-mid h1 { font-size: 34px; line-height: 1.26; margin-top: 16px }
+  /* 영문 첫 줄(Unforgettable Waikiki)이 375 이하에서 한 단어씩 떨어지지 않게 폭에 맞춰 줄인다 (360~430 에서 4줄 확인) */
+  .os.en .hero-mid h1 { font-size: min(34px, 8vw) }
   .os .hero-foot { bottom: 76px; display: block }
   .os .hf-left { width: auto }
   .os .hf-t { font-size: 17px }
