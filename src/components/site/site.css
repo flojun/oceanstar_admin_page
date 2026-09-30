@@ -200,8 +200,17 @@
   font-size: 12.5px; font-weight: 700; color: var(--text); white-space: nowrap }
 .os .detail:hover { text-decoration: underline; text-underline-offset: 3px }
 
+/* 투어 구간 바탕: 예전 사이트의 거북이 선화를 모래색으로 (ink 대비 1.31:1 로 은은하게, 재서 맞춘 값).
+   무늬는 ::before 에만 걸어 글자·카드는 그대로 선명하고, 제목·분류 버튼 뒤는 타원으로 비운다.
+   비교표 위 간격은 이 구간 안(padding)으로 옮겨 거북이가 비교표 시트까지 이어진다 */
+.os #tours { position: relative; isolation: isolate; padding-bottom: 72px }
+.os #tours::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: url(/renewal/turtle_lines_sand.webp) center / 720px repeat; opacity: .43;
+  -webkit-mask-image: radial-gradient(ellipse min(46vw, 640px) 250px at 50% 330px, transparent 55%, #000 100%);
+  mask-image: radial-gradient(ellipse min(46vw, 640px) 250px at 50% 330px, transparent 55%, #000 100%) }
+
 /* 비교표 */
-.os .panel { background: var(--soft); color: rgba(16,20,24,.72); margin-top: 72px; padding: 96px var(--pad) 104px;
+.os .panel { background: var(--soft); color: rgba(16,20,24,.72); margin-top: 0; padding: 96px var(--pad) 104px;
   border-radius: 48px 48px 0 0; box-shadow: 0 -14px 34px rgba(16,20,24,.07) }
 .os .panel h2 { color: var(--ink) }
 .os .cmp { margin-top: 56px }
@@ -481,8 +490,12 @@
   .os .book { height: 46px; margin-top: 14px; font-size: 14px }
   .os .detail { height: 38px; margin-top: 0; font-size: 13px }
 
-  .os .panel { margin-top: 48px; padding: 56px var(--pad) 60px; border-radius: 28px 28px 0 0 }
+  .os .panel { padding: 56px var(--pad) 60px; border-radius: 28px 28px 0 0 }
   .os .strip { border-radius: 0 0 28px 28px }
+  .os #tours { padding-bottom: 48px }
+  .os #tours::before { background-size: 360px;
+    -webkit-mask-image: radial-gradient(ellipse 60vw 170px at 50% 270px, transparent 50%, #000 100%);
+    mask-image: radial-gradient(ellipse 60vw 170px at 50% 270px, transparent 50%, #000 100%) }
   .os .cmp { margin-top: 28px }
   .os .crow { grid-template-columns: 124px repeat(var(--cols, 5), 138px) }
   .os .cc { flex-direction: column; padding: 12px 10px; min-height: 52px }
