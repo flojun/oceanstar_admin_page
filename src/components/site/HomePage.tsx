@@ -98,7 +98,7 @@ export default function HomePage({ lang, tourSettings, googleReviews, google }: 
                 <div className="hero-mid">
                     <span className="tag">{t.tag}</span>
                     <h1>
-                        <span className="thin">{t.h1a}</span><br />
+                        {t.h1a}<br />
                         {t.h1b}<em>{t.h1em}</em>{t.h1c}
                     </h1>
                 </div>

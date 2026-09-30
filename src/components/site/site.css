@@ -142,7 +142,6 @@
 .os .hero-mid h1 { font-size: clamp(44px, 5vw, 72px); line-height: 1.14; color: #fff; font-weight: 800; margin-top: 22px }
 .os.en .hero-mid h1 { font-size: clamp(42px, 4.45vw, 64px); line-height: 1.1 }
 /* 캔버스는 SUIT 300 을 싣지 않아 가장 가까운 700 으로 보였다. 확정된 화면이 그 모습이라 700 으로 맞춘다. */
-.os .hero-mid h1 .thin { font-weight: 700 }
 .os .hero-mid h1 em { font-style: normal; font-weight: inherit; color: var(--sky); margin-right: .06em }
 .os .hero-foot { position: absolute; left: var(--pad); right: var(--pad); bottom: 64px; z-index: 3;
   display: flex; align-items: flex-end; justify-content: space-between; gap: 56px; color: #fff }
