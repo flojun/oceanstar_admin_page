@@ -159,7 +159,10 @@
 .os .hf-left .book-pill { margin-top: 20px }
 
 /* ── 지표 띠 ──────────────────────────────────────────────────────── */
-.os .strip { background: var(--soft); border-bottom: 1px solid var(--line); padding: 46px var(--pad) 44px;
+/* 지표 띠와 비교표(.panel)는 같은 --soft 라 투어 구간(--paper)과 대비가 1.07:1 - 선이 아니라 둥근 모서리 + 그림자로
+   겹쳐 쌓인 시트처럼 나눈다 */
+.os .strip { position: relative; z-index: 1; background: var(--soft); padding: 46px var(--pad) 44px;
+  border-radius: 0 0 48px 48px; box-shadow: 0 14px 34px rgba(16,20,24,.07);
   text-align: center; display: grid; grid-template-columns: repeat(4, 1fr); justify-items: center; column-gap: 24px }
 .os .strip b { font-family: var(--f-head); font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -.01em;
   color: var(--ink); display: block }
@@ -198,7 +201,8 @@
 .os .detail:hover { text-decoration: underline; text-underline-offset: 3px }
 
 /* 비교표 */
-.os .panel { background: var(--soft); color: rgba(16,20,24,.72); margin-top: 104px; padding: 96px var(--pad) 104px }
+.os .panel { background: var(--soft); color: rgba(16,20,24,.72); margin-top: 72px; padding: 96px var(--pad) 104px;
+  border-radius: 48px 48px 0 0; box-shadow: 0 -14px 34px rgba(16,20,24,.07) }
 .os .panel h2 { color: var(--ink) }
 .os .cmp { margin-top: 56px }
 .os .crow { display: grid; grid-template-columns: 268px repeat(var(--cols, 5), minmax(0, 1fr)); align-items: center }
@@ -390,8 +394,10 @@
   .os .menu > a, .os .menu > .dd > button { padding: 0 12px }
   .os .ghost-pill { display: none }
   /* 카드 다섯 장이 한 줄에 들어가지 않는다 - 가로로 넘긴다 */
+  /* 가로 스크롤 상자는 넘친 것을 자른다 - 카드 그림자(--e1, 아래로 56px)가 잘려 선이 생기지 않게
+     아래 여백을 56px 로 두고 그만큼 margin 으로 되돌린다(보이는 간격은 그대로 18px) */
   .os .scroller { overflow-x: auto; scroll-snap-type: x mandatory; margin-left: calc(var(--pad) * -1);
-    margin-right: calc(var(--pad) * -1); padding: 4px var(--pad) 18px; scroll-padding-left: var(--pad) }
+    margin-right: calc(var(--pad) * -1); padding: 4px var(--pad) 56px; margin-bottom: -38px; scroll-padding-left: var(--pad) }
   .os .ac { flex: 0 0 272px; scroll-snap-align: start }
   .os .cmp { overflow-x: auto; margin-left: calc(var(--pad) * -1); margin-right: calc(var(--pad) * -1); padding: 0 var(--pad) }
   .os .crow { grid-template-columns: 200px repeat(var(--cols, 5), 170px); width: max-content }
@@ -467,7 +473,7 @@
   .os .filters { margin-top: 20px }
   .os .fp { height: 36px; padding: 0 14px; font-size: 13px }
 
-  .os .scroller { gap: 12px; margin-top: 28px; padding: 4px var(--pad) 14px }
+  .os .scroller { gap: 12px; margin-top: 28px; padding: 4px var(--pad) 56px; margin-bottom: -42px }
   .os .ac { flex: 0 0 268px; border-radius: 18px }
   .os .ac-in { padding: 14px 14px 13px }
   .os .ac-in > b { font-size: 14.5px; line-height: 1.4 }
@@ -475,7 +481,8 @@
   .os .book { height: 46px; margin-top: 14px; font-size: 14px }
   .os .detail { height: 38px; margin-top: 0; font-size: 13px }
 
-  .os .panel { margin-top: 60px; padding: 56px var(--pad) 60px }
+  .os .panel { margin-top: 48px; padding: 56px var(--pad) 60px; border-radius: 28px 28px 0 0 }
+  .os .strip { border-radius: 0 0 28px 28px }
   .os .cmp { margin-top: 28px }
   .os .crow { grid-template-columns: 124px repeat(var(--cols, 5), 138px) }
   .os .cc { flex-direction: column; padding: 12px 10px; min-height: 52px }
