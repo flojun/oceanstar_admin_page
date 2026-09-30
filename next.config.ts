@@ -46,6 +46,8 @@ const nextConfig: NextConfig = {
       // 워드프레스 시절 주소 (서치콘솔 404 목록, 2026-09-29)
       { source: "/kr/waikiki-turtle-snorkeling-tour", destination: "/kr/tours/turtle", permanent: true },
       { source: "/kr/home", destination: "/kr", permanent: true },
+      { source: "/kr/index", destination: "/kr", permanent: true },
+      { source: "/index", destination: "/", permanent: true },
       { source: "/home", destination: "/", permanent: true },
       { source: "/jp/:path*", destination: "/", permanent: true },
       ...oldSite("korean", "/kr"),
