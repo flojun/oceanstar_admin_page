@@ -5,7 +5,7 @@ import { isUrgentTourDate } from '@/lib/reservationUrgency';
 import { sendDiscordUrgentAlert } from '@/lib/discordWebhook';
 import { getHawaiiDateStr , getReceiptDateStr } from '@/lib/timeUtils';
 import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
-import { imapAccounts } from '@/lib/imapAccounts';
+import { imapAccounts, openAllMail } from '@/lib/imapAccounts';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 
@@ -116,8 +116,7 @@ export async function GET(request: Request) {
 
             try {
                 await client.connect();
-                // INBOX 열기
-                await client.mailboxOpen('INBOX');
+                await openAllMail(client);
 
                 // ============================================
                 // 메일은 **도착한 순서대로** 한 통씩 처리한다.

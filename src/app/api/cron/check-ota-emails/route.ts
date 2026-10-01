@@ -7,7 +7,7 @@ import { getHawaiiDateStr } from '@/lib/timeUtils';
 import { withAppliedDateMarker } from '@/lib/rescheduleNote';
 import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
 import { getPickupLocations, resolveNearestPickup } from '@/lib/nearestPickup';
-import { imapAccounts } from '@/lib/imapAccounts';
+import { imapAccounts, openAllMail } from '@/lib/imapAccounts';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 
@@ -78,7 +78,7 @@ export async function GET(request: Request) {
 
             try {
                 await client.connect();
-                await client.mailboxOpen('INBOX');
+                await openAllMail(client);
 
                 const pickupLocations = await getPickupLocations();
 
