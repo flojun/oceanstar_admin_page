@@ -563,5 +563,11 @@ export function parseOtaEmail(html: string, subject: string, from: string): OtaB
     // 취소·변경은 예약번호만 있으면 된다. 신규는 이름까지 필요.
     if (kind === 'new' && !parsed.name) return null;
 
+    // 인원(pax)은 총원만 적으므로 아동이 몇 명인지는 기타사항 맨 앞에 "(아1)" 로 남긴다.
+    // 정산 매처(settlement/matcher.ts extractChildCount)가 기타사항에서 처음 나오는 이 표기를 읽는다.
+    if (parsed.childCount > 0) {
+        parsed.note = [`(아${parsed.childCount})`, parsed.note].filter(Boolean).join(' ');
+    }
+
     return { kind, platform, source: OTA_SOURCE[platform], ...parsed };
 }
