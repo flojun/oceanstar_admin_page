@@ -213,13 +213,41 @@ export function optionFromTime(text: string): string {
     return '3부';
 }
 
+/**
+ * 라벨 다음에 **줄을 바꿔 이어지는** "N x …" 인원 줄을 전부 모은다.
+ *
+ * GYG 는 인원 종류마다 `<br>` 로 줄을 나눠 보낸다. 순서도 메일마다 다르다.
+ *   1 x Child (Age 3 - 7)
+ *   2 x Adults (Age 8 - 99)
+ *   1 x Infant (Age 0 - 2)
+ * `field()` 는 첫 줄만 돌려주므로 그대로 쓰면 둘째 줄부터의 인원이 통째로 빠진다.
+ */
+function xFormLines(text: string, label: string): string {
+    const lines = text.split('\n');
+    const i = lines.findIndex((l) => l.includes(label));
+    if (i === -1) return '';
+
+    const found: string[] = [];
+    const rest = lines[i].slice(lines[i].indexOf(label) + label.length).replace(/^[\s:：]+/, '').trim();
+    if (rest) found.push(rest);
+    for (let j = i + 1; j < lines.length; j++) {
+        const v = lines[j].trim();
+        if (!v) continue;
+        if (!/^\d+\s*x\b/i.test(v)) break;
+        found.push(v);
+    }
+    return found.join(', ');
+}
+
 /** "2 x 1부(...) 성인", "4 x Adults (Age 8-99)" 형태. total 은 성인/아동 구분이 없을 때를 위한 총원. */
 function paxFromXForm(v: string): { adult: number; child: number; total: number } {
     let adult = 0;
     let child = 0;
-    for (const m of v.matchAll(/(\d+)\s*x\s*([^,;]*)/gi)) {
+    // 항목이 쉼표 없이 한 줄로 붙어 와도("1 x Child (Age 3 - 7) 2 x Adults …") 다음 "N x" 앞에서 끊는다.
+    for (const m of v.matchAll(/(\d+)\s*x\s*(.*?)(?=[,;]|\s\d+\s*x\s|$)/gi)) {
         const n = Number(m[1]);
-        if (/아동|소아|child/i.test(m[2])) child += n;
+        // 영아도 자리를 차지하므로 아동으로 센다 (Viator 와 같은 기준).
+        if (/아동|소아|영아|유아|child|youth|infant|kid/i.test(m[2])) child += n;
         else adult += n;
     }
     // 변경 메일은 "2" 처럼 총원만 온다. 성인/아동 구분이 없으니 성인으로 세지 않는다.
@@ -301,7 +329,7 @@ function parseKlook(text: string): ParsedFields | null {
     // 부분 취소 메일에는 '여행자' 가 없고 '취소된 수량' / '남은 수량' 으로 온다.
     // 이때 인원·옵션은 **남은 수량** 기준이어야 한다.
     const cancelledQty = clean(field(text, '취소된 수량'));
-    const travelers = field(text, '여행자') || clean(field(text, '남은 수량'));
+    const travelers = xFormLines(text, '여행자') || clean(field(text, '남은 수량'));
     const { adult, child } = paxFromXForm(travelers);
 
     const kakao = clean(field(text, '카카오톡'));
@@ -333,7 +361,7 @@ function parseGyg(text: string): ParsedFields | null {
     const tourDate = parseOtaDate(dateLine);
     if (!tourDate) return null;
 
-    const participants = field(text, 'Number of participants');
+    const participants = xFormLines(text, 'Number of participants');
     const { adult, child } = paxFromXForm(participants);
 
     const lang = clean(field(text, 'Tour language'));

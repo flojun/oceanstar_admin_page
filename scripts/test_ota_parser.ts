@@ -125,6 +125,37 @@ assert.equal(gygNew.contact, '+818022082909');
 assert.equal(gygNew.bookerEmail, 'customer-fm6nb7dfd2y7dk7t@reply.getyourguide.com');
 assert.ok(gygNew.note.includes('Japanese'), '언어가 note 에 없다');
 
+// 인원 종류가 여럿이면 <br> 로 줄을 나눠 온다. 순서도 메일마다 다르다 (실제 GYG48YGAWKQ6 / GYG6H73QQBXV 구조).
+const gygMixed = (participants: string) => parseOtaEmail(
+    `<div>
+      <p class="title">Reference number</p><a><strong>GYG48YGAWKQ6</strong></a>
+      <p class="title">Date</p><span><strong>October 3, 2026, 11:00 AM</strong></span>
+      <p class="title">Number of participants</p><span>${participants}</span>
+      <p class="title">Main customer</p><span>Pierre Sagna</span><a><br> customer-zdp5p3nwh2rdsl4c@reply.getyourguide.com</a>
+      <br><span>Phone: +13412197583</span>
+    </div>`,
+    'Urgent: New booking received - S257755 - GYG48YGAWKQ6',
+    'GetYourGuide <do-not-reply@notification.getyourguide.com>',
+);
+
+const childFirst = gygMixed('<strong>1 x</strong> Child (Age 3 - 7)<br><strong>2 x</strong> Adults (Age 8 - 99)');
+assert.ok(childFirst, 'gyg 아동 먼저 파싱 실패');
+assert.equal(childFirst.adultCount, 2);
+assert.equal(childFirst.childCount, 1);
+assert.equal(childFirst.pax, '3명');
+
+const adultFirst = gygMixed('<strong>2 x</strong> Adults (Age 8 - 99)<br><strong>1 x</strong> Child (Age 3 - 7)');
+assert.ok(adultFirst, 'gyg 성인 먼저 파싱 실패');
+assert.equal(adultFirst.adultCount, 2);
+assert.equal(adultFirst.childCount, 1);
+
+const withInfant = gygMixed('<strong>1 x</strong> Child (Age 3 - 7)<br><strong>2 x</strong> Adults (Age 8 - 99)<br><strong>1 x</strong> Infant (Age 0 - 2)');
+assert.ok(withInfant, 'gyg 영아 포함 파싱 실패');
+assert.equal(withInfant.adultCount, 2);
+assert.equal(withInfant.childCount, 2);
+assert.equal(withInfant.pax, '4명');
+assert.equal(withInfant.name, 'Pierre Sagna');   // 인원 줄 다음의 고객명이 인원으로 빨려 들어가지 않는다
+
 const gygCancel = parseOtaEmail(
     `<div>
       <h2>GYG32L3Y4WYM was cancelled</h2>
