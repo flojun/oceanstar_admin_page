@@ -11,7 +11,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { ImapFlow } from 'imapflow';
-import { imapAccounts } from '../src/lib/imapAccounts.ts';
+import { imapAccounts, openAllMail } from '../src/lib/imapAccounts.ts';
 import { OTA_FROM, OTA_SUBJECT, type OtaPlatform } from '../src/lib/otaEmailParser.ts';
 
 const envPath = path.join(import.meta.dirname, '..', '.env.local');
@@ -46,7 +46,7 @@ for (const account of accounts) {
 
     try {
         await client.connect();
-        await client.mailboxOpen('INBOX', { readOnly: true });
+        await openAllMail(client, { readOnly: true });
 
         let fresh = 0;
         let stale = 0;

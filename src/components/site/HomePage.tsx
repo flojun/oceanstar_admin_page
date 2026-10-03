@@ -16,7 +16,7 @@ const T = {
     ko: {
         heroAlt: "와이키키 앞바다의 오션스타 보트, 왼쪽으로 와이키키 스카이라인과 오른쪽으로 다이아몬드헤드",
         tag: "Hawaii's Best Tour",
-        h1a: "평생토록 기억에 남을 스노클링", h1b: "지금, ", h1em: "오션스타", h1c: "에서",
+        h1a: "평생 기억에 남을 하와이 거북이 스노클링", h1b: "와이키키 앞바다, ", h1em: "오션스타", h1c: "에서",
         hft: "하와이 와이키키 거북이 스노클링 투어",
         loved: "누적 리뷰 15,000+ · Since 2019 하와이 최초 개설", lovedM: "누적 리뷰 15,000+",
         intro: ["와이키키 앞바다에서 야생 바다거북을 만나는 한국어 스노클링 투어입니다. 51인승 루프탑 보트로 이동하고 해양 전문 한국인 크루가 함께해, 수영을 못해도 참여할 수 있습니다.", "거북이 관찰 100% 보장."],
@@ -39,7 +39,7 @@ const T = {
     en: {
         heroAlt: "The Oceanstar boat off Waikiki, with the Waikiki skyline to the left and Diamond Head to the right",
         tag: "Hawaii’s Best Tour",
-        h1a: "Snorkel with wild sea turtles", h1b: "off Waikiki, with ", h1em: "Oceanstar", h1c: "",
+        h1a: "Unforgettable Waikiki turtle snorkeling", h1b: "Hawaii’s sea turtles, with ", h1em: "Oceanstar", h1c: "",
         hft: "Waikiki Turtle Snorkeling Tour",
         loved: "15,000+ guest reviews. On the water since 2019.", lovedM: "15,000+ guest reviews",
         intro: ["Wild sea turtles off Waikiki, from a 51-seat rooftop boat.", "English-speaking crew swim beside you. Non-swimmers welcome."],
@@ -98,7 +98,7 @@ export default function HomePage({ lang, tourSettings, googleReviews, google }: 
                 <div className="hero-mid">
                     <span className="tag">{t.tag}</span>
                     <h1>
-                        <span className="thin">{t.h1a}</span><br />
+                        {t.h1a}<br />
                         {t.h1b}<em>{t.h1em}</em>{t.h1c}
                     </h1>
                 </div>

@@ -142,7 +142,6 @@
 .os .hero-mid h1 { font-size: clamp(44px, 5vw, 72px); line-height: 1.14; color: #fff; font-weight: 800; margin-top: 22px }
 .os.en .hero-mid h1 { font-size: clamp(42px, 4.45vw, 64px); line-height: 1.1 }
 /* 캔버스는 SUIT 300 을 싣지 않아 가장 가까운 700 으로 보였다. 확정된 화면이 그 모습이라 700 으로 맞춘다. */
-.os .hero-mid h1 .thin { font-weight: 700 }
 .os .hero-mid h1 em { font-style: normal; font-weight: inherit; color: var(--sky); margin-right: .06em }
 .os .hero-foot { position: absolute; left: var(--pad); right: var(--pad); bottom: 64px; z-index: 3;
   display: flex; align-items: flex-end; justify-content: space-between; gap: 56px; color: #fff }
@@ -200,19 +199,27 @@
   font-size: 12.5px; font-weight: 700; color: var(--text); white-space: nowrap }
 .os .detail:hover { text-decoration: underline; text-underline-offset: 3px }
 
+/* 투어 구간 바탕: 예전 사이트의 거북이 선화를 모래색으로 (ink 대비 1.31:1 로 은은하게, 재서 맞춘 값).
+   무늬는 ::before 에만 걸어 글자·카드는 그대로 선명하고, 제목·분류 버튼 뒤는 타원으로 비운다.
+   비교표 위 간격은 이 구간 안(padding)으로 옮겨 거북이가 비교표 시트까지 이어진다 */
+.os #tours { position: relative; isolation: isolate; padding-bottom: 72px }
+.os #tours::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: url(/renewal/turtle_lines_sand.webp) center / 720px repeat; opacity: .43;
+  -webkit-mask-image: radial-gradient(ellipse min(46vw, 640px) 250px at 50% 330px, transparent 55%, #000 100%);
+  mask-image: radial-gradient(ellipse min(46vw, 640px) 250px at 50% 330px, transparent 55%, #000 100%) }
+
 /* 비교표 */
-.os .panel { background: var(--soft); color: rgba(16,20,24,.72); margin-top: 72px; padding: 96px var(--pad) 104px;
+.os .panel { background: var(--soft); color: rgba(16,20,24,.72); margin-top: 0; padding: 96px var(--pad) 104px;
   border-radius: 48px 48px 0 0; box-shadow: 0 -14px 34px rgba(16,20,24,.07) }
 .os .panel h2 { color: var(--ink) }
 .os .cmp { margin-top: 56px }
-.os .crow { display: grid; grid-template-columns: 268px repeat(var(--cols, 5), minmax(0, 1fr)); align-items: center }
+.os .crow { display: grid; grid-template-columns: 268px repeat(var(--cols, 5), minmax(0, 1fr)); align-items: stretch }
 .os .crow:nth-child(2n+1) .cc:not(.on) { background: rgba(16,20,24,.035) }
 .os .cc { position: relative; padding: 15px 14px; text-align: center; min-height: 56px; display: flex; align-items: center; justify-content: center }
 .os .cc.lead { font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.45 }
 .os .cc.on { background: #fff }
 .os .crow:not(.chead):not(.cfoot) .cc.on { box-shadow: inset 0 -1px 0 rgba(16,20,24,.11) }
 .os .cc > svg { color: var(--sea) }
-.os .crow:not(.chead):not(.cfoot) { align-items: stretch }
 .os .crow:not(.chead):not(.cfoot) .cc { min-height: 56px }
 .os.en .crow:not(.chead):not(.cfoot) .cc { min-height: 74px }
 .os .chead .cc { align-items: center; flex-direction: column; justify-content: flex-end; padding: 22px 16px 18px;
@@ -222,7 +229,7 @@
   color: #fff; font-size: 10.5px; font-weight: 800 }
 .os .chead b { font-family: var(--f-head); font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.4 }
 .os .chead em { display: block; margin-top: 12px; font-family: var(--f-head); font-size: 21px; font-weight: 800;
-  font-style: normal; color: var(--ink); line-height: 1.1 }
+  font-style: normal; color: var(--ink); line-height: 1.1; white-space: nowrap }
 .os .chead i { display: block; margin-top: 5px; font-size: 10.5px; font-style: normal; color: var(--text); line-height: 1.45 }
 .os .cfoot .cc { flex-direction: column; justify-content: center; padding: 20px 14px 22px }
 .os .cfoot .cc.on { border-radius: 0 0 16px 16px }
@@ -453,6 +460,8 @@
   .os .hero-mid { top: 104px }
   .os .tag { height: 30px; padding: 0 15px; background: rgba(9,16,22,.42); font-size: 12px }
   .os .hero-mid h1, .os.en .hero-mid h1 { font-size: 34px; line-height: 1.26; margin-top: 16px }
+  /* 영문 첫 줄(Unforgettable Waikiki)이 375 이하에서 한 단어씩 떨어지지 않게 폭에 맞춰 줄인다 (360~430 에서 4줄 확인) */
+  .os.en .hero-mid h1 { font-size: min(34px, 8vw) }
   .os .hero-foot { bottom: 76px; display: block }
   .os .hf-left { width: auto }
   .os .hf-t { font-size: 17px }
@@ -481,8 +490,12 @@
   .os .book { height: 46px; margin-top: 14px; font-size: 14px }
   .os .detail { height: 38px; margin-top: 0; font-size: 13px }
 
-  .os .panel { margin-top: 48px; padding: 56px var(--pad) 60px; border-radius: 28px 28px 0 0 }
+  .os .panel { padding: 56px var(--pad) 60px; border-radius: 28px 28px 0 0 }
   .os .strip { border-radius: 0 0 28px 28px }
+  .os #tours { padding-bottom: 48px }
+  .os #tours::before { background-size: 360px;
+    -webkit-mask-image: radial-gradient(ellipse 60vw 170px at 50% 270px, transparent 50%, #000 100%);
+    mask-image: radial-gradient(ellipse 60vw 170px at 50% 270px, transparent 50%, #000 100%) }
   .os .cmp { margin-top: 28px }
   .os .crow { grid-template-columns: 124px repeat(var(--cols, 5), 138px) }
   .os .cc { flex-direction: column; padding: 12px 10px; min-height: 52px }

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Hawaii Turtle Snorkeling & Sunset Cruise | Ocean Star",
+    title: "Waikiki Turtle Snorkeling & Sunset Cruise | Ocean Star Hawaii",
     description: "Highest rated in Waikiki! Hawaii turtle snorkeling, marine activities, sunset cruise, and private boat trips. Book now with Waikiki pickup included.",
     type: "website",
     url: "/",

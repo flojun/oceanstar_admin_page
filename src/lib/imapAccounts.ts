@@ -1,3 +1,5 @@
+import type { ImapFlow } from 'imapflow';
+
 /**
  * 메일을 읽어올 IMAP 계정 전부. **환경변수는 지금 있는 그대로 쓴다.**
  *
@@ -32,4 +34,22 @@ export function imapAccounts(env: Record<string, string | undefined> = process.e
         accounts.push({ user: user.trim(), pass: pass.trim() });
     }
     return accounts;
+}
+
+/**
+ * **받은편지함이 아니라 전체보관함**을 연다.
+ *
+ * Gmail 필터에 '받은편지함 건너뛰기' 가 걸려 있으면 그 메일은 INBOX 에 아예 들어오지 않는다.
+ * 실제로 마이리얼트립 [확정대기] 메일이 통째로 그렇게 새서 예약 세 건이 DB 에 안 들어왔다.
+ * 사람이 메일을 보관처리해도 같은 일이 생긴다.
+ *
+ * 전체보관함에는 받은편지함 메일과 보관처리한 메일이 모두 있고 스팸·휴지통은 빠진다.
+ * 이름이 계정 언어를 타므로(`[Gmail]/All Mail` / `[Gmail]/전체보관함`) \\All 특수용도 표식으로 찾고,
+ * 못 찾으면 INBOX 로 물러난다.
+ */
+export async function openAllMail(client: ImapFlow, options: { readOnly?: boolean } = {}) {
+    const boxes = await client.list();
+    const allMail = boxes.find((b) => b.specialUse === '\\All');
+    if (!allMail) console.warn('[IMAP] 전체보관함을 찾지 못해 받은편지함만 봅니다');
+    return client.mailboxOpen(allMail?.path || 'INBOX', options);
 }
