@@ -1,5 +1,5 @@
 /**
- * Klook / GetYourGuide / Viator / 여기어때 파트너 메일 파서.
+ * Klook / GetYourGuide / Viator / 여기어때 / 트리플(NOL 투어) 파트너 메일 파서.
  *
  * 메일 HTML을 한 번 평문으로 눕힌 뒤 "라벨 → 값"으로 뽑는다.
  * 라벨과 값이 같은 줄에 있든(평문·여기어때) 다른 테이블 셀에 있든(클룩) 동작한다.
@@ -8,7 +8,7 @@
  * 본문으로는 구분이 불가능하다.
  */
 
-export type OtaPlatform = 'klook' | 'gyg' | 'viator' | 'yeogi';
+export type OtaPlatform = 'klook' | 'gyg' | 'viator' | 'yeogi' | 'triple';
 export type OtaEmailKind = 'new' | 'cancel' | 'partial_cancel' | 'update';
 
 export interface OtaBooking {
@@ -34,6 +34,7 @@ export const OTA_SOURCE: Record<OtaPlatform, string> = {
     gyg: 'G',
     viator: 'Viator',
     yeogi: '여기어때',
+    triple: 'T',
 };
 
 /**
@@ -45,6 +46,7 @@ export const OTA_LABEL: Record<OtaPlatform, string> = {
     gyg: 'GetYourGuide',
     viator: 'Viator',
     yeogi: '여기어때',
+    triple: '트리플',
 };
 
 /**
@@ -69,6 +71,7 @@ export const OTA_FROM: Record<OtaPlatform, string> = {
     gyg: 'getyourguide',
     viator: 'viator',
     yeogi: 'yeogi',
+    triple: 'nol-universe',   // confirmation.triple@nol-universe.com (Gmail 라벨은 '야놀자')
 };
 
 /**
@@ -83,11 +86,17 @@ export const OTA_SUBJECT: Record<OtaPlatform, string[]> = {
     gyg: ['Booking', 'cancelled'],
     viator: ['Booking'],      // New Booking for… / Cancelled Booking:…
     yeogi: ['예약'],          // 예약이 확정되었어요
+    // "827433 [한국어 가이드] … 예약이 접수되었습니다.(Booking Received)"
+    // 같은 주소로 오는 로그인 인증번호·채팅 알림 메일은 제목에 둘 다 없어서 걸리지 않는다.
+    triple: ['Booking', '예약'],
 };
 
 // ============================================================
 // 텍스트 유틸
 // ============================================================
+
+/** 범위를 벗어난 숫자 엔티티에 fromCodePoint 가 던지면 메일 한 통이 통째로 처리 실패한다. */
+const codePoint = (n: number) => (n > 0 && n <= 0x10ffff ? String.fromCodePoint(n) : '');
 
 function htmlToText(html: string): string {
     return html
@@ -101,6 +110,10 @@ function htmlToText(html: string): string {
         .replace(/&gt;/gi, '>')
         .replace(/&quot;/gi, '"')
         .replace(/&#39;|&apos;/gi, "'")
+        .replace(/&middot;/gi, '·')
+        // 트리플은 인원 줄의 ✕ 를 `&#x2715;` 로 보낸다.
+        .replace(/&#x([0-9a-f]+);/gi, (_, h) => codePoint(parseInt(h, 16)))
+        .replace(/&#(\d+);/g, (_, d) => codePoint(Number(d)))
         .replace(/[‎‏⁦-⁩]/g, '')   // Viator 가 섞어 보내는 방향 제어 문자
         .split('\n')
         .map((l) => l.replace(/\s+/g, ' ').trim())
@@ -277,6 +290,7 @@ export function detectPlatform(from: string, subject: string): OtaPlatform | nul
     if (s.includes('getyourguide')) return 'gyg';
     if (s.includes('viator')) return 'viator';
     if (s.includes('yeogi') || s.includes('goodchoice') || s.includes('여기어때')) return 'yeogi';
+    if (s.includes('nol-universe') || s.includes('triple')) return 'triple';
     return null;
 }
 
@@ -305,6 +319,9 @@ function detectKind(platform: OtaPlatform, subject: string, text: string): OtaEm
         case 'yeogi':
             // 취소 메일 포맷 미확인. "확정" 메일만 처리하고 나머지는 안읽음으로 남긴다.
             return /확정/.test(subject) ? 'new' : null;
+        case 'triple':
+            // 접수 메일만 확인했다. 취소·변경 메일 포맷은 아직 없어서 null → 사람에게 한 번 알린다.
+            return /접수|Booking Received/i.test(subject) ? 'new' : null;
     }
 }
 
@@ -536,6 +553,59 @@ function parseYeogi(text: string): ParsedFields | null {
     };
 }
 
+/**
+ * 트리플(NOL 투어 파트너센터) "예약 접수" 메일.
+ *
+ * 한국어 블록 다음에 같은 내용의 영어 블록이 한 번 더 온다. 인원 줄("성인 ✕ 2")은
+ * 영어 블록에서도 한국어 그대로라, 한국어 블록 안에서만 세야 두 배로 세지 않는다.
+ *   파트너 예약번호 823393 / 예약확인번호 PROD:3d9a08
+ *   예약아이템 정보 15000+리뷰, … - 2부 트립(10:30-2:30)   ← 선셋은 "로맨틱 선셋 …" 에 시각 없음
+ *   성인가 ✕ 2   (상품마다 '성인' / '성인가')
+ *   이용예정일 2026-10-29
+ *   이용시각 10:30                                         ← 선셋 상품에는 이 줄이 없다
+ * 고객명·연락처·픽업은 메일에 없다. 운영자가 파트너센터에서 보고 채운다.
+ */
+function parseTriple(text: string): ParsedFields | null {
+    const orderId = field(text, '파트너 예약번호');
+    const tourDate = parseOtaDate(field(text, '이용예정일'));
+    if (!/^\d+$/.test(orderId) || !tourDate) return null;
+
+    const item = clean(field(text, '예약아이템 정보'));
+    const channelId = clean(field(text, '예약확인번호'));
+
+    const start = text.indexOf('예약아이템 정보');
+    const end = text.indexOf('이용예정일', start);
+    const block = start >= 0 && end > start ? text.slice(start, end) : '';
+
+    let adult = 0;
+    let child = 0;
+    for (const m of block.matchAll(/([가-힣A-Za-z]+)\s*[✕×]\s*(\d+)/g)) {
+        const n = Number(m[2]);
+        if (/아동|소아|유아|영아|어린이|키즈|child|infant|kid/i.test(m[1])) child += n;
+        else adult += n;
+    }
+    if (adult + child === 0) return null;
+
+    return {
+        orderId,
+        name: '(트리플 확인필요)',
+        tourDate,
+        // 이용시각이 있으면 그걸로, 없으면 아이템명("2부 트립(10:30-…)" / "로맨틱 선셋 …")으로.
+        option: optionFromTime(field(text, '이용시각')) || optionFromTime(item),
+        pax: paxLabel(adult, child),
+        adultCount: adult,
+        childCount: child,
+        pickupLocation: '',
+        contact: '',
+        bookerEmail: '',
+        note: [
+            item && `상품: ${item}`,
+            channelId && `예약확인번호: ${channelId}`,
+            `확인: https://tour.triple.partners/booking-management/${orderId}`,
+        ].filter(Boolean).join(' / '),
+    };
+}
+
 // ============================================================
 // 진입점
 // ============================================================
@@ -556,7 +626,8 @@ export function parseOtaEmail(html: string, subject: string, from: string): OtaB
         platform === 'klook' ? parseKlook(text)
             : platform === 'gyg' ? (kind === 'update' ? parseGygUpdate(text) : parseGyg(text))
                 : platform === 'viator' ? (kind === 'update' ? parseViatorUpdate(text) : parseViator(text))
-                    : parseYeogi(text);
+                    : platform === 'yeogi' ? parseYeogi(text)
+                        : parseTriple(text);
 
     if (!parsed) return null;
 

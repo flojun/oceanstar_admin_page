@@ -457,3 +457,75 @@ for (const subject of [
 ]) {
     assert.ok(!isCustomerMessageSubject(subject), `예약 메일인데 걸러짐: ${subject}`);
 }
+
+// ---------------------------------------------------------------- 트리플 (NOL 투어 파트너센터)
+// 실제 메일 구조: th/td 표 + 아이템 아래 colspan 줄. 한국어 블록 뒤에 영어 블록이 한 번 더 온다.
+const tripleBlock = (heads: [string, string, string, string, string, string], item: string, pax: string, date: string, time: string) => `
+<table>
+  <tr><td class="content-th">${heads[0]}</td><td class="content-td">827433</td></tr>
+  <tr><td class="content-th">${heads[1]}</td><td class="content-td">NOL</td></tr>
+  <tr><td class="content-th">${heads[2]}</td><td class="content-td">PROD:fe84d3</td></tr>
+  <tr><td class="content-th">${heads[3]}</td><td class="content-td">[한국어 가이드] 하와이 거북이 스노클링｜후기 7000개&middot;재방문 1위&middot;5종 해양액티비티</td></tr>
+  <tr><td class="content-th">${heads[4]}</td><td class="content-td">${item}</td></tr>
+  <tr><td colspan="2" class="content-td">
+      ${pax}
+  </td></tr>
+  <tr><td colspan="2" class="content-td">${heads[5]} ${date}</td></tr>
+  ${time}
+  <tr><td colspan="2"><a href="https://p9lmf0db.r.ap-northeast-1.awstrack.me/L0/https:%2F%2Ftour.triple.partners%2Fbooking-management%2F827433/1/x">예약상세 바로가기</a></td></tr>
+</table>`;
+const KO: [string, string, string, string, string, string] = ['파트너 예약번호', '판매채널', '예약확인번호', '상품명', '예약아이템 정보', '이용예정일'];
+const EN: [string, string, string, string, string, string] = ['Partner booking ID', 'Sale Channel', 'Channel booking ID', 'Product name', 'Product item information', 'Date of use'];
+const tripleMail = (item: string, pax: string, timeKo: string, timeEn: string) => parseOtaEmail(
+    `<strong>예약 접수</strong><p>예약 확인 후 확정 처리해주세요.</p>
+     ${tripleBlock(KO, item, pax, '2026-10-29', timeKo)}
+     <strong>Booking Received</strong>
+     ${tripleBlock(EN, item, pax, '2026-10-29', timeEn)}`,
+    '827433 [한국어 가이드] 하와이 거북이 스노클링｜후기 7000개·재방문 1위·5종 해양액티비티 예약이 접수되었습니다.(Booking Received)',
+    'NOL 투어 파트너센터 <confirmation.triple@nol-universe.com>',
+);
+
+const tripleDay = tripleMail(
+    '15000+리뷰, 하와이 한인 최초, 최고의 거북이 스노클링 - 2부 트립(10:30-2:30)',
+    '성인가 &#x2715; 2',
+    '<tr><td colspan="2" class="content-td">이용시각 10:30</td></tr>',
+    '<tr><td colspan="2" class="content-td">Time of use 10:30</td></tr>',
+);
+assert.ok(tripleDay, '트리플 2부 파싱 실패');
+assert.equal(tripleDay.kind, 'new');
+assert.equal(tripleDay.platform, 'triple');
+assert.equal(tripleDay.source, 'T');
+assert.equal(tripleDay.orderId, '827433');
+assert.equal(tripleDay.tourDate, '2026-10-29');
+assert.equal(tripleDay.option, '2부');
+assert.equal(tripleDay.pax, '2명');                 // 영어 블록의 같은 줄을 한 번 더 세지 않는다
+assert.equal(tripleDay.adultCount, 2);
+assert.equal(tripleDay.name, '(트리플 확인필요)');
+assert.ok(tripleDay.note.includes('예약확인번호: PROD:fe84d3'), `채널 예약번호가 note 에 없다: ${tripleDay.note}`);
+assert.ok(tripleDay.note.includes('tour.triple.partners/booking-management/827433'), '파트너센터 링크가 note 에 없다');
+
+const tripleSunset = tripleMail(
+    '[프리미엄!신혼 여행/ 커플 강추] 로맨틱 선셋 거북이 스노클링+5종 해양+와인크루즈',
+    '성인 &#x2715; 2',
+    '', '',   // 선셋 상품은 이용시각 줄이 없다
+);
+assert.ok(tripleSunset, '트리플 선셋 파싱 실패');
+assert.equal(tripleSunset.option, '3부');
+
+const tripleMorning = tripleMail(
+    '15000+리뷰, 하와이 한인 최초, 최고의 거북이 스노클링 - 1부 트립(7:30-11:30)',
+    '성인 &#x2715; 2<br>아동 &#x2715; 1',
+    '<tr><td colspan="2" class="content-td">이용시각 07:30</td></tr>',
+    '<tr><td colspan="2" class="content-td">Time of use 07:30</td></tr>',
+);
+assert.ok(tripleMorning, '트리플 1부 파싱 실패');
+assert.equal(tripleMorning.option, '1부');
+assert.equal(tripleMorning.pax, '3명');
+assert.equal(tripleMorning.childCount, 1);
+assert.ok(tripleMorning.note.startsWith('(아1)'), `아동 표기가 없다: ${tripleMorning.note}`);
+
+// 같은 주소로 오는 인증번호·채팅 알림, 아직 포맷을 모르는 메일은 예약으로 만들지 않는다.
+assert.equal(parseOtaEmail('<p>[ 806715 ]</p>', '[NOL 투어 파트너센터] 로그인 2차 인증번호 안내', 'confirmation.triple@nol-universe.com'), null);
+assert.equal(parseOtaEmail('<p>취소</p>', '827433 … 예약이 취소되었습니다.(Booking Cancelled)', 'confirmation.triple@nol-universe.com'), null);
+
+console.log('OK — 트리플 접수 메일 (1부/2부/선셋, 한·영 블록 중복 없음)');

@@ -12,7 +12,7 @@ import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 
 /**
- * OTA(클룩·GetYourGuide·Viator·여기어때) 예약 메일 자동 수집 Cron.
+ * OTA(클룩·GetYourGuide·Viator·여기어때·트리플) 예약 메일 자동 수집 Cron.
  * - 5분마다 Gmail IMAP 에서 아직 처리하지 않은 메일을 플랫폼별로 검색
  * - 신규 예약 → reservations INSERT (상태 '안내필요')  ← 운영자가 직접 안내 후 '예약확정' 으로 변경
  * - 취소     → 기존 예약 UPDATE (상태 '취소요청')      ← '취소' 로 바로 바꾸지 않는다. 눈으로 확인 후 마감.
@@ -26,7 +26,7 @@ import { simpleParser } from 'mailparser';
  * - 파싱/매칭 실패 시 표식을 붙이지 않아 메일이 안읽음으로 남는다 (수동 대응 가능)
  */
 
-const PLATFORMS: OtaPlatform[] = ['klook', 'gyg', 'viator', 'yeogi'];
+const PLATFORMS: OtaPlatform[] = ['klook', 'gyg', 'viator', 'yeogi', 'triple'];
 
 /**
  * 처리 완료 표식. `\Seen`(읽음)에 기대면 **사람이 Gmail 에서 먼저 열어본 메일을 영원히 건너뛴다.**
@@ -101,7 +101,7 @@ export async function GET(request: Request) {
                                         tourDate: '',
                                         option: '',
                                         source: OTA_LABEL[platform],
-                                        orderNumber: msg.subject.match(/BR-\d+|GYG[A-Z0-9]{6,}|[A-Z]{3}\d{6,}/)?.[0] || undefined,
+                                        orderNumber: msg.subject.match(/BR-\d+|GYG[A-Z0-9]{6,}|[A-Z]{3}\d{6,}|^\d{6,}/)?.[0] || undefined,
                                         detail: `제목: ${msg.subject}
 예약에 반영되지 않았습니다. 메일함에서 직접 확인해주세요.`,
                                     });

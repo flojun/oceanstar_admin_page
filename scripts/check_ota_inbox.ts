@@ -38,7 +38,7 @@ console.log(`접속 성공: ${user}\n`);
 // readOnly = EXAMINE. 본문을 읽어도 \Seen 이 붙지 않는다.
 await client.mailboxOpen('INBOX', { readOnly: true });
 
-for (const platform of ['klook', 'gyg', 'viator', 'yeogi'] as OtaPlatform[]) {
+for (const platform of ['klook', 'gyg', 'viator', 'yeogi', 'triple'] as OtaPlatform[]) {
     const since = new Date(Date.now() - 30 * 864e5);
     const uidSet = new Set<number>();
     for (const subject of OTA_SUBJECT[platform]) {

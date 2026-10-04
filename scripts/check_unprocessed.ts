@@ -32,7 +32,7 @@ const OLDER = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
 /** cron 이 실제로 찾는 조합. 여기 없는 메일(정산·광고 등)은 원래 처리 대상이 아니다. */
 const FEEDS: Array<{ label: string; from: string; subjects: string[] }> = [
     { label: '마이리얼트립', from: 'myrealtrip', subjects: ['확정대기', '확정완료', '예약취소', '취소 요청 접수'] },
-    ...(['klook', 'gyg', 'viator', 'yeogi'] as OtaPlatform[]).map((p) => ({
+    ...(['klook', 'gyg', 'viator', 'yeogi', 'triple'] as OtaPlatform[]).map((p) => ({
         label: p, from: OTA_FROM[p], subjects: OTA_SUBJECT[p],
     })),
 ];
