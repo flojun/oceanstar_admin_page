@@ -1,5 +1,5 @@
 /**
- * Klook / GetYourGuide / Viator / 여기어때 / 트리플(NOL 투어) 파트너 메일 파서.
+ * Klook / GetYourGuide / Viator / 여기어때 / 트리플(NOL 투어) / 줌줌투어 파트너 메일 파서.
  *
  * 메일 HTML을 한 번 평문으로 눕힌 뒤 "라벨 → 값"으로 뽑는다.
  * 라벨과 값이 같은 줄에 있든(평문·여기어때) 다른 테이블 셀에 있든(클룩) 동작한다.
@@ -8,7 +8,7 @@
  * 본문으로는 구분이 불가능하다.
  */
 
-export type OtaPlatform = 'klook' | 'gyg' | 'viator' | 'yeogi' | 'triple';
+export type OtaPlatform = 'klook' | 'gyg' | 'viator' | 'yeogi' | 'triple' | 'zoomzoom';
 export type OtaEmailKind = 'new' | 'cancel' | 'partial_cancel' | 'update';
 
 export interface OtaBooking {
@@ -35,6 +35,7 @@ export const OTA_SOURCE: Record<OtaPlatform, string> = {
     viator: 'Viator',
     yeogi: '여기어때',
     triple: 'T',
+    zoomzoom: 'Z',
 };
 
 /**
@@ -47,6 +48,7 @@ export const OTA_LABEL: Record<OtaPlatform, string> = {
     viator: 'Viator',
     yeogi: '여기어때',
     triple: '트리플',
+    zoomzoom: '줌줌투어',
 };
 
 /**
@@ -72,6 +74,7 @@ export const OTA_FROM: Record<OtaPlatform, string> = {
     viator: 'viator',
     yeogi: 'yeogi',
     triple: 'nol-universe',   // confirmation.triple@nol-universe.com (Gmail 라벨은 '야놀자')
+    zoomzoom: 'zoomzoomtour',
 };
 
 /**
@@ -89,6 +92,11 @@ export const OTA_SUBJECT: Record<OtaPlatform, string[]> = {
     // "827433 [한국어 가이드] … 예약이 접수되었습니다.(Booking Received)"
     // 같은 주소로 오는 로그인 인증번호·채팅 알림 메일은 제목에 둘 다 없어서 걸리지 않는다.
     triple: ['Booking', '예약'],
+    // "[줌줌투어] 예약이 접수됐습니다! - 예약번호 614652"
+    // "[줌줌투어] 예약번호: 609359 - 심 규식님의 예약 취소 및 환불을 완료하였습니다."
+    // '예약' 으로 찾으면 후기("예약번호 : 610178의 새로운 여행 후기")·정보 업데이트 알림까지 딸려와
+    // 못 읽었다는 알림만 쌓인다. 문의·메시지·필수 입력 항목 알림은 둘 다 안 걸린다.
+    zoomzoom: ['접수', '취소'],
 };
 
 // ============================================================
@@ -291,6 +299,7 @@ export function detectPlatform(from: string, subject: string): OtaPlatform | nul
     if (s.includes('viator')) return 'viator';
     if (s.includes('yeogi') || s.includes('goodchoice') || s.includes('여기어때')) return 'yeogi';
     if (s.includes('nol-universe') || s.includes('triple')) return 'triple';
+    if (s.includes('zoomzoomtour') || s.includes('줌줌투어')) return 'zoomzoom';
     return null;
 }
 
@@ -322,6 +331,9 @@ function detectKind(platform: OtaPlatform, subject: string, text: string): OtaEm
         case 'triple':
             // 접수 메일만 확인했다. 취소·변경 메일 포맷은 아직 없어서 null → 사람에게 한 번 알린다.
             return /접수|Booking Received/i.test(subject) ? 'new' : null;
+        case 'zoomzoom':
+            if (/취소/.test(subject)) return 'cancel';
+            return /접수/.test(subject) ? 'new' : null;
     }
 }
 
@@ -606,6 +618,54 @@ function parseTriple(text: string): ParsedFields | null {
     };
 }
 
+/**
+ * 줌줌투어. 이름·날짜·인원만 쓴다(부는 운영자가 채운다).
+ *
+ * 접수 메일 — 라벨과 값이 각자 div 로 줄이 나뉘어 온다.
+ *   "Sunjung Lee 님으로부터 새로운 예약이 접수됐습니다."
+ *   예약 번호 614652 / 여행일 2026-10-24 / 인원 2
+ * 취소 메일 — 본문에는 예약번호와 상품명뿐이다. 이름은 **제목에만** 있고 여행일·인원은 없다.
+ *   "[줌줌투어] 예약번호: 609359 - 심 규식님의 예약 취소 및 환불을 완료하였습니다."
+ */
+function parseZoomzoom(text: string, subject: string, kind: OtaEmailKind): ParsedFields | null {
+    if (kind === 'cancel') {
+        const orderId = subject.match(/예약번호\s*:?\s*(\d+)/)?.[1] || field(text, '예약 번호').match(/\d+/)?.[0] || '';
+        if (!orderId) return null;
+        return {
+            orderId,
+            name: subject.match(/-\s*(.+?)\s*님의 예약 취소/)?.[1]?.trim() || '',
+            tourDate: '',
+            option: '',
+            pax: '',
+            adultCount: 0,
+            childCount: 0,
+            pickupLocation: '',
+            contact: '',
+            bookerEmail: '',
+            note: '',
+        };
+    }
+
+    const orderId = field(text, '예약 번호').match(/\d+/)?.[0] || subject.match(/예약번호\s*:?\s*(\d+)/)?.[1] || '';
+    const tourDate = parseOtaDate(field(text, '여행일'));
+    const total = Number(field(text, '인원').match(/\d+/)?.[0] || 0);
+    if (!orderId || !tourDate || !total) return null;
+
+    return {
+        orderId,
+        name: text.match(/^(.+?)\s*님으로부터 새로운 예약/m)?.[1]?.trim() || '',
+        tourDate,
+        option: '',
+        pax: `${total}명`,
+        adultCount: 0,      // 총원만 오고 성인/아동 구분이 없다
+        childCount: 0,
+        pickupLocation: '',
+        contact: '',
+        bookerEmail: '',
+        note: '',
+    };
+}
+
 // ============================================================
 // 진입점
 // ============================================================
@@ -627,7 +687,8 @@ export function parseOtaEmail(html: string, subject: string, from: string): OtaB
             : platform === 'gyg' ? (kind === 'update' ? parseGygUpdate(text) : parseGyg(text))
                 : platform === 'viator' ? (kind === 'update' ? parseViatorUpdate(text) : parseViator(text))
                     : platform === 'yeogi' ? parseYeogi(text)
-                        : parseTriple(text);
+                        : platform === 'triple' ? parseTriple(text)
+                            : parseZoomzoom(text, subject, kind);
 
     if (!parsed) return null;
 

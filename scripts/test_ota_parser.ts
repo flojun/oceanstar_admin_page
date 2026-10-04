@@ -529,3 +529,51 @@ assert.equal(parseOtaEmail('<p>[ 806715 ]</p>', '[NOL 투어 파트너센터] �
 assert.equal(parseOtaEmail('<p>취소</p>', '827433 … 예약이 취소되었습니다.(Booking Cancelled)', 'confirmation.triple@nol-universe.com'), null);
 
 console.log('OK — 트리플 접수 메일 (1부/2부/선셋, 한·영 블록 중복 없음)');
+
+// ---------------------------------------------------------------- 줌줌투어
+// 실제 메일 구조 (Stibee 템플릿): 라벨/값이 각자 left/right cell 의 div 로 온다. &nbsp; 는 엔티티 그대로.
+const zzCell = (label: string, value: string) => `
+<table class="stb-left-cell"><tbody><tr><td><table><tbody><tr><td>${label}</td></tr></tbody></table></td></tr></tbody></table>
+<table class="stb-right-cell"><tbody><tr><td><table><tbody><tr><td>${value}</td></tr></tbody></table></td></tr></tbody></table>`;
+const zzNew = parseOtaEmail(
+    `<div style="display: none;">&nbsp;</div>
+     <div><span><span class="stb-bold">줌줌투어<span> 예약 요청</span> 접수</span></span></div>
+     <td><div>Sunjung Lee 님으로부터 새로운 예약이 접수됐습니다. [예약 상황 확인하기] 버튼을 누른 후, 예약 요청에 대한 답변 혹은 확정을 해주시기 바랍니다.&nbsp;</div></td>
+     ${zzCell('<div><span>예약 여행</span></div>', '<div><span><a href="https://www.zoomzoomtour.com/tour/15767">[통합후기 15,000개 하와이1위 지붕있는배] 거북이 스노클링 + 5종 해양 액티비티</a></span></div>')}
+     ${zzCell('<div><span>예약 번호</span></div>', '<div><span><span class="stb-bold">614652</span></span></div>')}
+     ${zzCell('<div><span>예약 신청일<br></span></div>', '<div><span>2026-09-22</span></div>')}
+     ${zzCell('<div>\n<div><span>여행일</span></div>\n</div>', '<div><span> <span class="stb-bold">2026-10-24</span></span></div>')}
+     ${zzCell('<div><span class="stb-bold">인원</span>&nbsp;&nbsp;</div>', '<div><span class="stb-bold">&nbsp;2</span></div>')}
+     ${zzCell('<div><span class="stb-bold">예약 상태</span>&nbsp;&nbsp;</div>', '<div><span class="stb-bold stb-fore-colored"> 예약 요청</span></div>')}`,
+    '[줌줌투어] 예약이 접수됐습니다! - 예약번호 614652',
+    '줌줌투어 <noreply@zoomzoomtour.com>',
+);
+assert.ok(zzNew, '줌줌 접수 파싱 실패');
+assert.equal(zzNew.kind, 'new');
+assert.equal(zzNew.platform, 'zoomzoom');
+assert.equal(zzNew.source, 'Z');
+assert.equal(zzNew.orderId, '614652');
+assert.equal(zzNew.name, 'Sunjung Lee');
+assert.equal(zzNew.tourDate, '2026-10-24');
+assert.equal(zzNew.pax, '2명');
+assert.equal(zzNew.option, '');                     // 부는 운영자가 채운다
+
+const zzCancel = parseOtaEmail(
+    `<div><span><span class="stb-bold"><span>예약 번호 : 609359</span></span></span></div>
+     <div><span>취소 및 환불</span> 완료</div>
+     <div class="stb-left-cell"><div><span class="stb-bold">취소 상품</span></div></div>
+     <div class="stb-right-cell"><div>[줌줌후기 1위 하와이 베스트셀러] 거북이 스노클링 + 5종 해양 액티비티</div></div>
+     <div class="stb-left-cell"><div><span class="stb-bold">예약 번호</span></div></div>
+     <div class="stb-right-cell"><div>609359</div></div>`,
+    '[줌줌투어] 예약번호: 609359 - 심 규식님의 예약 취소 및 환불을 완료하였습니다.',
+    'noreply@zoomzoomtour.com',
+);
+assert.ok(zzCancel, '줌줌 취소 파싱 실패');
+assert.equal(zzCancel.kind, 'cancel');
+assert.equal(zzCancel.orderId, '609359');
+assert.equal(zzCancel.name, '심 규식');
+
+// 문의·메시지·후기 알림은 예약으로 만들지 않는다 (제목 검색에도 안 걸리지만 파서도 거른다).
+assert.equal(parseOtaEmail('<p>후기</p>', '[줌줌투어] 예약번호 : 610178의 새로운 여행 후기가 도착했습니다.', 'noreply@zoomzoomtour.com'), null);
+
+console.log('OK — 줌줌투어 접수/취소 메일');

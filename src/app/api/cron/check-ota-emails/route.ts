@@ -12,7 +12,7 @@ import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 
 /**
- * OTA(클룩·GetYourGuide·Viator·여기어때·트리플) 예약 메일 자동 수집 Cron.
+ * OTA(클룩·GetYourGuide·Viator·여기어때·트리플·줌줌투어) 예약 메일 자동 수집 Cron.
  * - 5분마다 Gmail IMAP 에서 아직 처리하지 않은 메일을 플랫폼별로 검색
  * - 신규 예약 → reservations INSERT (상태 '안내필요')  ← 운영자가 직접 안내 후 '예약확정' 으로 변경
  * - 취소     → 기존 예약 UPDATE (상태 '취소요청')      ← '취소' 로 바로 바꾸지 않는다. 눈으로 확인 후 마감.
@@ -26,7 +26,7 @@ import { simpleParser } from 'mailparser';
  * - 파싱/매칭 실패 시 표식을 붙이지 않아 메일이 안읽음으로 남는다 (수동 대응 가능)
  */
 
-const PLATFORMS: OtaPlatform[] = ['klook', 'gyg', 'viator', 'yeogi', 'triple'];
+const PLATFORMS: OtaPlatform[] = ['klook', 'gyg', 'viator', 'yeogi', 'triple', 'zoomzoom'];
 
 /**
  * 처리 완료 표식. `\Seen`(읽음)에 기대면 **사람이 Gmail 에서 먼저 열어본 메일을 영원히 건너뛴다.**
@@ -189,7 +189,8 @@ async function findTarget(b: OtaBooking): Promise<Target | null> {
         .from('reservations').select(cols).eq('order_id', b.orderId).maybeSingle();
     if (byOrder) return byOrder as Target;
 
-    if (!b.name) return null;
+    // 줌줌 취소 메일처럼 여행일이 없으면 이름만으로는 어느 날짜 예약인지 모른다.
+    if (!b.name || !b.tourDate) return null;
 
     // 예약번호가 이미 붙어 있는 행은 다른 예약이다. 같은 손님이 같은 날 두 번 예약했을 때
     // 엉뚱한 쪽을 취소·변경하지 않도록 번호가 빈 행만 본다.
