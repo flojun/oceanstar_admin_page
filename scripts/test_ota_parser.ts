@@ -577,3 +577,33 @@ assert.equal(zzCancel.name, '심 규식');
 assert.equal(parseOtaEmail('<p>후기</p>', '[줌줌투어] 예약번호 : 610178의 새로운 여행 후기가 도착했습니다.', 'noreply@zoomzoomtour.com'), null);
 
 console.log('OK — 줌줌투어 접수/취소 메일');
+
+// ---------------------------------------------------------------- Viator 인원 구분
+// 실제 메일은 "2 Adults, 1 Child" / "2 Adults, 2 Children" 한 줄로 온다. 구분이 여럿이어도 전부 센다.
+const viatorPax = (travelers: string) => parseOtaEmail(
+    `<div>
+      <p>Booking Reference: BR-1453085517</p>
+      <p>Travel Date: Sat, Oct 03, 2026</p>
+      <p>Lead Traveler Name: Gargi Nejad</p>
+      <p>Traveler Names: Gargi Nejad, Sia Nejad, Brexton Nejad, Kingsley Nejad</p>
+      <p>Travelers: ${travelers}</p>
+      <p>Tour Grade Code: TG1~10:30</p>
+    </div>`,
+    'New Booking for Sat, Oct 03, 2026 (#BR-1453085517)',
+    'Viator <booking@t1.viator.com>',
+);
+for (const [travelers, adult, child] of [
+    ['2 Adults, 2 Children', 2, 2],
+    ['2 Adults, 1 Child', 2, 1],
+    ['1 Adult, 1 Child, 1 Infant', 1, 2],      // 예전엔 첫 아동 구분만 세서 영아가 빠졌다
+    ['2 Adults, 1 Youth', 2, 1],               // 예전엔 Youth 를 아예 안 셌다
+    ['1 Senior, 1 Adult', 2, 0],
+] as const) {
+    const b = viatorPax(travelers);
+    assert.ok(b, `viator 파싱 실패: ${travelers}`);
+    assert.equal(b.adultCount, adult, `성인 수: ${travelers}`);
+    assert.equal(b.childCount, child, `아동 수: ${travelers}`);
+    assert.equal(b.pax, `${adult + child}명`, `총원: ${travelers}`);
+    if (child) assert.ok(b.note.startsWith(`(아${child})`), `아동 표기 없음: ${travelers} → ${b.note}`);
+}
+console.log('OK — Viator 인원 구분 (Adults/Children/Infant/Youth/Senior)');

@@ -504,9 +504,15 @@ function parseViator(text: string): ParsedFields | null {
     const tourDate = parseOtaDate(field(text, 'Travel Date'));
     if (!orderId || !tourDate) return null;
 
+    // "2 Adults, 1 Child" / "2 Adults, 2 Children". 구분마다 따로 더한다.
+    // 첫 매치만 보면 "1 Child, 1 Infant" 의 영아가 빠지고, Youth·Senior 는 아예 안 세어진다.
     const travelers = field(text, 'Travelers');
-    const adult = Number(travelers.match(/(\d+)\s*Adult/i)?.[1] || 0);
-    const child = Number(travelers.match(/(\d+)\s*(?:Child|Infant)/i)?.[1] || 0);
+    let adult = 0;
+    let child = 0;
+    for (const m of travelers.matchAll(/(\d+)\s*([A-Za-z]+)/g)) {
+        if (/child|youth|infant|kid/i.test(m[2])) child += Number(m[1]);
+        else adult += Number(m[1]);      // Adult, Senior …
+    }
 
     // 신규는 "Tour Grade", 취소는 "Tour Option" 으로 온다.
     // 셋 중 하나에만 시각이 붙어 오는 경우가 있어서 (`TG1` vs `TG1~10:30`) 전부 이어 붙인다.
