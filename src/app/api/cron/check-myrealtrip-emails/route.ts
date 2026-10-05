@@ -35,6 +35,11 @@ const PROCESSED = 'OceanstarDone';
  * 있으면 행을 만들지 않고 note 에 예약번호만 덧붙인 뒤 Discord 로 알린다.
  * (같은 이름·같은 날의 별개 예약일 가능성이 있으므로 조용히 버리지 않고 반드시 알린다)
  *
+ * 단, **결제일이 같은 예약번호끼리만** 합친다. 예약번호 `EXP-YYYYMMDD-…` 의 날짜는 결제일이고,
+ * 한 번 결제로 나온 1인당 번호들은 이 날짜가 같다(EXP-20261005-00019043/…44).
+ * 같은 손님이 다른 날 같은 여행일로 한 팀을 더 잡으면 결제일이 달라서 별개 예약이다.
+ * 이걸 안 보면 두 번째 팀이 첫 예약의 note 한 줄로 흡수돼 명단에서 사라진다.
+ *
  * @returns 합쳐 넣은 경우 true. 그러면 INSERT 하지 않는다.
  */
 async function mergeIntoExisting(
@@ -45,7 +50,7 @@ async function mergeIntoExisting(
 ): Promise<boolean> {
     const { data: rows } = await supabaseServer
         .from('reservations')
-        .select('id, note, pax, option, status')
+        .select('id, order_id, note, pax, option, status')
         .eq('source', 'M')
         .eq('name', name)
         .eq('tour_date', tourDate)
@@ -53,10 +58,20 @@ async function mergeIntoExisting(
         // 새 예약이 취소된 행에 흡수돼서 재예약이 통째로 사라진다.
         .not('status', 'in', '("취소","취소요청")');
 
-    if (!rows || rows.length !== 1) return false;   // 0건이면 새 예약, 2건 이상이면 사람이 판단
+    if (!rows || rows.length === 0) return false;   // 새 예약
 
-    const target = rows[0];
-    if ((target.note || '').includes(orderNumber)) return true;   // 이미 붙여 둔 번호
+    const numbers = (r: { order_id: string | null; note: string | null }) => `${r.order_id || ''} ${r.note || ''}`;
+    if (rows.some((r) => numbers(r).includes(orderNumber))) return true;   // 이미 붙여 둔 번호
+
+    const paidOn = orderNumber.match(/^EXP-\d{8}/)?.[0];
+    const samePurchase = paidOn ? rows.filter((r) => numbers(r).includes(paidOn)) : [];
+    // 예약번호가 하나도 없는 행(운영자가 손으로 넣은 행)이 하나뿐이면 예전처럼 같은 예약으로 본다.
+    const handEntered = rows.length === 1 && !/EXP-\d{8}/.test(numbers(rows[0]));
+
+    const target = samePurchase.length === 1 ? samePurchase[0]
+        : samePurchase.length === 0 && handEntered ? rows[0]
+            : null;
+    if (!target) return false;   // 결제일이 다르면 별개 팀, 같은 결제일 후보가 여럿이면 사람이 판단
 
     await supabaseServer
         .from('reservations')
