@@ -569,6 +569,11 @@ export default function WebsiteSettingsPage() {
                                 {/* 정기 휴무 요일 */}
                                 <div className="mt-4 pt-4 border-t border-gray-200">
                                     <h4 className="text-sm font-semibold text-gray-700 mb-2">정기 휴무 요일 지정</h4>
+                                    {setting.tour_id === 'combo_marine' && (
+                                        <p className="text-xs text-gray-500 mb-2">
+                                            콤보에서는 <b>거북이 스노클링 날짜</b>에만 적용됩니다. 패러세일링/제트스키 날짜는 따로 월~금만 열립니다.
+                                        </p>
+                                    )}
                                     <div className="flex flex-wrap gap-3">
                                         {[
                                             { label: '일', value: 0 }, { label: '월', value: 1 },

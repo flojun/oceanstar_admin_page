@@ -10,6 +10,19 @@ export const stripeClient = process.env.STRIPE_SECRET_KEY
     : null;
 
 /**
+ * 결제 직후 예약 상태.
+ * 거북이 스노클링은 바우처만으로 안내가 끝나지만, 콤보의 패러세일링·제트스키·서핑과
+ * 프라이빗은 운영자가 따로 연락해 시간·장소를 맞춰야 한다. 그래서 '안내필요' 로 넣어
+ * 대시보드의 안내 대상에 뜨게 한다.
+ */
+function initialStatus(metadata: Stripe.Metadata): '예약확정' | '안내필요' {
+    if (metadata.combo_option) return '안내필요';
+    // 맞춤 결제 링크는 "프라이빗 (09:00-13:00)" 처럼 시간이 붙어 온다.
+    if ((metadata.option || '').startsWith('프라이빗')) return '안내필요';
+    return '예약확정';
+}
+
+/**
  * Turns a paid Checkout Session into reservation row(s).
  *
  * Idempotent: returns early if the order_id already exists, so the browser
@@ -42,12 +55,14 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
     }
 
     if (existing) {
-        // Already stored - just make sure a pending row gets confirmed.
+        // 결제 성공 페이지와 웹훅이 같은 세션을 두 번 처리한다. 두 번째에 상태를 덮어쓰면
+        // '안내필요' 로 넣은 콤보·프라이빗이 바로 '예약확정' 이 되고, 취소한 예약도 되살아난다.
+        // 결제 전 상태로 남아 있던 행만 확정한다.
         await supabaseServer
             .from('reservations')
-            .update({ status: '예약확정' })
+            .update({ status: initialStatus(metadata) })
             .eq('order_id', order_id)
-            .neq('status', '예약확정');
+            .in('status', ['예약대기', '대기', '결제대기']);
         return { ok: true as const, order_id, created: false, status: session.payment_status };
     }
 
@@ -61,7 +76,7 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
         pax: metadata.pax,
         note: metadata.note,
         pickup_location: metadata.pickup_location,
-        status: '예약확정',
+        status: initialStatus(metadata),
         // 환불/캡처의 유일한 연결 고리. 없으면 나중에 이 예약을 환불할 방법이 없다.
         payment_intent_id: paymentIntent?.id ?? (typeof session.payment_intent === 'string' ? session.payment_intent : null),
         captured_at: captured ? new Date().toISOString() : null,
