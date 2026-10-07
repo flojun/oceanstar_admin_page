@@ -1,6 +1,8 @@
 import Stripe from 'stripe';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { sendVoucherEmail } from '@/lib/email';
+import { isUrgentTourDate } from '@/lib/reservationUrgency';
+import { sendDiscordUrgentAlert } from '@/lib/discordWebhook';
 
 // apiVersion 을 고정하지 않는다. SDK 가 자기 기본 버전을 쓰게 두면 타입이
 // 런타임과 맞아떨어진다. 한국 결제수단(kakao_pay 등)의 capture_method 는
@@ -10,17 +12,14 @@ export const stripeClient = process.env.STRIPE_SECRET_KEY
     : null;
 
 /**
- * 결제 직후 예약 상태.
- * 거북이 스노클링은 바우처만으로 안내가 끝나지만, 콤보의 패러세일링·제트스키·서핑과
- * 프라이빗은 운영자가 따로 연락해 시간·장소를 맞춰야 한다. 그래서 '안내필요' 로 넣어
- * 대시보드의 안내 대상에 뜨게 한다.
+ * 결제 직후 예약 상태. 웹사이트 예약은 전부 '안내필요' 로 넣어 운영자가 한 번씩 연락하게 한다
+ * (콤보의 패러세일링·서핑, 프라이빗은 시간·장소를 따로 맞춰야 하고, 나머지도 확인 연락을 한다).
+ * 바우처 메일은 상태와 상관없이 그대로 나간다.
+ *
+ * ⚠️ 이 상태도 결제 캡처 대상이어야 한다 (`/api/cron/capture-pending`).
+ *    빠지면 승인만 걸린 결제가 만료돼 돈을 못 받는다.
  */
-function initialStatus(metadata: Stripe.Metadata): '예약확정' | '안내필요' {
-    if (metadata.combo_option) return '안내필요';
-    // 맞춤 결제 링크는 "프라이빗 (09:00-13:00)" 처럼 시간이 붙어 온다.
-    if ((metadata.option || '').startsWith('프라이빗')) return '안내필요';
-    return '예약확정';
-}
+const INITIAL_STATUS = '안내필요';
 
 /**
  * Turns a paid Checkout Session into reservation row(s).
@@ -60,7 +59,7 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
         // 결제 전 상태로 남아 있던 행만 확정한다.
         await supabaseServer
             .from('reservations')
-            .update({ status: initialStatus(metadata) })
+            .update({ status: INITIAL_STATUS })
             .eq('order_id', order_id)
             .in('status', ['예약대기', '대기', '결제대기']);
         return { ok: true as const, order_id, created: false, status: session.payment_status };
@@ -76,7 +75,7 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
         pax: metadata.pax,
         note: metadata.note,
         pickup_location: metadata.pickup_location,
-        status: initialStatus(metadata),
+        status: INITIAL_STATUS,
         // 환불/캡처의 유일한 연결 고리. 없으면 나중에 이 예약을 환불할 방법이 없다.
         payment_intent_id: paymentIntent?.id ?? (typeof session.payment_intent === 'string' ? session.payment_intent : null),
         captured_at: captured ? new Date().toISOString() : null,
@@ -124,6 +123,26 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
     }
 
     const reservation = inserted?.[0];
+
+    // 당일·내일 예약 긴급 알림. 예전에는 행이 '예약확정' 으로 들어올 때 DB 웹훅
+    // (/api/notifications/discord-urgent-reservation) 이 보냈는데 이제 '안내필요' 로 들어와서
+    // 그 웹훅이 건너뛴다. 여기서 직접 보내고 urgent_alert_sent 를 세워, 운영자가 나중에
+    // '예약확정' 으로 바꿀 때 웹훅이 한 번 더 울리지 않게 한다.
+    if (reservation && isUrgentTourDate(reservation.tour_date)) {
+        const sent = await sendDiscordUrgentAlert({
+            title: '🚨 [안내필요] 웹사이트 긴급 예약! (당일/전날)',
+            customerName: reservation.name || '미확인',
+            tourDate: reservation.tour_date,
+            option: reservation.option || '미확인',
+            pax: reservation.pax || '',
+            source: reservation.source,
+            orderNumber: order_id,
+            pickupLocation: reservation.pickup_location || undefined,
+        }).catch(() => false);
+        if (sent) {
+            await supabaseServer.from('reservations').update({ urgent_alert_sent: true }).eq('order_id', order_id);
+        }
+    }
     if (reservation?.booker_email) {
         sendVoucherEmail({
             to: reservation.booker_email,

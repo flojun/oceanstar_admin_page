@@ -26,7 +26,9 @@ export async function GET(request: Request) {
         .select('id, order_id, name, tour_date, option, source, pickup_location, created_at, payment_intent_id')
         .not('payment_intent_id', 'is', null)
         .is('captured_at', null)
-        .eq('status', '예약확정');
+        // 웹사이트 예약은 '안내필요' 로 들어온다(stripeBooking). 운영자가 아직 '예약확정' 으로
+        // 안 바꿨다고 캡처를 건너뛰면 승인이 만료돼 결제가 통째로 사라진다.
+        .in('status', ['예약확정', '안내필요']);
 
     if (error) {
         console.error('[capture-cron] 예약 조회 실패:', error);

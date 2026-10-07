@@ -68,7 +68,8 @@ const T = {
         cBig: ["전액 환불", "요금의 50% 공제 후 환불", "취소 · 환불 불가"],
         cRule: "여행일은 하와이 현지 시각 기준입니다. 본 상품은 국외여행 표준약관 제6조(특약)에 따라 일반 소비자분쟁해결기준과 다른 취소수수료가 적용됩니다.",
         agree: "위 규정을 확인했고, 취소에 동의합니다.", cGo: "취소 요청하기", cGoing: "요청 중...", cFinal: "취소 요청은 되돌릴 수 없어요. 관리자 확인 후 처리됩니다.", close: "닫기",
-        statusMap: { 예약확정: "예약확정", 취소요청: "취소요청" } as Record<string, string>,
+        // '안내필요' 는 운영자 쪽 할 일 표시다. 손님에게는 결제가 끝난 확정 예약이다.
+        statusMap: { 예약확정: "예약확정", 안내필요: "예약확정", 취소요청: "취소요청" } as Record<string, string>,
         okCancel: "취소 요청이 접수되었습니다. 관리자 확인 후 처리됩니다.",
         okResched: (d: string, l: string) => `변경 신청이 접수되었습니다. (${d} · ${l}) 관리자 확인 후 확정됩니다.`,
         errNotFound: "일치하는 예약 정보가 없습니다. 예약 번호와 이메일을 확인해주세요.", errLookup: "조회 중 오류가 발생했습니다.",
@@ -103,7 +104,7 @@ const T = {
         cBig: ["Full refund", "50% refund", "No refund"],
         cRule: "Tour dates are based on local Hawaii time.",
         agree: "I have read the policy above and agree to cancel.", cGo: "Request cancellation", cGoing: "Requesting...", cFinal: "A cancellation request can't be undone. Our team will process it after review.", close: "Close",
-        statusMap: { 예약확정: "Confirmed", 취소요청: "Cancellation requested" } as Record<string, string>,
+        statusMap: { 예약확정: "Confirmed", 안내필요: "Confirmed", 취소요청: "Cancellation requested" } as Record<string, string>,
         okCancel: "Your cancellation request has been received. Our team will process it after review.",
         okResched: (d: string, l: string) => `Your change request has been received (${d} · ${l}). It is final after our team confirms.`,
         errNotFound: "No matching booking found. Please check your booking number and email.", errLookup: "An error occurred during lookup.",
