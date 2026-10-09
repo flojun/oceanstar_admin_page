@@ -7,11 +7,13 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "예약 관리",
+  // 예약번호로 들어오는 손님 화면이라 검색 결과에 띄우지 않는다 (링크는 따라가게 둔다)
+  robots: { index: false, follow: true },
   alternates: {
     canonical: "/kr/manage-booking",
     languages: {
-      "ko-KR": "/kr/manage-booking",
-      "en-US": "/manage-booking",
+      "ko": "/kr/manage-booking",
+      "en": "/manage-booking",
       "x-default": "/manage-booking",
     },
   },

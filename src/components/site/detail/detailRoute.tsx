@@ -40,7 +40,7 @@ export function detailMetadata(lang: Lang, tour: string): Metadata {
     return {
         title,
         description,
-        alternates: { canonical: lang === "en" ? en : ko, languages: { "ko-KR": ko, "en-US": en, "x-default": en } },
+        alternates: { canonical: lang === "en" ? en : ko, languages: { "ko": ko, "en": en, "x-default": en } },
         openGraph: { title, description, type: "website", url: lang === "en" ? en : ko, locale: lang === "en" ? "en_US" : "ko_KR", images: [img] },
     };
 }

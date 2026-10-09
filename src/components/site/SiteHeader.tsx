@@ -30,7 +30,8 @@ const T = {
 export default function SiteHeader({ lang, active, tours }: { lang: Lang; active: NavKey; tours: { key: TourKey; name: string }[] }) {
     const t = T[lang];
     const L = links(lang);
-    const pathname = usePathname() || L.home;
+    // 정적 생성된 영문 홈은 경로가 /index 로 잡혀 한국어 링크가 /kr/index 가 된다. canonical 주소로 맞춘다
+    const pathname = (usePathname() || L.home).replace(/\/index$/, "") || "/";
     const otherHref = otherLangPath(pathname, lang);
     const [drop, setDrop] = useState(false);
     const [pinDrop, setPinDrop] = useState(false);

@@ -11,7 +11,6 @@ const PAGES: { path: string; freq: 'daily' | 'weekly'; priority: number }[] = [
   { path: '/reviews', freq: 'weekly', priority: 0.7 },
   { path: '/faq', freq: 'weekly', priority: 0.7 },
   { path: '/restaurants', freq: 'weekly', priority: 0.6 },
-  { path: '/manage-booking', freq: 'weekly', priority: 0.5 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -19,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return PAGES.flatMap(({ path, freq, priority }) => {
     const en = `${SITE_URL}${path || '/'}`;
     const ko = `${SITE_URL}/kr${path}`;
-    const alternates = { languages: { 'en-US': en, 'ko-KR': ko, 'x-default': en } };
+    const alternates = { languages: { en, ko, 'x-default': en } };
     return [
       { url: en, lastModified: now, changeFrequency: freq, priority, alternates },
       { url: ko, lastModified: now, changeFrequency: freq, priority, alternates },

@@ -5,8 +5,8 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/restaurants",
     languages: {
-      "ko-KR": "/kr/restaurants",
-      "en-US": "/restaurants",
+      "ko": "/kr/restaurants",
+      "en": "/restaurants",
       "x-default": "/restaurants",
     },
   },

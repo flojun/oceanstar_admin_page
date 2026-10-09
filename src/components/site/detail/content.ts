@@ -99,7 +99,7 @@ export const DETAIL: Record<string, any> = {
    [
     "03",
     "오션스타 자체 기획 & 도입",
-    "해양 5종 액티비티 + 인생샷",
+    "해양 4종 액티비티 + 인생샷",
     [
      "스탠드업 패들보드, 카약, 씨체어, 다이빙 등 스노클링과 함께 자유롭게 즐기는 다양한 액티비티!",
      "다이아몬드헤드와 와이키키를 배경으로 인생샷도 마음껏 찍어드립니다."
@@ -142,7 +142,7 @@ export const DETAIL: Record<string, any> = {
   "FLOW_SUB": "호텔 픽업으로 시작해 호텔 복귀로 끝나는 4시간입니다.",
   "HERO": {
    "eyebrow": "하와이 거북이 스노클링의 원조, 오션스타",
-   "h1": "거북이 100% 보장<br><span class=\"hl\">스노클링</span>",
+   "h1": "와이키키 거북이 스노클링<br><span class=\"hl\">100% 보장</span>",
    "badge": "압도적 업계 통합 누적 리뷰 15,000개",
    "price": "₩151,570",
    "price_sub": "성인 1인 · 24개월 미만 무료",
@@ -184,7 +184,7 @@ export const DETAIL: Record<string, any> = {
     null
    ],
    [
-    "해양 5종",
+    "해양 4종",
     null
    ],
    [
@@ -213,7 +213,7 @@ export const DETAIL: Record<string, any> = {
    [
     "sunset.jpg",
     "로맨틱 선셋 크루즈",
-    "선셋 거북이 스노클링 + 해양 5종 + 와인 크루즈"
+    "선셋 거북이 스노클링 + 해양 4종 + 와인 크루즈"
    ]
   ],
   "MORE_H2": "오션스타만의 특별상품",
@@ -435,7 +435,7 @@ export const DETAIL: Record<string, any> = {
   "FLOW_SUB": "4 hours, starting with hotel pickup and ending back at your hotel.",
   "HERO": {
    "eyebrow": "The original turtle snorkeling in Hawaii",
-   "h1": "Guaranteed turtle<br><span class=\"hl\">snorkeling</span>",
+   "h1": "Waikiki turtle snorkeling,<br><span class=\"hl\">guaranteed</span>",
    "badge": "15,000+ reviews across platforms",
    "price": "$110",
    "price_sub": "Per adult · Under 24 months free",
@@ -678,7 +678,7 @@ export const DETAIL: Record<string, any> = {
    [
     "03",
     "오션스타 자체 기획 & 도입",
-    "해양 5종 액티비티 + 인생샷",
+    "해양 4종 액티비티 + 인생샷",
     [
      "스탠드업 패들보드, 카약, 씨체어, 다이빙 등 스노클링과 함께 자유롭게 즐기는 다양한 액티비티!",
      "다이아몬드헤드와 와이키키를 배경으로 인생샷도 마음껏 찍어드립니다."
@@ -809,7 +809,7 @@ export const DETAIL: Record<string, any> = {
    ],
    [
     "sup",
-    "5종 액티비티",
+    "4종 액티비티",
     "패들보드·카약·다이빙 모두 포함"
    ],
    [
@@ -1107,7 +1107,7 @@ export const DETAIL: Record<string, any> = {
    ],
    [
     "sup",
-    "5 activities",
+    "4 activities",
     "Paddleboard, kayak and diving included"
    ],
    [
@@ -1325,7 +1325,7 @@ export const DETAIL: Record<string, any> = {
    [
     "03",
     "오션스타 자체 기획 & 도입",
-    "해양 5종 액티비티 + 인생샷",
+    "해양 4종 액티비티 + 인생샷",
     [
      "스탠드업 패들보드, 카약, 씨체어, 다이빙 등 스노클링과 함께 자유롭게 즐기는 다양한 액티비티!",
      "다이아몬드헤드와 와이키키를 배경으로 인생샷도 마음껏 찍어드립니다."
@@ -1933,7 +1933,7 @@ export const DETAIL: Record<string, any> = {
    [
     "03",
     "오션스타 자체 기획 & 도입",
-    "해양 5종 액티비티 + 인생샷",
+    "해양 4종 액티비티 + 인생샷",
     [
      "스탠드업 패들보드, 카약, 씨체어, 다이빙 등 스노클링과 함께 자유롭게 즐기는 다양한 액티비티!",
      "다이아몬드헤드와 와이키키를 배경으로 인생샷도 마음껏 찍어드립니다."

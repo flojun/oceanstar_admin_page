@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
     languages: {
-      "ko-KR": "/kr",
-      "en-US": "/",
+      "ko": "/kr",
+      "en": "/",
       "x-default": "/",
     },
   },
