@@ -23,7 +23,7 @@ function PaymentSuccessContent() {
                 const data = await res.json();
                 if (data.success && data.order_id) {
                     // 결제 확인이 끝난 뒤 한 번만 전환을 보낸다 (새로고침·재방문은 conversion.ts 가 거른다)
-                    reportPurchase({ orderId: data.order_id, value: data.amount, currency: data.currency });
+                    reportPurchase({ orderId: data.order_id, value: data.amount, currency: data.currency, emailSha256: data.email_sha256 });
                     router.replace(`/kr/booking/success?order_id=${data.order_id}`);
                 } else {
                     setVerifyFailed(true);

@@ -24,7 +24,7 @@ function gtag(): Gtag {
     };
 }
 
-export function reportPurchase({ orderId, value, currency }: { orderId: string; value?: number; currency?: string }) {
+export function reportPurchase({ orderId, value, currency, emailSha256 }: { orderId: string; value?: number; currency?: string; emailSha256?: string }) {
     if (typeof window === "undefined" || !orderId) return;
     const key = `os-conv-${orderId}`;
     try {
@@ -36,6 +36,8 @@ export function reportPurchase({ orderId, value, currency }: { orderId: string; 
     const g = gtag();
     const money = value !== undefined && currency ? { value, currency } : {};
     const label = process.env.NEXT_PUBLIC_GADS_PURCHASE_LABEL || PURCHASE_LABEL;
+    // 향상된 전환: 서버가 해시한 이메일만 넘긴다. 다른 브라우저·기기에서 예약한 광고 클릭도 이어 붙여 준다
+    if (emailSha256) g("set", "user_data", { sha256_email_address: emailSha256 });
     g("event", "conversion", { send_to: `${ADS_ID}/${label}`, transaction_id: orderId, ...money });
     g("event", "purchase", { transaction_id: orderId, ...money });
 }

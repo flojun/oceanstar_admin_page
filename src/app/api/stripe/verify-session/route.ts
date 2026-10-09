@@ -1,6 +1,20 @@
 import { NextResponse } from 'next/server';
 import { stripeClient, createReservationFromSession } from '@/lib/stripeBooking';
 import { fromMinor } from '@/lib/money';
+import { createHash } from 'crypto';
+
+/**
+ * Google Ads 향상된 전환용 이메일 해시. 원문 이메일은 브라우저로 내려보내지 않는다.
+ * 구글 정규화 규칙: 앞뒤 공백 제거, 소문자, gmail.com·googlemail.com 은 @ 앞의 점을 뺀다.
+ */
+function hashEmailForAds(email: string | null | undefined): string | undefined {
+    if (!email) return undefined;
+    let e = email.trim().toLowerCase();
+    const [local, domain] = e.split('@');
+    if (!local || !domain) return undefined;
+    if (domain === 'gmail.com' || domain === 'googlemail.com') e = `${local.replace(/\./g, '')}@${domain}`;
+    return createHash('sha256').update(e).digest('hex');
+}
 
 export async function POST(req: Request) {
     if (!stripeClient) {
@@ -32,6 +46,7 @@ export async function POST(req: Request) {
             // 결제 완료 화면의 전환 이벤트용 (손님이 실제로 낸 금액)
             amount: session.amount_total != null && session.currency ? fromMinor(session.amount_total, session.currency) : undefined,
             currency: session.currency ? session.currency.toUpperCase() : undefined,
+            email_sha256: hashEmailForAds(session.customer_details?.email ?? session.customer_email),
         });
     } catch (error) {
         console.error('Verify Session Error:', error);
