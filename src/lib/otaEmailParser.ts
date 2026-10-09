@@ -539,6 +539,19 @@ function parseViator(text: string): ParsedFields | null {
     };
 }
 
+/**
+ * 여기어때 옵션명 → 부.
+ *   "1부, 2부 … / … 크루즈 07:30"            그룹명 전체가 오는 옛 형식. 앞의 "N부" 는 믿지 말고 시각을 본다.
+ *   "1부 오전 거북이 스노클링"                시각이 없다. 적힌 "N부" 하나가 답이다.
+ *   "3부 거북이 스노클링+선셋&와인 크루즈"
+ */
+function yeogiOption(option: string): string {
+    if (/\d{1,2}:\d{2}/.test(option)) return optionFromTime(option);
+    const parts = [...new Set(option.match(/[1-3]부/g) || [])];
+    if (parts.length === 1) return parts[0];
+    return /선셋|sunset/i.test(option) ? '3부' : '';
+}
+
 function parseYeogi(text: string): ParsedFields | null {
     // 예약번호 필드가 따로 없다. 예약확인 URL 끝 토큰이 예약번호.
     const url = text.match(/https?:\/\/\S*reservation\/detail\/([A-Za-z0-9]+)/);
@@ -552,14 +565,20 @@ function parseYeogi(text: string): ParsedFields | null {
     const headcount = Number(total.match(/(\d+)\s*명/)?.[1] || 0);
 
     const product = clean(field(text, '상품'));
-    const option = clean(field(text, '옵션'));
+    // `field(text, '옵션')` 을 쓰면 안 된다. 상품명 끝에 "(옵션:선셋)" 이 붙어 오는 리스팅이 있어서
+    // 상품 줄이 먼저 걸리고, 실제로는 1부인 예약이 선셋(3부)으로 들어간다.
+    //   ・상품: [통합후기15,000개·…]하와이 거북이스노클링+5종해양+라면 (옵션:선셋)
+    //   ・옵션: 1부 오전 거북이 스노클링
+    //   ・추가 옵션: -
+    // 그래서 줄 머리가 "옵션:" 인 줄만 본다 ('추가 옵션' 도 제외된다).
+    const option = clean(text.match(/^[・·•\-\s]*옵션\s*[:：]\s*(.+)$/m)?.[1]?.trim() || '');
 
     return {
         orderId,
         // 여기어때 메일에는 고객명·연락처·픽업이 아예 없다. 운영자가 링크 열어 채운다.
         name: '(여기어때 확인필요)',
         tourDate,
-        option: optionFromTime(option),
+        option: yeogiOption(option),
         pax: `${adult + child || headcount}명`,
         adultCount: adult,
         childCount: child,

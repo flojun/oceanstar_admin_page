@@ -607,3 +607,22 @@ for (const [travelers, adult, child] of [
     if (child) assert.ok(b.note.startsWith(`(아${child})`), `아동 표기 없음: ${travelers} → ${b.note}`);
 }
 console.log('OK — Viator 인원 구분 (Adults/Children/Infant/Youth/Senior)');
+
+// ---------------------------------------------------------------- 여기어때 옵션 줄
+// 상품명 끝에 "(옵션:선셋)" 이 붙는 리스팅. 상품 줄을 옵션으로 읽으면 1부 예약이 3부가 된다 (실제 메일 그대로).
+const yeogiMail = (option: string) => parseOtaEmail(
+    `・상품: [통합후기15,000개·루프탑배·무료픽업]하와이 거북이스노클링+5종해양+라면 (옵션:선셋)<br/>・옵션: ${option} <br/>・추가 옵션: -<br/>・총 인원: 1명 (성인x1)<br/>・이용일: 2026.10.12(월)<br/><br/>예약 확인하기: https://tna.goodchoice.kr/reservation/detail/26100719014256GT1`,
+    '[여기어때] 예약이 확정되었어요. 예약 내용을 꼭 확인해주세요.',
+    'noreply@yeogi.com',
+);
+for (const [option, want] of [
+    ['1부 오전 거북이 스노클링', '1부'],
+    ['2부 오전 거북이 스노클링', '2부'],
+    ['3부 거북이 스노클링+선셋&amp;와인 크루즈', '3부'],
+] as const) {
+    const b = yeogiMail(option);
+    assert.ok(b, `여기어때 파싱 실패: ${option}`);
+    assert.equal(b.option, want, `여기어때 옵션: ${option}`);
+    assert.ok(!b.note.includes('옵션: 선셋)'), `상품명의 (옵션:선셋) 이 옵션으로 들어갔다: ${b.note}`);
+}
+console.log('OK — 여기어때 옵션 줄 (상품명의 "(옵션:선셋)" 무시)');
