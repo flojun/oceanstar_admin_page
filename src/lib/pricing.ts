@@ -150,3 +150,36 @@ export function feeAmount(base: number, currency: Currency, exchangeRate = FALLB
         ? total - base
         : Math.round((total - base) * 100) / 100;
 }
+
+/**
+ * tour_settings 가격이 이미 수수료를 포함한 최종가인 상품.
+ *
+ * 이 상품들은 수수료를 얹지 않는다. 손님은 표시가(예: 성인 $110)를 그대로 내고,
+ * 결제창에는 그 안에서 수수료를 떼어 "상품가 + 수수료 = 표시가"로 나눠 보여준다.
+ * 콤보·프라이빗은 여전히 grossUp 으로 수수료를 얹는다.
+ */
+const FEE_INCLUDED_TOURS = new Set(["morning1", "morning2", "sunset"]);
+
+export function isFeeIncluded(tourId: string | null | undefined): boolean {
+    return !!tourId && FEE_INCLUDED_TOURS.has(tourId);
+}
+
+/**
+ * 손님이 실제로 낼 총액과 그중 수수료. 화면과 결제 API 가 함께 쓴다.
+ *
+ * 수수료 포함 상품: total = base, fee 는 total 안에서 Stripe 요율로 떼어낸 값.
+ * 그 외 상품: total = grossUp(base), fee = total - base.
+ */
+export function checkoutAmounts(
+    setting: PricingSetting,
+    base: number,
+    currency: Currency,
+): { total: number; fee: number } {
+    const rate = resolveExchangeRate(setting);
+    if (!isFeeIncluded(setting.tour_id)) {
+        return { total: grossUp(base, currency, rate), fee: feeAmount(base, currency, rate) };
+    }
+    const raw = base * FEE_PERCENT[currency] + fixedFee(currency, rate);
+    const fee = currency === "KRW" ? Math.round(raw) : Math.round(raw * 100) / 100;
+    return { total: base, fee: Math.min(fee, base) };
+}

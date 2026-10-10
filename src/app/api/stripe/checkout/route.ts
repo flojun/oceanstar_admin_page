@@ -3,7 +3,7 @@ import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { stripeClient as stripe } from '@/lib/stripeBooking';
-import { basePrice, grossUp, feeAmount, resolveExchangeRate, MIN_AMOUNT, type Currency } from '@/lib/pricing';
+import { basePrice, checkoutAmounts, MIN_AMOUNT, type Currency } from '@/lib/pricing';
 import { toMinor } from '@/lib/money';
 
 // Hawaii time helper
@@ -85,12 +85,12 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Invalid price calculation.' }, { status: 400 });
         }
 
-        // 4. 결제 수수료를 얹어 손님이 낼 총액을 만든다.
-        // 고정 수수료($0.30)는 달러로 매겨지므로 원화 결제는 환율 환산이 필요하다.
-        // 상품 가격에 쓴 환율과 같은 값을 써야 표시가와 청구액이 어긋나지 않는다.
-        const exchangeRate = resolveExchangeRate(tourSetting);
-        const totalRounded = grossUp(productPrice, currency, exchangeRate);
-        const fee = feeAmount(productPrice, currency, exchangeRate);
+        // 4. 손님이 낼 총액과 수수료. 1·2부·선셋은 표시가에 수수료가 포함돼 있고,
+        // 나머지 상품은 수수료를 얹는다. 규칙은 pricing.ts 의 checkoutAmounts 한 곳에 있다.
+        const { total: totalRounded, fee } = checkoutAmounts(tourSetting, productPrice, currency);
+        // 두 줄의 합이 총액과 정확히 같도록 최소 단위에서 뺀다.
+        const feeMinor = toMinor(fee, currency);
+        const itemMinor = toMinor(totalRounded, currency) - feeMinor;
 
         if (totalRounded < MIN_AMOUNT[currency]) {
             return NextResponse.json({ error: '결제 최소 금액에 미달합니다.' }, { status: 400 });
@@ -118,7 +118,7 @@ export async function POST(req: Request) {
                             description: `Booking ID: ${order_id}`,
                         },
                         // KRW 은 소수점이 없어 배율이 1이다. toMinor 밖에서 * 100 금지.
-                        unit_amount: toMinor(productPrice, currency),
+                        unit_amount: itemMinor,
                     },
                     quantity: 1,
                 },
@@ -129,7 +129,7 @@ export async function POST(req: Request) {
                             name: isEn ? 'Online Booking Fee' : '온라인 예약 수수료',
                             description: `Payment Processing Fee`,
                         },
-                        unit_amount: toMinor(fee, currency),
+                        unit_amount: feeMinor,
                     },
                     quantity: 1,
                 }

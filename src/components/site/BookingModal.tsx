@@ -11,7 +11,7 @@
 import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 import { addMonths, format, getDaysInMonth, isSameMonth, startOfMonth } from "date-fns";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { basePrice, grossUp, resolveExchangeRate, type Currency } from "@/lib/pricing";
+import { basePrice, checkoutAmounts, isFeeIncluded, type Currency } from "@/lib/pricing";
 import { findClosestPickup, getWalkingMinutes, type PickupLocation } from "@/lib/utils";
 import { getTranslation } from "@/lib/translations";
 import { getPickupDisplayNameByLang } from "@/constants/pickupLocations";
@@ -310,8 +310,10 @@ export default function BookingModal({
     const priceRow = row;
     const needsOption = isMarine && !comboOption;
     const base = priceRow && !needsOption ? basePrice(priceRow, currency, { adultCount: adult, childCount: child }, comboOption ?? undefined) : null;
-    const total = base !== null && priceRow ? grossUp(base, currency, resolveExchangeRate(priceRow)) : null;
-    const fee = base !== null && total !== null ? total - base : null;
+    const amounts = base !== null && priceRow ? checkoutAmounts(priceRow, base, currency) : null;
+    const total = amounts?.total ?? null;
+    // 수수료 포함 상품(1·2부·선셋)은 인원별 금액의 합이 곧 총액이라 수수료 줄을 따로 보이지 않는다.
+    const fee = amounts && priceRow && !isFeeIncluded(priceRow.tour_id) ? amounts.fee : null;
     const unit = (type: "adult" | "child") => {
         if (!priceRow) return 0;
         return basePrice(priceRow, currency, { adultCount: type === "adult" ? 1 : 0, childCount: type === "child" ? 1 : 0 }, comboOption ?? undefined);
