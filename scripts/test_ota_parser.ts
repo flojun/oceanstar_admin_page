@@ -626,3 +626,25 @@ for (const [option, want] of [
     assert.ok(!b.note.includes('옵션: 선셋)'), `상품명의 (옵션:선셋) 이 옵션으로 들어갔다: ${b.note}`);
 }
 console.log('OK — 여기어때 옵션 줄 (상품명의 "(옵션:선셋)" 무시)');
+
+// ---------------------------------------------------------------- GYG 새 상품 제목 (2026-10)
+// 제목에 "Free Pickup" 이 들어가면서 상품명이 픽업 주소로 읽혔다 (실제 GYG83W6MKA28 구조).
+const gygNewTitle = parseOtaEmail(
+    `<h1>Hi Supply Partner, great news!<br>Your offer has been booked:</h1>
+     <p class="activity activity-title">Waikiki: Turtle Canyon Snorkel, 6 Activities &amp; Free Pickup</p>
+     <p class="activity activity-option-title">[4HR w/PickUp] Waikiki Turtle Canyon Snorkel 6-in-1 Activity</p>
+     <div class="left-content"><p class="title">Reference number</p></div><div class="right-content"><a><strong>GYG83W6MKA28</strong></a></div>
+     <div class="left-content"><p class="title">Date</p></div><div class="right-content"><span><strong>December 16, 2026, 8:00 AM</strong></span></div>
+     <div class="left-content"><p class="title">Number of participants</p></div><div class="right-content"><span><strong>2 x</strong> Adults (Age 8 - 99)</span></div>
+     <div class="left-content"><p class="title">Main customer</p></div><div class="right-content"><span>Margaret Anne Connolly</span><a><br> customer-toomofbytmj4qdxr@reply.getyourguide.com</a><br><span>Phone: +61412009788</span></div>
+     <div class="left-content"><p class="title">Pickup</p></div><div class="right-content"><span>Starbucks Coffee Company, 410 Atkinson Dr, Honolulu, HI 96814, USA</span><a><br> Open in Google Maps</a></div>
+     <div class="left-content"><p class="title">Price</p></div><div class="right-content"><span>$ 240.00</span></div>`,
+    'Booking - S257755 - GYG83W6MKA28',
+    'GetYourGuide <do-not-reply@notification.getyourguide.com>',
+);
+assert.ok(gygNewTitle, 'gyg 새 제목 파싱 실패');
+assert.equal(gygNewTitle.pickupLocation, 'Starbucks Coffee Company, 410 Atkinson Dr, Honolulu, HI 96814, USA');
+assert.equal(gygNewTitle.name, 'Margaret Anne Connolly');
+assert.equal(gygNewTitle.option, '1부');
+assert.equal(gygNewTitle.pax, '2명');
+console.log('OK — GYG 새 상품 제목("Free Pickup")에서도 픽업 칸을 읽음');

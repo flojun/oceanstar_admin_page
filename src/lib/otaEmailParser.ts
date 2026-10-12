@@ -163,6 +163,27 @@ function field(text: string, label: string): string {
  * 라벨 **다음 줄**의 값을 뽑는다. GYG 변경 메일 전용.
  * 라벨 줄에 `New` 배지가 붙어 오므로("Pickup location New") 그건 값으로 치지 않는다.
  */
+/**
+ * 줄 **머리**에 라벨이 있는 칸의 값. `field()` 는 라벨이 줄 어디에 있든 첫 줄을 잡는다.
+ *
+ * GYG 는 2026-10 무렵 상품 제목을 "Waikiki: Turtle Canyon Snorkel, 6 Activities & Free Pickup
+ * [4HR w/PickUp] …" 로 바꿨다. 제목 줄에 "Pickup" 이 들어 있어서 `field(text, 'Pickup')` 이
+ * 상품명을 픽업 주소로 읽었고, 그 문구를 지오코딩한 와이키키 중심 근처(HM 등)가 픽업으로 들어갔다.
+ */
+function labelledValue(text: string, label: string): string {
+    const lines = text.split('\n');
+    const head = new RegExp(`^${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\s*[:：]|\\s|$)`);
+    const i = lines.findIndex((l) => head.test(l.trim()));
+    if (i === -1) return '';
+
+    const rest = lines[i].trim().slice(label.length).replace(/^[\s:：]+/, '').trim();
+    if (rest) return rest;
+    for (let j = i + 1; j < lines.length; j++) {
+        if (lines[j].trim()) return lines[j].trim();
+    }
+    return '';
+}
+
 function valueAfterLabel(text: string, label: string): string {
     const lines = text.split('\n');
     const i = lines.findIndex((l) => l.includes(label));
@@ -416,7 +437,8 @@ function parseGyg(text: string): ParsedFields | null {
         adultCount: adult,
         childCount: child,
         // "…, Honolulu, HI 96815, USA Open in Google Maps" 에서 링크 문구를 떼어 낸다.
-        pickupLocation: clean(field(text, 'Pickup')).replace(/\s*Open in Google Maps\s*$/i, '').trim(),
+        // "Open in Google Maps" 링크 문구를 떼어 낸다.
+        pickupLocation: clean(labelledValue(text, 'Pickup')).replace(/\s*Open in Google Maps\s*$/i, '').trim(),
         contact: phoneOf(phoneTail) || phoneOf(field(text, 'Phone')),
         bookerEmail: emailPart.trim() || text.match(/[\w.+-]+@[\w.-]+\.\w+/)?.[0] || '',
         note: [lang && `언어: ${lang}`, price && `금액: ${price}`, reason && `취소사유: ${reason}`]
