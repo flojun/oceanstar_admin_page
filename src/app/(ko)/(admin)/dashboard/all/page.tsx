@@ -111,10 +111,11 @@ function AllReservationsContent() {
     const [tabCounts, setTabCounts] = useState({ guidance: 0, cancellation: 0, reschedule: 0 });
     useEffect(() => {
         const fetchTabCounts = async () => {
-            const head = (status: string) =>
-                supabase.from('reservations').select('*', { count: 'exact', head: true }).eq('status', status);
+            const head = (...statuses: string[]) =>
+                supabase.from('reservations').select('*', { count: 'exact', head: true }).in('status', statuses);
+            // 정원초과도 손님에게 연락해야 하는 건이라 안내필요 탭에 같이 센다.
             const [guidance, cancellation, reschedule] = await Promise.all([
-                head('안내필요'), head('취소요청'), head('변경요청'),
+                head('안내필요', '정원초과'), head('취소요청'), head('변경요청'),
             ]);
             setTabCounts({
                 guidance: guidance.count || 0,
@@ -1639,6 +1640,7 @@ function AllReservationsContent() {
                 if (status === "예약확정") className = "text-green-600 font-bold";
                 else if (status === "예약대기") className = "text-yellow-600 font-bold";
                 else if (status === "안내필요") className = "text-purple-600 font-bold";
+                else if (status === "정원초과") className = "text-rose-700 font-bold";
                 else if (status === "취소요청") className = "text-orange-600 font-bold";
                 else if (status === "취소") className = "text-red-600 font-bold line-through";
 

@@ -1208,10 +1208,10 @@ function UnassignedDropZone({ items, id, totalPax }: { items: Reservation[], id:
 
     // Split items by status
     const confirmedItems = useMemo(() => items.filter(i => i.status === '예약확정'), [items]);
-    // '안내필요' 도 아직 확정 전이라 예약대기와 같은 자리에 둔다.
+    // '안내필요'·'정원초과' 도 아직 확정 전이라 예약대기와 같은 자리에 둔다.
     // 빠뜨리면 조회는 되는데 어느 목록에도 안 그려져서 배차에서 통째로 사라진다.
     const pendingItems = useMemo(
-        () => items.filter(i => i.status === '대기' || i.status === '예약대기' || i.status === '안내필요'),
+        () => items.filter(i => i.status === '대기' || i.status === '예약대기' || i.status === '안내필요' || i.status === '정원초과'),
         [items],
     );
 

@@ -46,7 +46,9 @@ export function DraggableBar({ reservation, index }: DraggableBarProps) {
                     className={`shrink-0 rounded px-1 py-0.5 text-[10px] font-bold ${
                         reservation.status === '안내필요'
                             ? 'bg-purple-100 text-purple-700'
-                            : 'bg-yellow-100 text-yellow-700'
+                            : reservation.status === '정원초과'
+                                ? 'bg-rose-100 text-rose-700'
+                                : 'bg-yellow-100 text-yellow-700'
                     }`}
                 >
                     {reservation.status}

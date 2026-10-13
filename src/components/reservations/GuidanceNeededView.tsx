@@ -9,6 +9,7 @@ import { Check, PhoneCall } from "lucide-react";
 /**
  * OTA 신규 예약은 '안내필요' 로 들어온다. 손님에게 픽업 시간·장소를 안내한 뒤
  * '예약확정' 으로 닫는 자리. 투어일이 가까운 순으로 올린다.
+ * 그날 정원을 넘긴 예약은 '정원초과' 로 들어온다. 다른 날·부로 옮기거나 거절해야 해서 여기 같이 올린다.
  */
 export default function GuidanceNeededView() {
     const [rows, setRows] = useState<Reservation[]>([]);
@@ -22,7 +23,7 @@ export default function GuidanceNeededView() {
             const { data, error } = await supabase
                 .from("reservations")
                 .select("*")
-                .eq("status", "안내필요")
+                .in("status", ["안내필요", "정원초과"])
                 .order("tour_date", { ascending: true })
                 .limit(100);
 
@@ -80,7 +81,7 @@ export default function GuidanceNeededView() {
                         <PhoneCall className="w-4 h-4 shrink-0 text-purple-400 mt-0.5" />
                         {/* 안내필요 · 경로 · 이름 · 날짜 · 인원수 · 옵션 · 픽업장소 · 연락처 순서 */}
                         <div className="min-w-0 flex-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                            <span className="text-[12.1px] px-1.5 py-0.5 rounded font-medium bg-purple-50 text-purple-700">안내필요</span>
+                            <span className={`text-[12.1px] px-1.5 py-0.5 rounded font-medium ${r.status === "정원초과" ? "bg-rose-50 text-rose-700" : "bg-purple-50 text-purple-700"}`}>{r.status}</span>
                             <span className="text-[12.1px] text-gray-400">{r.source}</span>
                             <span className="font-bold text-gray-900">{r.name}</span>
                             <span className="font-bold text-purple-600 text-[13.2px]">{formatDateDisplay(r.tour_date)}</span>

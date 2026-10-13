@@ -8,6 +8,7 @@ import { withAppliedDateMarker } from '@/lib/rescheduleNote';
 import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
 import { getPickupLocations, resolveNearestPickup } from '@/lib/nearestPickup';
 import { imapAccounts, openAllMail } from '@/lib/imapAccounts';
+import { checkCapacity, OVER_CAPACITY_STATUS } from '@/lib/capacity';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 
@@ -15,6 +16,7 @@ import { simpleParser } from 'mailparser';
  * OTA(클룩·GetYourGuide·Viator·여기어때·트리플·줌줌투어) 예약 메일 자동 수집 Cron.
  * - 5분마다 Gmail IMAP 에서 아직 처리하지 않은 메일을 플랫폼별로 검색
  * - 신규 예약 → reservations INSERT (상태 '안내필요')  ← 운영자가 직접 안내 후 '예약확정' 으로 변경
+ *   그날 그 부가 이 예약으로 정원을 넘으면 상태 '정원초과' + 투어일과 무관하게 Discord 알림
  * - 취소     → 기존 예약 UPDATE (상태 '취소요청')      ← '취소' 로 바로 바꾸지 않는다. 눈으로 확인 후 마감.
  * - 부분취소 → 인원만 '남은 수량' 으로 줄이고 상태 '안내필요' ← 남은 손님이 있으므로 취소요청으로 보내지 않는다.
  * - 변경     → 기존 예약의 픽업/인원/날짜만 갱신 (GYG "Booking detail change") ← INSERT 하지 않는다.
@@ -127,7 +129,7 @@ export async function GET(request: Request) {
                                         : await handleCancel(booking);
 
                             if (outcome === 'error') { errors++; continue; }
-                            if (outcome === 'inserted') inserted++;
+                            if (outcome === 'inserted' || outcome === 'overbooked') inserted++;
                             if (outcome === 'cancelled') cancelled++;
                             if (outcome === 'partial') partial++;
                             if (outcome === 'updated') updated++;
@@ -170,7 +172,7 @@ export async function GET(request: Request) {
     }
 }
 
-type Outcome = 'inserted' | 'duplicate' | 'cancelled' | 'partial' | 'updated' | 'unmatched' | 'error';
+type Outcome = 'inserted' | 'overbooked' | 'duplicate' | 'cancelled' | 'partial' | 'updated' | 'unmatched' | 'error';
 
 /** detail 은 Discord 알림에 실을 "무엇이 바뀌었는지" 요약. */
 type Result = { outcome: Outcome; detail?: string };
@@ -231,12 +233,14 @@ async function handleNew(b: OtaBooking): Promise<Result> {
         return { outcome: 'duplicate' };
     }
 
+    const capacity = await capacityFor(b);
+
     const { error } = await supabaseServer.from('reservations').insert({
         order_id: b.orderId,
         name: b.name,
         tour_date: b.tourDate,
         source: b.source,
-        status: '안내필요',
+        status: capacity?.over ? OVER_CAPACITY_STATUS : '안내필요',
         option: b.option,
         pax: b.pax,
         adult_count: b.adultCount,
@@ -253,7 +257,30 @@ async function handleNew(b: OtaBooking): Promise<Result> {
         console.error('[OTA Cron] INSERT 실패:', error);
         return { outcome: 'error' };
     }
+    if (capacity?.over) {
+        return {
+            outcome: 'overbooked',
+            detail: `${capacity.group}: 기존 ${capacity.current}명 + 이 예약 ${b.pax} = ${capacity.total}/${capacity.limit}명. 손님에게 다른 날·부를 안내하거나 플랫폼에서 거절해주세요.`,
+        };
+    }
     return { outcome: 'inserted' };
+}
+
+/**
+ * 옵션(부)이 있는 신규 예약이 그날 정원을 넘기는지. 대시보드 초과 경고와 같은 계산.
+ * 옵션이 없거나 조회에 실패하면 판단하지 않는다(null) — 그러면 평소처럼 '안내필요' 로 들어간다.
+ */
+async function capacityFor(b: OtaBooking) {
+    if (!b.option || !b.tourDate) return null;
+    const [{ data: settings, error: settingsError }, { data: sameDay, error: sameDayError }] = await Promise.all([
+        supabaseServer.from('tour_settings').select('*'),
+        supabaseServer.from('reservations').select('option, pax').eq('tour_date', b.tourDate).neq('status', '취소'),
+    ]);
+    if (settingsError || sameDayError || !settings) {
+        console.error('[OTA Cron] 정원 조회 실패:', settingsError || sameDayError);
+        return null;
+    }
+    return checkCapacity(b.option, b.pax, sameDay || [], settings);
 }
 
 /** 취소 메일 → 기존 예약을 '취소요청' 으로. 없으면 unmatched (INSERT 하지 않는다) */
@@ -448,8 +475,9 @@ async function notify(b: OtaBooking, outcome: Outcome, detail?: string): Promise
             : outcome === 'partial' ? `✂️ [부분취소] ${platform} 인원이 줄었습니다`
                 : outcome === 'updated' ? `🔄 [예약변경] ${platform} 날짜·인원·픽업이 바뀌었습니다`
                     : outcome === 'unmatched' ? `⚠️ [${kindLabel}] ${platform} — 매칭되는 예약을 못 찾음`
-                        : outcome === 'inserted' && isUrgentTourDate(b.tourDate) ? `🚨 [안내필요] ${platform} 긴급 예약!`
-                            : null;
+                        : outcome === 'overbooked' ? `⛔ [정원초과] ${platform} 예약이 정원을 넘었습니다`
+                            : outcome === 'inserted' && isUrgentTourDate(b.tourDate) ? `🚨 [안내필요] ${platform} 긴급 예약!`
+                                : null;
 
     if (!title) return false;
 
@@ -465,7 +493,7 @@ async function notify(b: OtaBooking, outcome: Outcome, detail?: string): Promise
         detail,
     });
 
-    // 알림이 실패해도 DB 는 이미 갱신됐고 상태가 '안내필요'/'취소요청' 이라
+    // 알림이 실패해도 DB 는 이미 갱신됐고 상태가 '안내필요'/'정원초과'/'취소요청' 이라
     // 대시보드 종 알림에는 남는다. 로그만 크게 남긴다.
     if (!sent) console.error(`[OTA Cron] ⚠️ Discord 알림 실패 — ${title} / ${b.orderId}`);
     return sent;
