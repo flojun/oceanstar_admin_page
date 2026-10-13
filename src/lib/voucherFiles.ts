@@ -62,6 +62,20 @@ const START_TIME_TO_SET: Record<string, SunsetSet> = {
     '15:30': '330',
 };
 
+/**
+ * 투어일 기준으로 선셋 세트를 고정하는 기간. tour_settings 의 출항 시각보다 우선한다.
+ * 날짜는 하와이 투어일('YYYY-MM-DD'), 양 끝 포함.
+ */
+const SUNSET_SEASONS: { from: string; to: string; set: SunsetSet }[] = [
+    { from: '2026-10-13', to: '2026-12-31', set: '230' },
+];
+
+function seasonalSunsetSet(tourDate?: string): SunsetSet | null {
+    if (!tourDate) return null;
+    const d = tourDate.slice(0, 10);
+    return SUNSET_SEASONS.find(s => s.from <= d && d <= s.to)?.set ?? null;
+}
+
 type Session = '1' | '2' | '3';
 
 /** "HM (3:05)" -> { key: 'HM', time: '305' } */
@@ -109,7 +123,7 @@ async function currentSunsetSet(): Promise<SunsetSet | null> {
 }
 
 /** 첨부할 파일명을 정한다. 붙일 수 없으면 null. */
-export async function resolveVoucherFile(pickupLocation: string, option: string): Promise<string | null> {
+export async function resolveVoucherFile(pickupLocation: string, option: string, tourDate?: string): Promise<string | null> {
     const { key, time } = parsePickup(pickupLocation);
     if (!key) {
         console.warn(`[voucher] 매핑되지 않은 픽업 장소: "${pickupLocation}"`);
@@ -119,10 +133,10 @@ export async function resolveVoucherFile(pickupLocation: string, option: string)
     const session = parseSession(option);
     if (session !== '3') return `${key}_${session}.pdf`;
 
-    // 괄호에 적힌 시간이 가장 정확하다. 없으면 현재 선셋 세트로 표에서 찾는다.
+    // 괄호에 적힌 시간이 가장 정확하다. 없으면 투어일의 시즌 세트, 그다음 현재 선셋 세트로 표에서 찾는다.
     if (time) return `${key}_3_${time}.pdf`;
 
-    const set = await currentSunsetSet();
+    const set = seasonalSunsetSet(tourDate) ?? await currentSunsetSet();
     const fallback = set ? SUNSET_PICKUP[key]?.[set] : null;
     if (!fallback) {
         console.warn(`[voucher] 선셋 픽업 시각을 정하지 못함: "${pickupLocation}" / "${option}"`);
