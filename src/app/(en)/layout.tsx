@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   },
   verification: {
     other: {
-      "naver-site-verification": [""], // 네이버 소유권 확인 토큰
+      "naver-site-verification": ["8e3a5d8912aa0697514db8be852d98dd3a03c6f9"], // 네이버 서치어드바이저 소유확인 (www.oceanstarhi.com)
     },
   },
 };

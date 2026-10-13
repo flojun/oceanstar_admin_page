@@ -1,7 +1,7 @@
 import { SITE_URL } from "@/lib/site";
 import type { TourSetting } from "@/lib/tourUtils";
 import { FAQ, REFUND_ROWS } from "./faqData";
-import { links } from "./links";
+import { EXTERNAL, links } from "./links";
 import type { GoogleSummary } from "@/lib/siteData";
 import { availableTours, fromPrice, type Lang, type TourDef } from "./tours";
 
@@ -23,6 +23,12 @@ const business = (lang: Lang, g: GoogleSummary) => ({
     image: abs("/renewal/hero_waikiki.jpg"),
     address: { "@type": "PostalAddress", streetAddress: "1125 Kewalo Basin Harbor, Gate D #110", addressLocality: "Honolulu", addressRegion: "HI", postalCode: "96814", addressCountry: "US" },
     aggregateRating: rating(g),
+    // 네이버 '사이트 연관 채널'과 구글 지식 패널이 같은 업체의 공식 채널로 묶는다
+    sameAs: [
+        "https://www.instagram.com/oceanstar_turtlesnorkelling",
+        "https://pf.kakao.com/_hzxeEn",
+        EXTERNAL.googleMaps,
+    ],
 });
 
 function product(def: TourDef, settings: TourSetting[], lang: Lang, g: GoogleSummary) {
