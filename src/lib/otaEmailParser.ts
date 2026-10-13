@@ -106,7 +106,7 @@ export const OTA_SUBJECT: Record<OtaPlatform, string[]> = {
 /** 범위를 벗어난 숫자 엔티티에 fromCodePoint 가 던지면 메일 한 통이 통째로 처리 실패한다. */
 const codePoint = (n: number) => (n > 0 && n <= 0x10ffff ? String.fromCodePoint(n) : '');
 
-function htmlToText(html: string): string {
+export function htmlToText(html: string): string {
     return html
         .replace(/<(script|style)[\s\S]*?<\/\1>/gi, '')
         .replace(/<br\s*\/?>/gi, '\n')

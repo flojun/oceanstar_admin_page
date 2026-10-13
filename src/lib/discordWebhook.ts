@@ -78,3 +78,50 @@ export async function sendDiscordUrgentAlert(params: DiscordAlertParams): Promis
         return false;
     }
 }
+
+/**
+ * 여러 줄짜리 점검 보고. 긴급 예약 알림처럼 칸이 정해진 내용이 아닐 때 쓴다.
+ * 문제가 있을 때만 역할 멘션을 단다(매일 "이상 없음" 으로 사람을 부르지 않는다).
+ */
+export async function sendDiscordReport(params: {
+    title: string;
+    description: string;
+    ok: boolean;
+}): Promise<boolean> {
+    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+    const roleId = process.env.DISCORD_URGENT_ROLE_ID;
+    if (!webhookUrl) {
+        console.error('[Discord] DISCORD_WEBHOOK_URL이 설정되지 않았습니다.');
+        return false;
+    }
+
+    // 임베드 설명은 4096자까지다. 넘치면 잘라서라도 보낸다(안 보내는 것보다 낫다).
+    const description = params.description.length > 4000
+        ? `${params.description.slice(0, 4000)}\n… (잘림)`
+        : params.description;
+
+    try {
+        const response = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                content: !params.ok && roleId ? `<@&${roleId}> ${params.title}` : params.title,
+                embeds: [{
+                    title: params.title,
+                    description,
+                    color: params.ok ? 0x2ECC71 : 0xFF0000,
+                    timestamp: new Date().toISOString(),
+                    footer: { text: 'Ocean Star 메일 형식 점검' },
+                }],
+            }),
+        });
+        if (!response.ok) {
+            console.error(`[Discord] 보고 발송 실패: ${response.status} ${response.statusText}`);
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('[Discord] 보고 발송 중 오류:', error);
+        return false;
+    }
+}
