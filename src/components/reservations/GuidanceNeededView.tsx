@@ -56,6 +56,32 @@ export default function GuidanceNeededView() {
         window.dispatchEvent(new Event("reservation_status_changed"));
     };
 
+    /** 확정 + 픽업 시간 알림톡. 시간은 서버가 픽업 장소 괄호(1·2부는 고정 시간표)에서 읽는다. */
+    const confirmWithAlimtalk = async (r: Reservation) => {
+        if (!confirm(`${r.name} (${formatDateDisplay(r.tour_date)}) 예약확정으로 바꾸고 픽업 시간 알림톡을 보낼까요?`)) return;
+
+        setProcessingId(r.id);
+        try {
+            const res = await fetch("/api/admin/confirm-with-alimtalk", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: r.id }),
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+
+            setRows((prev) => prev.filter((x) => x.id !== r.id));
+            window.dispatchEvent(new Event("reservation_status_changed"));
+            alert(json.alimtalk === "sent" ? `예약확정 + 알림톡 발송 완료 (픽업 ${json.pickupTime})`
+                : json.alimtalk === "failed" ? "예약확정은 됐지만 알림톡 발송에 실패했습니다. 직접 안내해 주세요."
+                : "예약확정은 됐지만 알림톡은 보내지 않았습니다 (휴대폰 번호가 아니거나 알림톡 설정 전). 직접 안내해 주세요.");
+        } catch (error) {
+            alert(error instanceof Error ? error.message : "처리 중 오류가 발생했습니다.");
+        } finally {
+            setProcessingId(null);
+        }
+    };
+
     if (loading) {
         return <div className="p-8 text-center text-gray-500">불러오는 중...</div>;
     }
@@ -96,6 +122,13 @@ export default function GuidanceNeededView() {
                             className="shrink-0 px-2 py-1 text-[13.2px] font-bold text-white bg-purple-600 rounded hover:bg-purple-700 disabled:opacity-50"
                         >
                             {processingId === r.id ? "처리 중..." : "안내완료"}
+                        </button>
+                        <button
+                            onClick={() => confirmWithAlimtalk(r)}
+                            disabled={processingId === r.id}
+                            className="shrink-0 px-2 py-1 text-[13.2px] font-bold text-gray-900 bg-yellow-300 rounded hover:bg-yellow-400 disabled:opacity-50"
+                        >
+                            확정+알림톡
                         </button>
                     </div>
                 ))}

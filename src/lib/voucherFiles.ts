@@ -145,6 +145,33 @@ export async function resolveVoucherFile(pickupLocation: string, option: string,
     return `${key}_3_${fallback}.pdf`;
 }
 
+/** 홈페이지 예약 화면엔 숨기는(=pickup_locations 에 없는) 관리자 전용 픽업 장소의 1·2부 시각 */
+const ADMIN_ONLY_PICKUP: Record<string, { time_1: string; time_2: string }> = {
+    HIE: { time_1: '07:40', time_2: '10:40' },
+};
+
+/**
+ * 알림톡용 픽업 시각("오후 2:35"). 정하지 못하면 null.
+ * 픽업 장소 괄호에 적힌 시간("HM (2:35)", "HM(2:35)")이 우선, 없으면 1·2부만 pickup_locations 고정 시간표.
+ * 선셋·프라이빗 등은 운영자가 괄호에 적어 둔 시간만 믿는다 — 추측한 시간을 손님에게 보내지 않는다.
+ */
+export async function pickupTime(pickupLocation: string, option: string): Promise<string | null> {
+    let hhmm = parsePickup(pickupLocation).time;
+    const column = option?.includes('2부') ? 'time_2' : option?.includes('1부') ? 'time_1' : null;
+    if (!hhmm && column) {
+        const name = (pickupLocation || '').replace(/\(.*?\)/g, '').trim();
+        const { data } = await supabaseServer.from('pickup_locations').select('time_1, time_2').eq('name', name).maybeSingle();
+        const row = data ?? ADMIN_ONLY_PICKUP[name];
+        hhmm = (row?.[column] as string | null)?.slice(0, 5).replace(':', '') ?? null;
+    }
+    if (!hhmm) return null;
+    const h = Number(hhmm.slice(0, -2));
+    const m = hhmm.slice(-2);
+    // ponytail: 1~6시는 오후로 본다 — 새벽 픽업이 생기면 고칠 것
+    const pm = h >= 12 || h <= 6;
+    return `${pm ? '오후' : '오전'} ${h % 12 || 12}:${m}`;
+}
+
 /** Storage에서 받아 임시폴더에 캐시한다. 실패하면 null. */
 async function downloadVoucher(lang: 'ko' | 'en', fileName: string): Promise<string | null> {
     const cached = path.join(CACHE_ROOT, lang, fileName);

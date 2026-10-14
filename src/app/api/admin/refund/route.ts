@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { sendAlimtalk } from '@/lib/alimtalk';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { getAdminUser } from '@/lib/adminAuth';
 import { stripeClient } from '@/lib/stripeBooking';
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
 
         const { data: rows, error: fetchError } = await supabaseServer
             .from('reservations')
-            .select('id, order_id, name, note, status, payment_intent_id, refunded_amount')
+            .select('id, order_id, name, note, status, payment_intent_id, refunded_amount, contact, tour_date, option')
             .eq('order_id', order_id);
 
         if (fetchError) {
@@ -138,6 +139,21 @@ export async function POST(request: Request) {
                     ...(mode === 'canceled' ? { captured_at: null } : {}),
                 })
                 .eq('id', row.id);
+        }
+
+        // 예약이 끝났으면(전액 환불이거나 손님이 취소를 요청한 건) 취소 안내,
+        // 예약이 살아 있으면(코스 이동 차액 등) 부분 환불 안내.
+        const first = rows[0];
+        const cancelled = remainingMinor <= 0 || first.status === '취소요청';
+        if (first.contact) {
+            await sendAlimtalk(first.contact, cancelled ? process.env.SOLAPI_TPL_CANCEL : process.env.SOLAPI_TPL_PARTIAL, {
+                이름: first.name,
+                예약번호: first.order_id,
+                투어: first.option,
+                날짜: first.tour_date,
+                사유: reason,
+                환불금액: new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(fromMinor(processedMinor, currency)),
+            }).catch(err => console.error('[refund] 알림톡 실패:', order_id, err));
         }
 
         return NextResponse.json({

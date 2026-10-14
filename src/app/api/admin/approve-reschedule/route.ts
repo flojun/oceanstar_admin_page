@@ -3,6 +3,7 @@ import { supabaseServer } from '@/lib/supabaseServer';
 import { getAdminUser } from '@/lib/adminAuth';
 import { resolveOptionToTourSetting } from '@/lib/tourUtils';
 import { stripRescheduleMarkers } from '@/lib/rescheduleNote';
+import { bookingVars, sendAlimtalk } from '@/lib/alimtalk';
 
 export async function POST(req: Request) {
     try {
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
         // 1. 현재 대기중인 예약 정보 가져오기
         const { data: reservation, error: fetchErr } = await supabaseServer
             .from('reservations')
-            .select('id, pax, option, booker_email, name')
+            .select('id, order_id, pax, option, booker_email, name, contact')
             .eq('id', reservation_id)
             .single();
 
@@ -86,6 +87,12 @@ export async function POST(req: Request) {
             .eq('id', reservation_id);
 
         if (updateErr) throw updateErr;
+
+        if (reservation.contact) {
+            await sendAlimtalk(reservation.contact, process.env.SOLAPI_TPL_CHANGE,
+                bookingVars({ ...reservation, tour_date: new_date, pickup_location: new_pickup })
+            ).catch(err => console.error('Failed to send change alimtalk:', reservation_id, err));
+        }
 
         // 4. 이메일/알림톡 발송 로직 가이드 (안내 스니펫 연동 구조)
         const notificationSnippet = `예약 변경이 확정되었습니다.\n\n픽업 장소 및 시간, ${new_pickup}`;
