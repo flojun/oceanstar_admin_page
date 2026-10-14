@@ -11,6 +11,7 @@ export const PICKUP_LOCATIONS = [
     "알라모아나",
     "리츠칼튼",
     "HIE",
+    "카할라",
     "직접"
 ] as const;
 
@@ -30,6 +31,7 @@ export const PICKUP_MAPPINGS: Record<string, string> = {
     '알라모아나': 'Ala Moana Hotel',
     '리츠칼튼': 'Ritz Carlton Hotel',
     'HIE': 'Holiday Inn Express',
+    '카할라': 'The Kahala Hotel & Resort',
     '직접': '개별 이동 (항구 직접 도착)'
 };
 
@@ -47,6 +49,7 @@ export const PICKUP_MAPPINGS_EN: Record<string, string> = {
     '알라모아나': 'Ala Moana Hotel',
     '리츠칼튼': 'Ritz Carlton Hotel',
     'HIE': 'Holiday Inn Express',
+    '카할라': 'The Kahala Hotel & Resort',
     '직접': 'Self Arrival'
 };
 
