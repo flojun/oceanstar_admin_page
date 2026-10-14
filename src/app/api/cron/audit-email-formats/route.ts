@@ -22,7 +22,9 @@ import { sendDiscordReport } from '@/lib/discordWebhook';
  *   ④ 수집 cron 의 제목 검색에 안 걸리는 예약 관련 메일이 있는지 (제목 변경)
  * 를 보고 Discord 로 보고한다. 문제가 없어도 "이상 없음" 을 한 줄 보내서 점검이 돌았다는 걸 남긴다.
  */
-export const maxDuration = 60;
+export const maxDuration = 300;
+/** 이 시간이 지나면 남은 플랫폼은 건너뛰고 그때까지 본 것만 보고한다. 끊겨서 아무 보고도 안 가는 것보다 낫다. */
+const TIME_BUDGET_MS = 240 * 1000;
 
 const PLATFORMS: OtaPlatform[] = ['klook', 'gyg', 'viator', 'yeogi', 'triple', 'zoomzoom', 'waug'];
 const MRT_SUBJECTS = ['확정대기', '확정완료', '예약취소', '취소 요청 접수'];
@@ -50,78 +52,89 @@ export async function GET(request: Request) {
     const problems: string[] = [];
     const seen = new Set<string>();   // 두 메일함에 같은 메일이 있으면 한 번만 본다
     const note = (p: AuditPlatform, ref: string, what: string) => problems.push(`[${LABEL[p]}] ${ref} — ${what}`);
+    const skipped: string[] = [];
+    const outOfTime = () => Date.now() - now.getTime() > TIME_BUDGET_MS;
 
-    for (const account of accounts) {
-        const client = new ImapFlow({ host: 'imap.gmail.com', port: 993, secure: true, auth: account, logger: false });
-        try {
-            await client.connect();
-            await openAllMail(client, { readOnly: true });
+    // 어디서 예외가 나도 Discord 보고는 반드시 보낸다(보고가 없으면 점검이 돌았는지조차 모른다).
+    try {
+        for (const account of accounts) {
+            const client = new ImapFlow({ host: 'imap.gmail.com', port: 993, secure: true, auth: account, logger: false });
+            try {
+                await client.connect();
+                await openAllMail(client, { readOnly: true });
 
-            for (const platform of ['myrealtrip', ...PLATFORMS] as AuditPlatform[]) {
-                const from = platform === 'myrealtrip' ? 'myrealtrip' : OTA_FROM[platform];
-                const subjects = platform === 'myrealtrip' ? MRT_SUBJECTS : OTA_SUBJECT[platform];
-                const { cronMails, otherSubjects } = await collect(client, from, subjects, windowStart, seen);
+                for (const platform of ['myrealtrip', ...PLATFORMS] as AuditPlatform[]) {
+                    if (outOfTime()) { skipped.push(`${account.user} ${LABEL[platform]}`); continue; }
+                    const from = platform === 'myrealtrip' ? 'myrealtrip' : OTA_FROM[platform];
+                    const subjects = platform === 'myrealtrip' ? MRT_SUBJECTS : OTA_SUBJECT[platform];
+                    const { cronMails, otherSubjects } = await collect(client, from, subjects, windowStart, seen);
 
-                // ④ 제목이 바뀌어 수집 cron 이 못 보는 예약 메일
-                for (const subject of otherSubjects) {
-                    if (looksLikeMissedBookingSubject(subject)) note(platform, `"${subject.slice(0, 80)}"`, '수집 cron 의 제목 검색에 안 걸리는 예약 관련 메일');
-                }
-
-                for (const mail of cronMails) {
-                    checked[platform]++;
-                    const old = now.getTime() - mail.receivedAt.getTime() > DB_GRACE_MS;
-                    const ref = mail.subject.match(/EXP-\d{8}-\d{8}|BR-\d+|GYG[A-Z0-9]{6,}|[A-Z]{3}\d{6}|\d{6,}/)?.[0] || `"${mail.subject.slice(0, 60)}"`;
-
-                    // ① 칸 이름
-                    if (BOOKING_LABELS[platform].subject.test(mail.subject)) {
-                        const missing = missingLabels(mail.html, BOOKING_LABELS[platform].labels);
-                        if (missing.length) note(platform, ref, `양식 변경 의심: ${missing.map((m) => `'${m}'`).join(', ')} 칸이 없음`);
+                    // ④ 제목이 바뀌어 수집 cron 이 못 보는 예약 메일
+                    for (const subject of otherSubjects) {
+                        if (looksLikeMissedBookingSubject(subject)) note(platform, `"${subject.slice(0, 80)}"`, '수집 cron 의 제목 검색에 안 걸리는 예약 관련 메일');
                     }
 
-                    if (platform === 'myrealtrip') {
-                        const parsed = parseMyRealTripEmail(mail.html, mail.subject);
-                        if (!parsed) {
-                            if (detectEmailType(mail.subject)) note(platform, ref, '메일을 읽지 못함');
+                    for (const mail of cronMails) {
+                        checked[platform]++;
+                        const old = now.getTime() - mail.receivedAt.getTime() > DB_GRACE_MS;
+                        const ref = mail.subject.match(/EXP-\d{8}-\d{8}|BR-\d+|GYG[A-Z0-9]{6,}|[A-Z]{3}\d{6}|\d{6,}/)?.[0] || `"${mail.subject.slice(0, 60)}"`;
+
+                        // ① 칸 이름
+                        if (BOOKING_LABELS[platform].subject.test(mail.subject)) {
+                            const missing = missingLabels(mail.html, BOOKING_LABELS[platform].labels);
+                            if (missing.length) note(platform, ref, `양식 변경 의심: ${missing.map((m) => `'${m}'`).join(', ')} 칸이 없음`);
+                        }
+
+                        if (platform === 'myrealtrip') {
+                            const parsed = parseMyRealTripEmail(mail.html, mail.subject);
+                            if (!parsed) {
+                                if (detectEmailType(mail.subject)) note(platform, ref, '메일을 읽지 못함');
+                                continue;
+                            }
+                            // ② 값
+                            for (const p of checkMrtReservation(parsed, now)) note(platform, ref, p);
+                            // ③ DB — 1인당 번호는 다른 행의 note 에 "[동일 예약 합침: …]" 로 붙어 있을 수 있다
+                            if ((parsed.type === 'pending' || parsed.type === 'confirmed') && old) {
+                                const num = parsed.reservation.orderNumber;
+                                const { count } = await supabaseServer.from('reservations')
+                                    .select('id', { count: 'exact', head: true })
+                                    .or(`order_id.eq.${num},note.ilike.%${num}%`);
+                                if (!count) note(platform, num, `DB 에 없음 (${parsed.reservation.travelerName} ${parsed.reservation.tourDate})`);
+                            }
                             continue;
                         }
-                        // ② 값
-                        for (const p of checkMrtReservation(parsed, now)) note(platform, ref, p);
-                        // ③ DB — 1인당 번호는 다른 행의 note 에 "[동일 예약 합침: …]" 로 붙어 있을 수 있다
-                        if ((parsed.type === 'pending' || parsed.type === 'confirmed') && old) {
-                            const num = parsed.reservation.orderNumber;
+
+                        const booking = parseOtaEmail(mail.html, mail.subject, mail.from);
+                        if (!booking) {
+                            // 인증번호·독촉·메시지처럼 원래 못 읽는 메일은 빼고, 예약 메일인데 못 읽은 것만
+                            if (!isCustomerMessageSubject(mail.subject) && looksLikeMissedBookingSubject(mail.subject)) {
+                                note(platform, ref, '예약 메일로 보이는데 읽지 못함');
+                            }
+                            continue;
+                        }
+                        for (const p of checkOtaBooking(booking, now)) note(platform, booking.orderId || ref, p);
+                        if (booking.kind === 'new' && old) {
                             const { count } = await supabaseServer.from('reservations')
                                 .select('id', { count: 'exact', head: true })
-                                .or(`order_id.eq.${num},note.ilike.%${num}%`);
-                            if (!count) note(platform, num, `DB 에 없음 (${parsed.reservation.travelerName} ${parsed.reservation.tourDate})`);
+                                .eq('order_id', booking.orderId);
+                            if (!count) note(platform, booking.orderId, `DB 에 없음 (${booking.name} ${booking.tourDate})`);
                         }
-                        continue;
-                    }
-
-                    const booking = parseOtaEmail(mail.html, mail.subject, mail.from);
-                    if (!booking) {
-                        // 인증번호·독촉·메시지처럼 원래 못 읽는 메일은 빼고, 예약 메일인데 못 읽은 것만
-                        if (!isCustomerMessageSubject(mail.subject) && looksLikeMissedBookingSubject(mail.subject)) {
-                            note(platform, ref, '예약 메일로 보이는데 읽지 못함');
-                        }
-                        continue;
-                    }
-                    for (const p of checkOtaBooking(booking, now)) note(platform, booking.orderId || ref, p);
-                    if (booking.kind === 'new' && old) {
-                        const { count } = await supabaseServer.from('reservations')
-                            .select('id', { count: 'exact', head: true })
-                            .eq('order_id', booking.orderId);
-                        if (!count) note(platform, booking.orderId, `DB 에 없음 (${booking.name} ${booking.tourDate})`);
                     }
                 }
+            } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                console.error(`[Email Audit] ${account.user} 점검 실패:`, message);
+                problems.push(`[메일함] ${account.user} 접속/조회 실패 — ${message}`);
+            } finally {
+                await client.logout().catch(() => { });
             }
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            console.error(`[Email Audit] ${account.user} 점검 실패:`, message);
-            problems.push(`[메일함] ${account.user} 접속/조회 실패 — ${message}`);
-        } finally {
-            await client.logout().catch(() => { });
         }
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error('[Email Audit] 점검 중 오류:', message);
+        problems.push(`[점검] 도중에 멈춤 — ${message}`);
     }
+    if (skipped.length) problems.push(`[점검] 시간이 모자라 못 본 것: ${skipped.join(', ')}`);
 
     const counts = (Object.keys(checked) as AuditPlatform[])
         .filter((p) => checked[p] > 0)
@@ -148,7 +161,7 @@ export async function GET(request: Request) {
 async function collect(client: ImapFlow, from: string, subjects: string[], windowStart: Date, seen: Set<string>) {
     // IMAP SINCE 는 날짜 단위라 하루 앞에서 찾고, 도착 시각으로 다시 거른다.
     const since = new Date(windowStart.getTime() - 24 * 60 * 60 * 1000);
-    const all = new Set<number>((await client.search({ from, since }, { uid: true })) || []);
+    const all = (await client.search({ from, since }, { uid: true })) || [];
     const cronUids = new Set<number>();
     for (const subject of subjects) {
         for (const uid of (await client.search({ from, subject, since }, { uid: true })) || []) cronUids.add(uid);
@@ -156,25 +169,35 @@ async function collect(client: ImapFlow, from: string, subjects: string[], windo
 
     const cronMails: Mail[] = [];
     const otherSubjects: string[] = [];
-    for (const uid of [...all].sort((a, b) => a - b)) {
-        const inCron = cronUids.has(uid);
-        const msg = await client.fetchOne(String(uid), { envelope: true, internalDate: true, source: inCron }, { uid: true });
-        if (!msg) continue;
+    if (all.length === 0) return { cronMails, otherSubjects };
+
+    // 메일마다 따로 묻지 않고 한 번에 머리글만 받는다(한 통씩 왕복하면 수백 통에서 시간 제한에 걸린다).
+    const wanted: { uid: number; receivedAt: Date }[] = [];
+    for await (const msg of client.fetch(all, { envelope: true, internalDate: true }, { uid: true })) {
         const receivedAt = new Date(msg.internalDate ?? msg.envelope?.date ?? 0);
         if (receivedAt < windowStart) continue;
 
-        const key = msg.envelope?.messageId || `${from}:${uid}:${receivedAt.toISOString()}`;
+        const key = msg.envelope?.messageId || `${from}:${msg.uid}:${receivedAt.toISOString()}`;
         if (seen.has(key)) continue;
         seen.add(key);
 
-        if (!inCron || !msg.source) {
-            otherSubjects.push(msg.envelope?.subject || '');
-            continue;
-        }
-        const parsed = await simpleParser(msg.source);
+        if (cronUids.has(msg.uid)) wanted.push({ uid: msg.uid, receivedAt });
+        else otherSubjects.push(msg.envelope?.subject || '');
+    }
+    if (wanted.length === 0) return { cronMails, otherSubjects };
+
+    // 본문은 수집 cron 이 읽는 메일만, 역시 한 번에.
+    const receivedAtOf = new Map(wanted.map((w) => [w.uid, w.receivedAt]));
+    const sources: { source: Buffer; receivedAt: Date; subject: string }[] = [];
+    for await (const msg of client.fetch(wanted.map((w) => w.uid), { envelope: true, source: true }, { uid: true })) {
+        if (!msg.source) continue;
+        sources.push({ source: msg.source, receivedAt: receivedAtOf.get(msg.uid)!, subject: msg.envelope?.subject || '' });
+    }
+    for (const { source, receivedAt, subject } of sources) {
+        const parsed = await simpleParser(source);
         cronMails.push({
-            subject: parsed.subject || msg.envelope?.subject || '',
-            html: parsed.html || parsed.textAsHtml || msg.source.toString(),
+            subject: parsed.subject || subject,
+            html: parsed.html || parsed.textAsHtml || source.toString(),
             from: parsed.from?.text || from,
             receivedAt,
         });
