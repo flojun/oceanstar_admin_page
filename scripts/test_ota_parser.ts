@@ -648,3 +648,61 @@ assert.equal(gygNewTitle.name, 'Margaret Anne Connolly');
 assert.equal(gygNewTitle.option, '1부');
 assert.equal(gygNewTitle.pax, '2명');
 console.log('OK — GYG 새 상품 제목("Free Pickup")에서도 픽업 칸을 읽음');
+
+// ---------------------------------------------------------------- WAUG (실제 메일 9181379 / 9213805 / 9198358 구조)
+const waugHead = `Hello, this is WAUG<br /><br />You received a booking request for 하와이 거북이 100% 보장 스노클링 투어 + 5종 해양 액티비티 (선셋 옵션 선택 가능) - WAUG Exclusive<br />Please confirm the availability for the following request.<br />Click here to access our Partner Site : https://wadmin.waug.com/<br /><br /><b>[Order Detail]</b><br />`;
+const waugTail = `<br />Please get back to us on the availability of this request to ensure your customer receives the best service.<br />customer@waug.com<br />Team WAUG<br />+82 070 – 4353 – 5959<br />AM 10:00 ~ PM 06:00 (GMT+9)<br />`;
+const waugFrom = 'WAUG <customer@waug.com>';
+
+const waug1 = parseOtaEmail(
+    `${waugHead}Order ID : 9181379<br />Product URL : https://www.waug.com/ko/goods/126174<br />Product Name : 하와이 거북이 100% 보장 스노클링 투어 + 5종 해양 액티비티 (선셋 옵션 선택 가능) - WAUG Exclusive<br />Product Option :<br />[❤️ 최저가] 와이키키 해양 액티비티 투어 Adult (만 8세 이상)*2 ([❤️ 최저가] 와이키키 해양 액티비티 투어 성인 (만 8세 이상)*2) 07:30-11:30<br />Visit Date : 2026-11-28<br />Visit Time : 07:30-11:30<br /><br /><b>[Customer Detail]</b><br />Full legal name as per passport(여권상 영문명) : CHO SEONG HOON<br />Mobile No.(휴대전화번호) : 19494338805<br />Email address(이메일) : dcc70.cho@gmail.com<br /><br /><b>[Reservation Detail]</b><br />Please enter the name of your hotel or resort in English.(호텔 혹은 리조트명을 영문으로 작성해주세요.) : the ritz carlton residence waikiki<br />Preferred messaging app(메신저 종류) : 카카오톡<br />Messenger ID(메신저 ID) : dcc70<br />${waugTail}`,
+    '[WAUG] New Booking Request (Order ID : 9181379)', waugFrom,
+);
+assert.ok(waug1, 'WAUG 9181379 파싱 실패');
+assert.equal(waug1.platform, 'waug');
+assert.equal(waug1.source, 'W');
+assert.equal(waug1.kind, 'new');
+assert.equal(waug1.orderId, '9181379');
+assert.equal(waug1.name, 'CHO SEONG HOON');       // 국문명 칸이 없으면 영문명
+assert.equal(waug1.tourDate, '2026-11-28');
+assert.equal(waug1.option, '1부');
+assert.equal(waug1.pax, '2명');                    // 괄호 안 한글 "성인*2" 를 또 세지 않는다
+assert.equal(waug1.adultCount, 2);
+assert.equal(waug1.childCount, 0);
+assert.equal(waug1.contact, 'dcc70');              // 수기 입력처럼 메신저 ID
+assert.equal(waug1.bookerEmail, 'dcc70.cho@gmail.com');
+assert.equal(waug1.pickupLocation, 'the ritz carlton residence waikiki');
+assert.ok(waug1.note.includes('카카오톡: dcc70') && waug1.note.includes('휴대폰: 19494338805'), waug1.note);
+
+const waug2 = parseOtaEmail(
+    `${waugHead}Order ID : 9213805<br />Product Option :<br />[❤️ 최저가] 와이키키 해양 액티비티 투어 Adult (만 8세 이상)*2 ([❤️ 최저가] 와이키키 해양 액티비티 투어 성인 (만 8세 이상)*2) 10:30-14:30<br />Visit Date : 2026-12-02<br />Visit Time : 10:30-14:30<br /><br /><b>[Customer Detail]</b><br />Mobile No.(휴대전화번호) : 8201039031202<br />Full legal name as per passport(여권상 영문명) : KIM EUNJI<br />Email address(이메일) : ehowlskaao@naver.com<br /><br /><br /><b>[Reservation Detail]</b><br />Please enter the name of your hotel or resort in English.(호텔 혹은 리조트명을 영문으로 작성해주세요.) : Sheraton Waikiki Beach Resort<br />Hotel or resort address(호텔 or 리조트 주소) : 2255 Kalākaua Ave, Honolulu, Hawaii, 96815, United States<br />Messaging app ID (e.g. WhatsApp, Facebook, kakaotalk. LINE, WeChat, etc.)(메신저 ID) : 카카오톡/ehowlskaao<br />Preferred messaging app(메신저 종류) : 카카오톡<br />Messenger ID(메신저 ID) : ehowlskaao<br /><br />User Info 1<br />Full legal name as per passport(여권상 영문명) : KIM EUN JI<br />Date of birth(생년월일) : 1990-12-02<br />Gender(성별) : 여(Female)<br />Full legal name(국문명) : 김은지<br /><br />User Info 2<br />Full legal name as per passport(여권상 영문명) : LEE EUN YOUNG<br />Full legal name(국문명) : 이은영<br />${waugTail}`,
+    '[WAUG] New Booking Request (Order ID : 9213805)', waugFrom,
+);
+assert.ok(waug2, 'WAUG 9213805 파싱 실패');
+assert.equal(waug2.name, '김은지');                 // 대표자 = 첫 탑승자(띄어쓰기만 다름) → 국문명
+assert.equal(waug2.option, '2부');
+assert.equal(waug2.contact, 'ehowlskaao');
+assert.equal(waug2.pickupLocation, '2255 Kalākaua Ave, Honolulu, Hawaii, 96815, United States');
+assert.ok(waug2.note.includes('영문명: KIM EUNJI') && waug2.note.includes('호텔: Sheraton Waikiki Beach Resort'), waug2.note);
+
+const waug3 = parseOtaEmail(
+    `${waugHead}Order ID : 9198358<br />Product Option :<br />[❤️ 최저가] 선셋 프리미엄 크루즈 스노클링 Adult (만 8세 이상)*2 ([❤️ 최저가] 선셋 프리미엄 크루즈 스노클링 성인 (만 8세 이상)*2) 15:30-19:15<br />Visit Date : 2026-12-29<br />Visit Time : 15:30-19:15<br /><br /><b>[Customer Detail]</b><br />Full legal name as per passport(여권상 영문명) : KWON SUNGEUN<br />Mobile No.(휴대전화번호) : 8201046139474<br />Email address(이메일) : s-e0211@hanmail.net<br /><br /><b>[Reservation Detail]</b><br />Please enter the name of your hotel or resort in English.(호텔 혹은 리조트명을 영문으로 작성해주세요.) : 1920 Ala Moana Blvd, Honolulu, HI 96815 미국<br />Preferred messaging app(메신저 종류) : 카카오톡<br />Messenger ID(메신저 ID) : se0211<br />${waugTail}`,
+    '[WAUG] New Booking Request (Order ID : 9198358)', waugFrom,
+);
+assert.ok(waug3, 'WAUG 9198358 파싱 실패');
+assert.equal(waug3.option, '3부');
+assert.equal(waug3.name, 'KWON SUNGEUN');
+
+// 아동이 섞인 옵션 줄 — 영문 쪽만 센다
+const waugKid = parseOtaEmail(
+    `${waugHead}Order ID : 9200001<br />Product Option :<br />와이키키 해양 액티비티 투어 Adult (만 8세 이상)*2, Child (만 3-7세)*1 (와이키키 해양 액티비티 투어 성인 (만 8세 이상)*2, 아동 (만 3-7세)*1) 07:30-11:30<br />Visit Date : 2026-12-05<br />Visit Time : 07:30-11:30<br />Full legal name as per passport(여권상 영문명) : HONG GILDONG<br />Messenger ID(메신저 ID) : hong<br />${waugTail}`,
+    '[WAUG] New Booking Request (Order ID : 9200001)', waugFrom,
+);
+assert.ok(waugKid, 'WAUG 아동 파싱 실패');
+assert.equal(waugKid.pax, '3명');
+assert.equal(waugKid.childCount, 1);
+assert.ok(waugKid.note.startsWith('(아1)'), waugKid.note);
+
+// 신규 요청이 아닌 WAUG 메일은 읽지 않는다(사람에게 한 번 알린다)
+assert.equal(parseOtaEmail('<p>x</p>', '[WAUG] Booking Cancellation (Order ID : 9181379)', waugFrom), null);
+console.log('OK — WAUG 신규 요청 메일 (1부/2부/선셋, 한글 중복 인원 안 셈, 국문명)');

@@ -24,6 +24,7 @@ export const BOOKING_LABELS: Record<AuditPlatform, { subject: RegExp; labels: st
     yeogi: { subject: /확정/, labels: ['상품', '옵션', '총 인원', '이용일'] },
     triple: { subject: /접수|Booking Received/i, labels: ['파트너 예약번호', '예약아이템 정보', '이용예정일'] },
     zoomzoom: { subject: /접수/, labels: ['예약 번호', '여행일', '인원'] },
+    waug: { subject: /New Booking Request/i, labels: ['Order ID', 'Product Option', 'Visit Date', 'Visit Time', 'Full legal name as per passport', 'Messenger ID'] },
 };
 
 const ORDER_ID: Record<AuditPlatform, RegExp> = {
@@ -34,6 +35,7 @@ const ORDER_ID: Record<AuditPlatform, RegExp> = {
     yeogi: /^[0-9A-Z]{12,}$/,
     triple: /^\d{5,}$/,
     zoomzoom: /^\d{5,}$/,
+    waug: /^\d{6,}$/,
 };
 
 /** 상품명·투어 설명에 쓰이는 말. 이름이나 픽업 칸에 이게 보이면 엉뚱한 줄을 읽은 것이다. */

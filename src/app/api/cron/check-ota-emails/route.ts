@@ -13,7 +13,7 @@ import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 
 /**
- * OTA(클룩·GetYourGuide·Viator·여기어때·트리플·줌줌투어) 예약 메일 자동 수집 Cron.
+ * OTA(클룩·GetYourGuide·Viator·여기어때·트리플·줌줌투어·WAUG) 예약 메일 자동 수집 Cron.
  * - 5분마다 Gmail IMAP 에서 아직 처리하지 않은 메일을 플랫폼별로 검색
  * - 신규 예약 → reservations INSERT (상태 '안내필요')  ← 운영자가 직접 안내 후 '예약확정' 으로 변경
  *   그날 그 부가 이 예약으로 정원을 넘으면 상태 '정원초과' + 투어일과 무관하게 Discord 알림
@@ -28,7 +28,7 @@ import { simpleParser } from 'mailparser';
  * - 파싱/매칭 실패 시 표식을 붙이지 않아 메일이 안읽음으로 남는다 (수동 대응 가능)
  */
 
-const PLATFORMS: OtaPlatform[] = ['klook', 'gyg', 'viator', 'yeogi', 'triple', 'zoomzoom'];
+const PLATFORMS: OtaPlatform[] = ['klook', 'gyg', 'viator', 'yeogi', 'triple', 'zoomzoom', 'waug'];
 
 /**
  * 처리 완료 표식. `\Seen`(읽음)에 기대면 **사람이 Gmail 에서 먼저 열어본 메일을 영원히 건너뛴다.**
@@ -233,6 +233,22 @@ async function handleNew(b: OtaBooking): Promise<Result> {
         return { outcome: 'duplicate' };
     }
 
+    // 메일보다 사람이 먼저 넣은 예약. 예약번호가 비어 있고 이름이나 연락처가 같다.
+    // WAUG 는 수기로 이름을 한글로, 연락처에 메신저 ID 를 적어 와서 연락처로 맞는다.
+    // 새 행을 만들지 않고 예약번호·이메일만 채운다.
+    const handEntered = await findHandEntered(b);
+    if (handEntered) {
+        const { error } = await supabaseServer.from('reservations')
+            .update({ order_id: b.orderId, ...(handEntered.booker_email ? {} : { booker_email: b.bookerEmail || null }) })
+            .eq('id', handEntered.id);
+        if (error) {
+            console.error('[OTA Cron] 수기 예약에 예약번호 채우기 실패:', error);
+            return { outcome: 'error' };
+        }
+        console.log(`[OTA Cron] 수기 예약에 예약번호 채움: ${b.orderId} → ${handEntered.id}`);
+        return { outcome: 'duplicate' };
+    }
+
     const capacity = await capacityFor(b);
 
     const { error } = await supabaseServer.from('reservations').insert({
@@ -264,6 +280,18 @@ async function handleNew(b: OtaBooking): Promise<Result> {
         };
     }
     return { outcome: 'inserted' };
+}
+
+/** 같은 출처·투어일에 예약번호 없이 이름이나 연락처가 같은 행이 **딱 하나** 있으면 그 행. */
+async function findHandEntered(b: OtaBooking): Promise<{ id: string; booker_email: string | null } | null> {
+    if (!b.tourDate) return null;
+    const { data } = await supabaseServer.from('reservations')
+        .select('id, name, contact, booker_email')
+        .eq('source', b.source).eq('tour_date', b.tourDate).is('order_id', null).neq('status', '취소');
+    const norm = (v: string | null) => (v || '').replace(/[\s\-+]/g, '').toLowerCase();
+    const hits = (data || []).filter((r) =>
+        (b.name && norm(r.name) === norm(b.name)) || (b.contact && norm(r.contact) === norm(b.contact)));
+    return hits.length === 1 ? hits[0] : null;
 }
 
 /**

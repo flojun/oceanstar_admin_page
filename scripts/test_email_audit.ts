@@ -5,7 +5,7 @@
  */
 import assert from 'node:assert';
 import type { OtaBooking } from '../src/lib/otaEmailParser.ts';
-import { checkOtaBooking, checkMrtReservation, looksLikeMissedBookingSubject, missingLabels } from '../src/lib/emailFormatAudit.ts';
+import { BOOKING_LABELS, checkOtaBooking, checkMrtReservation, looksLikeMissedBookingSubject, missingLabels } from '../src/lib/emailFormatAudit.ts';
 
 const now = new Date('2026-10-13T16:00:00Z');
 const base: OtaBooking = {
@@ -51,5 +51,11 @@ for (const s of ['필수 조치: 예약확정 요청 안내 (예약번호: SVE10
     '[줌줌투어] 예약번호 : 610178의 새로운 여행 후기가 도착했습니다.', 'Conversation with Gargi N about Viator booking BR-1453085517']) {
     assert.ok(!looksLikeMissedBookingSubject(s), `예약 메일이 아닌데 걸림: ${s}`);
 }
+
+// WAUG — 실제 신규 요청 메일의 칸은 전부 줄 머리에 있다
+const waugHtml = 'Order ID : 9181379<br />Product Option :<br />… Adult (만 8세 이상)*2 07:30-11:30<br />Visit Date : 2026-11-28<br />Visit Time : 07:30-11:30<br />Full legal name as per passport(여권상 영문명) : CHO SEONG HOON<br />Messenger ID(메신저 ID) : dcc70<br />';
+assert.ok(BOOKING_LABELS.waug.subject.test('[WAUG] New Booking Request (Order ID : 9181379)'));
+assert.deepEqual(missingLabels(waugHtml, BOOKING_LABELS.waug.labels), []);
+assert.deepEqual(checkOtaBooking({ ...base, platform: 'waug', orderId: '9181379', name: 'CHO SEONG HOON', pickupLocation: '리츠칼튼' }, now), []);
 
 console.log('OK — 메일 형식 점검 규칙');

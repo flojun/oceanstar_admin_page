@@ -24,7 +24,7 @@ import { sendDiscordReport } from '@/lib/discordWebhook';
  */
 export const maxDuration = 60;
 
-const PLATFORMS: OtaPlatform[] = ['klook', 'gyg', 'viator', 'yeogi', 'triple', 'zoomzoom'];
+const PLATFORMS: OtaPlatform[] = ['klook', 'gyg', 'viator', 'yeogi', 'triple', 'zoomzoom', 'waug'];
 const MRT_SUBJECTS = ['확정대기', '확정완료', '예약취소', '취소 요청 접수'];
 const LABEL: Record<AuditPlatform, string> = { myrealtrip: '마이리얼트립', ...OTA_LABEL };
 const WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -46,7 +46,7 @@ export async function GET(request: Request) {
 
     const now = new Date();
     const windowStart = new Date(now.getTime() - WINDOW_MS);
-    const checked: Record<AuditPlatform, number> = { myrealtrip: 0, klook: 0, gyg: 0, viator: 0, yeogi: 0, triple: 0, zoomzoom: 0 };
+    const checked: Record<AuditPlatform, number> = { myrealtrip: 0, klook: 0, gyg: 0, viator: 0, yeogi: 0, triple: 0, zoomzoom: 0, waug: 0 };
     const problems: string[] = [];
     const seen = new Set<string>();   // 두 메일함에 같은 메일이 있으면 한 번만 본다
     const note = (p: AuditPlatform, ref: string, what: string) => problems.push(`[${LABEL[p]}] ${ref} — ${what}`);

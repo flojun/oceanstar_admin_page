@@ -1,5 +1,5 @@
 /**
- * Klook / GetYourGuide / Viator / 여기어때 / 트리플(NOL 투어) / 줌줌투어 파트너 메일 파서.
+ * Klook / GetYourGuide / Viator / 여기어때 / 트리플(NOL 투어) / 줌줌투어 / WAUG 파트너 메일 파서.
  *
  * 메일 HTML을 한 번 평문으로 눕힌 뒤 "라벨 → 값"으로 뽑는다.
  * 라벨과 값이 같은 줄에 있든(평문·여기어때) 다른 테이블 셀에 있든(클룩) 동작한다.
@@ -8,7 +8,7 @@
  * 본문으로는 구분이 불가능하다.
  */
 
-export type OtaPlatform = 'klook' | 'gyg' | 'viator' | 'yeogi' | 'triple' | 'zoomzoom';
+export type OtaPlatform = 'klook' | 'gyg' | 'viator' | 'yeogi' | 'triple' | 'zoomzoom' | 'waug';
 export type OtaEmailKind = 'new' | 'cancel' | 'partial_cancel' | 'update';
 
 export interface OtaBooking {
@@ -36,6 +36,7 @@ export const OTA_SOURCE: Record<OtaPlatform, string> = {
     yeogi: '여기어때',
     triple: 'T',
     zoomzoom: 'Z',
+    waug: 'W',
 };
 
 /**
@@ -49,6 +50,7 @@ export const OTA_LABEL: Record<OtaPlatform, string> = {
     yeogi: '여기어때',
     triple: '트리플',
     zoomzoom: '줌줌투어',
+    waug: 'WAUG',
 };
 
 /**
@@ -75,6 +77,7 @@ export const OTA_FROM: Record<OtaPlatform, string> = {
     yeogi: 'yeogi',
     triple: 'nol-universe',   // confirmation.triple@nol-universe.com (Gmail 라벨은 '야놀자')
     zoomzoom: 'zoomzoomtour',
+    waug: 'waug.com',         // customer@waug.com
 };
 
 /**
@@ -97,6 +100,8 @@ export const OTA_SUBJECT: Record<OtaPlatform, string[]> = {
     // '예약' 으로 찾으면 후기("예약번호 : 610178의 새로운 여행 후기")·정보 업데이트 알림까지 딸려와
     // 못 읽었다는 알림만 쌓인다. 문의·메시지·필수 입력 항목 알림은 둘 다 안 걸린다.
     zoomzoom: ['접수', '취소'],
+    // "[WAUG] New Booking Request (Order ID : 9181379)". 취소·변경 메일은 아직 받아 본 적이 없다.
+    waug: ['Booking'],
 };
 
 // ============================================================
@@ -321,6 +326,7 @@ export function detectPlatform(from: string, subject: string): OtaPlatform | nul
     if (s.includes('yeogi') || s.includes('goodchoice') || s.includes('여기어때')) return 'yeogi';
     if (s.includes('nol-universe') || s.includes('triple')) return 'triple';
     if (s.includes('zoomzoomtour') || s.includes('줌줌투어')) return 'zoomzoom';
+    if (s.includes('waug')) return 'waug';
     return null;
 }
 
@@ -355,6 +361,9 @@ function detectKind(platform: OtaPlatform, subject: string, text: string): OtaEm
         case 'zoomzoom':
             if (/취소/.test(subject)) return 'cancel';
             return /접수/.test(subject) ? 'new' : null;
+        case 'waug':
+            // 신규 요청 메일만 확인했다. 그 밖의 'Booking' 메일은 null → 사람에게 한 번 알린다.
+            return /New Booking Request/i.test(subject) ? 'new' : null;
     }
 }
 
@@ -713,6 +722,79 @@ function parseZoomzoom(text: string, subject: string, kind: OtaEmailKind): Parse
     };
 }
 
+/**
+ * WAUG. 줄마다 "라벨(한글 설명) : 값" 이다.
+ *   Order ID : 9181379
+ *   Product Option :
+ *   [❤️ 최저가] 와이키키 해양 액티비티 투어 Adult (만 8세 이상)*2 ([❤️ 최저가] … 성인 (만 8세 이상)*2) 07:30-11:30
+ *   Visit Date : 2026-11-28 / Visit Time : 07:30-11:30        ← 07:30 1부 · 10:30 2부 · 15:30 선셋
+ *   Full legal name as per passport(여권상 영문명) : CHO SEONG HOON
+ *   Messenger ID(메신저 ID) : dcc70
+ * 옵션 줄은 영문 뒤 괄호 안에 한글로 **같은 인원을 한 번 더** 적는다. 영문 쪽만 센다.
+ * 수기 입력은 이름을 한글로, 연락처에 메신저 ID 를 적어 왔다. 그 모양을 그대로 따른다.
+ */
+function waugValue(text: string, label: string, from = 0): string {
+    const head = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.slice(from).match(new RegExp(`^${head}[^:\n]*:[ \t]*(.*)$`, 'm'))?.[1]?.trim() || '';
+}
+
+function parseWaug(text: string): ParsedFields | null {
+    const orderId = waugValue(text, 'Order ID').match(/\d+/)?.[0] || '';
+    const tourDate = parseOtaDate(waugValue(text, 'Visit Date'));
+    if (!orderId || !tourDate) return null;
+
+    const optionLine = field(text, 'Product Option');
+    const english = optionLine.split(' ([')[0];
+    let adult = 0;
+    let child = 0;
+    for (const m of english.matchAll(/(Adult|Child|Youth|Infant|Kid|Senior)[^*]*\*\s*(\d+)/gi)) {
+        if (/adult|senior/i.test(m[1])) adult += Number(m[2]);
+        else child += Number(m[2]);
+    }
+    if (adult + child === 0) {
+        for (const m of optionLine.matchAll(/(성인|아동|소아|유아|영아)[^*]*\*\s*(\d+)/g)) {
+            if (m[1] === '성인') adult += Number(m[2]);
+            else child += Number(m[2]);
+        }
+    }
+    if (adult + child === 0) return null;
+
+    // 대표자 영문명이 첫 번째 탑승자와 같으면 그 사람의 국문명을 쓴다.
+    const englishName = waugValue(text, 'Full legal name as per passport');
+    const user1 = text.indexOf('User Info 1');
+    const user1English = user1 >= 0 ? waugValue(text, 'Full legal name as per passport', user1) : '';
+    const user1Korean = user1 >= 0 ? waugValue(text, 'Full legal name(국문명)', user1) : '';
+    const same = (a: string, b: string) => a.replace(/\s/g, '').toUpperCase() === b.replace(/\s/g, '').toUpperCase();
+    const name = user1Korean && same(englishName, user1English) ? user1Korean : englishName;
+
+    const messengerApp = waugValue(text, 'Preferred messaging app');
+    const messengerId = waugValue(text, 'Messenger ID');
+    const mobile = waugValue(text, 'Mobile No.');
+    const hotel = waugValue(text, 'Please enter the name of your hotel');
+    const address = waugValue(text, 'Hotel or resort address');
+
+    return {
+        orderId,
+        name,
+        tourDate,
+        option: optionFromTime(waugValue(text, 'Visit Time')) || optionFromTime(optionLine),
+        pax: paxLabel(adult, child),
+        adultCount: adult,
+        childCount: child,
+        // 주소가 있으면 주소가, 없으면 호텔명이 가장 가까운 픽업 장소를 찾기에 낫다.
+        pickupLocation: address || hotel,
+        contact: messengerId || mobile,
+        bookerEmail: waugValue(text, 'Email address'),
+        note: [
+            name !== englishName && englishName && `영문명: ${englishName}`,
+            messengerId && `${messengerApp || '메신저'}: ${messengerId}`,
+            mobile && `휴대폰: ${mobile}`,
+            address && hotel && `호텔: ${hotel}`,
+            english && `옵션: ${english}`,
+        ].filter(Boolean).join(' / '),
+    };
+}
+
 // ============================================================
 // 진입점
 // ============================================================
@@ -735,7 +817,8 @@ export function parseOtaEmail(html: string, subject: string, from: string): OtaB
                 : platform === 'viator' ? (kind === 'update' ? parseViatorUpdate(text) : parseViator(text))
                     : platform === 'yeogi' ? parseYeogi(text)
                         : platform === 'triple' ? parseTriple(text)
-                            : parseZoomzoom(text, subject, kind);
+                            : platform === 'waug' ? parseWaug(text)
+                                : parseZoomzoom(text, subject, kind);
 
     if (!parsed) return null;
 
