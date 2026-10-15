@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { Reservation, ReservationInsert, isInManifest } from "@/types/reservation";
 import { smartParseRow } from "@/lib/smartParser";
 import { cn } from "@/lib/utils";
-import { getHawaiiDateStr, formatDateDisplay, getKoreanDay, getKoreanDayShort , getReceiptDateStr } from '@/lib/timeUtils';
+import { formatDateDisplay, getKoreanDay, getKoreanDayShort , getReceiptDateStr } from '@/lib/timeUtils';
 import { useUnsavedChanges } from "@/components/providers/UnsavedChangesProvider";
 import CustomTextEditor from "@/components/editors/CustomTextEditor";
 import ComboSelectEditor from "@/components/editors/ComboSelectEditor";
@@ -1388,7 +1388,12 @@ function AllReservationsContent() {
                 }
             });
 
-            const defaultDateToUse = (batchMaxDate > latestDbDate ? batchMaxDate : latestDbDate) || getHawaiiDateStr();
+            // 가장 늦은 날짜를 쓴다. 이미 내일 명단을 시작했으면 그 날짜를 따라가고(기존 동작),
+            // 아직 아무것도 없으면 접수일 규칙(하와이 19시 넘으면 다음날)이 바닥을 깔아 준다.
+            // 예전에는 getHawaiiDateStr() 로 떨어져서, 19시 이후에 손으로 넣은 예약이
+            // 이미 보내 버린 오늘 명단에 붙었다.
+            const defaultDateToUse = [batchMaxDate, latestDbDate, getReceiptDateStr()]
+                .filter(Boolean).sort().at(-1)!;
 
             const insertBaseTime = Date.now();
 

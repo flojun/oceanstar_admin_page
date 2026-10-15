@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { ReservationInsert, ReservationUpdate } from "@/types/reservation";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -193,7 +194,7 @@ export async function createAgencyReservation(reservation: ReservationInsert) {
                 agency_id: session.id,
                 source: session.name,
                 status: "예약확정",
-                receipt_date: new Date().toISOString().split("T")[0],
+                receipt_date: await getDynamicReceiptDateStr(),   // UTC 날짜를 쓰면 하와이 오후부터 하루 당겨진다
                 is_reconfirmed: false,
                 is_admin_checked: false, // Force it to show in Admin Notification Center
             })
