@@ -5,7 +5,7 @@ import { bookingVars, sendAlimtalk } from '@/lib/alimtalk';
 import { pickupTime } from '@/lib/voucherFiles';
 
 /**
- * '안내필요' 예약을 '예약확정'으로 바꾸고 픽업 시간이 담긴 알림톡을 보낸다.
+ * '안내필요' 예약을 '예약확정'으로 바꾸고 픽업 시간이 담긴 예약 확정 알림톡을 보낸다.
  * 픽업 시간을 정하지 못하면 확정하지 않는다 — 시간 없는 확정 안내를 보내지 않게.
  */
 export async function POST(req: Request) {
@@ -43,7 +43,9 @@ export async function POST(req: Request) {
     // 확정은 이미 끝났다. 알림톡 결과는 화면에 알리기만 한다.
     let alimtalk: 'sent' | 'skipped' | 'failed' = 'skipped';
     try {
-        const sent = await sendAlimtalk(r.contact ?? '', process.env.SOLAPI_TPL_PICKUP_TIME, { ...bookingVars(r), 픽업시간: time });
+        // 예약 확정 템플릿을 같이 쓴다. 픽업 시간 칸이 없어 픽업 장소에 붙인다: "H&M (오후 2:35)"
+        const vars = bookingVars(r);
+        const sent = await sendAlimtalk(r.contact ?? '', process.env.SOLAPI_TPL_CONFIRM, { ...vars, 픽업: `${vars.픽업} (${time})` });
         alimtalk = sent ? 'sent' : 'skipped';
     } catch (err) {
         console.error('[confirm-with-alimtalk] 알림톡 실패:', r.order_id, err);
