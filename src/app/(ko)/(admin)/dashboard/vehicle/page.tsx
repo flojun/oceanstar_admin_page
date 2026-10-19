@@ -100,6 +100,12 @@ function createFreshVehicleState(): VehicleState {
     return JSON.parse(JSON.stringify(initialVehiclesState));
 }
 
+// 직접입력 기사님은 drivers 테이블에 없어서 화면에서는 "custom:이름"을 id로 쓴다.
+const CUSTOM_PREFIX = "custom:";
+function statusDriverId(s: { driver_id: string | null; driver_name?: string | null }): string | null {
+    return s.driver_id ?? (s.driver_name ? CUSTOM_PREFIX + s.driver_name : null);
+}
+
 function distributeReservationsToState(resData: Reservation[], state: VehicleState) {
     const unassignedItems: Reservation[] = [];
 
@@ -210,9 +216,18 @@ export default function VehiclePage() {
         return ids;
     }, [bulkData]);
 
+    // DB drivers + 직접입력 names in use, so lookups, select options and sharing treat them alike
+    const allDrivers = useMemo(() => {
+        const ids = new Set(assignedDriverIds);
+        Object.values(vehicles).forEach(v => { if (v.driverId) ids.add(v.driverId); });
+        const custom = [...ids].filter(id => id.startsWith(CUSTOM_PREFIX))
+            .map(id => ({ id, name: id.slice(CUSTOM_PREFIX.length) }));
+        return [...drivers, ...custom];
+    }, [drivers, vehicles, assignedDriverIds]);
+
     const assignedDrivers = useMemo(() => {
-        return drivers.filter(d => assignedDriverIds.has(d.id));
-    }, [drivers, assignedDriverIds]);
+        return allDrivers.filter(d => assignedDriverIds.has(d.id));
+    }, [allDrivers, assignedDriverIds]);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -247,7 +262,7 @@ export default function VehiclePage() {
             if (statusData) {
                 statusData.forEach((status: any) => {
                     if (state[status.vehicle_id]) {
-                        state[status.vehicle_id].driverId = status.driver_id;
+                        state[status.vehicle_id].driverId = statusDriverId(status);
                     }
                 });
             }
@@ -296,23 +311,14 @@ export default function VehiclePage() {
 
     // Save Driver Assignment
     const handleDriverChange = useCallback(async (vehicleId: string, driverId: string) => {
-        // 직접입력: reuse a same-name driver, otherwise add one to the drivers list
+        // 직접입력: reuse a same-name driver, otherwise keep the name on this assignment only
+        // (drivers 목록에는 넣지 않는다)
         if (driverId === "__custom__") {
             const name = prompt("기사님 성함 입력")?.trim();
             if (!name) return;
-            const existing = drivers.find(d => d.name === name);
-            if (existing) {
-                driverId = existing.id;
-            } else {
-                const { data, error } = await supabase.from("drivers").insert([{ name }]).select().single();
-                if (error || !data) {
-                    alert(`기사님 추가 실패: ${error?.message ?? ""}`);
-                    return;
-                }
-                setDrivers(prev => [...prev, data]);
-                driverId = data.id;
-            }
+            driverId = drivers.find(d => d.name === name)?.id ?? CUSTOM_PREFIX + name;
         }
+        const isCustom = driverId.startsWith(CUSTOM_PREFIX);
 
         // Optimistic UI Update
         setVehicles(prev => ({
@@ -328,7 +334,8 @@ export default function VehiclePage() {
                     date: selectedDate,
                     option: selectedOption,
                     vehicle_id: vehicleId,
-                    driver_id: driverId || null,
+                    driver_id: isCustom ? null : driverId || null,
+                    driver_name: isCustom ? driverId.slice(CUSTOM_PREFIX.length) : null,
                 }, { onConflict: 'date, option, vehicle_id' });
 
             if (error) throw error;
@@ -394,7 +401,7 @@ export default function VehiclePage() {
                 // Drivers
                 const optStatus = allStatus?.filter(s => s.option === opt) || [];
                 optStatus.forEach((s: any) => {
-                    if (state[s.vehicle_id]) state[s.vehicle_id].driverId = s.driver_id;
+                    if (state[s.vehicle_id]) state[s.vehicle_id].driverId = statusDriverId(s);
                 });
 
                 // Reservations
@@ -709,7 +716,7 @@ export default function VehiclePage() {
             const items = v.items.filter(item => isInManifest(item.status));
             if (items.length === 0) return;
 
-            const driverName = v.driverId ? drivers.find(d => d.id === v.driverId)?.name : "미지정";
+            const driverName = v.driverId ? allDrivers.find(d => d.id === v.driverId)?.name : "미지정";
             text += `🔹 ${v.name} (${driverName})\n`;
             items.forEach(item => {
                 text += `  ${item.pickup_location} | ${item.name} | ${item.pax?.replace("명", "")}명 | ${item.contact}\n`;
@@ -914,7 +921,7 @@ export default function VehiclePage() {
 
             // Share Logic
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            const driverName = drivers.find(d => d.id === driverId)?.name || '기사님';
+            const driverName = allDrivers.find(d => d.id === driverId)?.name || '기사님';
 
             if (isMobile) {
                 setReadyShareFiles({
@@ -953,7 +960,7 @@ export default function VehiclePage() {
                     <div key={opt} id={`export-container-${opt}`}>
                         <VehicleManifestTable
                             vehicles={vState}
-                            drivers={drivers}
+                            drivers={allDrivers}
                             optionName={opt}
                             date={selectedDate}
                         />
@@ -966,7 +973,7 @@ export default function VehiclePage() {
                 <div id="export-container-current">
                     <VehicleManifestTable
                         vehicles={vehicles}
-                        drivers={drivers}
+                        drivers={allDrivers}
                         optionName={selectedOption}
                         date={selectedDate}
                     />
@@ -979,7 +986,7 @@ export default function VehiclePage() {
                     <div key={`driver-export-${opt}`} id={`export-driver-container-${opt}`}>
                         <VehicleManifestTable
                             vehicles={vState}
-                            drivers={drivers}
+                            drivers={allDrivers}
                             optionName={opt}
                             date={selectedDate}
                             targetDriverId={selectedDriverForShare}
@@ -1112,7 +1119,7 @@ export default function VehiclePage() {
                                 <VehicleDropZone
                                     key={key}
                                     vehicle={vehicles[key]}
-                                    drivers={drivers}
+                                    drivers={allDrivers}
                                     driverId={vehicles[key].driverId}
                                     items={vehicles[key].items}
                                     onDriverChange={handleDriverChange}
