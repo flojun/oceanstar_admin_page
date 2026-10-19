@@ -99,9 +99,9 @@ export const DETAIL: Record<string, any> = {
    [
     "03",
     "오션스타 자체 기획 & 도입",
-    "해양 4종 액티비티 + 인생샷",
+    "해양 5종 액티비티",
     [
-     "스탠드업 패들보드, 카약, 씨체어, 다이빙 등 스노클링과 함께 자유롭게 즐기는 다양한 액티비티!",
+     "보트 다이빙, 씨체어, 씨카약, 스탠드업 패들보드, 인생샷까지! 스노클링과 함께 자유롭게 즐기는 해양 5종 액티비티!",
      "다이아몬드헤드와 와이키키를 배경으로 인생샷도 마음껏 찍어드립니다."
     ],
     null
@@ -184,7 +184,7 @@ export const DETAIL: Record<string, any> = {
     null
    ],
    [
-    "해양 4종",
+    "해양 5종",
     null
    ],
    [
@@ -213,7 +213,7 @@ export const DETAIL: Record<string, any> = {
    [
     "sunset.jpg",
     "로맨틱 선셋 크루즈",
-    "선셋 거북이 스노클링 + 해양 4종 + 와인 크루즈"
+    "선셋 거북이 스노클링 + 해양 5종 + 와인 크루즈"
    ]
   ],
   "MORE_H2": "오션스타만의 특별상품",
@@ -392,9 +392,9 @@ export const DETAIL: Record<string, any> = {
    [
     "03",
     "Designed & introduced by OceanStar",
-    "5 ocean activities + photos of a lifetime",
+    "5 ocean activities",
     [
-     "Stand-up paddleboards, kayaks, sea chairs, diving and more. Enjoy a variety of activities freely along with snorkeling!",
+     "Boat diving, sea chair, sea kayak, stand-up paddleboard and photos of a lifetime. All five are yours to enjoy freely along with snorkeling!",
      "We’ll also take as many great photos as you like with Diamond Head and Waikiki in the background."
     ],
     null
@@ -678,9 +678,9 @@ export const DETAIL: Record<string, any> = {
    [
     "03",
     "오션스타 자체 기획 & 도입",
-    "해양 4종 액티비티 + 인생샷",
+    "해양 5종 액티비티",
     [
-     "스탠드업 패들보드, 카약, 씨체어, 다이빙 등 스노클링과 함께 자유롭게 즐기는 다양한 액티비티!",
+     "보트 다이빙, 씨체어, 씨카약, 스탠드업 패들보드, 인생샷까지! 스노클링과 함께 자유롭게 즐기는 해양 5종 액티비티!",
      "다이아몬드헤드와 와이키키를 배경으로 인생샷도 마음껏 찍어드립니다."
     ],
     null
@@ -809,8 +809,8 @@ export const DETAIL: Record<string, any> = {
    ],
    [
     "sup",
-    "4종 액티비티",
-    "패들보드·카약·다이빙 모두 포함"
+    "5종 액티비티",
+    "다이빙·씨체어·카약·패들보드·인생샷 모두 포함"
    ],
    [
     "van",
@@ -976,9 +976,9 @@ export const DETAIL: Record<string, any> = {
    [
     "03",
     "Designed & introduced by OceanStar",
-    "5 ocean activities + photos of a lifetime",
+    "5 ocean activities",
     [
-     "Stand-up paddleboards, kayaks, sea chairs, diving and more. Enjoy a variety of activities freely along with snorkeling!",
+     "Boat diving, sea chair, sea kayak, stand-up paddleboard and photos of a lifetime. All five are yours to enjoy freely along with snorkeling!",
      "We’ll also take as many great photos as you like with Diamond Head and Waikiki in the background."
     ],
     null
@@ -1107,8 +1107,8 @@ export const DETAIL: Record<string, any> = {
    ],
    [
     "sup",
-    "4 activities",
-    "Paddleboard, kayak and diving included"
+    "5 activities",
+    "Diving, sea chair, kayak, paddleboard and photos included"
    ],
    [
     "van",
@@ -1325,9 +1325,9 @@ export const DETAIL: Record<string, any> = {
    [
     "03",
     "오션스타 자체 기획 & 도입",
-    "해양 4종 액티비티 + 인생샷",
+    "해양 5종 액티비티",
     [
-     "스탠드업 패들보드, 카약, 씨체어, 다이빙 등 스노클링과 함께 자유롭게 즐기는 다양한 액티비티!",
+     "보트 다이빙, 씨체어, 씨카약, 스탠드업 패들보드, 인생샷까지! 스노클링과 함께 자유롭게 즐기는 해양 5종 액티비티!",
      "다이아몬드헤드와 와이키키를 배경으로 인생샷도 마음껏 찍어드립니다."
     ],
     null
@@ -1631,9 +1631,9 @@ export const DETAIL: Record<string, any> = {
    [
     "03",
     "Designed & introduced by OceanStar",
-    "5 ocean activities + photos of a lifetime",
+    "5 ocean activities",
     [
-     "Stand-up paddleboards, kayaks, sea chairs, diving and more. Enjoy a variety of activities freely along with snorkeling!",
+     "Boat diving, sea chair, sea kayak, stand-up paddleboard and photos of a lifetime. All five are yours to enjoy freely along with snorkeling!",
      "We’ll also take as many great photos as you like with Diamond Head and Waikiki in the background."
     ],
     null
@@ -1933,9 +1933,9 @@ export const DETAIL: Record<string, any> = {
    [
     "03",
     "오션스타 자체 기획 & 도입",
-    "해양 4종 액티비티 + 인생샷",
+    "해양 5종 액티비티",
     [
-     "스탠드업 패들보드, 카약, 씨체어, 다이빙 등 스노클링과 함께 자유롭게 즐기는 다양한 액티비티!",
+     "보트 다이빙, 씨체어, 씨카약, 스탠드업 패들보드, 인생샷까지! 스노클링과 함께 자유롭게 즐기는 해양 5종 액티비티!",
      "다이아몬드헤드와 와이키키를 배경으로 인생샷도 마음껏 찍어드립니다."
     ],
     null
@@ -2243,9 +2243,9 @@ export const DETAIL: Record<string, any> = {
    [
     "03",
     "Designed & introduced by OceanStar",
-    "5 ocean activities + photos of a lifetime",
+    "5 ocean activities",
     [
-     "Stand-up paddleboards, kayaks, sea chairs, diving and more. Enjoy a variety of activities freely along with snorkeling!",
+     "Boat diving, sea chair, sea kayak, stand-up paddleboard and photos of a lifetime. All five are yours to enjoy freely along with snorkeling!",
      "We’ll also take as many great photos as you like with Diamond Head and Waikiki in the background."
     ],
     null

@@ -76,17 +76,17 @@ export const FAQ: Record<Lang, FaqGroup[]> = {
         {
           "id": "q3-1",
           "q": "거북이를 정말 100% 볼 수 있나요?",
-          "a": "네, 자연산 거북이를 100% 보장하는 것이 저희의 가장 큰 자부심입니다. 하와이 한인 최초로 터틀캐년 스노클링을 시작한 원조 업체로서, 어느 포인트에서 거북이를 만날 수 있는지 누구보다 잘 알고 있습니다. 만약 거북이를 만나지 못하셨다면 재방문 시 특별 혜택을 제공합니다. 단, 이런 경우는 극히 드뭅니다."
+          "a": "네, 자연산 거북이를 100% 보장하는 것이 저희의 가장 큰 자부심입니다. 하와이 한인 최초로 터틀캐년 스노클링을 시작한 원조 업체로서, 어느 포인트에서 거북이를 만날 수 있는지 누구보다 잘 알고 있습니다. 만약 거북이를 만나지 못하셨다면 다른 날 같은 투어에 무료로 다시 탑승하실 수 있습니다. 단, 이런 경우는 극히 드뭅니다."
         },
         {
           "id": "q3-2",
           "q": "투어가 총 몇 시간인가요? 어떤 순서로 진행되나요?",
-          "a": "총 4시간 진행됩니다. 호텔 픽업 → 케왈로 하버 승선 → 터틀캐니언 이동(15분) → 거북이 스노클링 + 4종 해양 액티비티 → 선상 스냅샷 + 간식 → 하버 복귀 → 호텔 드랍 순으로 진행됩니다. 타 업체 대비 1시간 더 넉넉하게 운영하여 모든 프로그램을 여유 있게 즐기실 수 있습니다."
+          "a": "총 4시간 진행됩니다. 호텔 픽업 → 케왈로 하버 승선 → 터틀캐니언 이동(15분) → 거북이 스노클링 + 5종 해양 액티비티 → 선상 스냅샷 + 간식 → 하버 복귀 → 호텔 드랍 순으로 진행됩니다. 타 업체 대비 1시간 더 넉넉하게 운영하여 모든 프로그램을 여유 있게 즐기실 수 있습니다."
         },
         {
           "id": "q3-3",
-          "q": "4종 해양 액티비티가 정확히 무엇인가요? 모두 강제 참여인가요?",
-          "a": "스탠드업 패들보드, 카약, 선상 보트다이빙, 씨체어입니다. 모두 자유 참여이며 원하지 않는 항목은 건너뛰셔도 됩니다. 보트 위에서 쉬거나 경치를 즐기시는 분들도 많습니다."
+          "q": "5종 해양 액티비티가 정확히 무엇인가요? 모두 강제 참여인가요?",
+          "a": "선상 보트다이빙, 씨체어, 씨카약, 스탠드업 패들보드, 그리고 크루가 찍어 드리는 인생샷입니다. 모두 자유 참여이며 원하지 않는 항목은 건너뛰셔도 됩니다. 보트 위에서 쉬거나 경치를 즐기시는 분들도 많습니다."
         },
         {
           "id": "q3-4",
@@ -181,7 +181,7 @@ export const FAQ: Record<Lang, FaqGroup[]> = {
         {
           "id": "q7-5",
           "q": "왜 오션스타를 선택해야 하나요?",
-          "a": "하와이 한인 대상 거북이 스노클링 최초 시작 + 업계 통합 누적 리뷰 15,000+ No.1. 루프탑 보트·한국어 풀케어·4종 액티비티·거북이 보장까지, 수천 명이 \"하와이 최고의 추억\"이라고 말합니다."
+          "a": "하와이 한인 대상 거북이 스노클링 최초 시작 + 업계 통합 누적 리뷰 15,000+ No.1. 루프탑 보트·한국어 풀케어·5종 액티비티·거북이 보장까지, 수천 명이 \"하와이 최고의 추억\"이라고 말합니다."
         },
         {
           "id": "q7-6",
@@ -263,17 +263,17 @@ export const FAQ: Record<Lang, FaqGroup[]> = {
         {
           "id": "q3-1",
           "q": "Is seeing turtles 100% guaranteed?",
-          "a": "Yes! As the original Turtle Canyon tour operator, we know exactly where to find them. If you don't see one, we offer special benefits for your next visit (which is extremely rare)."
+          "a": "Yes! As the original Turtle Canyon tour operator, we know exactly where to find them. If you don't see one, you can join the same tour again on another day for free (which is extremely rare)."
         },
         {
           "id": "q3-2",
           "q": "How long is the tour?",
-          "a": "It takes about 4 hours including hotel pickup, 15m boat ride, snorkeling, 4 marine activities, snacks, and hotel drop-off."
+          "a": "It takes about 4 hours including hotel pickup, 15m boat ride, snorkeling, 5 marine activities, snacks, and hotel drop-off."
         },
         {
           "id": "q3-3",
-          "q": "Are the 4 marine activities mandatory?",
-          "a": "No, you can freely choose to do SUP, kayak, boat diving, or sea chair. You can also just relax on the boat."
+          "q": "Are the 5 marine activities mandatory?",
+          "a": "No. The five are boat diving, sea chair, sea kayak, stand-up paddleboard, and photos of a lifetime taken by our crew. Join whichever you like, or just relax on the boat."
         },
         {
           "id": "q3-4",
@@ -358,7 +358,7 @@ export const FAQ: Record<Lang, FaqGroup[]> = {
         {
           "id": "q7-3",
           "q": "Why choose OceanStar?",
-          "a": "We are the original Turtle Canyon snorkeling tour, with 15,000+ reviews across platforms. We offer rooftop boats, full care, 4 activities, and guaranteed turtle sightings."
+          "a": "We are the original Turtle Canyon snorkeling tour, with 15,000+ reviews across platforms. We offer rooftop boats, full care, 5 activities, and guaranteed turtle sightings."
         },
         {
           "id": "q7-4",
