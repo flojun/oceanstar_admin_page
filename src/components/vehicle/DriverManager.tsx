@@ -40,6 +40,15 @@ export function DriverManager({ drivers, onDriversChange }: DriverManagerProps) 
         if (!confirm("정말 삭제하시겠습니까?")) return;
 
         try {
+            // 과거 배차 기록이 이 기사님을 가리키면 FK 때문에 삭제가 막힌다.
+            // 기록에는 이름만 남기고 연결을 끊은 뒤 삭제한다.
+            const name = drivers.find(d => d.id === id)?.name ?? null;
+            const { error: unlinkError } = await supabase
+                .from("daily_vehicle_status")
+                .update({ driver_id: null, driver_name: name })
+                .eq("driver_id", id);
+            if (unlinkError) throw unlinkError;
+
             const { error } = await supabase
                 .from("drivers")
                 .delete()
