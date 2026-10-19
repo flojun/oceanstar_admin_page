@@ -296,6 +296,24 @@ export default function VehiclePage() {
 
     // Save Driver Assignment
     const handleDriverChange = useCallback(async (vehicleId: string, driverId: string) => {
+        // 직접입력: reuse a same-name driver, otherwise add one to the drivers list
+        if (driverId === "__custom__") {
+            const name = prompt("기사님 성함 입력")?.trim();
+            if (!name) return;
+            const existing = drivers.find(d => d.name === name);
+            if (existing) {
+                driverId = existing.id;
+            } else {
+                const { data, error } = await supabase.from("drivers").insert([{ name }]).select().single();
+                if (error || !data) {
+                    alert(`기사님 추가 실패: ${error?.message ?? ""}`);
+                    return;
+                }
+                setDrivers(prev => [...prev, data]);
+                driverId = data.id;
+            }
+        }
+
         // Optimistic UI Update
         setVehicles(prev => ({
             ...prev,
@@ -319,7 +337,7 @@ export default function VehiclePage() {
             alert("기사 배정 저장 실패");
             fetchData(); // Revert on error
         }
-    }, [selectedDate, selectedOption, fetchData]);
+    }, [selectedDate, selectedOption, fetchData, drivers]);
 
     // ... (Handlers)
 

@@ -54,6 +54,7 @@ export function VehicleDropZone({ vehicle, drivers, onDriverChange, optionName, 
                     {drivers.map(d => (
                         <option key={d.id} value={d.id}>{d.name}</option>
                     ))}
+                    <option value="__custom__">직접입력</option>
                 </select>
             </div>
 
