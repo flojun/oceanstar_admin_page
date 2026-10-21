@@ -356,7 +356,9 @@ function detectKind(platform: OtaPlatform, subject: string, text: string): OtaEm
             // 취소 메일 포맷 미확인. "확정" 메일만 처리하고 나머지는 안읽음으로 남긴다.
             return /확정/.test(subject) ? 'new' : null;
         case 'triple':
-            // 접수 메일만 확인했다. 취소·변경 메일 포맷은 아직 없어서 null → 사람에게 한 번 알린다.
+            // **취소를 먼저 본다.** 취소 메일 제목도 "취소 접수가 들어왔습니다" 라서
+            // '접수' 만 보면 취소가 신규 예약으로 들어온다(실제로 유령 예약이 하나 생겼다).
+            if (/취소|Cancellation/i.test(subject)) return 'cancel';
             return /접수|Booking Received/i.test(subject) ? 'new' : null;
         case 'zoomzoom':
             if (/취소/.test(subject)) return 'cancel';
@@ -633,7 +635,7 @@ function parseYeogi(text: string): ParsedFields | null {
  *   이용시각 10:30                                         ← 선셋 상품에는 이 줄이 없다
  * 고객명·연락처·픽업은 메일에 없다. 운영자가 파트너센터에서 보고 채운다.
  */
-function parseTriple(text: string): ParsedFields | null {
+function parseTriple(text: string, kind: OtaEmailKind): ParsedFields | null {
     const orderId = field(text, '파트너 예약번호');
     const tourDate = parseOtaDate(field(text, '이용예정일'));
     if (!/^\d+$/.test(orderId) || !tourDate) return null;
@@ -656,7 +658,9 @@ function parseTriple(text: string): ParsedFields | null {
 
     return {
         orderId,
-        name: '(트리플 확인필요)',
+        // 취소 메일에서는 이름을 비워 둔다. 자리표시자 이름으로 2순위 매칭(출처+이름+투어일)이
+        // 돌면 같은 날 다른 트리플 예약을 엉뚱하게 취소시킬 수 있다.
+        name: kind === 'cancel' ? '' : '(트리플 확인필요)',
         tourDate,
         // 이용시각이 있으면 그걸로, 없으면 아이템명("2부 트립(10:30-…)" / "로맨틱 선셋 …")으로.
         option: optionFromTime(field(text, '이용시각')) || optionFromTime(item),
@@ -816,7 +820,7 @@ export function parseOtaEmail(html: string, subject: string, from: string): OtaB
             : platform === 'gyg' ? (kind === 'update' ? parseGygUpdate(text) : parseGyg(text))
                 : platform === 'viator' ? (kind === 'update' ? parseViatorUpdate(text) : parseViator(text))
                     : platform === 'yeogi' ? parseYeogi(text)
-                        : platform === 'triple' ? parseTriple(text)
+                        : platform === 'triple' ? parseTriple(text, kind)
                             : platform === 'waug' ? parseWaug(text)
                                 : parseZoomzoom(text, subject, kind);
 

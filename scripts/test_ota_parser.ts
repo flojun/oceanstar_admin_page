@@ -706,3 +706,40 @@ assert.ok(waugKid.note.startsWith('(아1)'), waugKid.note);
 // 신규 요청이 아닌 WAUG 메일은 읽지 않는다(사람에게 한 번 알린다)
 assert.equal(parseOtaEmail('<p>x</p>', '[WAUG] Booking Cancellation (Order ID : 9181379)', waugFrom), null);
 console.log('OK — WAUG 신규 요청 메일 (1부/2부/선셋, 한글 중복 인원 안 셈, 국문명)');
+
+// ---------------------------------------------------------------- 트리플 취소
+// 실제로 온 577124 메일. 제목이 "취소 접수가 들어왔습니다" 라 '접수' 만 보면 신규로 읽힌다.
+const tripleCancel = parseOtaEmail(
+    `<div>
+      <p>취소 접수</p>
+      <p>확인 후 취소 처리해주세요.</p>
+      <p>파트너 예약번호</p><p>577124</p>
+      <p>예약확인번호</p><p>PROD:eb5676</p>
+      <p>예약아이템 정보</p><p>[로맨틱 인기 상품] 선셋 크루즈 &amp; 거북이 스노클링</p>
+      <p>성인 &#x2715; 2</p>
+      <p>이용예정일 2026-10-28</p>
+    </div>`,
+    '577124 [와이키키 NO.1 거북이 스노클링]거북이 100% 보장 + 해양 5종 액티비티 (옵션: 선셋 스노쿨링) 취소 접수가 들어왔습니다.(Booking Cancellation Requested)',
+    'NOL <confirmation.triple@nol-universe.com>',
+);
+assert.ok(tripleCancel, '트리플 취소 파싱 실패');
+assert.equal(tripleCancel.kind, 'cancel');        // 'new' 로 읽히면 유령 예약이 생긴다
+assert.equal(tripleCancel.orderId, '577124');
+assert.equal(tripleCancel.name, '');              // 자리표시자 이름으로 엉뚱한 행을 취소하지 않게
+
+// 신규 접수 메일은 그대로 신규여야 한다
+const tripleNew = parseOtaEmail(
+    `<div>
+      <p>파트너 예약번호</p><p>834277</p>
+      <p>예약아이템 정보</p><p>15000+리뷰 … - 2부 트립(10:30-2:30)</p>
+      <p>성인 &#x2715; 2</p>
+      <p>이용예정일 2026-10-27</p>
+    </div>`,
+    '834277 [와이키키 NO.1 거북이 스노클링] 예약 접수가 들어왔습니다.(Booking Received)',
+    'NOL <confirmation.triple@nol-universe.com>',
+);
+assert.ok(tripleNew, '트리플 신규 파싱 실패');
+assert.equal(tripleNew.kind, 'new');
+assert.equal(tripleNew.orderId, '834277');
+assert.equal(tripleNew.name, '(트리플 확인필요)');
+assert.equal(tripleNew.option, '2부');
