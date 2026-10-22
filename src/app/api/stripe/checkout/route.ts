@@ -1,4 +1,4 @@
-import { getReceiptDateStr } from '@/lib/timeUtils';
+import { getReceiptDateStr, getHawaiiDatePlusStr, SURF_BOOKING_DAYS } from '@/lib/timeUtils';
 import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
@@ -50,6 +50,11 @@ export async function POST(req: Request) {
 
         if (tourSetting.is_active === false) {
             return NextResponse.json({ error: '현재 판매가 중지된 옵션입니다.' }, { status: 400 });
+        }
+
+        // 서핑 업체는 120일 안쪽만 받는다. 달력에서 막지만 요청을 직접 보내는 경우도 막는다.
+        if (body.comboOption === 'surf' && (!body.secondaryDate || body.secondaryDate > getHawaiiDatePlusStr(SURF_BOOKING_DAYS))) {
+            return NextResponse.json({ error: `서핑은 오늘부터 ${SURF_BOOKING_DAYS}일 이내 날짜만 예약할 수 있습니다.` }, { status: 400 });
         }
 
         // Option Label

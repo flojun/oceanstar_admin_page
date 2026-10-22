@@ -14,6 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { basePrice, checkoutAmounts, isFeeIncluded, type Currency } from "@/lib/pricing";
 import { findClosestPickup, getWalkingMinutes, type PickupLocation } from "@/lib/utils";
 import { getTranslation } from "@/lib/translations";
+import { SURF_BOOKING_DAYS, getHawaiiDatePlusStr } from "@/lib/timeUtils";
 import { getPickupDisplayNameByLang } from "@/constants/pickupLocations";
 import type { TourSetting } from "@/lib/tourUtils";
 import type { BlockedDate } from "@/lib/siteData";
@@ -49,6 +50,7 @@ const S = {
         surfH: "서핑 레슨 시간 선택", surfSub: "마지막 픽업 시간 기준", surf: "서핑 그룹 레슨", surfLine: "서핑 07:30-14:30 · 하루 5회",
         surfTime: "서핑 시간", surfDate: "서핑 날짜", surfPick: "서핑 픽업",
         surfNote: "서핑 픽업 장소 및 시간은 예약 후 개별 안내됩니다.",
+        surfLimit: `서핑은 오늘부터 ${SURF_BOOKING_DAYS}일 이내 날짜만 예약할 수 있습니다.`,
         err: {
             surf: "서핑 레슨 시간을 선택해주세요.", surfDate: "서핑 날짜를 선택해주세요.", surfPick: "서핑 픽업 장소를 입력해주세요.",
             session: "거북이 스노클링 시간을 선택해주세요.", combo: "패러세일링/제트스키 옵션을 선택해주세요.",
@@ -79,6 +81,7 @@ const S = {
         surfH: "Select surf lesson time", surfSub: "Last pickup time", surf: "Group surf lesson", surfLine: "Surf 07:30-14:30 · 5 a day",
         surfTime: "Surf time", surfDate: "Surf date", surfPick: "Surf pickup",
         surfNote: "Surf pickup location and time will be arranged individually after booking.",
+        surfLimit: `Surf lessons can only be booked within ${SURF_BOOKING_DAYS} days from today.`,
         err: {
             surf: "Please select a surf lesson time.", surfDate: "Please select a surf date.", surfPick: "Please enter pickup location for the surf lesson.",
             session: "Please select a snorkeling time.", combo: "Please select a combo option.",
@@ -253,6 +256,7 @@ export default function BookingModal({
         const ds = ymd(d);
         if (date && ds === ymd(date)) return true;
         if (isSurf) {
+            if (ds > getHawaiiDatePlusStr(SURF_BOOKING_DAYS)) return true;
             if (blockedDates.some((b) => b.date === ds && (b.tour_id === "all" || b.tour_id === selectedTour))) return true;
             const day = avail2[ds];
             if (day && day.isAvailable === false) return true;
@@ -656,6 +660,7 @@ export default function BookingModal({
                                         <div className="ahead"><span className="ano">2</span><b>{isSurf ? s.surf : s.para}</b><i>{isSurf ? surfTime ?? "" : s.noWeekend}</i></div>
                                         <div className="abody">
                                             <p className="recalc">{s.clash(date ? (lang === "en" ? format(date, "MMM d") : `${date.getMonth() + 1}월 ${date.getDate()}일`) : "")}</p>
+                                            {isSurf && <p className="help strong">{s.surfLimit}</p>}
                                             <Calendar lang={lang} month={month2} setMonth={setMonth2} selected={date2} onSelect={setDate2} blocked={day2Blocked}
                                                 clash={date} />
                                             {errText("date2")}

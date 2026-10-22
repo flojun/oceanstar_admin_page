@@ -2557,7 +2557,7 @@ export const DETAIL: Record<string, any> = {
   "RULES": [
    [
     "사전 문의",
-    "7세 미만 어린이, 65세 이상, 체중 95kg 이상 참가자는 예약 전 사전 문의가 필요합니다.",
+    "10세 미만 어린이, 60세 이상, 체중 95kg 이상 참가자는 예약 전 사전 문의가 필요합니다.",
     false
    ],
    [
@@ -2612,7 +2612,7 @@ export const DETAIL: Record<string, any> = {
    ]
   ],
   "SESS_H2": "서핑 레슨 시간",
-  "SESS_NOTE": "서핑 그룹 레슨은 90분 진행합니다.",
+  "SESS_NOTE": "서핑 그룹 레슨은 90분 진행합니다. 서핑은 오늘부터 120일 이내 날짜만 예약할 수 있습니다.",
   "SESS_SUB": "마지막 픽업 시간 기준입니다.",
   "SHOW_STARS": false,
   "THEME": "surf"
@@ -2755,7 +2755,7 @@ export const DETAIL: Record<string, any> = {
   "RULES": [
    [
     "Ask first",
-    "Children under 7, guests 65 and older, and guests weighing 95 kg (209 lb) or more must contact us before booking.",
+    "Children under 10, guests 60 and older, and guests weighing 95 kg (209 lb) or more must contact us before booking.",
     false
    ],
    [
@@ -2810,7 +2810,7 @@ export const DETAIL: Record<string, any> = {
    ]
   ],
   "SESS_H2": "Surf lesson times",
-  "SESS_NOTE": "Group surf lessons run 90 minutes.",
+  "SESS_NOTE": "Group surf lessons run 90 minutes. Surf lessons can only be booked within 120 days from today.",
   "SESS_SUB": "Based on the last pickup time.",
   "SHOW_STARS": false,
   "THEME": "surf"

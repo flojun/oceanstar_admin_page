@@ -22,6 +22,18 @@ export function getHawaiiTomorrowStr(): string {
     return format(tomorrow, "yyyy-MM-dd");
 }
 
+/** 서핑 업체가 받는 기간. 하와이 오늘부터 이 날수 뒤까지만 서핑 날짜로 받는다 */
+export const SURF_BOOKING_DAYS = 120;
+
+/**
+ * Returns the date string N days after today in Hawaii (YYYY-MM-DD)
+ */
+export function getHawaiiDatePlusStr(days: number): string {
+    const d = toZonedTime(new Date(), TIMEZONE);
+    d.setDate(d.getDate() + days);
+    return format(d, "yyyy-MM-dd");
+}
+
 /**
  * Formats a YYYY-MM-DD date string to MM-DD-YYYY for display
  */
