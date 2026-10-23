@@ -36,6 +36,7 @@
   .os .dp .buy-r .book-pill { margin-top:18px;width:100%;justify-content:space-between;height:54px; padding:0 10px 0 24px;font-size:16.5px }
   .os .dp .pure { grid-column:1 / -1;margin-top:26px;padding-top:20px;border-top:1px solid var(--line); display:flex;align-items:flex-start;gap:9px;font-size:15px;line-height:1.75;color:var(--text) }
   .os .dp .pure svg { color:var(--sea);margin-top:1px }
+  .os .dp .pure + .pure { margin-top:6px;padding-top:0;border-top:0 }
   .os .dp .inc { margin-top:40px;display:grid;grid-template-columns:repeat(4,1fr); background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden }
   .os .dp .inc-c { padding:34px 30px }
   .os .dp .inc-c + .inc-c { border-left:1px solid var(--line) }
@@ -273,6 +274,7 @@
   .os .dp .facts dd { font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.5;text-align:right }
   .os .dp .pure { margin-top:20px;padding-top:18px;border-top:1px solid var(--line);display:flex; align-items:flex-start;gap:9px;font-size:14.5px;line-height:1.75;color:var(--text) }
   .os .dp .pure svg { color:var(--sea-d);margin-top:2px }
+  .os .dp .pure + .pure { margin-top:6px;padding-top:0;border-top:0 }
   .os .dp .inc { margin-top:28px;display:grid;grid-template-columns:1fr; background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden }
   .os .dp .inc-c { padding:24px 22px 26px }
   .os .dp .inc-c + .inc-c { border-top:1px solid var(--line) }
@@ -483,6 +485,7 @@
   .os .dp .hero-in { right: var(--pad) }
   .os .dp .hero-in h1 { font-size: clamp(44px, 5.4vw, 68px) }
   .os .dp .buy { grid-template-columns: 1fr; row-gap: 26px }
+  .os .dp .pure + .pure { margin-top: -20px }
   .os .dp .buy-r { padding-left: 0; border-left: 0; padding-top: 22px; border-top: 1px solid var(--line) }
   .os .dp .inc { grid-template-columns: 1fr 1fr }
   .os .dp .inc-c + .inc-c { border-left: 0 }

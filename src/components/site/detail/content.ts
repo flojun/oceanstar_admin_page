@@ -2469,6 +2469,7 @@ export const DETAIL: Record<string, any> = {
      "와이키키 · 알라모아나"
     ]
    ],
+   "school": "서핑 레슨은 하와이 현지 전문 서핑스쿨 서프 클라우드 9 (SURF CLOUD 9)에서 진행합니다.",
    "pure": "레슨 시간은 마지막 픽업 시간 기준입니다."
   },
   "HERO_IMG": [
@@ -2667,6 +2668,7 @@ export const DETAIL: Record<string, any> = {
      "Waikiki · Ala Moana"
     ]
    ],
+   "school": "Surf lessons are run by SURF CLOUD 9, a local surf school in Hawaii.",
    "pure": "Lesson times are based on the last pickup time."
   },
   "HERO_IMG": [

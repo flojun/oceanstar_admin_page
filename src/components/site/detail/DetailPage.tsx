@@ -26,6 +26,7 @@ const svg = (paths: React.ReactNode, size = 18, sw = 1.7) => (
 );
 const I_ARROW = <Arrow />;
 const I_CLOCK = svg(<><circle cx="12" cy="12" r="8.5" /><path d="M12 7.3V12l3.2 1.9" /></>);
+const I_INFO = svg(<><circle cx="12" cy="12" r="8.5" /><path d="M12 11v5.2M12 7.8v.1" /></>);
 const I_STAR = svg(<path d="M12 3.6l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" fill="currentColor" stroke="none" />, 15);
 const I_CHEV = svg(<path d="M6 9.5l6 6 6-6" />, 20, 2);
 const I_SWIPE = svg(<path d="M4 12h15M14 7l5 5-5 5" />, 16, 2);
@@ -127,6 +128,7 @@ export default function DetailPage({ lang, tour, tourSettings, google }: { lang:
                     <span className="amt-s">{C.HERO.price_sub}</span>
                     {book("book-pill")}
                 </div>
+                {C.HERO.school && <p className="pure">{I_INFO}<H html={C.HERO.school} /></p>}
                 <p className="pure">{I_CLOCK}<H html={C.HERO.pure} /></p>
             </section>
         </>
