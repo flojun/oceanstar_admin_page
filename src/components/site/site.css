@@ -194,6 +194,9 @@
 /* ALOH 특가: 정가에 줄, 특가는 크게 */
 .os .ac-p s { display: block; font-size: 13px; font-weight: 600; color: var(--muted) }
 .os .ac-p b.sale { font-size: 26px; color: var(--food-d) }
+.os .chead s { display: block; margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--muted) }
+.os .chead s + em { margin-top: 0 }
+.os .chead em.sale { font-size: 26px; color: var(--food-d) }
 .os .ac-p i { display: block; margin-top: 4px; font-size: 11px; font-style: normal; color: var(--muted); line-height: 1.4 }
 .os .book { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; height: 42px; margin-top: 12px;
   border-radius: 999px; background: var(--ink); color: #fff; font-size: 13px; font-weight: 700; white-space: nowrap; text-align: center }
@@ -509,6 +512,8 @@
   .os .ctag { margin-bottom: 8px; padding: 3px 9px; font-size: 10px }
   .os .chead b { font-size: 12.5px }
   .os .chead em { white-space: nowrap; margin-top: 9px; font-size: 17px }
+  .os .chead em.sale { font-size: 21px }
+  .os .chead s { margin-top: 8px; font-size: 11.5px }
   .os .chead i { display: none }
   .os .cfoot .cc { padding: 16px 10px 18px }
   .os .cfoot .cc.on { border-radius: 0 0 14px 14px }

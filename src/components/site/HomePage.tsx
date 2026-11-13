@@ -3,11 +3,12 @@ import { maskName } from "@/lib/utils";
 import type { TourSetting } from "@/lib/tourUtils";
 import type { GoogleReview, GoogleSummary } from "@/lib/siteData";
 import { BookButton } from "./BookingContext";
-import { Arrow, Check, Chevron, Play, Plus, Stars } from "./Icons";
+import { Arrow, Chevron, Play, Plus, Stars } from "./Icons";
 import { EXTERNAL, links } from "./links";
 import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
 import TourScroller, { type CardData } from "./TourScroller";
+import CompareTable from "./CompareTable";
 import { FAQ_TOP } from "./faqData";
 import { homeJsonLd, ldJson } from "./jsonLd";
 import { FEATURES, alohSalePriceText, availableTours, currencyOf, priceCaption, priceText, timeLines, type Lang } from "./tours";
@@ -88,7 +89,6 @@ export default function HomePage({ lang, tourSettings, googleReviews, google }: 
         .map((label, i) => ({ label, cells: tours.map((d) => d.features[i]) }))
         .filter((r) => r.cells.some(Boolean));
     const reviews = googleReviews.slice(0, 6);
-    const cols = { ["--cols" as string]: tours.length } as React.CSSProperties;
 
     return (
         <>
@@ -140,39 +140,7 @@ export default function HomePage({ lang, tourSettings, googleReviews, google }: 
                     <span className="pill"><Plus size={13} /> {t.cmpPill}</span>
                     <h2>{t.cmpH(tours.length)}<br /><span className="hl">{t.cmpHl}</span></h2>
                 </div>
-                <div className="cmp" role="table">
-                    <div className="crow chead rise" role="row" style={cols}>
-                        <div className="cc lead" role="columnheader" />
-                        {tours.map((d, i) => (
-                            <div key={d.key} className={`cc${i === 0 ? " on" : ""}`} role="columnheader">
-                                {i === 0 && <span className="ctag">{t.popular}</span>}
-                                <b>{d.name[lang]}</b>
-                                <em className="n">{priceText(d, tourSettings, cur, lang)}</em>
-                                <i>{priceCaption(d, lang)}</i>
-                            </div>
-                        ))}
-                    </div>
-                    {featureRows.map((r, ri) => (
-                        <div key={r.label} className="crow rise" role="row" style={{ ...cols, ["--i" as string]: ri } as React.CSSProperties}>
-                            <div className="cc lead" role="rowheader">{r.label}</div>
-                            {r.cells.map((on, i) => (
-                                <div key={i} className={`cc${i === 0 ? " on" : ""}`} role="cell">
-                                    {on ? <Check /> : null}
-                                    <span className="sr">{on ? "O" : "X"}</span>
-                                </div>
-                            ))}
-                        </div>
-                    ))}
-                    <div className="crow cfoot rise" role="row" style={cols}>
-                        <div className="cc lead" role="rowheader">{t.picked}</div>
-                        {tours.map((d, i) => (
-                            <div key={d.key} className={`cc${i === 0 ? " on" : ""}`} role="cell">
-                                <BookButton tour={d.key} className="book" label={`${d.name[lang]} ${t.book}`}>{t.book} <Arrow /></BookButton>
-                                <Link href={L.tour(d.key)} className="detail" aria-label={`${d.name[lang]} ${t.detail}`}>{t.detail}</Link>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                <CompareTable cards={cards} featureRows={featureRows} labels={{ popular: t.popular, picked: t.picked, book: t.book, detail: t.detail }} />
             </section>
 
             <section className="sect" id="reviews">
