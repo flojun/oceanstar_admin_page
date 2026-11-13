@@ -9,9 +9,10 @@
  * 달라진 점: 통화(KRW/USD)를 창 안에서 고르고, 결제 수수료를 포함한 실제 청구액을 보여 준다.
  */
 import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
-import { addMonths, format, getDaysInMonth, isSameMonth, startOfMonth } from "date-fns";
+import { addDays, addMonths, format, getDaysInMonth, isSameMonth, startOfMonth } from "date-fns";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { basePrice, checkoutAmounts, isFeeIncluded, type Currency } from "@/lib/pricing";
+import { ALOH_SALE, alohSaleSetting, isAlohSaleTour, basePrice, checkoutAmounts, isFeeIncluded, type Currency } from "@/lib/pricing";
+import { EXTERNAL } from "./links";
 import { findClosestPickup, getWalkingMinutes, type PickupLocation } from "@/lib/utils";
 import { getTranslation } from "@/lib/translations";
 import { SURF_BOOKING_DAYS, getHawaiiDatePlusStr } from "@/lib/timeUtils";
@@ -60,6 +61,8 @@ const S = {
             pax: "최소 1명 이상 선택해주세요", server: "서버 통신 중 오류가 발생했습니다.", pay: "결제 준비 중 오류가 발생했습니다: ",
         },
         namePh: "예: 홍길동", phonePh: "010-0000-0000 혹은 카카오톡 ID",
+        saleNote: `ALOH 특가 (1·2부 $${ALOH_SALE.prices.morning1} · 선셋 $${ALOH_SALE.prices.sunset}): 오늘부터 ${ALOH_SALE.daysAhead}일 뒤까지, 남은 자리 안에서 받습니다. 그 밖은 문의해 주세요.`,
+        inquire: "카카오톡으로 문의하기", soldOut: "특가 자리가 없습니다. 문의해 주세요.",
     },
     en: {
         perAdult: "Per adult", teamFare: "Team fare · 1-10 guests", perAdultHead: "Price per adult", change: "Change",
@@ -91,6 +94,8 @@ const S = {
             pax: "Please select at least 1 person", server: "Server communication error.", pay: "Payment error: ",
         },
         namePh: "e.g., HONG GILDONG", phonePh: "+1 808-000-0000",
+        saleNote: `ALOH deal (morning $${ALOH_SALE.prices.morning1} · sunset $${ALOH_SALE.prices.sunset}): today through ${ALOH_SALE.daysAhead} days ahead, while seats last. Otherwise please contact us.`,
+        inquire: "Contact us", soldOut: "No deal seats left. Please contact us.",
     },
 };
 
@@ -107,14 +112,21 @@ const today0 =() => new Date(new Date().setHours(0, 0, 0, 0));
 const ymd = (d: Date) => format(d, "yyyy-MM-dd");
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** ALOH 호스텔 QR 로 들어온 손님. 'aloh' 는 일반가, 'aloh-sale' 은 특가(ALOH_SALE). 둘 다 출처 ALOH · 달러 결제 */
+export type Partner = "aloh" | "aloh-sale";
+const ALOH_TOURS: TourKey[] = ["turtle", "sunset", "private"];
+
 export default function BookingModal({
-    lang, initialTour, tourSettings, blockedDates, onClose,
+    lang, initialTour, tourSettings, blockedDates, partner, onClose,
 }: {
-    lang: Lang; initialTour?: TourKey; tourSettings: TourSetting[]; blockedDates: BlockedDate[]; onClose: () => void;
+    lang: Lang; initialTour?: TourKey; tourSettings: TourSetting[]; blockedDates: BlockedDate[]; partner?: Partner; onClose: () => void;
 }) {
     const s = S[lang];
     const tr = getTranslation(lang);
-    const tours = useMemo(() => availableTours(tourSettings), [tourSettings]);
+    const sale = partner === "aloh-sale";
+    // ALOH QR 손님은 거북이 1·2부 · 선셋 · 프라이빗만. 특가는 1·2부 · 선셋에만 붙고 프라이빗은 정상가
+    const tours = useMemo(() => availableTours(tourSettings).filter((t) => !partner || ALOH_TOURS.includes(t.key)), [tourSettings, partner]);
+    const salePrice = <T extends TourSetting>(r: T): T => (sale ? alohSaleSetting(r) : r);
 
     const [tourKey, setTourKey] = useState<TourKey | undefined>(initialTour && tours.some((t) => t.key === initialTour) ? initialTour : undefined);
     const def = tourKey ? tourByKey(tourKey) : undefined;
@@ -140,7 +152,9 @@ export default function BookingModal({
     const [adult, setAdult] = useState(2);
     const [child, setChild] = useState(0);
     const pax = adult + child;
-    const [currency, setCurrency] = useState<Currency>(currencyOf(lang));
+    const [pickedCurrency, setCurrency] = useState<Currency>(currencyOf(lang));
+    // ALOH 는 수수료를 달러로 나누므로 달러로만 받는다 (서버도 막는다)
+    const currency: Currency = partner ? "USD" : pickedCurrency;
 
     const [month, setMonth] = useState(() => startOfMonth(new Date()));
     const [date, setDate] = useState<Date | undefined>();
@@ -241,6 +255,8 @@ export default function BookingModal({
     // 시간(1부·2부)을 바꾸면 자리가 달라지므로 날짜를 다시 고른다
     useEffect(() => { setDate(undefined); }, [selectedTour]);
 
+    // 특가 QR 에서 특가가 붙는 투어(1·2부 · 선셋)를 고른 경우. 프라이빗은 평소 규칙대로
+    const saleTour = sale && isAlohSaleTour(selectedTour ?? "");
     const dayBlocked = (d: Date) => {
         if (d < today0()) return true;
         if (row?.blocked_days?.includes(d.getDay())) return true;
@@ -249,8 +265,16 @@ export default function BookingModal({
         const day = avail[ds];
         if (day && day.isAvailable === false) return true;
         if (isPrivate) return false;
+        if (saleTour) {
+            // 하와이 기준 오늘~이틀 뒤, 배 인원 1·2부 41명 · 선셋 34명까지만
+            if (ds > getHawaiiDatePlusStr(ALOH_SALE.daysAhead)) return true;
+            const cap = ALOH_SALE.caps[selectedTour ?? ""] ?? 0;
+            return (day ? cap - day.booked : cap) < pax;
+        }
         return (day ? day.remaining : maxCap) < pax;
     };
+    // ponytail: 달이 넘어가는 날(예: 31일에 본 다음 달 1·2일)은 보이는 달의 자리만 알아서 자리가 있다고 본다. 결제 API 가 다시 막는다.
+    const saleOpen = !saleTour || loadingAvail || Array.from({ length: ALOH_SALE.daysAhead + 1 }, (_, i) => addDays(today0(), i)).some((d) => !dayBlocked(d));
     const day2Blocked = (d: Date) => {
         if (d < today0()) return true;
         const ds = ymd(d);
@@ -311,7 +335,7 @@ export default function BookingModal({
     const pickupName = (loc: PickupLocation) => getPickupDisplayNameByLang(loc.name, lang);
 
     // ── 금액 ──
-    const priceRow = row;
+    const priceRow = row && salePrice(row);
     const needsOption = isMarine && !comboOption;
     const base = priceRow && !needsOption ? basePrice(priceRow, currency, { adultCount: adult, childCount: child }, comboOption ?? undefined) : null;
     const amounts = base !== null && priceRow ? checkoutAmounts(priceRow, base, currency) : null;
@@ -377,6 +401,8 @@ export default function BookingModal({
                     surfTime: isSurf ? surfTime : undefined,
                     lang,
                     currency,
+                    // 특가 QR 이라도 프라이빗은 특가가 없으니 일반 ALOH 예약으로 보낸다
+                    partner: sale && !saleTour ? "aloh" : partner,
                 }),
             });
             const data = await res.json();
@@ -396,7 +422,7 @@ export default function BookingModal({
     const priceOf = (d: TourDef) => {
         const r = activeRows(d, tourSettings)[0];
         if (!r) return "";
-        const v = basePrice(r, currency, { adultCount: 1, childCount: 0 }, "1");
+        const v = basePrice(salePrice(r), currency, { adultCount: 1, childCount: 0 }, "1");
         return d.key === "private" ? (lang === "en" ? `From ${m(v)}` : `${m(v)} ~`) : m(v);
     };
     const subOf = (d: TourDef) => {
@@ -510,8 +536,10 @@ export default function BookingModal({
 
     const payBtn = !def
         ? <p className="pay wait" role="status">{s.pickFirst}</p>
+        : !saleOpen
+        ? <a className="pay" href={EXTERNAL.kakaoChat} target="_blank" rel="noopener noreferrer">{s.inquire} <Arrow size={16} /></a>
         : <button type="button" className="pay" onClick={pay} disabled={submitting}>{submitting ? tr("bookingModal.waiting") : tr("bookingModal.checkout_btn")} {!submitting && <Arrow size={16} />}</button>;
-    const curBtns = (
+    const curBtns = partner ? null : (
         <div className="cur" role="radiogroup" aria-label={lang === "en" ? "Currency" : "결제 통화"}>
             {(["KRW", "USD"] as Currency[]).map((c) => (
                 <button key={c} type="button" role="radio" aria-checked={currency === c} className={currency === c ? "on" : undefined} onClick={() => setCurrency(c)}>{c}</button>
@@ -550,7 +578,9 @@ export default function BookingModal({
                                             <button type="button" className="t" onClick={() => setTourKey(d.key)}>
                                                 <img src={d.img} alt="" width={42} height={42} />
                                                 <span className="tt"><b>{d.name[lang]}</b><i>{subOf(d)}</i></span>
-                                                <span className="pr"><em className="n">{priceOf(d)}</em><u>{d.key === "private" ? s.teamFare : s.perAdult}</u></span>
+                                                <span className="pr">
+                                                    {sale && isAlohSaleTour(activeRows(d, tourSettings)[0]?.tour_id ?? "") && <s className="n">{m(basePrice(activeRows(d, tourSettings)[0], currency, { adultCount: 1, childCount: 0 }))}</s>}
+                                                    <em className={`n${sale && isAlohSaleTour(activeRows(d, tourSettings)[0]?.tour_id ?? "") ? " sale" : ""}`}>{priceOf(d)}</em><u>{d.key === "private" ? s.teamFare : s.perAdult}</u></span>
                                             </button>
                                         </li>
                                     ))}
@@ -629,6 +659,12 @@ export default function BookingModal({
                         {def && !isCombo && (
                             <div className="grp" id="bk-date">
                                 <div className="glab"><b>{tr("bookingModal.step3")}</b></div>
+                                {saleTour && (
+                                    <p className="help strong">
+                                        {saleOpen ? s.saleNote : s.soldOut}{" "}
+                                        <a href={EXTERNAL.kakaoChat} target="_blank" rel="noopener noreferrer"><u>{s.inquire}</u></a>
+                                    </p>
+                                )}
                                 <Calendar lang={lang} month={month} setMonth={setMonth} selected={date} onSelect={setDate} blocked={dayBlocked}
                                     loading={loadingAvail} recalc={(n) => s.recalc(isFlat ? s.paxTotal(pax) : paxLabel, month.getMonth() + 1, n)} />
                                 {errText("date")}

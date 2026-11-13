@@ -5,11 +5,12 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import type { TourSetting } from "@/lib/tourUtils";
 import type { BlockedDate } from "@/lib/siteData";
 import { tourByKey, type Lang, type TourKey } from "./tours";
+import type { Partner } from "./BookingModal";
 
 // 예약 창은 누를 때 불러온다. 첫 화면 자바스크립트에 구글 지도·달력이 실리지 않게.
 const BookingModal = dynamic(() => import("./BookingModal"), { ssr: false });
 
-type Ctx = { open: (tour?: TourKey) => void };
+type Ctx = { open: (tour?: TourKey) => void; partner?: Partner };
 const BookingCtx = createContext<Ctx>({ open: () => {} });
 export const useBooking = () => useContext(BookingCtx);
 
@@ -26,6 +27,21 @@ export function BookingProvider({
 }) {
     const [state, setState] = useState<{ open: boolean; tour?: TourKey; n: number }>({ open: false, n: 0 });
     const open = useCallback((tour?: TourKey) => setState((s) => ({ open: true, tour, n: s.n + 1 })), []);
+
+    // ALOH 호스텔 QR(?ref=aloh · ?ref=aloh-sale). 같은 탭에서 다른 페이지로 옮겨 다녀도 ALOH 예약으로 남게 기억한다.
+    const [partner, setPartner] = useState<Partner>();
+    useEffect(() => {
+        const KEY = "os-partner";
+        const q = new URLSearchParams(window.location.search).get("ref");
+        let p: string | null = null;
+        try {
+            if (q === "aloh" || q === "aloh-sale") sessionStorage.setItem(KEY, q);
+            p = sessionStorage.getItem(KEY);
+        } catch { p = q; }
+        // 첫 렌더 뒤에 넣는다 (effect 안에서 바로 setState 하지 않게)
+        const id = setTimeout(() => setPartner(p === "aloh" || p === "aloh-sale" ? p : undefined), 0);
+        return () => clearTimeout(id);
+    }, []);
 
     // ?book=turtle 로 들어오면 예약 창을 바로 연다 (광고·상세 페이지·외부 링크용)
     useEffect(() => {
@@ -44,7 +60,7 @@ export function BookingProvider({
     }, [open]);
 
     return (
-        <BookingCtx.Provider value={{ open }}>
+        <BookingCtx.Provider value={{ open, partner }}>
             {children}
             {state.open && (
                 <BookingModal
@@ -53,6 +69,7 @@ export function BookingProvider({
                     initialTour={state.tour}
                     tourSettings={tourSettings}
                     blockedDates={blockedDates}
+                    partner={partner}
                     onClose={() => setState((s) => ({ ...s, open: false }))}
                 />
             )}

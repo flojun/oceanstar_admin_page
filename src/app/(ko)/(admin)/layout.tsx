@@ -27,7 +27,8 @@ import {
     ClipboardCheck,
     Building2,
     Bell,
-    Settings
+    Settings,
+    Hotel
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import NotificationBell from "@/components/dashboard/NotificationBell";
@@ -72,6 +73,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
         ]
     },
     { name: "여행사 관리", href: "/dashboard/agencies", icon: Building2 },
+    { name: "ALOH 관리", href: "/dashboard/aloh", icon: Hotel },
 ];
 
 function AdminSidebar({

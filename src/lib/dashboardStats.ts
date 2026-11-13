@@ -67,6 +67,7 @@ const PLATFORM_BY_SOURCE: Record<string, Platform> = {
 
     // ---- 여행사 ----
     'ktb': { label: 'KTB', category: 'agency' },
+    'aloh': { label: 'ALOH', category: 'agency' },
     '타미스': { label: '타미스', category: 'agency' },
     '탐': { label: '타미스', category: 'agency' },
     '팜투어': { label: '팜투어', category: 'agency' },

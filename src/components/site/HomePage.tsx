@@ -10,7 +10,7 @@ import SiteHeader from "./SiteHeader";
 import TourScroller, { type CardData } from "./TourScroller";
 import { FAQ_TOP } from "./faqData";
 import { homeJsonLd, ldJson } from "./jsonLd";
-import { FEATURES, availableTours, currencyOf, priceCaption, priceText, timeLines, type Lang } from "./tours";
+import { FEATURES, alohSalePriceText, availableTours, currencyOf, priceCaption, priceText, timeLines, type Lang } from "./tours";
 
 const T = {
     ko: {
@@ -74,6 +74,8 @@ export default function HomePage({ lang, tourSettings, googleReviews, google }: 
         name: d.name[lang],
         times: timeLines(d, tourSettings, lang),
         price: priceText(d, tourSettings, cur, lang),
+        priceUsd: priceText(d, tourSettings, "USD", lang),
+        salePrice: alohSalePriceText(d, tourSettings),
         caption: priceCaption(d, lang),
         href: L.tour(d.key),
     }));

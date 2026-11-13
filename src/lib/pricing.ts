@@ -165,6 +165,32 @@ export function isFeeIncluded(tourId: string | null | undefined): boolean {
 }
 
 /**
+ * ALOH 호스텔 특가 (특가 QR 로 들어온 손님). 투어 2일 전부터, 1인 1·2부 $80 · 선셋 $120.
+ * 그날 배 인원이 1·2부 41명 · 선셋 34명 이하일 때만. 그 밖은 문의로 돌린다. 화면과 결제 API 가 같은 값을 쓴다.
+ */
+export const ALOH_SALE = {
+    prices: { morning1: 80, morning2: 80, sunset: 120 } as Record<string, number>,
+    caps: { morning1: 41, morning2: 41, sunset: 34 } as Record<string, number>,
+    daysAhead: 2,
+};
+
+export const isAlohSaleTour = (tourId: string) => tourId in ALOH_SALE.prices;
+
+/** ALOH 수수료. 결제 총액(total_price)에 곱한다. */
+export const ALOH_COMMISSION = [
+    { name: "조덕", rate: 0.1 },
+    { name: "하준", rate: 0.05 },
+];
+
+/** 특가 가격을 얹은 tour_settings 행. 아동가가 이미 더 싸면($77·$90) 그대로 둔다. ALOH 는 달러로만 받는다. */
+export function alohSaleSetting<T extends PricingSetting>(s: T): T {
+    const usd = ALOH_SALE.prices[s.tour_id];
+    if (!usd) return s;
+    const cap = (v?: number | null) => Math.min(Number(v) || usd, usd);
+    return { ...s, adult_price_usd: cap(s.adult_price_usd), child_price_usd: cap(s.child_price_usd) };
+}
+
+/**
  * 손님이 실제로 낼 총액과 그중 수수료. 화면과 결제 API 가 함께 쓴다.
  *
  * 수수료 포함 상품: total = base, fee 는 total 안에서 Stripe 요율로 떼어낸 값.

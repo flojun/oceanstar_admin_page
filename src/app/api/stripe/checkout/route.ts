@@ -3,7 +3,8 @@ import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { stripeClient as stripe } from '@/lib/stripeBooking';
-import { basePrice, checkoutAmounts, MIN_AMOUNT, type Currency } from '@/lib/pricing';
+import { basePrice, checkoutAmounts, MIN_AMOUNT, ALOH_SALE, alohSaleSetting, isAlohSaleTour, type Currency } from '@/lib/pricing';
+import { checkCapacity } from '@/lib/capacity';
 import { toMinor } from '@/lib/money';
 
 // Hawaii time helper
@@ -38,15 +39,16 @@ export async function POST(req: Request) {
         };
 
         // 2. Fetch Tour Settings
-        const { data: tourSetting, error: settingError } = await supabaseServer
+        const { data: dbSetting, error: settingError } = await supabaseServer
             .from('tour_settings')
             .select('*')
             .eq('tour_id', body.selectedTour)
             .single();
 
-        if (settingError || !tourSetting) {
+        if (settingError || !dbSetting) {
             return NextResponse.json({ error: 'Failed to fetch pricing from DB' }, { status: 500 });
         }
+        let tourSetting = dbSetting;
 
         if (tourSetting.is_active === false) {
             return NextResponse.json({ error: '현재 판매가 중지된 옵션입니다.' }, { status: 400 });
@@ -80,6 +82,29 @@ export async function POST(req: Request) {
         }
         const currency: Currency = body.currency;
 
+        // ALOH 호스텔 QR 로 들어온 예약. 수수료를 달러로 나눠야 해서 달러로만 받는다.
+        const partner = body.partner === 'aloh' || body.partner === 'aloh-sale' ? body.partner as string : null;
+        if (partner && currency !== 'USD') {
+            return NextResponse.json({ error: 'ALOH 예약은 달러로만 결제됩니다.' }, { status: 400 });
+        }
+        // 특가는 화면에서 막아도 요청을 직접 보낼 수 있으니 날짜·투어·정원을 여기서 다시 본다.
+        if (partner === 'aloh-sale') {
+            const inquire = '특가 자리가 없습니다. 카카오톡으로 문의해 주세요.';
+            if (!isAlohSaleTour(tourSetting.tour_id)
+                || !body.tourDate || body.tourDate < getHawaiiDatePlusStr(0) || body.tourDate > getHawaiiDatePlusStr(ALOH_SALE.daysAhead)) {
+                return NextResponse.json({ error: inquire }, { status: 400 });
+            }
+            const [{ data: sameDay }, { data: allSettings }] = await Promise.all([
+                supabaseServer.from('reservations').select('option, pax').eq('tour_date', body.tourDate).neq('status', '취소'),
+                supabaseServer.from('tour_settings').select('*'),
+            ]);
+            const cap = checkCapacity(optionLabel, totalCount, sameDay ?? [], allSettings ?? []);
+            if (!cap || cap.total > ALOH_SALE.caps[tourSetting.tour_id]) {
+                return NextResponse.json({ error: inquire }, { status: 400 });
+            }
+            tourSetting = alohSaleSetting(tourSetting);
+        }
+
         // 가격 로직은 pricing.ts 한 곳에만 둔다. 화면 표시와 같은 값이어야 한다.
         const productPrice = basePrice(tourSetting, currency, {
             adultCount: body.adultCount,
@@ -108,7 +133,7 @@ export async function POST(req: Request) {
             `오션스타 ${optionLabel}`;
 
         let order_id = generateOrderId();
-        const noteText = `(성${body.adultCount}/아${body.childCount}) (예약번호 ${order_id}) [${currency}결제] (Stripe)`;
+        const noteText = `(성${body.adultCount}/아${body.childCount}) (예약번호 ${order_id}) [${currency}결제] (Stripe)${partner === 'aloh-sale' ? ` [ALOH 특가 $${ALOH_SALE.prices[tourSetting.tour_id]}]` : ''}`;
         const stripeCurrency = currency.toLowerCase();
 
         const session = await stripe.checkout.sessions.create({
@@ -163,7 +188,7 @@ export async function POST(req: Request) {
             allow_promotion_codes: true,
             metadata: {
                 order_id: order_id,
-                source: isEn ? '웹사이트(EN)' : '웹사이트',
+                source: partner ? 'ALOH' : isEn ? '웹사이트(EN)' : '웹사이트',
                 name: body.bookerName,
                 contact: body.bookerPhone,
                 tour_date: body.tourDate,

@@ -21,7 +21,7 @@ export async function GET(request: Request) {
         .select('id, order_id, name, tour_date, option, pax, pickup_location, contact')
         .eq('tour_date', tomorrow)
         .eq('status', '예약확정')
-        .in('source', ['웹사이트', '웹사이트(EN)'])
+        .in('source', ['웹사이트', '웹사이트(EN)', 'ALOH'])
         .not('contact', 'is', null);
 
     if (error) {

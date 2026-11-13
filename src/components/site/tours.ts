@@ -1,4 +1,4 @@
-import { basePrice, type Currency } from "@/lib/pricing";
+import { alohSaleSetting, basePrice, isAlohSaleTour, type Currency } from "@/lib/pricing";
 import type { TourSetting } from "@/lib/tourUtils";
 
 /**
@@ -181,6 +181,16 @@ export function fromPrice(def: TourDef, settings: TourSetting[], currency: Curre
     if (!row) return null;
     const amount = basePrice(row, currency, { adultCount: 1, childCount: 0 }, "1");
     return { amount, from: def.key === "private" };
+}
+
+/** ALOH QR 손님에게 보이는 상품 (거북이 1·2부 · 선셋 · 프라이빗) */
+export const ALOH_TOURS: TourKey[] = ["turtle", "sunset", "private"];
+
+/** ALOH 특가 성인 1인가 ("$80"). 특가가 없는 상품은 undefined. ALOH 는 달러로만 받는다. */
+export function alohSalePriceText(def: TourDef, settings: TourSetting[]): string | undefined {
+    const row = activeRows(def, settings)[0];
+    if (!row || !isAlohSaleTour(row.tour_id)) return undefined;
+    return fmtMoney(basePrice(alohSaleSetting(row), "USD", { adultCount: 1, childCount: 0 }), "USD");
 }
 
 export function priceCaption(def: TourDef, lang: Lang): string {
