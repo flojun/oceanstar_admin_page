@@ -6,7 +6,7 @@
  *    (파싱 실패 시 메일을 읽음 처리하지 않으므로 데이터가 망가지지는 않는다)
  */
 import assert from 'node:assert';
-import { parseOtaEmail, isCustomerMessageSubject } from '../src/lib/otaEmailParser.ts';
+import { parseOtaEmail, isCustomerMessageSubject, orderIdFromSubject } from '../src/lib/otaEmailParser.ts';
 
 const row = (label: string, value: string) => `<tr><td>${label}:</td><td>${value}</td></tr>`;
 
@@ -743,3 +743,15 @@ assert.equal(tripleNew.kind, 'new');
 assert.equal(tripleNew.orderId, '834277');
 assert.equal(tripleNew.name, '(트리플 확인필요)');
 assert.equal(tripleNew.option, '2부');
+
+// ---------------------------------------------------------------- 제목에서 예약번호 뽑기
+// 본문을 못 읽는 메일이라도 제목의 번호로 "이미 들어온 예약인지" 를 가린다.
+for (const [subject, expected] of [
+    ['필수 조치: 예약확정 요청 안내 (예약번호: YCP048073)', 'YCP048073'],   // 클룩 독촉 메일
+    ['Amended Booking: Mon, Sep 28, 2026 (#BR-1450906377)', 'BR-1450906377'],
+    ['577124 [와이키키 NO.1 거북이 스노클링] 취소 접수가 들어왔습니다.', '577124'],
+    ['Booking detail change: - S257755 - GYG996VHXV85', 'GYG996VHXV85'],
+    ['You have a message about a booking', undefined],
+] as const) {
+    assert.equal(orderIdFromSubject(subject), expected, `제목 파싱: ${subject}`);
+}

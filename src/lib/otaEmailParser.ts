@@ -64,6 +64,16 @@ export const OTA_LABEL: Record<OtaPlatform, string> = {
  *   "ACTION NEEDED (booking changes): You have a message about a booking"
  *   "Conversation with Peter N about Viator booking BR-…"
  */
+/**
+ * 제목에 박혀 있는 예약번호. 본문을 못 읽는 메일에서도 어느 예약 이야기인지는 알 수 있다.
+ *   "필수 조치: 예약확정 요청 안내 (예약번호: YCP048073)"   ← 클룩 독촉 메일
+ *   "Amended Booking: Mon, Sep 28, 2026 (#BR-1450906377)"
+ *   "577124 [와이키키 …] 취소 접수가 들어왔습니다."
+ */
+export function orderIdFromSubject(subject: string): string | undefined {
+    return (subject || '').match(/BR-\d+|GYG[A-Z0-9]{6,}|[A-Z]{3}\d{6,}|^\d{6,}/)?.[0];
+}
+
 export function isCustomerMessageSubject(subject: string): boolean {
     return /message about a booking|messaged you about|conversation with|tripadvisor experiences booking/i
         .test(subject || '');

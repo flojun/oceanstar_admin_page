@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
-import { parseOtaEmail, isCustomerMessageSubject, OTA_FROM, OTA_LABEL, OTA_SUBJECT, type OtaPlatform, type OtaBooking } from '@/lib/otaEmailParser';
+import { parseOtaEmail, isCustomerMessageSubject, orderIdFromSubject, OTA_FROM, OTA_LABEL, OTA_SUBJECT, type OtaPlatform, type OtaBooking } from '@/lib/otaEmailParser';
 import { isUrgentTourDate } from '@/lib/reservationUrgency';
 import { sendDiscordUrgentAlert } from '@/lib/discordWebhook';
 import { getHawaiiDateStr } from '@/lib/timeUtils';
@@ -95,15 +95,27 @@ export async function GET(request: Request) {
                                 console.log(`[OTA Cron] 파싱 스킵 (${platform}): ${msg.subject}`);
                                 skipped++;
 
-                                if (!isCustomerMessageSubject(msg.subject) && !msg.flags.has(UNPARSED)) {
+                                if (!msg.flags.has(UNPARSED)) {
                                     await client.messageFlagsAdd(msg.uid, [UNPARSED], { uid: true });
+
+                                    // 제목의 예약번호가 이미 DB 에 있으면 예약은 들어온 것이다.
+                                    // 클룩 "필수 조치: 예약확정 요청 안내" 처럼 예약 데이터가 없는 독촉 메일이
+                                    // 멀쩡히 들어온 예약을 두고 울리면 알림이 무뎌진다.
+                                    const subjectOrderId = orderIdFromSubject(msg.subject);
+                                    const alreadyHave = subjectOrderId ? await reservationExists(subjectOrderId) : false;
+                                    if (alreadyHave) {
+                                        console.log(`[OTA Cron] 못 읽었지만 예약은 있음(알림 생략): ${msg.subject}`);
+                                        continue;
+                                    }
+                                    if (isCustomerMessageSubject(msg.subject)) continue;
+
                                     const sent = await sendDiscordUrgentAlert({
                                         title: `⚠️ [확인 필요] ${OTA_LABEL[platform]} 메일을 읽지 못했습니다`,
                                         customerName: '(메일에서 못 읽음)',
                                         tourDate: '',
                                         option: '',
                                         source: OTA_LABEL[platform],
-                                        orderNumber: msg.subject.match(/BR-\d+|GYG[A-Z0-9]{6,}|[A-Z]{3}\d{6,}|^\d{6,}/)?.[0] || undefined,
+                                        orderNumber: subjectOrderId,
                                         detail: `제목: ${msg.subject}
 예약에 반영되지 않았습니다. 메일함에서 직접 확인해주세요.`,
                                     });
@@ -202,6 +214,13 @@ async function findTarget(b: OtaBooking): Promise<Target | null> {
         .is('order_id', null)
         .maybeSingle();
     return (byName as Target) ?? null;
+}
+
+/** 그 예약번호가 이미 DB 에 있는가. 못 읽은 메일로 헛알림을 보내지 않으려고 본다. */
+async function reservationExists(orderId: string): Promise<boolean> {
+    const { data } = await supabaseServer
+        .from('reservations').select('id').eq('order_id', orderId).maybeSingle();
+    return !!data;
 }
 
 /** 신규 예약 → '안내필요' 로 INSERT */
