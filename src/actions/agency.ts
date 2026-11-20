@@ -6,6 +6,7 @@ import { ReservationInsert, ReservationUpdate } from "@/types/reservation";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { getDynamicReceiptDateStr } from '@/lib/serverTimeUtils';
+import { sendDiscordUrgentAlert } from '@/lib/discordWebhook';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -286,11 +287,32 @@ export async function cancelAgencyReservation(id: string, reserverName: string) 
 
     try {
         const supabase = getSupabase();
-        const { data, error } = await supabase
+
+        // 이전 상태를 알아야 알림에 "예약확정 → 취소요청" 처럼 남길 수 있다.
+        const { data: before, error: fetchError } = await supabase
             .from("reservations")
-            .update({ status: "취소요청" })
+            .select("status")
             .eq("id", id)
             .eq("agency_id", session.id) // Partners may only cancel their own bookings
+            .maybeSingle();
+
+        if (fetchError) throw fetchError;
+        if (!before) return { success: false, error: "예약을 찾을 수 없습니다." };
+        // 이미 접수·마감된 건을 다시 요청하면 알림이 중복으로 울린다.
+        if (before.status === "취소" || before.status === "취소요청") {
+            return { success: false, error: "이미 취소 또는 취소요청 상태인 예약입니다." };
+        }
+
+        // 마이리얼트립·OTA 메일 취소와 같은 필드를 채워 환불 화면과 알림센터에 똑같이 뜨게 한다.
+        const { data, error } = await supabase
+            .from("reservations")
+            .update({
+                status: "취소요청",
+                cancel_requested_at: new Date().toISOString(),
+                is_admin_checked: false,
+            })
+            .eq("id", id)
+            .eq("agency_id", session.id)
             .select()
             .single();
 
@@ -302,6 +324,19 @@ export async function cancelAgencyReservation(id: string, reserverName: string) 
             action: "CANCELLED",
             message: `${session.name}에서 예약(${reserverName})의 취소를 요청했습니다.`,
         });
+
+        // 알림이 실패해도 취소요청 자체는 이미 DB에 반영됐으므로 실패로 돌려주지 않는다.
+        const sent = await sendDiscordUrgentAlert({
+            title: "❌ [취소요청] 여행사 취소 요청",
+            customerName: data.name || reserverName,
+            tourDate: data.tour_date,
+            option: data.option,
+            pax: data.pax || undefined,
+            source: `여행사 (${session.name || "알수없음"})`,
+            pickupLocation: data.pickup_location || undefined,
+            detail: `${before.status || "상태없음"} → 취소요청 (여행사 요청)`,
+        });
+        if (!sent) console.error(`[Agency] ⚠️ Discord 알림 실패 — 취소요청 ${data.name} ${data.tour_date}`);
 
         return { success: true, data };
     } catch (err: any) {

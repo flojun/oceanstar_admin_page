@@ -13,7 +13,7 @@ export default function AgencyDashboardPage() {
 
     const [searchTerm, setSearchTerm] = useState("");
     const [filterDate, setFilterDate] = useState("");
-    const [sortFilter, setSortFilter] = useState("TOUR_ASC");
+    const [sortFilter, setSortFilter] = useState("RECEIPT_DESC");
 
     const [availabilityStart, setAvailabilityStart] = useState(() => {
         const today = new Date();
@@ -336,20 +336,20 @@ export default function AgencyDashboardPage() {
                         <select 
                             value={sortFilter} 
                             onChange={e => setSortFilter(e.target.value)}
-                            className="w-[160px] px-3 py-2 text-sm bg-white border border-gray-300 rounded-md focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition font-medium text-gray-700"
+                            className="w-[190px] px-3 py-2 text-sm bg-white border border-gray-300 rounded-md focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition font-medium text-gray-700"
                         >
                             <option value="TODAY_LIST">⭐ 오늘 명단 (투어일)</option>
                             <option value="TOMORROW_LIST">⭐ 내일 명단 (투어일)</option>
-                            <option value="TOUR_ASC">투어날짜 (오름차순)</option>
-                            <option value="TOUR_DESC">투어날짜 (내림차순)</option>
-                            <option value="RECEIPT_ASC">예약날짜순 (오름차순)</option>
-                            <option value="RECEIPT_DESC">예약날짜순 (내림차순)</option>
+                            <option value="TOUR_ASC">투어날짜 (오래된순서)</option>
+                            <option value="TOUR_DESC">투어날짜 (최신순)</option>
+                            <option value="RECEIPT_ASC">예약날짜순 (오래된순서)</option>
+                            <option value="RECEIPT_DESC">예약날짜순 (최신순)</option>
                             <option value="STATUS_CONFIRMED">예약확정 (보기)</option>
                             <option value="STATUS_CANCELLED">예약취소 (보기)</option>
                             <option value="STATUS_PENDING">예약대기 (보기)</option>
                         </select>
-                        {(filterDate || sortFilter !== "TOUR_ASC") && (
-                            <button onClick={() => { setFilterDate(""); setSortFilter("TOUR_ASC"); }} className="px-3 text-xs font-bold text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 rounded-md transition whitespace-nowrap">초기화</button>
+                        {(filterDate || sortFilter !== "RECEIPT_DESC") && (
+                            <button onClick={() => { setFilterDate(""); setSortFilter("RECEIPT_DESC"); }} className="px-3 text-xs font-bold text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 rounded-md transition whitespace-nowrap">초기화</button>
                         )}
                     </div>
                     
@@ -363,13 +363,13 @@ export default function AgencyDashboardPage() {
                     <table className="w-full text-sm text-left whitespace-nowrap min-w-[800px]">
                         <thead className="sticky top-0 bg-gray-100/95 backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.05)] border-b border-gray-200 z-10 text-xs font-bold text-gray-600 uppercase tracking-widest">
                             <tr className="divide-x divide-gray-200">
-                                <th className="px-5 py-3 w-24">상태</th>
-                                <th className="px-5 py-3 w-32">투어 날짜</th>
-                                <th className="px-5 py-3 w-28">옵션</th>
+                                <th className="px-5 py-3 text-center w-24">상태</th>
                                 <th className="px-5 py-3 text-center">예약자명</th>
+                                <th className="px-5 py-3 text-center w-32">투어 날짜</th>
                                 <th className="px-5 py-3 text-center w-24">인원</th>
-                                <th className="px-5 py-3 truncate max-w-[150px]">픽업장소</th>
-                                <th className="px-5 py-3">담당자 연락처</th>
+                                <th className="px-5 py-3 text-center w-28">옵션</th>
+                                <th className="px-5 py-3 text-center truncate max-w-[150px]">픽업장소</th>
+                                <th className="px-5 py-3 text-center">담당자 혹은 연락처</th>
                                 <th className="px-5 py-3 text-center w-24">수정/취소</th>
                             </tr>
                         </thead>
@@ -379,11 +379,11 @@ export default function AgencyDashboardPage() {
                                 Array.from({ length: 15 }).map((_, i) => (
                                     <tr key={i} className="animate-pulse bg-white divide-x divide-gray-100">
                                         <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-12"></div></td>
-                                        <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-20"></div></td>
-                                        <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-10"></div></td>
                                         <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-16 mx-auto"></div></td>
+                                        <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-20"></div></td>
                                         <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-14 mx-auto"></div></td>
-                                        <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-32"></div></td>
+                                        <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-10"></div></td>
+                                        <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-32 mx-auto"></div></td>
                                         <td className="px-5 py-3.5"><div className="h-4 bg-gray-200 rounded w-24"></div></td>
                                         <td className="px-5 py-3.5"><div className="h-6 bg-gray-200 rounded w-16 mx-auto"></div></td>
                                     </tr>
@@ -408,11 +408,11 @@ export default function AgencyDashboardPage() {
                                                     {res.status}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-3 font-bold text-gray-800 tracking-tight">{res.tour_date.replace(/-/g, '.')}</td>
-                                            <td className="px-5 py-3 font-bold text-indigo-700">{res.option}</td>
                                             <td className="px-5 py-3 text-center font-bold text-gray-900">{res.name}</td>
+                                            <td className="px-5 py-3 font-bold text-gray-800 tracking-tight">{res.tour_date.replace(/-/g, '.')}</td>
                                             <td className="px-5 py-3 text-center text-gray-600 text-xs font-medium">{res.pax}</td>
-                                            <td className="px-5 py-3 text-gray-600 truncate max-w-[200px]" title={res.pickup_location}>{res.pickup_location}</td>
+                                            <td className="px-5 py-3 font-bold text-indigo-700">{res.option}</td>
+                                            <td className="px-5 py-3 text-center text-gray-600 truncate max-w-[200px]" title={res.pickup_location}>{res.pickup_location}</td>
                                             <td className="px-5 py-3 text-gray-600 text-xs font-medium font-mono">{res.contact}</td>
                                             <td className="px-5 py-2 text-center flex items-center justify-center gap-1.5 min-w-[100px]">
                                                 {!isCancelled && (
