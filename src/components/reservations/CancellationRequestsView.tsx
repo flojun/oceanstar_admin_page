@@ -179,15 +179,15 @@ export default function CancellationRequestsView() {
 
             {/* Refund Process Modal */}
             {isModalOpen && selectedReservation && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                        <div className="bg-red-50 px-6 py-4 border-b border-red-100">
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-full flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        <div className="shrink-0 bg-red-50 px-6 py-4 border-b border-red-100">
                             <h3 className="text-lg font-bold text-red-800 flex items-center gap-2">
                                 <AlertTriangle className="w-5 h-5" />
                                 취소 처리 및 환불
                             </h3>
                         </div>
-                        <div className="p-6 space-y-4">
+                        <div className="p-6 space-y-4 overflow-y-auto min-h-0">
                             <div className="bg-gray-50 p-4 rounded text-sm space-y-1.5 border border-gray-100">
                                 <div className="flex items-center justify-between mb-1">
                                     <p><span className="font-bold w-20 inline-block text-gray-500">예약자:</span> <span className="font-semibold text-gray-900">{selectedReservation.name}</span></p>
@@ -267,7 +267,7 @@ export default function CancellationRequestsView() {
                                 ></textarea>
                             </div>
                         </div>
-                        <div className="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
+                        <div className="shrink-0 bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
                             <button
                                 onClick={() => setIsModalOpen(false)}
                                 disabled={processingId === selectedReservation.id}

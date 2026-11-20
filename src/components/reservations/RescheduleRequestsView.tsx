@@ -144,15 +144,15 @@ export default function RescheduleRequestsView() {
 
             {/* Approve Process Modal */}
             {isModalOpen && selectedReservation && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                        <div className="bg-blue-50 px-6 py-4 border-b border-blue-100">
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-full flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        <div className="shrink-0 bg-blue-50 px-6 py-4 border-b border-blue-100">
                             <h3 className="text-lg font-bold text-blue-800 flex items-center gap-2">
                                 <AlertTriangle className="w-5 h-5" />
                                 예약 일정/픽업 변경 승인
                             </h3>
                         </div>
-                        <div className="p-6 space-y-4">
+                        <div className="p-6 space-y-4 overflow-y-auto min-h-0">
                             <div className="bg-gray-50 p-3 rounded text-sm space-y-1 border border-gray-200">
                                 <p><span className="font-bold w-20 inline-block text-gray-500">예약자:</span> {selectedReservation.name}</p>
                                 <p><span className="font-bold w-20 inline-block text-gray-500">인원:</span> {selectedReservation.pax}</p>
@@ -181,7 +181,7 @@ export default function RescheduleRequestsView() {
                             </p>
                         </div>
                         
-                        <div className="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
+                        <div className="shrink-0 bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-100">
                             <button
                                 onClick={() => setIsModalOpen(false)}
                                 className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded"
