@@ -49,6 +49,7 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
 
     // Data State
     const [reservations, setReservations] = useState<Reservation[]>([]);
+    const [cancelledReservations, setCancelledReservations] = useState<Reservation[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
@@ -64,7 +65,7 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
     const [searchQuery, setSearchQuery] = useState('');
 
     // Filter Hook (now with tourSettings for dynamic tabs)
-    const { activeTab, setActiveTab, filteredData: tabFilteredData, groupedSections, sortOption, setSortOption, vesselFilter, setVesselFilter, availableVessels, getVessel } = useReservationFilter(reservations, tourSettings);
+    const { activeTab, setActiveTab, filteredData: tabFilteredData, groupedSections, sortOption, setSortOption, vesselFilter, setVesselFilter, availableVessels, getVessel, getGroup } = useReservationFilter(reservations, tourSettings);
 
     // Apply search filter on top of tab filter
     const filteredData = useMemo(() => {
@@ -86,6 +87,29 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
             return value.includes(query);
         });
     }, [tabFilteredData, searchQuery, searchCriteria]);
+
+    // Cancelled reservations: shown separately at the bottom (not counted in totals)
+    const filteredCancelled = useMemo(() => {
+        let result = cancelledReservations;
+        if (activeTab !== '전체') {
+            result = result.filter(item => getGroup(item.option) === activeTab);
+        }
+        if (vesselFilter !== '전체') {
+            result = result.filter(item => getVessel(item.option) === vesselFilter);
+        }
+        if (searchQuery.trim()) {
+            let query = searchQuery.toLowerCase().trim();
+            if (searchCriteria === 'tour_date') {
+                const dateMatch = query.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+                if (dateMatch) {
+                    const [, month, day, year] = dateMatch;
+                    query = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                }
+            }
+            result = result.filter(row => String(row[searchCriteria] || '').toLowerCase().includes(query));
+        }
+        return result;
+    }, [cancelledReservations, activeTab, vesselFilter, searchQuery, searchCriteria, tourSettings]);
     
     // Calculate summary stats
     const summaryStats = useMemo(() => {
@@ -142,16 +166,27 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
     const fetchReservations = async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
-                .from("reservations")
-                .select("*")
-                .eq("tour_date", selectedDate)
-                .neq("status", "취소") // Exclude cancelled reservations from List View
-                .order("option", { ascending: true })
-                .order("pickup_location", { ascending: true });
+            const [activeRes, cancelledRes] = await Promise.all([
+                supabase
+                    .from("reservations")
+                    .select("*")
+                    .eq("tour_date", selectedDate)
+                    .neq("status", "취소") // Cancelled ones are shown separately at the bottom
+                    .order("option", { ascending: true })
+                    .order("pickup_location", { ascending: true }),
+                supabase
+                    .from("reservations")
+                    .select("*")
+                    .eq("tour_date", selectedDate)
+                    .eq("status", "취소")
+                    .order("option", { ascending: true })
+                    .order("pickup_location", { ascending: true }),
+            ]);
 
-            if (error) throw error;
-            setReservations(data || []);
+            if (activeRes.error) throw activeRes.error;
+            if (cancelledRes.error) throw cancelledRes.error;
+            setReservations(activeRes.data || []);
+            setCancelledReservations(cancelledRes.data || []);
         } catch (error) {
             console.error("Error fetching reservations:", error);
             alert("예약 데이터를 불러오는데 실패했습니다.");
@@ -201,6 +236,7 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
 
     const handleReconfirmToggle = async (id: string, currentVal: boolean) => {
         setReservations(prev => prev.map(r => r.id === id ? { ...r, is_reconfirmed: !currentVal } : r));
+        setCancelledReservations(prev => prev.map(r => r.id === id ? { ...r, is_reconfirmed: !currentVal } : r));
         try {
             const { error } = await supabase.from("reservations").update({ is_reconfirmed: !currentVal }).eq("id", id);
             if (error) throw error;
@@ -492,6 +528,28 @@ export function ReservationListView({ defaultDate }: ReservationListViewProps) {
                             onReconfirmToggle={handleReconfirmToggle}
                             loading={loading}
                         />
+                    </div>
+                )}
+
+                {/* Cancelled reservations (always at the bottom, excluded from totals) */}
+                {filteredCancelled.length > 0 && (
+                    <div className="p-4 border-t-4 border-gray-100 bg-gray-50/60">
+                        <h3 className="mb-3 text-lg font-bold text-red-700 flex items-center gap-2">
+                            <span className="w-2 h-6 bg-red-400 rounded-sm inline-block"></span>
+                            취소 명단
+                            <span className="text-sm font-bold text-gray-600 bg-white px-2 py-0.5 rounded-full border border-gray-200">
+                                {filteredCancelled.length}건 · {calculateTotalPax(filteredCancelled)}명 (총원 미포함)
+                            </span>
+                        </h3>
+                        <div className="opacity-70">
+                            <ReservationTable
+                                reservations={filteredCancelled}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                                onReconfirmToggle={handleReconfirmToggle}
+                                loading={false}
+                            />
+                        </div>
                     </div>
                 )}
 
