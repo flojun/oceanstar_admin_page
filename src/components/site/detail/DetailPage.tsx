@@ -309,6 +309,28 @@ export default function DetailPage({ lang, tour, tourSettings, google }: { lang:
         const val = tour === "surf" && def ? priceText(def, tourSettings, currencyOf(lang), lang) : v[0];
         return <p className="cb-p has"><b className="n">{v[2] ? <small className="per">{v[2]}</small> : null}{val}</b>{v[1] && <span>{v[1]}</span>}</p>;
     };
+    // 사진 모음 (카카아코 PART 1): 숫자 카드 · 캡션 사진 · 꿀팁 카드
+    const gallery = () => {
+        const G = C.GALLERY;
+        return (
+            <section className="sect" key="gallery">
+                <span className="act-tag rise">{G.tag}</span>
+                {sh(G.h2, G.lede, "gsh")}
+                <div className="gstats rise">{G.stats.map(([v, k]: [string, string]) => <div key={k}><b className="n">{v}</b><span>{k}</span></div>)}</div>
+                <div className="ggrid">
+                    {G.photos.map(([img, cap, wide]: [string, string, boolean]) => (
+                        <figure className={`gph rise${wide ? " wide" : ""}`} key={img} data-image-slot="detail.gallery">
+                            <img src={R(img)} alt={cap} loading="lazy" /><figcaption>{cap}</figcaption>
+                        </figure>
+                    ))}
+                </div>
+                <div className="gtips rise">
+                    {G.tips.map(([t, b, dark]: [string, string, boolean]) => <div className={`gtip${dark ? " dark" : ""}`} key={t}><b>{t}</b><H as="p" html={b} /></div>)}
+                </div>
+            </section>
+        );
+    };
+
     const combo = () => {
         const n = C.COMBOS.length;
         return (
@@ -415,7 +437,7 @@ export default function DetailPage({ lang, tour, tourSettings, google }: { lang:
     const plain = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
     const ld = detailJsonLd(lang, tourSettings, tour, `${plain(C.HERO.eyebrow)}. ${plain(C.HERO.pure)}`, google);
 
-    const FN: Record<string, () => React.ReactNode> = { perks, features, times, flow, course, stars, more, acts, combo, days, reco, sessions, meet, rules };
+    const FN: Record<string, () => React.ReactNode> = { perks, features, times, flow, course, stars, more, acts, combo, days, reco, sessions, meet, rules, gallery };
     let order: string[] = C.SECTIONS ?? ["perks", "features", "times", "flow", "course", "stars", "more"];
     if (C.SHOW_STARS === false) order = order.filter((x) => x !== "stars");
 

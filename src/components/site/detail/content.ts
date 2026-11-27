@@ -3438,6 +3438,7 @@ export const DETAIL: Record<string, any> = {
   "SECTIONS": [
    "features",
    "course",
+   "gallery",
    "acts",
    "perks",
    "rules",
@@ -3577,38 +3578,9 @@ export const DETAIL: Record<string, any> = {
     "bowl"
    ]
   ],
-  "ACTS_H2": "<span class=\"hl\">장터</span>와 <span class=\"hl\">바다</span>, 토요일 하루에 두 번의 투어",
-  "ACTS_LEDE": "매주 토요일 진행합니다. 마켓은 토요일 오전 8시부터 정오까지만 열려요.",
+  "ACTS_H2": "<span class=\"hl\">18,000개의 후기</span>가<br>먼저 다녀왔습니다",
+  "ACTS_LEDE": "PART 2 · 마켓에서 걸어서 닿는 오션스타 선착장, 11:00 출항입니다.",
   "ACTS": [
-   [
-    "PART 1",
-    "카카아코 파머스 마켓 (Kakaʻako Farmers Market)",
-    "오아후의 토요일이 한자리에 모이는 곳",
-    [
-     "워드 빌리지 옆 알라모아나 대로에서 매주 토요일 열리는 장터예요. 오아후 농장의 열대 과일과 꿀, 즉석 요리, 로컬 작가들의 수공예품까지 100개가 넘는 부스가 늘어섭니다.",
-     "인기 부스는 일찍 줄이 생겨요. 도착하면 먹고 싶은 곳부터 들르세요."
-    ],
-    [
-     [
-      "부스 수",
-      "110곳 이상"
-     ],
-     [
-      "운영 시간",
-      "토 8 - 12시"
-     ],
-     [
-      "입장",
-      "무료"
-     ],
-     [
-      "결제",
-      "대부분 카드 가능 <span class=\"nw\">(소액 현금 권장)</span>"
-     ]
-    ],
-    "mk_brunch.webp",
-    "카카아코 파머스 마켓 나무 그늘 아래 테이블에서 브런치를 먹는 사람들"
-   ],
    [
     "PART 2",
     "오션스타 거북이 스노클링",
@@ -3739,13 +3711,72 @@ export const DETAIL: Record<string, any> = {
   ],
   "DOCK_SUB": "1인 · 08:30-14:30",
   "END_H2": "토요일 아침은 장터에서",
-  "END_SUB": "원하시는 토요일을 골라 주세요."
+  "END_SUB": "원하시는 토요일을 골라 주세요.",
+  "GALLERY": {
+   "tag": "PART 1 · 카카아코 파머스 마켓",
+   "h2": "오아후의 토요일이<br><span class=\"hl\">한자리에 모이는 곳</span>",
+   "lede": "워드 빌리지 옆 알라모아나 대로에서 매주 토요일 열리는 장터예요. 오아후 농장의 열대 과일과 꿀, 즉석 요리, 로컬 작가들의 수공예품까지 100개가 넘는 부스가 늘어섭니다.",
+   "stats": [
+    [
+     "110곳 이상",
+     "부스 수"
+    ],
+    [
+     "토 8-12시",
+     "운영 시간"
+    ],
+    [
+     "무료",
+     "입장"
+    ]
+   ],
+   "photos": [
+    [
+     "mk_fruit.webp",
+     "오아후 농장의 열대 과일",
+     false
+    ],
+    [
+     "mk_bowls.webp",
+     "즉석 과일 볼 & 주스",
+     false
+    ],
+    [
+     "mk_bagel.webp",
+     "줄 서서 먹는 수제 베이글",
+     false
+    ],
+    [
+     "mk_roti.webp",
+     "로티세리 치킨 · 즉석 요리 푸드 부스",
+     false
+    ],
+    [
+     "mk_brunch.webp",
+     "나무 그늘 아래 테이블에서 느긋한 브런치",
+     true
+    ]
+   ],
+   "tips": [
+    [
+     "마켓 꿀팁",
+     "인기 부스는 일찍 줄이 생겨요.<br>도착하면 먹고 싶은 곳부터!",
+     true
+    ],
+    [
+     "결제",
+     "대부분 카드 가능, 작은 농산물 부스용<br>소액 현금을 챙기세요.",
+     false
+    ]
+   ]
+  }
  },
  "market_en": {
   "THEME": "market",
   "SECTIONS": [
    "features",
    "course",
+   "gallery",
    "acts",
    "perks",
    "rules",
@@ -3885,38 +3916,9 @@ export const DETAIL: Record<string, any> = {
     "bowl"
    ]
   ],
-  "ACTS_H2": "<span class=\"hl\">Market</span> and <span class=\"hl\">sea</span> in one Saturday",
-  "ACTS_LEDE": "Saturdays only. The market runs from 8 AM to noon.",
+  "ACTS_H2": "<span class=\"hl\">18,000 reviews</span><br>went first",
+  "ACTS_LEDE": "Part 2 · A short walk from the market to the Ocean Star dock, departing at 11:00.",
   "ACTS": [
-   [
-    "Part 1",
-    "Kakaʻako Farmers Market",
-    "Oahu's Saturday, all in one place",
-    [
-     "Held every Saturday on Ala Moana Boulevard next to Ward Village. More than 100 booths: tropical fruit and honey from Oahu farms, food cooked to order and crafts by local makers.",
-     "Popular booths get lines early, so start with the one you want most."
-    ],
-    [
-     [
-      "Booths",
-      "110+"
-     ],
-     [
-      "Hours",
-      "Sat 8 AM - noon"
-     ],
-     [
-      "Entry",
-      "Free"
-     ],
-     [
-      "Payment",
-      "Most take cards <span class=\"nw\">(bring small cash)</span>"
-     ]
-    ],
-    "mk_brunch.webp",
-    "People eating brunch at tables under the trees at the Kaka'ako Farmers Market"
-   ],
    [
     "Part 2",
     "Ocean Star Turtle Snorkeling",
@@ -4047,6 +4049,64 @@ export const DETAIL: Record<string, any> = {
   ],
   "DOCK_SUB": "Per person · 08:30-14:30",
   "END_H2": "Saturday starts at the market",
-  "END_SUB": "Pick your Saturday."
+  "END_SUB": "Pick your Saturday.",
+  "GALLERY": {
+   "tag": "Part 1 · Kakaʻako Farmers Market",
+   "h2": "Oahu's Saturday,<br><span class=\"hl\">all in one place</span>",
+   "lede": "Held every Saturday on Ala Moana Boulevard next to Ward Village. More than 100 booths: tropical fruit and honey from Oahu farms, food cooked to order and crafts by local makers.",
+   "stats": [
+    [
+     "110+",
+     "Booths"
+    ],
+    [
+     "Sat 8-12",
+     "Hours"
+    ],
+    [
+     "Free",
+     "Entry"
+    ]
+   ],
+   "photos": [
+    [
+     "mk_fruit.webp",
+     "Tropical fruit from Oahu farms",
+     false
+    ],
+    [
+     "mk_bowls.webp",
+     "Fresh fruit bowls and juice",
+     false
+    ],
+    [
+     "mk_bagel.webp",
+     "Hand-rolled bagels worth the line",
+     false
+    ],
+    [
+     "mk_roti.webp",
+     "Rotisserie chicken and food cooked to order",
+     false
+    ],
+    [
+     "mk_brunch.webp",
+     "Slow brunch at tables under the trees",
+     true
+    ]
+   ],
+   "tips": [
+    [
+     "Market tip",
+     "Popular booths get lines early.<br>Start with the one you want most!",
+     true
+    ],
+    [
+     "Payment",
+     "Most booths take cards. Bring small cash<br>for the produce stands.",
+     false
+    ]
+   ]
+  }
  }
 };

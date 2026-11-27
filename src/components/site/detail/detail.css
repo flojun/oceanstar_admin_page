@@ -576,3 +576,34 @@
     .os .dp .buy :is(.facts > div, .pure) { animation: os-leave linear both; animation-timeline: view(); animation-range: cover 70% cover 100% }
   }
 }
+
+/* 사진 모음 (카카아코 PART 1): 숫자 카드 · 캡션 사진 · 꿀팁 카드 */
+.os .dp .gsh { margin-top:16px }
+.os .dp .gstats { margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px }
+.os .dp .gstats div { display:flex;flex-direction:column;align-items:center;gap:6px;padding:26px 12px; background:#fff;border:1px solid var(--line);border-radius:18px }
+.os .dp .gstats b { font-family:var(--f-head);font-size:30px;font-weight:800;color:var(--ink);letter-spacing:-.02em;white-space:nowrap;text-align:center }
+.os .dp .gstats span { font-size:14.5px;font-weight:700;color:var(--muted) }
+.os .dp .ggrid { margin-top:16px;display:grid;grid-template-columns:repeat(2,1fr);gap:14px }
+.os .dp .gph { position:relative;margin:0;aspect-ratio:4 / 3;border-radius:18px;overflow:hidden;background:var(--soft) }
+.os .dp .gph.wide { grid-column:1 / -1;aspect-ratio:2 / 1 }
+.os .dp .gph img { display:block;width:100%;height:100%;object-fit:cover }
+.os .dp .gph figcaption { position:absolute;left:0;right:0;bottom:0;padding:48px 22px 18px; background:linear-gradient(180deg,rgba(9,16,22,0),rgba(9,16,22,.66)); color:#fff;font-size:17px;font-weight:800;line-height:1.4 }
+.os .dp .gtips { margin-top:16px;display:grid;grid-template-columns:repeat(2,1fr);gap:14px }
+.os .dp .gtip { padding:26px 28px;background:#fff;border:1px solid var(--line);border-radius:18px }
+.os .dp .gtip b { display:block;font-size:16px;font-weight:800;color:var(--food-d) }
+.os .dp .gtip p { margin:8px 0 0;font-size:15.5px;line-height:1.75;color:var(--text) }
+.os .dp .gtip.dark { background:var(--deep);border-color:var(--deep) }
+.os .dp .gtip.dark b { color:#FFE066 }
+.os .dp .gtip.dark p { color:#fff }
+@media (max-width: 767px) {
+  .os .dp .gstats { margin-top:26px;gap:8px }
+  .os .dp .gstats div { padding:18px 6px;border-radius:14px }
+  .os .dp .gstats b { font-size:clamp(16px,5vw,21px) }
+  .os .dp .gstats span { font-size:12.5px }
+  .os .dp .ggrid, .os .dp .gtips { gap:10px }
+  .os .dp .gph { border-radius:14px }
+  .os .dp .gph.wide { aspect-ratio:4 / 3 }
+  .os .dp .gph figcaption { padding:30px 12px 11px;font-size:14px }
+  .os .dp .gtips { grid-template-columns:1fr }
+  .os .dp .gtip { padding:20px 22px }
+}
