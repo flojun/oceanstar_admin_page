@@ -122,7 +122,9 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
     }
 
     // 콤보는 행마다 옵션이 달라(거북이 1부 + 패러) 상태도 행마다 정한다.
-    for (const row of insertRows) row.status = initialStatus(row.option, metadata);
+    // 같은 날 콤보(다이아몬드·카카아코)는 픽업 시간을 개별 안내하므로 두 행 모두 '안내필요'.
+    const sameDayRows = !!sameDayByOption(metadata.combo_option);
+    for (const row of insertRows) row.status = sameDayRows ? '안내필요' : initialStatus(row.option, metadata);
 
     const { data: inserted, error: insertError } = await supabaseServer
         .from('reservations')
