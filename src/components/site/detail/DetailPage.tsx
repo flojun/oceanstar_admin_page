@@ -70,6 +70,10 @@ const CS_MEDIA: Record<string, [string, string, string][]> = {
     photo: [["act_photo.webp", "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람", "Two people sitting on the bow with Diamond Head behind"]],
     dh_climb: [["dh_tunnel.webp", "다이아몬드 헤드 터널 출구 앞 계단에 선 손님", "Guest on the steps at the mouth of the Diamond Head tunnel"],
         ["dh_stairs.webp", "다이아몬드 헤드 99계단 중간에 앉아 손을 든 손님", "Guest sitting halfway up the 99 steps on Diamond Head"]],
+    mk_fruit: [["mk_fruit.webp", "열대 과일과 바나나가 가득 쌓인 카카아코 파머스 마켓 과일 부스", "Tropical fruit and bananas piled high at a Kaka'ako Farmers Market stand"],
+        ["mk_bowls.webp", "ICE COLD FRESH 간판 옆에서 과일 볼과 주스를 만드는 부스", "Fruit bowl and juice booth beside an ICE COLD FRESH sign"]],
+    mk_food: [["mk_bagel.webp", "바구니에 수제 베이글이 쌓인 빅 타임 베이글 부스", "Hand-rolled bagels piled in baskets at the Big Time Bagels booth"],
+        ["mk_roti.webp", "로티세리 치킨을 굽는 푸드 부스", "Food booth roasting rotisserie chicken"]],
     dh_west: [["dh_west.webp", "다이아몬드 헤드 정상에서 내려다본 와이키키 해변과 호텔들", "Waikiki beach and hotels seen from the Diamond Head summit"]],
 };
 
@@ -82,7 +86,7 @@ const R = (f: string) => `/renewal/${f}`;
 /** '다른 상품' 카드의 사진 → 상품 */
 const MORE_KEY: Record<string, TourKey> = {
     "turtle.jpg": "turtle", "sunset.jpg": "sunset", "course_sup_sunset.webp": "sunset",
-    "private_boat.webp": "private", "boat_private.webp": "private", "parasail.jpg": "combo", "surf.jpg": "surf", "dh_hero.webp": "diamond",
+    "private_boat.webp": "private", "boat_private.webp": "private", "parasail.jpg": "combo", "surf.jpg": "surf", "dh_hero.webp": "diamond", "mk_hero.webp": "market",
 };
 /** 콤보 패키지 카드 → 예약 창에서 고를 상품 (서핑 콤보 카드는 서핑) */
 

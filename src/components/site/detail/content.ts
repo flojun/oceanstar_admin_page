@@ -3432,5 +3432,621 @@ export const DETAIL: Record<string, any> = {
   "DOCK_SUB": "Per person · 05:20-11:30",
   "END_H2": "Mountain at dawn, sea by 8",
   "END_SUB": "Pick a Monday, Wednesday or Friday."
+ },
+ "market_ko": {
+  "THEME": "market",
+  "SECTIONS": [
+   "features",
+   "course",
+   "acts",
+   "perks",
+   "rules",
+   "more"
+  ],
+  "SHOW_STARS": false,
+  "HERO": {
+   "eyebrow": "후기 18,000개로 신뢰받는 오션스타의 토요일 코스",
+   "h1": "토요일 아침은<br>로컬처럼 장터에서,<br><span class=\"hl\">낮에는 거북이와</span>",
+   "badge": "압도적 업계 통합 누적 리뷰 18,000개",
+   "price": "$130",
+   "price_per": "1인",
+   "price_sub": "콤보가 · 매주 토요일 · 마켓 픽업 포함",
+   "facts": [
+    [
+     "소요 시간",
+     "약 6시간 (08:30 픽업 · 14:30 호텔 도착)"
+    ],
+    [
+     "운영",
+     "매주 토요일"
+    ],
+    [
+     "픽업",
+     "와이키키 호텔 또는 가장 가까운 지정 장소"
+    ],
+    [
+     "포함",
+     "마켓 픽업 · 스노클링 장비 · 라면과 간식"
+    ]
+   ],
+   "pure": "08:45 카카아코 파머스 마켓 자유 시간, 10:30 걸어서 선착장으로, 11:00 오션스타 승선, 14:30쯤 호텔에 도착합니다."
+  },
+  "HERO_IMG": [
+   "mk_hero.webp",
+   "야자수와 파란 하늘 아래 카카아코 파머스 마켓 입구에 걸린 하트 현수막"
+  ],
+  "FEAT_H2": "현지인 틈에서 브런치를 먹고,<br><span class=\"hl\">그 기운 그대로</span> 바다로 갑니다",
+  "FEAT_LEDE": "08:45 하와이 사람들의 토요일 장터에서, 11:00 거북이가 사는 바다 속에서.<br>함께라서 좋은 다섯 가지입니다.",
+  "FEATURES": [
+   [
+    "01",
+    "관광지가 아닌,",
+    "진짜 하와이의 주말",
+    [
+     "오아후 곳곳의 농부와 셰프, 작가들이 모이는 토요일 장터입니다."
+    ],
+    null
+   ],
+   [
+    "02",
+    "주차 전쟁 없이",
+    "편하게",
+    [
+     "9시만 넘어도 붐비는 마켓 주차장. 기사님이 입구에 내려드려요."
+    ],
+    null
+   ],
+   [
+    "03",
+    "장터에서 걸어서 바다로",
+    "케왈로 하버 산책",
+    [
+     "케왈로 하버를 따라 산책하다 보면 어느새 오션스타 선착장이에요."
+    ],
+    null
+   ],
+   [
+    "04",
+    "든든한 브런치가",
+    "스노클링 컨디션으로",
+    [
+     "열대 과일과 생과일주스로 충전하고 여유롭게 출발합니다."
+    ],
+    null
+   ],
+   [
+    "05",
+    "늦잠 자도 되는",
+    "08:30 픽업",
+    [
+     "새벽 기상 없이 여유롭게. 토요일 하루를 알차게 채웁니다."
+    ],
+    null
+   ]
+  ],
+  "COURSE_H2": "하루 일정",
+  "COURSE_HINT": "7단계 · 옆으로 넘겨 보세요",
+  "COURSE": [
+   [
+    "🚐 08:30 와이키키 픽업",
+    null,
+    "호텔 또는 가장 가까운 지정 장소에서 픽업해 마켓 입구에 내려 드립니다. 정확한 픽업 시간은 예약 후 개별 안내 드립니다.",
+    null,
+    "van"
+   ],
+   [
+    "🍍 08:45 카카아코 파머스 마켓 자유 시간",
+    "약 1시간 45분",
+    "오아후 농장의 열대 과일과 꿀, 즉석 과일 볼과 생과일주스까지. 가이드 없이 원하는 부스를 자유롭게 둘러보세요.",
+    "*인기 부스는 일찍 줄이 생겨요. 도착하면 먹고 싶은 곳부터!",
+    "mk_fruit"
+   ],
+   [
+    "🥯 브런치 · 기념품 쇼핑",
+    null,
+    "줄 서서 먹는 수제 베이글, 즉석 요리 푸드 부스, 로컬 작가들의 수공예품. 나무 그늘 아래 테이블에서 느긋하게 브런치를 즐겨요.",
+    "*대부분 카드 가능, 작은 농산물 부스용 소액 현금을 챙기세요.",
+    "mk_food"
+   ],
+   [
+    "🚶 10:30 케왈로 하버 산책 · 선착장으로",
+    null,
+    "마켓에서 걸어서, 바다를 보며 오션스타 선착장까지 이동합니다. 선착장 위치는 예약 확정 시 안내드립니다.",
+    "*스노클링 시작 시간에 맞춰 선착장으로 와 주세요.",
+    "boat"
+   ],
+   [
+    "🐢 11:00 승선 · 다이아몬드 헤드 크루즈 & 거북이 스노클링",
+    null,
+    "와이키키 유일의 나무 루프탑 보트로 다이아몬드 헤드를 바라보며 출발해, 터틀 캐니언에서 하와이 바다거북과 함께 수영합니다. 수영을 못하셔도 크루들이 보드로 끌어드립니다.",
+    "*고프로 대여 & 수중 촬영 옵션 $40 (현장 결제: 현금 또는 계좌이체)",
+    "turtle"
+   ],
+   [
+    "🏄 해양 액티비티 5종",
+    null,
+    "패들보드, 카약, 씨체어, 보트 다이빙 등 해양 액티비티를 무료로 즐깁니다.",
+    null,
+    "sup2"
+   ],
+   [
+    "🍜 간식 · 14:30 호텔 도착",
+    null,
+    "라면과 간식, 음료로 마무리하고 항구로 돌아옵니다. 14:30쯤 호텔에 도착하면 오후는 해변이나 쇼핑으로 자유 일정이에요.",
+    null,
+    "bowl"
+   ]
+  ],
+  "ACTS_H2": "<span class=\"hl\">장터</span>와 <span class=\"hl\">바다</span>, 토요일 하루에 두 번의 투어",
+  "ACTS_LEDE": "매주 토요일 진행합니다. 마켓은 토요일 오전 8시부터 정오까지만 열려요.",
+  "ACTS": [
+   [
+    "PART 1",
+    "카카아코 파머스 마켓 (Kakaʻako Farmers Market)",
+    "오아후의 토요일이 한자리에 모이는 곳",
+    [
+     "워드 빌리지 옆 알라모아나 대로에서 매주 토요일 열리는 장터예요. 오아후 농장의 열대 과일과 꿀, 즉석 요리, 로컬 작가들의 수공예품까지 100개가 넘는 부스가 늘어섭니다.",
+     "인기 부스는 일찍 줄이 생겨요. 도착하면 먹고 싶은 곳부터 들르세요."
+    ],
+    [
+     [
+      "부스 수",
+      "110곳 이상"
+     ],
+     [
+      "운영 시간",
+      "토 8 - 12시"
+     ],
+     [
+      "입장",
+      "무료"
+     ],
+     [
+      "결제",
+      "대부분 카드 가능 <span class=\"nw\">(소액 현금 권장)</span>"
+     ]
+    ],
+    "mk_brunch.webp",
+    "카카아코 파머스 마켓 나무 그늘 아래 테이블에서 브런치를 먹는 사람들"
+   ],
+   [
+    "PART 2",
+    "오션스타 거북이 스노클링",
+    "18,000개의 후기가 먼저 다녀왔습니다",
+    [
+     "하와이 로컬 한인 가족이 직접 운영하는, 한국어로 편한 투어입니다.",
+     "와이키키 유일의 나무 루프탑 보트로 햇빛 · 비 · 멀미 걱정을 덜고, 다이아몬드 헤드를 배경으로 인생샷을 남겨 드려요."
+    ],
+    [
+     [
+      "누적 후기",
+      "18,000+ · 평점 5.0"
+     ],
+     [
+      "거북이",
+      "100% 보장"
+     ],
+     [
+      "해양 5종",
+      "패들보드, 카약, 씨체어, 보트 다이빙 등"
+     ],
+     [
+      "무료",
+      "장비, 라면, 간식, 음료"
+     ],
+     [
+      "안전 · 위생",
+      "상해보험, 장비 매일 소독"
+     ]
+    ],
+    "hero_turtle.webp",
+    "와이키키 앞바다 산호 위의 푸른바다거북"
+   ]
+  ],
+  "ACTS_NOTE": "마켓에서 선착장까지는 케왈로 하버를 따라 걸어서 이동합니다. 위치는 예약 확정 시 안내드립니다.",
+  "PERKS_H2": "포함 사항",
+  "PERKS": [
+   [
+    "van",
+    "차량 이동",
+    "와이키키 → 마켓 픽업, 투어 후 호텔 드롭 (14:30)"
+   ],
+   [
+    "turtle",
+    "거북이 100% 보장",
+    "거북이가 사는 바다로"
+   ],
+   [
+    "gear",
+    "스노클링 장비",
+    "스노클링 장비 일체와 구명조끼"
+   ],
+   [
+    "sup",
+    "해양 액티비티 5종",
+    "패들보드 · 카약 · 씨체어 · 보트 다이빙 등"
+   ],
+   [
+    "bowl",
+    "라면 · 스낵 · 음료",
+    "스노클링 후 선상에서"
+   ],
+   [
+    "camera",
+    "인생샷 촬영",
+    "다이아몬드 헤드를 배경으로"
+   ]
+  ],
+  "RULES_H2": "준비물 & 유의사항",
+  "RULES": [
+   [
+    "수영복",
+    "처음부터 옷 안에 입고 출발해 주세요.",
+    false
+   ],
+   [
+    "챙길 것",
+    "수건, 갈아입을 옷, 모자, 선크림",
+    false
+   ],
+   [
+    "장바구니",
+    "장바구니와 소액 현금 (작은 농산물 부스는 현금만 받기도 해요)",
+    false
+   ],
+   [
+    "자유 시간",
+    "마켓은 가이드 없는 자유 시간입니다. 스노클링 시작 시간에 맞춰 오션스타 선착장으로 와 주세요.",
+    true
+   ],
+   [
+    "날씨",
+    "마켓은 야외 행사라 날씨에 따라 일부 부스가 나오지 않을 수 있어요.",
+    false
+   ],
+   [
+    "음식 반입",
+    "마켓에서 산 음식의 보트 반입 여부는 현장에서 안내드립니다.",
+    false
+   ],
+   [
+    "일정 변경",
+    "원하시는 시간이나 스노클링 요일로 변경을 원하시면 메시지로 요청해 주세요.",
+    false
+   ],
+   [
+    "불포함",
+    "마켓 식사 · 쇼핑 비용, 고프로 대여 & 수중 촬영 $40. 환불 규정은 별도 안내를 확인해 주세요.",
+    false
+   ]
+  ],
+  "RULES_PHOTO": [
+   "mk_bread.webp",
+   "카카아코 파머스 마켓의 수제 사워도우 빵 부스"
+  ],
+  "MORE_H2": "오션스타만의 특별상품",
+  "MORE": [
+   [
+    "turtle.jpg",
+    "거북이 100% 보장 스노클링",
+    "가장 많이 찾는 와이키키 거북이 스노클링"
+   ],
+   [
+    "dh_hero.webp",
+    "다이아몬드 헤드 + 거북이 스노클링",
+    "아침엔 정상에서, 오전엔 바다에서"
+   ]
+  ],
+  "DOCK_SUB": "1인 · 08:30-14:30",
+  "END_H2": "토요일 아침은 장터에서",
+  "END_SUB": "원하시는 토요일을 골라 주세요."
+ },
+ "market_en": {
+  "THEME": "market",
+  "SECTIONS": [
+   "features",
+   "course",
+   "acts",
+   "perks",
+   "rules",
+   "more"
+  ],
+  "SHOW_STARS": false,
+  "HERO": {
+   "eyebrow": "Ocean Star's Saturday course, trusted by 18,000+ reviews",
+   "h1": "Saturday morning<br>at the local market,<br><span class=\"hl\">turtles by noon</span>",
+   "badge": "18,000+ reviews across platforms",
+   "price": "$130",
+   "price_per": "",
+   "price_sub": "Combo price · Saturdays · market drop-off included",
+   "facts": [
+    [
+     "Duration",
+     "About 6 hours (08:30 pickup · 14:30 hotel drop-off)"
+    ],
+    [
+     "Days",
+     "Saturdays"
+    ],
+    [
+     "Pickup",
+     "Your Waikiki hotel or the nearest pickup point"
+    ],
+    [
+     "Included",
+     "Market drop-off · snorkel gear · noodles and snacks"
+    ]
+   ],
+   "pure": "Free time at the Kaka'ako Farmers Market from 08:45, walk to the harbor at 10:30, board Ocean Star at 11:00, back at your hotel around 14:30."
+  },
+  "HERO_IMG": [
+   "mk_hero.webp",
+   "Heart banner at the Kaka'ako Farmers Market entrance under palm trees and blue sky"
+  ],
+  "FEAT_H2": "Brunch with the locals,<br><span class=\"hl\">then straight to the sea</span>",
+  "FEAT_LEDE": "At 08:45, Hawaii's Saturday market. At 11:00, underwater with the turtles.<br>Five reasons it works as one day.",
+  "FEATURES": [
+   [
+    "01",
+    "Not a tourist spot,",
+    "a real Hawaii weekend",
+    [
+     "Farmers, chefs and makers from across Oahu gather here every Saturday."
+    ],
+    null
+   ],
+   [
+    "02",
+    "No parking battle",
+    "door-to-door",
+    [
+     "The market lot fills up by 9. Our driver drops you right at the entrance."
+    ],
+    null
+   ],
+   [
+    "03",
+    "Walk from the market to the sea",
+    "along Kewalo Basin",
+    [
+     "A stroll along Kewalo Basin brings you to the Ocean Star dock."
+    ],
+    null
+   ],
+   [
+    "04",
+    "A good brunch",
+    "before you snorkel",
+    [
+     "Fuel up on tropical fruit and fresh juice, then head out without rushing."
+    ],
+    null
+   ],
+   [
+    "05",
+    "Sleep in",
+    "08:30 pickup",
+    [
+     "No early alarm. A full Saturday, at an easy pace."
+    ],
+    null
+   ]
+  ],
+  "COURSE_H2": "Your day",
+  "COURSE_HINT": "7 stops · swipe for more",
+  "COURSE": [
+   [
+    "🚐 08:30 Waikiki pickup",
+    null,
+    "We pick you up at your hotel or the nearest pickup point and drop you at the market entrance. Your exact pickup time is sent after booking.",
+    null,
+    "van"
+   ],
+   [
+    "🍍 08:45 Free time at the Kaka'ako Farmers Market",
+    "About 1 hr 45 min",
+    "Tropical fruit and honey from Oahu farms, fresh fruit bowls and juice. Browse the booths at your own pace, no guide.",
+    "*Popular booths get lines early. Start with the one you want most!",
+    "mk_fruit"
+   ],
+   [
+    "🥯 Brunch and souvenirs",
+    null,
+    "Hand-rolled bagels, food booths cooking to order and work by local makers. Take your brunch to a table under the trees.",
+    "*Most booths take cards. Bring small cash for the produce stands.",
+    "mk_food"
+   ],
+   [
+    "🚶 10:30 Walk along Kewalo Basin to the dock",
+    null,
+    "Walk from the market to the Ocean Star dock with the sea alongside. We send the dock location when your booking is confirmed.",
+    "*Please be at the dock in time for the snorkel departure.",
+    "boat"
+   ],
+   [
+    "🐢 11:00 Board · Diamond Head cruise and turtle snorkeling",
+    null,
+    "Head out on Waikiki's only wooden-rooftop boat with Diamond Head in view, then swim with green sea turtles at Turtle Canyon. Not a strong swimmer? The crew will tow you on a board.",
+    "*GoPro rental and underwater filming $40 (pay on site, cash or bank transfer)",
+    "turtle"
+   ],
+   [
+    "🏄 Five water activities",
+    null,
+    "Paddleboard, kayak, sea chair, boat diving and more, free of charge.",
+    null,
+    "sup2"
+   ],
+   [
+    "🍜 Snacks · back at your hotel by 14:30",
+    null,
+    "Wrap up with cup noodles, snacks and drinks, then back to the harbor. You reach your hotel around 14:30 with the afternoon free.",
+    null,
+    "bowl"
+   ]
+  ],
+  "ACTS_H2": "<span class=\"hl\">Market</span> and <span class=\"hl\">sea</span> in one Saturday",
+  "ACTS_LEDE": "Saturdays only. The market runs from 8 AM to noon.",
+  "ACTS": [
+   [
+    "Part 1",
+    "Kakaʻako Farmers Market",
+    "Oahu's Saturday, all in one place",
+    [
+     "Held every Saturday on Ala Moana Boulevard next to Ward Village. More than 100 booths: tropical fruit and honey from Oahu farms, food cooked to order and crafts by local makers.",
+     "Popular booths get lines early, so start with the one you want most."
+    ],
+    [
+     [
+      "Booths",
+      "110+"
+     ],
+     [
+      "Hours",
+      "Sat 8 AM - noon"
+     ],
+     [
+      "Entry",
+      "Free"
+     ],
+     [
+      "Payment",
+      "Most take cards <span class=\"nw\">(bring small cash)</span>"
+     ]
+    ],
+    "mk_brunch.webp",
+    "People eating brunch at tables under the trees at the Kaka'ako Farmers Market"
+   ],
+   [
+    "Part 2",
+    "Ocean Star Turtle Snorkeling",
+    "18,000 reviews went first",
+    [
+     "Run by a local family in Hawaii, out of Kewalo Basin since 2019.",
+     "The only wooden-rooftop boat in Waikiki keeps off the sun, rain and seasickness, and the crew takes your photos with Diamond Head behind you."
+    ],
+    [
+     [
+      "Reviews",
+      "18,000+ · rated 5.0"
+     ],
+     [
+      "Turtles",
+      "Sighting guaranteed"
+     ],
+     [
+      "Activities",
+      "Paddleboard, kayak, sea chair, boat diving and more"
+     ],
+     [
+      "Free",
+      "Gear, noodles, snacks, drinks"
+     ],
+     [
+      "Safety",
+      "Accident insurance, gear sanitized daily"
+     ]
+    ],
+    "hero_turtle.webp",
+    "Green sea turtle over the reef off Waikiki"
+   ]
+  ],
+  "ACTS_NOTE": "From the market you walk along Kewalo Basin to the dock. We send the location when your booking is confirmed.",
+  "PERKS_H2": "What's included",
+  "PERKS": [
+   [
+    "van",
+    "Transport",
+    "Waikiki → market drop-off, hotel drop-off after the tour (14:30)"
+   ],
+   [
+    "turtle",
+    "Turtles guaranteed",
+    "Out to where the turtles live"
+   ],
+   [
+    "gear",
+    "Snorkel gear",
+    "Full snorkel set and life jacket"
+   ],
+   [
+    "sup",
+    "Five water activities",
+    "Paddleboard · kayak · sea chair · boat diving and more"
+   ],
+   [
+    "bowl",
+    "Noodles · snacks · drinks",
+    "On deck after snorkeling"
+   ],
+   [
+    "camera",
+    "Photos",
+    "With Diamond Head behind you"
+   ]
+  ],
+  "RULES_H2": "What to bring and good to know",
+  "RULES": [
+   [
+    "Swimsuit",
+    "Wear it under your clothes from the start.",
+    false
+   ],
+   [
+    "Bring",
+    "Towel, a change of clothes, hat, sunscreen",
+    false
+   ],
+   [
+    "Market bag",
+    "A tote bag and small cash (some produce stands take cash only)",
+    false
+   ],
+   [
+    "Free time",
+    "Market time is self-guided. Please be at the Ocean Star dock in time for the snorkel departure.",
+    true
+   ],
+   [
+    "Weather",
+    "The market is outdoors, so some booths may not open in bad weather.",
+    false
+   ],
+   [
+    "Food on board",
+    "We will tell you on site whether food from the market can come on the boat.",
+    false
+   ],
+   [
+    "Changes",
+    "To change the time or move the snorkeling to another day, send us a message.",
+    false
+   ],
+   [
+    "Not included",
+    "Market food and shopping, GoPro rental and underwater filming $40. See the separate notice for the refund policy.",
+    false
+   ]
+  ],
+  "RULES_PHOTO": [
+   "mk_bread.webp",
+   "Handcrafted sourdough booth at the Kaka'ako Farmers Market"
+  ],
+  "MORE_H2": "Only at OceanStar",
+  "MORE": [
+   [
+    "turtle.jpg",
+    "100% guaranteed turtle snorkeling",
+    "Our most popular Waikiki turtle snorkeling tour"
+   ],
+   [
+    "dh_hero.webp",
+    "Diamond Head + turtle snorkeling",
+    "The summit at dawn, the sea by 8"
+   ]
+  ],
+  "DOCK_SUB": "Per person · 08:30-14:30",
+  "END_H2": "Saturday starts at the market",
+  "END_SUB": "Pick your Saturday."
  }
 };

@@ -75,6 +75,10 @@
   .os .dp .hero.diamond .veil { background: linear-gradient(180deg,rgba(9,16,22,.28) 0,rgba(9,16,22,.16) 80px,rgba(9,16,22,0) 250px), linear-gradient(100deg,rgba(9,16,22,.46) 0%,rgba(9,16,22,.40) 22%,rgba(9,16,22,.24) 38%,rgba(9,16,22,.08) 50%,rgba(9,16,22,0) 60%) }
   .os .dp .hero.diamond .hero-in { text-shadow:0 2px 6px rgba(9,16,22,.22),0 2px 22px rgba(9,16,22,.30) }
   .os .dp .hero.diamond .hero-in h1 .hl { color:#FFE066 }
+  /* 카카아코: 입구 현수막이 글씨 오른쪽, 아래쪽에 오게 사진을 넓혀 왼쪽에 붙인다. 글씨 뒤만 어둠막 */
+  .os .dp .hero.market .hero-img { left:0;right:auto;width:125%;max-width:none;object-position:0% 100% }
+  .os .dp .hero.market .veil { background: linear-gradient(180deg,rgba(9,16,22,.22) 0,rgba(9,16,22,.12) 80px,rgba(9,16,22,0) 220px), linear-gradient(100deg,rgba(9,16,22,.20) 0%,rgba(9,16,22,.16) 22%,rgba(9,16,22,.08) 38%,rgba(9,16,22,0) 50%) }
+  .os .dp .hero.market .hero-in { text-shadow:0 2px 6px rgba(9,16,22,.22),0 2px 22px rgba(9,16,22,.30) }
   .os .dp .acts { margin-top:44px;display:grid;gap:28px }
   .os .dp .act { display:grid;grid-template-columns:1.2fr 1fr;background:#fff;border:1px solid var(--line); border-radius:22px;overflow:hidden }
   .os .dp .act.rev { grid-template-columns:1fr 1.2fr }
@@ -314,6 +318,9 @@
   .os .dp .hero.diamond .veil { background:linear-gradient(180deg, rgba(9,16,22,.42) 0%,rgba(9,16,22,.40) 20%,rgba(9,16,22,.40) 35%,rgba(9,16,22,.40) 50%,rgba(9,16,22,.12) 58%,rgba(9,16,22,0) 64%,rgba(9,16,22,.06) 100%) }
   .os .dp .hero.diamond .hero-in { text-shadow:0 2px 6px rgba(9,16,22,.22),0 2px 22px rgba(9,16,22,.30) }
   .os .dp .hero.diamond .hero-in h1 .hl { color:#FFE066 }
+  .os .dp .hero.market .hero-img { object-position:50% 100% }
+  .os .dp .hero.market .veil { background:linear-gradient(180deg, rgba(9,16,22,.42) 0%,rgba(9,16,22,.40) 20%,rgba(9,16,22,.40) 35%,rgba(9,16,22,.40) 50%,rgba(9,16,22,.12) 58%,rgba(9,16,22,0) 64%,rgba(9,16,22,.06) 100%) }
+  .os .dp .hero.market .hero-in { text-shadow:0 2px 6px rgba(9,16,22,.22),0 2px 22px rgba(9,16,22,.30) }
   .os .dp .hero.private .veil { background:linear-gradient(180deg, rgba(9,16,22,.40) 0%,rgba(9,16,22,.34) 20%,rgba(9,16,22,.24) 33%,rgba(9,16,22,.12) 42%, rgba(9,16,22,.04) 50%,rgba(9,16,22,0) 58%,rgba(9,16,22,.06) 100%) }
   .os .dp .hero.private .hero-in { text-shadow:0 2px 6px rgba(9,16,22,.28),0 2px 22px rgba(9,16,22,.42) }
   .os .dp .hero.private .hero-in .rev { display:none }

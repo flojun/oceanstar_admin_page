@@ -158,8 +158,8 @@ export function feeAmount(base: number, currency: Currency, exchangeRate = FALLB
  * 결제창에는 그 안에서 수수료를 떼어 "상품가 + 수수료 = 표시가"로 나눠 보여준다.
  * 콤보·프라이빗은 여전히 grossUp 으로 수수료를 얹는다.
  */
-// 다이아몬드 헤드 콤보도 "$150 / 1인" 그대로 받는다 (2026-11-26 확정).
-const FEE_INCLUDED_TOURS = new Set(["morning1", "morning2", "sunset", "combo_diamond"]);
+// 같은 날 콤보(다이아몬드 $150 · 카카아코 $130)도 표시가 그대로 받는다 (2026-11-26 확정).
+const FEE_INCLUDED_TOURS = new Set(["morning1", "morning2", "sunset", "combo_diamond", "combo_market"]);
 
 export function isFeeIncluded(tourId: string | null | undefined): boolean {
     return !!tourId && FEE_INCLUDED_TOURS.has(tourId);

@@ -9,7 +9,7 @@ import type { TourSetting } from "@/lib/tourUtils";
  * 한 상품이고, 예약 창에서 시간을 고른다.
  */
 export type Lang = "ko" | "en";
-export type TourKey = "turtle" | "sunset" | "combo" | "private" | "surf" | "diamond";
+export type TourKey = "turtle" | "sunset" | "combo" | "private" | "surf" | "diamond" | "market";
 export type TourFilter = "all" | "turtle" | "combo" | "private";
 
 export type TourDef = {
@@ -35,7 +35,7 @@ export const TOURS: TourDef[] = [
         name: { ko: "와이키키 거북이 스노클링", en: "Waikiki Turtle Snorkeling" },
         short: { ko: "거북이 스노클링", en: "Turtle snorkeling" },
         alt: { ko: "와이키키 거북이 스노클링", en: "Waikiki Turtle Snorkeling" },
-        features: [true, true, true, true, false, false, false, false, false],
+        features: [true, true, true, true, false, false, false, false, false, false],
     },
     {
         key: "sunset",
@@ -45,7 +45,7 @@ export const TOURS: TourDef[] = [
         name: { ko: "선셋·와인 & 와이키키 거북이 스노클링", en: "Sunset & Wine Turtle Snorkeling" },
         short: { ko: "선셋 거북이 스노클링", en: "Sunset turtle snorkeling" },
         alt: { ko: "선셋·와인 & 와이키키 거북이 스노클링", en: "Sunset & Wine Turtle Snorkeling" },
-        features: [true, true, true, true, true, false, false, false, false],
+        features: [true, true, true, true, true, false, false, false, false, false],
     },
     {
         key: "combo",
@@ -55,7 +55,7 @@ export const TOURS: TourDef[] = [
         name: { ko: "거북이 스노클링 + 패러세일링 / 제트스키", en: "Turtle Snorkeling + Parasailing / Jet Ski" },
         short: { ko: "스노클링 + 패러 · 제트", en: "Snorkeling + parasail · jet ski" },
         alt: { ko: "거북이 스노클링 + 패러세일링 / 제트스키", en: "Turtle Snorkeling + Parasailing / Jet Ski" },
-        features: [true, false, true, true, false, true, false, false, false],
+        features: [true, false, true, true, false, true, false, false, false, false],
     },
     {
         key: "private",
@@ -65,7 +65,7 @@ export const TOURS: TourDef[] = [
         name: { ko: "[단독] 프라이빗 와이키키 거북이 스노클링", en: "[Private] Waikiki Turtle Snorkeling" },
         short: { ko: "프라이빗 크루즈", en: "Private cruise" },
         alt: { ko: "[단독] 프라이빗 와이키키 거북이 스노클링", en: "[Private] Waikiki Turtle Snorkeling" },
-        features: [true, true, true, true, false, false, false, true, false],
+        features: [true, true, true, true, false, false, false, true, false, false],
     },
     {
         key: "surf",
@@ -75,7 +75,7 @@ export const TOURS: TourDef[] = [
         name: { ko: "거북이 스노클링 + 서핑", en: "Turtle Snorkeling + Surf Lesson" },
         short: { ko: "서핑 레슨", en: "Surf lesson" },
         alt: { ko: "거북이 스노클링 + 서핑", en: "Turtle Snorkeling + Surf Lesson" },
-        features: [true, true, true, true, false, false, true, false, false],
+        features: [true, true, true, true, false, false, true, false, false, false],
     },
     {
         key: "diamond",
@@ -85,7 +85,17 @@ export const TOURS: TourDef[] = [
         name: { ko: "다이아몬드 헤드 하이킹 + 거북이 스노클링", en: "Diamond Head Hike + Turtle Snorkeling" },
         short: { ko: "다이아몬드 헤드 + 스노클링", en: "Diamond Head + snorkeling" },
         alt: { ko: "다이아몬드 헤드 정상에서 분화구와 바다를 내려다보는 두 사람", en: "Two people looking over the crater and the sea from Diamond Head" },
-        features: [true, true, true, true, false, false, false, false, true],
+        features: [true, true, true, true, false, false, false, false, true, false],
+    },
+    {
+        key: "market",
+        tourIds: ["combo_market"],
+        filter: "combo",
+        img: "/renewal/mk_hero.webp",
+        name: { ko: "카카아코 파머스 마켓 + 거북이 스노클링", en: "Kaka'ako Farmers Market + Turtle Snorkeling" },
+        short: { ko: "파머스 마켓 + 스노클링", en: "Farmers market + snorkeling" },
+        alt: { ko: "야자수와 파란 하늘 아래 카카아코 파머스 마켓 입구 현수막", en: "Kaka'ako Farmers Market banner under palm trees and blue sky" },
+        features: [true, true, true, true, false, false, false, false, false, true],
     },
 ];
 
@@ -100,6 +110,7 @@ export const FEATURES: Record<Lang, string[]> = {
         "서핑 강습",
         "보트 단독 대관 · 옵션 커스터마이징",
         "다이아몬드 헤드 하이킹",
+        "카카아코 파머스 마켓",
     ],
     en: [
         "100% turtle sighting guarantee",
@@ -111,6 +122,7 @@ export const FEATURES: Record<Lang, string[]> = {
         "Surf lesson",
         "Whole boat to your group",
         "Diamond Head hike",
+        "Kaka'ako Farmers Market",
     ],
 };
 
@@ -152,8 +164,11 @@ export function ampm(t: string | undefined | null): string {
     return `${String(hh).padStart(2, "0")}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
 }
 
-/** 다이아몬드 헤드 콤보: 05:20 픽업 → 하이킹 → 1부 스노클링 → 11:30 호텔 */
-export const DIAMOND_LINE: Record<Lang, string> = { ko: "05:20-11:30 · 월·수·금", en: "05:20-11:30 · Mon, Wed, Fri" };
+/** 같은 날 콤보의 시간 한 줄. 다이아몬드: 05:20 픽업 → 하이킹 → 1부 / 카카아코: 08:30 픽업 → 마켓 → 2부 */
+export const SAME_DAY_LINE: Partial<Record<TourKey, Record<Lang, string>>> = {
+    diamond: { ko: "05:20-11:30 · 월·수·금", en: "05:20-11:30 · Mon, Wed, Fri" },
+    market: { ko: "08:30-14:30 · 토요일", en: "08:30-14:30 · Saturdays" },
+};
 
 /** 거북이 1부·2부의 픽업 포함 시간: 출항 30분 전 ~ 귀항 30분 후 */
 export function sessionRange(row: TourSetting): string {
@@ -183,7 +198,8 @@ export function timeLines(def: TourDef, settings: TourSetting[], lang: Lang): st
         case "surf":
             return [lang === "en" ? "Surf 07:30-14:30 · 5 a day" : "서핑 07:30-14:30 · 하루 5회"];
         case "diamond":
-            return [DIAMOND_LINE[lang]];
+        case "market":
+            return [SAME_DAY_LINE[def.key]![lang]];
         default:
             return rows[0]?.start_time ? [`${shiftTime(rows[0].start_time, 0)}-${shiftTime(rows[0].end_time, 0)}`] : [];
     }

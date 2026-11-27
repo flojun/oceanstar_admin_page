@@ -12,6 +12,7 @@ import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 import { addDays, addMonths, format, getDaysInMonth, isSameMonth, startOfMonth } from "date-fns";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ALOH_SALE, alohSaleSetting, isAlohSaleTour, basePrice, checkoutAmounts, isFeeIncluded, type Currency } from "@/lib/pricing";
+import { SAME_DAY_COMBOS } from "@/lib/sameDayCombo";
 import { EXTERNAL } from "./links";
 import { findClosestPickup, getWalkingMinutes, type PickupLocation } from "@/lib/utils";
 import { getTranslation } from "@/lib/translations";
@@ -21,7 +22,7 @@ import type { TourSetting } from "@/lib/tourUtils";
 import type { BlockedDate } from "@/lib/siteData";
 import { Arrow, Check, Chevron, Close, Minus, Pin, Plus, Shield } from "./Icons";
 import {
-    DIAMOND_LINE, TOURS, activeRows, ampm, availableTours, currencyOf, fmtMoney, sessionLabel, sessionRange, shiftTime,
+    SAME_DAY_LINE, TOURS, activeRows, ampm, availableTours, currencyOf, fmtMoney, sessionLabel, sessionRange, shiftTime,
     tourByKey, type Lang, type TourDef, type TourKey,
 } from "./tours";
 
@@ -51,7 +52,10 @@ const S = {
         surfH: "서핑 레슨 시간 선택", surfSub: "마지막 픽업 시간 기준", surf: "서핑 그룹 레슨", surfLine: "서핑 07:30-14:30 · 하루 5회",
         surfTime: "서핑 시간", surfDate: "서핑 날짜", surfPick: "서핑 픽업",
         surfNote: "서핑 픽업 장소 및 시간은 예약 후 개별 안내됩니다.",
-        diamondNote: "05:20부터 와이키키에서 픽업합니다. 정확한 픽업 시간은 예약 후 개별 안내됩니다. 하이킹 후 기사님이 바로 하버로 모셔다 드려요.",
+        sameDayNote: {
+            diamond: "05:20부터 와이키키에서 픽업합니다. 정확한 픽업 시간은 예약 후 개별 안내됩니다. 하이킹 후 기사님이 바로 하버로 모셔다 드려요.",
+            market: "08:30에 와이키키에서 픽업해 카카아코 파머스 마켓에 내려 드립니다. 정확한 픽업 시간은 예약 후 개별 안내되며, 마켓에서 선착장까지는 걸어서 이동합니다.",
+        } as Partial<Record<TourKey, string>>,
         surfLimit: `서핑은 오늘부터 ${SURF_BOOKING_DAYS}일 이내 날짜만 예약할 수 있습니다.`,
         err: {
             surf: "서핑 레슨 시간을 선택해주세요.", surfDate: "서핑 날짜를 선택해주세요.", surfPick: "서핑 픽업 장소를 입력해주세요.",
@@ -85,7 +89,10 @@ const S = {
         surfH: "Select surf lesson time", surfSub: "Last pickup time", surf: "Group surf lesson", surfLine: "Surf 07:30-14:30 · 5 a day",
         surfTime: "Surf time", surfDate: "Surf date", surfPick: "Surf pickup",
         surfNote: "Surf pickup location and time will be arranged individually after booking.",
-        diamondNote: "Waikiki pickup starts at 05:20. We will send your exact pickup time after booking. After the hike, our driver takes you straight to the harbor.",
+        sameDayNote: {
+            diamond: "Waikiki pickup starts at 05:20. We will send your exact pickup time after booking. After the hike, our driver takes you straight to the harbor.",
+            market: "We pick you up in Waikiki at 08:30 and drop you at the Kaka'ako Farmers Market. Your exact pickup time is sent after booking. From the market you walk to the harbor.",
+        } as Partial<Record<TourKey, string>>,
         surfLimit: `Surf lessons can only be booked within ${SURF_BOOKING_DAYS} days from today.`,
         err: {
             surf: "Please select a surf lesson time.", surfDate: "Please select a surf date.", surfPick: "Please enter pickup location for the surf lesson.",
@@ -149,8 +156,8 @@ export default function BookingModal({
     const isMarine = def?.key === "combo";
     const isSurf = def?.key === "surf";
     const isCombo = isMarine || isSurf;
-    // 다이아몬드 헤드 콤보: 하이킹과 1부 스노클링이 같은 날이라 날짜·픽업은 한 번만 받고, 자리는 1부 배로 본다
-    const isDiamond = def?.key === "diamond";
+    // 같은 날 콤보(다이아몬드·카카아코): 날짜·픽업은 한 번만 받고, 자리는 정해진 스노클링 배로 본다 (sameDayCombo.ts)
+    const sameDay = row ? SAME_DAY_COMBOS[row.tour_id] : undefined;
     const [surfTime, setSurfTime] = useState<string | null>(null);
 
     const [adult, setAdult] = useState(1);
@@ -236,7 +243,7 @@ export default function BookingModal({
     }, [tourSettings]);
 
     // 스노클링 날짜는 스노클링 배(1부·2부) 자리로 본다. 콤보도 콤보 행이 아니라 고른 시간의 행으로
-    const availTour = isCombo ? comboTime : isDiamond ? "morning1" : selectedTour;
+    const availTour = isCombo ? comboTime : sameDay ? sameDay.session : selectedTour;
     useEffect(() => {
         setAvail({});
         if (!availTour) return;
@@ -392,7 +399,7 @@ export default function BookingModal({
                     pickupLocationName: pick?.location?.name || "",
                     secondaryPickupLocationId: pick2?.location?.id,
                     secondaryPickupLocationName: isCombo ? pick2?.location?.name || hotel2 || undefined : undefined,
-                    comboTimeOption: isCombo ? comboTime : isDiamond ? "morning1" : undefined,
+                    comboTimeOption: isCombo ? comboTime : sameDay?.session,
                     tourDate: ymd(date!),
                     adultCount: adult,
                     childCount: child,
@@ -401,7 +408,7 @@ export default function BookingModal({
                     bookerEmail: email.trim(),
                     bookerPhone: phone.trim(),
                     secondaryDate: isCombo && date2 ? ymd(date2) : null,
-                    comboOption: isSurf ? "surf" : isMarine ? comboOption : isDiamond ? "diamond" : null,
+                    comboOption: isSurf ? "surf" : isMarine ? comboOption : sameDay?.comboOption ?? null,
                     surfTime: isSurf ? surfTime : undefined,
                     lang,
                     currency,
@@ -436,7 +443,7 @@ export default function BookingModal({
         if (d.key === "combo") return lang === "en" ? "Parasail/Jet 9:30-2:00" : "패러/제트 9:30-2:00";
         if (d.key === "private") return lang === "en" ? "2 hours" : "2시간";
         if (d.key === "surf") return s.surfLine;
-        if (d.key === "diamond") return DIAMOND_LINE[lang];
+        if (SAME_DAY_LINE[d.key]) return SAME_DAY_LINE[d.key]![lang];
         return "";
     };
     const errText = (k: string) => errors[k] ? <p className="err">{errors[k]}</p> : null;
@@ -448,7 +455,7 @@ export default function BookingModal({
         return r ? `${sessionLabel(r, lang)} ${sessionRange(r)}` : "";
     };
     const timeText = def?.key === "turtle" ? sessionText(sessionId)
-        : isDiamond ? DIAMOND_LINE[lang]
+        : def && SAME_DAY_LINE[def.key] ? SAME_DAY_LINE[def.key]![lang]
         : row?.start_time && !isPrivate ? `${shiftTime(row.start_time, 0)}-${shiftTime(row.end_time, 0)}` : "";
 
     const hotelBlock = (which: 1 | 2) => {
@@ -512,7 +519,7 @@ export default function BookingModal({
                 )}
                 {which === 1 && isPrivate && <p className="help strong">{s.privateNote}</p>}
                 {which === 2 && isSurf && <p className="help strong">{s.surfNote}</p>}
-                {which === 1 && isDiamond && <p className="help strong">{s.diamondNote}</p>}
+                {which === 1 && def && s.sameDayNote[def.key] && <p className="help strong">{s.sameDayNote[def.key]}</p>}
             </>
         );
     };
