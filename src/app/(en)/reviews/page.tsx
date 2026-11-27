@@ -8,7 +8,7 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Reviews | Ocean Star Hawaii Turtle Snorkeling",
-  description: "Reviews from guests who booked Ocean Star turtle snorkeling in Waikiki, plus Google reviews. 15,000+ reviews across platforms.",
+  description: "Reviews from guests who booked Ocean Star turtle snorkeling in Waikiki, plus Google reviews. 18,000+ reviews across platforms.",
   alternates: { canonical: "/reviews", languages: { "ko": "/kr/reviews", "en": "/reviews", "x-default": "/reviews" } },
 };
 

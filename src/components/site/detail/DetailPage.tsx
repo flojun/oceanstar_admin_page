@@ -68,6 +68,9 @@ const CS_MEDIA: Record<string, [string, string, string][]> = {
         ["pv_dive.webp", "보트 난간에서 바다로 백플립 하는 손님", "Guest backflipping off the boat rail into the sea"]],
     pv_cruise: [["pv_couple.webp", "다이아몬드헤드를 배경으로 선상에 나란히 앉은 커플", "Couple sitting side by side on deck with Diamond Head behind"]],
     photo: [["act_photo.webp", "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람", "Two people sitting on the bow with Diamond Head behind"]],
+    dh_climb: [["dh_tunnel.webp", "다이아몬드 헤드 터널 출구 앞 계단에 선 손님", "Guest on the steps at the mouth of the Diamond Head tunnel"],
+        ["dh_stairs.webp", "다이아몬드 헤드 99계단 중간에 앉아 손을 든 손님", "Guest sitting halfway up the 99 steps on Diamond Head"]],
+    dh_west: [["dh_west.webp", "다이아몬드 헤드 정상에서 내려다본 와이키키 해변과 호텔들", "Waikiki beach and hotels seen from the Diamond Head summit"]],
 };
 
 const UI = {
@@ -79,7 +82,7 @@ const R = (f: string) => `/renewal/${f}`;
 /** '다른 상품' 카드의 사진 → 상품 */
 const MORE_KEY: Record<string, TourKey> = {
     "turtle.jpg": "turtle", "sunset.jpg": "sunset", "course_sup_sunset.webp": "sunset",
-    "private_boat.webp": "private", "boat_private.webp": "private", "parasail.jpg": "combo", "surf.jpg": "surf",
+    "private_boat.webp": "private", "boat_private.webp": "private", "parasail.jpg": "combo", "surf.jpg": "surf", "dh_hero.webp": "diamond",
 };
 /** 콤보 패키지 카드 → 예약 창에서 고를 상품 (서핑 콤보 카드는 서핑) */
 

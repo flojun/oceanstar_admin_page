@@ -95,13 +95,17 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
     if (metadata.combo_option) {
         // 서핑 콤보는 combo_option 'surf'. 서핑 행의 option '서핑' 이 tour_settings 이름
         // '거북이 스노클링 + 서핑' 에 부분 일치해 combo_surf 정원(자리 조회)으로 잡힌다.
+        // 다이아몬드 헤드 콤보는 combo_option 'diamond'. 1부 행의 픽업은 '다이아몬드'(하이킹 입구에서 기사님이 하버로),
+        // 호텔 픽업(05:20~)은 다이아몬드 행에 둔다. 두 행 모두 같은 날이다.
         const isSurf = metadata.combo_option === 'surf';
-        const comboSuffix = isSurf ? '서핑' : metadata.combo_option === '1' ? '패러' : metadata.combo_option === '2' ? '제트' : '패러및제트';
+        const isDiamond = metadata.combo_option === 'diamond';
+        const comboSuffix = isSurf ? '서핑' : isDiamond ? '다이아몬드' : metadata.combo_option === '1' ? '패러' : metadata.combo_option === '2' ? '제트' : '패러및제트';
         const timeOptionLabel = metadata.combo_time_option === 'morning1' ? '1부' : metadata.combo_time_option === 'morning2' ? '2부' : '거북이 스노클링';
         const secondaryPickup = metadata.secondary_pickup || metadata.pickup_location;
         insertRows.push({
             ...baseRow,
             option: timeOptionLabel,
+            ...(isDiamond ? { pickup_location: '다이아몬드' } : {}),
             note: `${metadata.note} [거북이+${comboSuffix} 콤보]`,
         });
         insertRows.push({
@@ -130,6 +134,10 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
     }
 
     const reservation = inserted?.[0];
+    // 손님에게 나가는 메일·알림톡. 다이아몬드 콤보는 1부 행(픽업 '다이아몬드')이 아니라 호텔 픽업과 상품명을 보인다.
+    const guest = reservation && metadata.combo_option === 'diamond'
+        ? { ...reservation, option: '거북이+다이아몬드 헤드 콤보', pickup_location: metadata.pickup_location }
+        : reservation;
 
     // 당일·내일 예약 긴급 알림. '예약확정' 행이 들어오면 DB 웹훅
     // (/api/notifications/discord-urgent-reservation) 이 보낸다. 전부 '안내필요' 면 웹훅이 건너뛰므로
@@ -150,30 +158,32 @@ export async function createReservationFromSession(session: Stripe.Checkout.Sess
             await supabaseServer.from('reservations').update({ urgent_alert_sent: true }).eq('order_id', order_id);
         }
     }
-    if (reservation?.booker_email) {
-        sendVoucherEmail({
-            to: reservation.booker_email,
-            name: reservation.name,
-            order_id: reservation.order_id,
+    if (guest?.booker_email) {
+        // 기다리지 않으면 응답 뒤 서버리스가 먼저 끝나 메일이 통째로 사라진다 (IASFKH).
+        await sendVoucherEmail({
+            to: guest.booker_email,
+            name: guest.name,
+            order_id: guest.order_id,
             tour_name: 'OceanStar Hawaii Turtle Snorkeling',
-            tour_date: reservation.tour_date,
-            pax: reservation.pax,
-            option: reservation.option,
-            pickup_location: reservation.pickup_location,
+            tour_date: guest.tour_date,
+            pax: guest.pax,
+            option: guest.option,
+            pickup_location: guest.pickup_location,
             // 맞춤 링크는 정규 픽업 시간표가 없다. 시간을 "별도 안내"로 적고
             // 시각이 인쇄된 시간표 PDF 는 붙이지 않는다.
-            pickupTimeTbd: metadata.custom_pickup_time === '1',
+            // 다이아몬드 콤보 픽업(05:20~)도 정규 시간표에 없어 별도 안내다.
+            pickupTimeTbd: metadata.custom_pickup_time === '1' || metadata.combo_option === 'diamond',
         }).catch(err => {
             console.error('Failed to send voucher email:', order_id, err);
         });
     }
-    if (reservation?.contact) {
+    if (guest?.contact) {
         // 한 행이라도 안내가 필요하면 확정 대신 "픽업 시간 안내 예정" 알림톡.
         const needsGuide = inserted.some(r => r.status === '안내필요');
         // 응답 뒤로 미루면 서버리스가 먼저 끝나 버릴 수 있다. 0.5초 남짓이라 기다린다.
-        await sendAlimtalk(reservation.contact,
+        await sendAlimtalk(guest.contact,
             needsGuide ? process.env.SOLAPI_TPL_PICKUP_GUIDE : process.env.SOLAPI_TPL_CONFIRM,
-            bookingVars(reservation),
+            bookingVars(guest),
         ).catch(err => {
             console.error('Failed to send alimtalk:', order_id, err);
         });

@@ -181,7 +181,7 @@ export const FAQ: Record<Lang, FaqGroup[]> = {
         {
           "id": "q7-5",
           "q": "왜 오션스타를 선택해야 하나요?",
-          "a": "하와이 한인 대상 거북이 스노클링 최초 시작 + 업계 통합 누적 리뷰 15,000+ No.1. 루프탑 보트·한국어 풀케어·5종 액티비티·거북이 보장까지, 수천 명이 \"하와이 최고의 추억\"이라고 말합니다."
+          "a": "하와이 한인 대상 거북이 스노클링 최초 시작 + 업계 통합 누적 리뷰 18,000+ No.1. 루프탑 보트·한국어 풀케어·5종 액티비티·거북이 보장까지, 수천 명이 \"하와이 최고의 추억\"이라고 말합니다."
         },
         {
           "id": "q7-6",
@@ -358,7 +358,7 @@ export const FAQ: Record<Lang, FaqGroup[]> = {
         {
           "id": "q7-3",
           "q": "Why choose OceanStar?",
-          "a": "We are the original Turtle Canyon snorkeling tour, with 15,000+ reviews across platforms. We offer rooftop boats, full care, 5 activities, and guaranteed turtle sightings."
+          "a": "We are the original Turtle Canyon snorkeling tour, with 18,000+ reviews across platforms. We offer rooftop boats, full care, 5 activities, and guaranteed turtle sightings."
         },
         {
           "id": "q7-4",

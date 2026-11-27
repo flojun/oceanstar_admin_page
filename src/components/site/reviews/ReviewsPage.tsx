@@ -20,7 +20,7 @@ const T = {
     ko: {
         heroAlt: "다이아몬드헤드를 배경으로 뱃머리에 앉은 두 사람",
         h1: <>생생한 <span className="hl">리얼 후기</span></>, sub: "당일 취소, 노쇼 없이 검증된 고객님들의 찐 후기입니다.",
-        plat: ["구글", "GetYourGuide", "마이리얼트립"], loved: "업계 통합 누적 리뷰 15,000+",
+        plat: ["구글", "GetYourGuide", "마이리얼트립"], loved: "업계 통합 누적 리뷰 18,000+",
         tabs: "후기 모아보기", tabSite: "홈페이지 후기", tabGoogle: "구글 리뷰", wSite: "후기", wGoogle: "리뷰",
         siteH: "홈페이지 후기", siteLede: ["오션스타에서 예약하고 다녀오신 분만 남길 수 있어요.", "예약번호로 한 번 더 확인한 후기입니다."],
         googleH: "구글 리뷰", googleLine: (n: string) => <>구글 맵 기준 <b className="n">{n}</b>개의 실제 고객 리뷰</>, googleGo: "구글에서 전체 리뷰 보기",
@@ -29,7 +29,7 @@ const T = {
     en: {
         heroAlt: "Two people sitting on the bow with Diamond Head behind",
         h1: <>Real <span className="hl">reviews</span></>, sub: "Verified guests only. No same-day cancellations or no-shows.",
-        plat: ["Google", "GetYourGuide", "MyRealTrip"], loved: "15,000+ reviews across platforms",
+        plat: ["Google", "GetYourGuide", "MyRealTrip"], loved: "18,000+ reviews across platforms",
         tabs: "Review sources", tabSite: "Our site", tabGoogle: "Google", wSite: "review", wGoogle: "review",
         siteH: "Reviews on our site", siteLede: ["Only guests who booked with OceanStar can post here.", "Every review is checked against a booking number."],
         googleH: "Google reviews", googleLine: (n: string) => <><b className="n">{n}</b> real customer reviews on Google Maps</>, googleGo: "View all reviews on Google",

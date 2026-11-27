@@ -143,7 +143,7 @@ export const DETAIL: Record<string, any> = {
   "HERO": {
    "eyebrow": "하와이 거북이 스노클링의 원조, 오션스타",
    "h1": "와이키키 거북이 스노클링<br><span class=\"hl\">100% 보장</span>",
-   "badge": "압도적 업계 통합 누적 리뷰 15,000개",
+   "badge": "압도적 업계 통합 누적 리뷰 18,000개",
    "price": "₩151,570",
    "price_sub": "성인 1인 · 24개월 미만 무료",
    "facts": [
@@ -436,7 +436,7 @@ export const DETAIL: Record<string, any> = {
   "HERO": {
    "eyebrow": "The original turtle snorkeling in Hawaii",
    "h1": "Waikiki turtle snorkeling,<br><span class=\"hl\">guaranteed</span>",
-   "badge": "15,000+ reviews across platforms",
+   "badge": "18,000+ reviews across platforms",
    "price": "$110",
    "price_sub": "Per adult · Under 24 months free",
    "facts": [
@@ -722,7 +722,7 @@ export const DETAIL: Record<string, any> = {
   "HERO": {
    "eyebrow": "하와이 거북이 스노클링의 원조, 오션스타",
    "h1": "선셋·와인 &amp;<br>거북이 <span class=\"hl\">스노클링</span>",
-   "badge": "압도적 업계 통합 누적 리뷰 15,000개",
+   "badge": "압도적 업계 통합 누적 리뷰 18,000개",
    "price": "₩206,690",
    "price_sub": "성인 1인 · 24개월 미만 무료",
    "facts": [
@@ -1020,7 +1020,7 @@ export const DETAIL: Record<string, any> = {
   "HERO": {
    "eyebrow": "The original turtle snorkeling in Hawaii",
    "h1": "Sunset &amp; Wine<br>Turtle <span class=\"hl\">Snorkeling</span>",
-   "badge": "15,000+ reviews across platforms",
+   "badge": "18,000+ reviews across platforms",
    "price": "$150",
    "price_sub": "Per adult · Under 24 months free",
    "facts": [
@@ -1367,7 +1367,7 @@ export const DETAIL: Record<string, any> = {
   "HERO": {
    "eyebrow": "하와이 최고 인기 액티비티의 만남",
    "h1": "거북이 스노클링 +<br><span class=\"hl\">패러 · 제트</span>",
-   "badge": "압도적 업계 통합 누적 리뷰 15,000개",
+   "badge": "압도적 업계 통합 누적 리뷰 18,000개",
    "price": "₩291,220",
    "price_per": "1인",
    "price_sub": "콤보 A 패러세일링 · 성인 · 아동 동일",
@@ -1673,7 +1673,7 @@ export const DETAIL: Record<string, any> = {
   "HERO": {
    "eyebrow": "Two of Hawaii's most popular activities",
    "h1": "Turtle snorkeling +<br><span class=\"hl\">Parasail · Jet Ski</span>",
-   "badge": "15,000+ reviews across platforms",
+   "badge": "18,000+ reviews across platforms",
    "price": "$210",
    "price_per": "",
    "price_sub": "Combo A parasailing · per person · adults and children same price",
@@ -1978,7 +1978,7 @@ export const DETAIL: Record<string, any> = {
   "HERO": {
    "eyebrow": "와이키키 프라이빗 크루즈",
    "h1": "하와이 바다를,<br>오직 <span class=\"hl\">우리 팀</span>만을 위해",
-   "badge": "압도적 업계 통합 누적 리뷰 15,000개",
+   "badge": "압도적 업계 통합 누적 리뷰 18,000개",
    "price": "$1,200",
    "price_sub": "옵션 1 · 1-10명 팀 요금 · 2시간 완전 단독",
    "facts": [
@@ -2288,7 +2288,7 @@ export const DETAIL: Record<string, any> = {
   "HERO": {
    "eyebrow": "Waikiki private cruise",
    "h1": "A private boat<br>for <span class=\"hl\">your group</span>",
-   "badge": "15,000+ reviews across platforms",
+   "badge": "18,000+ reviews across platforms",
    "price": "$1,200",
    "price_sub": "Option 1 · 1-10 guests / Team · 2 hours, fully private",
    "facts": [
@@ -2447,7 +2447,7 @@ export const DETAIL: Record<string, any> = {
   "HERO": {
    "eyebrow": "알라모아나 서핑 레슨",
    "h1": "하와이에서 만나는<br>첫 <span class=\"hl\">서핑</span> 레슨",
-   "badge": "압도적 업계 통합 누적 리뷰 15,000개",
+   "badge": "압도적 업계 통합 누적 리뷰 18,000개",
    "price": "₩221,880",
    "price_per": "1인",
    "price_sub": "거북이 스노클링 + 서핑 콤보",
@@ -2646,7 +2646,7 @@ export const DETAIL: Record<string, any> = {
   "HERO": {
    "eyebrow": "Ala Moana surf lesson",
    "h1": "Your first <span class=\"hl\">surf</span> lesson<br>in Hawaii",
-   "badge": "15,000+ reviews across platforms",
+   "badge": "18,000+ reviews across platforms",
    "price": "$160",
    "price_per": "",
    "price_sub": "Turtle snorkeling + surf combo, per person",
@@ -2816,5 +2816,621 @@ export const DETAIL: Record<string, any> = {
   "SESS_SUB": "Based on the last pickup time.",
   "SHOW_STARS": false,
   "THEME": "surf"
+ },
+ "diamond_ko": {
+  "THEME": "diamond",
+  "SECTIONS": [
+   "features",
+   "course",
+   "acts",
+   "perks",
+   "rules",
+   "more"
+  ],
+  "SHOW_STARS": false,
+  "HERO": {
+   "eyebrow": "후기 18,000개로 신뢰받는 오션스타의 하루 코스",
+   "h1": "다이아몬드 헤드,<br>아침엔 위에서<br><span class=\"hl\">오전엔 바다에서</span>",
+   "badge": "압도적 업계 통합 누적 리뷰 18,000개",
+   "price": "$150",
+   "price_per": "1인",
+   "price_sub": "콤보가 · 따로 예약할 때보다 최대 $40 절약",
+   "facts": [
+    [
+     "소요 시간",
+     "약 6시간 (05:20 픽업 · 11:30 호텔 도착)"
+    ],
+    [
+     "운영",
+     "매주 월 · 수 · 금"
+    ],
+    [
+     "픽업",
+     "와이키키 호텔 또는 가장 가까운 지정 장소"
+    ],
+    [
+     "포함",
+     "입장 예약 · 차량 · 스노클링 장비 · 라면과 간식"
+    ]
+   ],
+   "pure": "06:00 다이아몬드 헤드 하이킹, 08:00 오션스타 승선, 11:00 항구 도착 후 11:30쯤 호텔에 도착합니다."
+  },
+  "HERO_IMG": [
+   "dh_hero.webp",
+   "오션스타 티셔츠를 입고 다이아몬드 헤드 분화구와 바다를 내려다보는 두 사람"
+  ],
+  "FEAT_H2": "정상에서 내려다본 그 바다로,<br><span class=\"hl\">한 시간 뒤 직접</span> 들어갑니다",
+  "FEAT_LEDE": "06:00 해발 232m 산 위에서, 08:00 거북이가 사는 바다 속에서.<br>함께라서 좋은 다섯 가지입니다.",
+  "FEATURES": [
+   [
+    "01",
+    "픽업 한 번으로",
+    "산에서 바다까지",
+    [
+     "하산하면 기사님이 곧장 하버로 모셔다 드립니다. 호텔에 들를 필요가 없어요."
+    ],
+    null
+   ],
+   [
+    "02",
+    "같은 산을 두 번",
+    "다른 시선으로",
+    [
+     "아침엔 정상에서 바다를, 다이아몬드 헤드 크루즈에선 바다에서 산을 바라봅니다."
+    ],
+    null
+   ],
+   [
+    "03",
+    "땀 흘린 몸을 바다가 식혀줍니다",
+    "새벽엔 산, 한낮 전엔 바다",
+    [
+     "선선한 새벽에 오르고, 해가 뜨거워질 즈음엔 바다 위에 있습니다."
+    ],
+    null
+   ],
+   [
+    "04",
+    "까다로운 입장 예약까지",
+    "한 번에",
+    [
+     "비거주자는 다이아몬드 헤드 입장 예약이 필수입니다. 예약과 입장료는 저희가 해결합니다."
+    ],
+    null
+   ],
+   [
+    "05",
+    "11:30 호텔 도착",
+    "오후는 통째로 자유",
+    [
+     "점심부터는 쇼핑, 낮잠, 해변. 하루를 두 배로 쓰는 방법이에요."
+    ],
+    null
+   ]
+  ],
+  "COURSE_H2": "하루 일정",
+  "COURSE_HINT": "7단계 · 옆으로 넘겨 보세요",
+  "COURSE": [
+   [
+    "🚐 05:20 와이키키 픽업",
+    null,
+    "호텔 또는 가장 가까운 지정 장소에서 픽업합니다. 정확한 픽업 시간은 예약 후 개별 안내 드립니다.",
+    null,
+    "van"
+   ],
+   [
+    "⛰️ 06:00 다이아몬드 헤드 자유 하이킹",
+    "약 1시간",
+    "입구에 내려 각자 속도로 오릅니다. 입장 예약과 입장료는 포함되어 있어요. 69m 터널과 99계단을 지나면 옛 화력통제소 꼭대기, 정상 전망대가 나옵니다.",
+    "*터널은 천장이 낮으니 머리 조심! 99계단 왼쪽으로 우회 루프도 있어요.",
+    "dh_climb"
+   ],
+   [
+    "🚐 07:00 하산 · 곧장 하버로",
+    null,
+    "하이킹 입구에서 기사님이 기다립니다. 방금 정상에서 내려다본 와이키키 바다로 바로 이동해요.",
+    "*기사님과 약속한 시간에 맞춰 탑승해 주세요.",
+    "dh_west"
+   ],
+   [
+    "⛵ 08:00 오션스타 승선 · 다이아몬드 헤드 크루즈",
+    null,
+    "케왈로 하버에서 와이키키 유일의 나무 루프탑 보트에 오릅니다. 안전교육 후 이번엔 바다에서 다이아몬드 헤드를 바라보며 출발해요.",
+    null,
+    "photo"
+   ],
+   [
+    "🐢 거북이 스노클링",
+    null,
+    "와이키키 터틀 캐니언에서 하와이 바다거북과 함께 수영합니다. 크루들이 거북이 스팟으로 안내하고 수중 사진도 도와드려요. 수영을 못하셔도 크루들이 보드로 끌어드립니다.",
+    "*고프로 대여 & 수중 촬영 옵션 $40 (현장 결제: 현금 또는 계좌이체)",
+    "turtle"
+   ],
+   [
+    "🏄 해양 액티비티 5종",
+    null,
+    "패들보드, 카약, 씨체어, 보트 다이빙 등 해양 액티비티를 무료로 즐깁니다.",
+    null,
+    "sup2"
+   ],
+   [
+    "🍜 간식 · 11:30 호텔 도착",
+    null,
+    "라면과 간식, 음료로 마무리하고 11:00 항구로 돌아옵니다. 11:30쯤 호텔에 도착하면 오후는 자유 일정이에요.",
+    null,
+    "bowl"
+   ]
+  ],
+  "ACTS_H2": "<span class=\"hl\">산</span>과 <span class=\"hl\">바다</span>, 하루에 두 번의 투어",
+  "ACTS_LEDE": "매주 월 · 수 · 금 진행하며, 하이킹과 스노클링은 같은 날 진행이 원칙입니다.",
+  "ACTS": [
+   [
+    "PART 1",
+    "다이아몬드 헤드 (Lēʻahi 레아히)",
+    "1908년 군인들이 낸 길을 따라 와이키키의 얼굴 위로",
+    [
+     "참치(ʻahi)의 이마(lae)를 닮아 ‘레아히’라 불린 해발 232m 분화구입니다. 터널과 99계단을 지나면 옛 화력통제소 꼭대기, 정상 전망대가 나옵니다.",
+     "1825년 영국 선원들이 반짝이는 방해석을 다이아몬드로 착각해 붙은 이름이에요. 서쪽으로는 와이키키와 호놀룰루, 동쪽으로는 분화구와 코코헤드가 펼쳐집니다."
+    ],
+    [
+     [
+      "정상 고도",
+      "232m"
+     ],
+     [
+      "왕복 거리",
+      "2.4km"
+     ],
+     [
+      "하이킹",
+      "약 1시간 <span class=\"nw\">(가이드 없는 자유 하이킹)</span>"
+     ],
+     [
+      "입장",
+      "비거주자 입장 예약 필수 <span class=\"nw\">(오션스타가 예약)</span>"
+     ]
+    ],
+    "dh_east.webp",
+    "다이아몬드 헤드 능선에서 내려다본 분화구와 코코헤드, 동쪽 해안"
+   ],
+   [
+    "PART 2",
+    "오션스타 거북이 스노클링",
+    "18,000개의 후기가 먼저 다녀왔습니다",
+    [
+     "하와이 로컬 한인 가족이 직접 운영하는, 한국어로 편한 투어입니다.",
+     "와이키키 유일의 나무 루프탑 보트로 햇빛 · 비 · 멀미 걱정을 덜고, 다이아몬드 헤드를 배경으로 인생샷을 남겨 드려요."
+    ],
+    [
+     [
+      "누적 후기",
+      "18,000+ · 평점 5.0"
+     ],
+     [
+      "거북이",
+      "100% 보장"
+     ],
+     [
+      "해양 5종",
+      "패들보드, 카약, 씨체어, 보트 다이빙 등"
+     ],
+     [
+      "무료",
+      "장비, 라면, 간식, 음료"
+     ],
+     [
+      "안전 · 위생",
+      "상해보험, 장비 매일 소독"
+     ]
+    ],
+    "hero_turtle.webp",
+    "와이키키 앞바다 산호 위의 푸른바다거북"
+   ]
+  ],
+  "ACTS_NOTE": "하산하면 기사님이 하이킹 입구에서 곧장 하버로 모셔다 드립니다.",
+  "PERKS_H2": "포함 사항",
+  "PERKS": [
+   [
+    "van",
+    "차량 이동",
+    "픽업 → 다이아몬드 헤드 → 하버 → 와이키키 복귀"
+   ],
+   [
+    "check",
+    "다이아몬드 헤드 입장",
+    "비거주자 입장 예약과 입장료"
+   ],
+   [
+    "gear",
+    "스노클링 장비",
+    "스노클링 장비 일체와 구명조끼"
+   ],
+   [
+    "sup",
+    "해양 액티비티 5종",
+    "패들보드 · 카약 · 씨체어 · 보트 다이빙 등"
+   ],
+   [
+    "bowl",
+    "라면 · 간식 · 음료",
+    "스노클링 후 선상에서"
+   ],
+   [
+    "camera",
+    "인생샷 촬영",
+    "다이아몬드 헤드를 배경으로"
+   ]
+  ],
+  "RULES_H2": "준비물 & 유의사항",
+  "RULES": [
+   [
+    "수영복",
+    "처음부터 옷 안에 입고 출발해 주세요.",
+    false
+   ],
+   [
+    "신발",
+    "운동화를 신어 주세요. 샌들 · 슬리퍼로는 하이킹이 어렵습니다.",
+    true
+   ],
+   [
+    "챙길 것",
+    "물, 모자, 선크림, 수건, 갈아입을 옷",
+    false
+   ],
+   [
+    "자유 하이킹",
+    "가이드 없이 각자 속도로 오릅니다. 기사님과 약속한 시간에 맞춰 탑승해 주세요.",
+    false
+   ],
+   [
+    "휴무",
+    "12/25, 1/1은 주립공원 휴무로 하이킹이 진행되지 않습니다.",
+    true
+   ],
+   [
+    "사전 문의",
+    "계단 구간이 있어 무릎 · 심혈관 질환이 있으신 분은 예약 전 문의해 주세요.",
+    false
+   ],
+   [
+    "일정 변경",
+    "스노클링 요일 변경이나 선셋 스노클링 변경은 메시지로 요청해 주세요.",
+    false
+   ],
+   [
+    "불포함",
+    "개인 경비, 고프로 대여 & 수중 촬영 $40. 환불 규정은 별도 안내를 확인해 주세요.",
+    false
+   ]
+  ],
+  "RULES_PHOTO": [
+   "dh_summit.webp",
+   "다이아몬드 헤드 정상 전망대 난간에 걸터앉은 손님"
+  ],
+  "MORE_H2": "오션스타만의 특별상품",
+  "MORE": [
+   [
+    "turtle.jpg",
+    "거북이 100% 보장 스노클링",
+    "가장 많이 찾는 와이키키 거북이 스노클링"
+   ],
+   [
+    "private_boat.webp",
+    "단독 프라이빗 크루즈",
+    "오직 우리 팀만을 위한 와이키키 바다"
+   ]
+  ],
+  "DOCK_SUB": "1인 · 05:20-11:30",
+  "END_H2": "아침엔 산, 오전엔 바다",
+  "END_SUB": "월 · 수 · 금 중 원하시는 날짜를 골라 주세요."
+ },
+ "diamond_en": {
+  "THEME": "diamond",
+  "SECTIONS": [
+   "features",
+   "course",
+   "acts",
+   "perks",
+   "rules",
+   "more"
+  ],
+  "SHOW_STARS": false,
+  "HERO": {
+   "eyebrow": "Ocean Star's morning course, trusted by 18,000+ reviews",
+   "h1": "Diamond Head at dawn,<br><span class=\"hl\">turtles by 8 AM</span>",
+   "badge": "18,000+ reviews across platforms",
+   "price": "$150",
+   "price_per": "",
+   "price_sub": "Combo price · save up to $40 vs booking separately",
+   "facts": [
+    [
+     "Duration",
+     "About 6 hours (05:20 pickup · 11:30 hotel drop-off)"
+    ],
+    [
+     "Days",
+     "Mon · Wed · Fri"
+    ],
+    [
+     "Pickup",
+     "Your Waikiki hotel or the nearest pickup point"
+    ],
+    [
+     "Included",
+     "Park reservation · transport · snorkel gear · noodles and snacks"
+    ]
+   ],
+   "pure": "Diamond Head hike at 06:00, board Ocean Star at 08:00, back at the harbor at 11:00 and at your hotel around 11:30."
+  },
+  "HERO_IMG": [
+   "dh_hero.webp",
+   "Two people in Ocean Star shirts looking over the Diamond Head crater and the sea"
+  ],
+  "FEAT_H2": "From the summit to the sea below,<br><span class=\"hl\">one hour later</span>",
+  "FEAT_LEDE": "At 06:00, 232 m up on the crater rim. At 08:00, underwater with the turtles.<br>Five reasons it works as one morning.",
+  "FEATURES": [
+   [
+    "01",
+    "One pickup",
+    "from the mountain to the sea",
+    [
+     "After the hike, our driver takes you straight to the harbor. No stop at the hotel."
+    ],
+    null
+   ],
+   [
+    "02",
+    "The same mountain twice",
+    "from two angles",
+    [
+     "From the summit in the morning, then from the water on the Diamond Head cruise."
+    ],
+    null
+   ],
+   [
+    "03",
+    "Hike in the cool, then cool off",
+    "mountain at dawn, sea before noon",
+    [
+     "You climb in the cool early morning and are out on the water by the time the sun gets hot."
+    ],
+    null
+   ],
+   [
+    "04",
+    "Park reservation",
+    "handled for you",
+    [
+     "Non-residents need a reservation to enter Diamond Head. We book it and cover the entry fee."
+    ],
+    null
+   ],
+   [
+    "05",
+    "Back by 11:30",
+    "with the afternoon free",
+    [
+     "Lunch, shopping, a nap or the beach. Two days' worth out of one."
+    ],
+    null
+   ]
+  ],
+  "COURSE_H2": "Your day",
+  "COURSE_HINT": "7 stops · swipe for more",
+  "COURSE": [
+   [
+    "🚐 05:20 Waikiki pickup",
+    null,
+    "We pick you up at your hotel or the nearest pickup point. Your exact pickup time is sent after booking.",
+    null,
+    "van"
+   ],
+   [
+    "⛰️ 06:00 Diamond Head hike, at your own pace",
+    "About 1 hour",
+    "We drop you at the trailhead and you climb at your own pace. The park reservation and entry fee are included. Past a 69 m tunnel and 99 steps you reach the old fire control station and the summit lookout.",
+    "*Mind your head in the tunnel. A gentler loop trail bypasses the 99 steps on the left.",
+    "dh_climb"
+   ],
+   [
+    "🚐 07:00 Back down, straight to the harbor",
+    null,
+    "Our driver waits at the trailhead and takes you straight to the Waikiki waters you just saw from the top.",
+    "*Please be at the pickup spot at the time agreed with the driver.",
+    "dh_west"
+   ],
+   [
+    "⛵ 08:00 Board Ocean Star · Diamond Head cruise",
+    null,
+    "Board our wooden-rooftop boat at Kewalo Basin. After the safety briefing we head out with Diamond Head in view, this time from the sea.",
+    null,
+    "photo"
+   ],
+   [
+    "🐢 Turtle snorkeling",
+    null,
+    "Swim with Hawaiian green sea turtles at Turtle Canyon. The crew leads you to the turtles and helps with underwater photos. Not a strong swimmer? The crew will tow you on a board.",
+    "*GoPro rental and underwater filming $40 (pay on site, cash or bank transfer)",
+    "turtle"
+   ],
+   [
+    "🏄 Five water activities",
+    null,
+    "Paddleboard, kayak, sea chair, boat diving and more, free of charge.",
+    null,
+    "sup2"
+   ],
+   [
+    "🍜 Snacks · back at your hotel by 11:30",
+    null,
+    "Wrap up with cup noodles, snacks and drinks, then back to the harbor at 11:00. You reach your hotel around 11:30 with the afternoon free.",
+    null,
+    "bowl"
+   ]
+  ],
+  "ACTS_H2": "<span class=\"hl\">Mountain</span> and <span class=\"hl\">sea</span> in one morning",
+  "ACTS_LEDE": "Mondays, Wednesdays and Fridays. The hike and the snorkeling run on the same day.",
+  "ACTS": [
+   [
+    "Part 1",
+    "Diamond Head (Lēʻahi)",
+    "Up the 1908 army trail to the top of Waikiki's skyline",
+    [
+     "Hawaiians named the 232 m crater Lēʻahi, the brow (lae) of the tuna (ʻahi). Past a tunnel and 99 steps you reach the old fire control station and the summit lookout.",
+     "The English name dates to 1825, when British sailors mistook its glittering calcite for diamonds. Waikiki and Honolulu lie to the west, the crater and Koko Head to the east."
+    ],
+    [
+     [
+      "Summit",
+      "232 m (761 ft)"
+     ],
+     [
+      "Round trip",
+      "2.4 km (1.5 mi)"
+     ],
+     [
+      "Hike",
+      "About 1 hour <span class=\"nw\">(self-guided)</span>"
+     ],
+     [
+      "Entry",
+      "Reservation required for non-residents <span class=\"nw\">(we book it)</span>"
+     ]
+    ],
+    "dh_east.webp",
+    "The Diamond Head crater, Koko Head and the east shore seen from the crater rim"
+   ],
+   [
+    "Part 2",
+    "Ocean Star Turtle Snorkeling",
+    "18,000 reviews went first",
+    [
+     "Run by a local family in Hawaii, out of Kewalo Basin since 2019.",
+     "The only wooden-rooftop boat in Waikiki keeps off the sun, rain and seasickness, and the crew takes your photos with Diamond Head behind you."
+    ],
+    [
+     [
+      "Reviews",
+      "18,000+ · rated 5.0"
+     ],
+     [
+      "Turtles",
+      "Sighting guaranteed"
+     ],
+     [
+      "Activities",
+      "Paddleboard, kayak, sea chair, boat diving and more"
+     ],
+     [
+      "Free",
+      "Gear, noodles, snacks, drinks"
+     ],
+     [
+      "Safety",
+      "Accident insurance, gear sanitized daily"
+     ]
+    ],
+    "hero_turtle.webp",
+    "Green sea turtle over the reef off Waikiki"
+   ]
+  ],
+  "ACTS_NOTE": "After the hike, our driver picks you up at the trailhead and heads straight to the harbor.",
+  "PERKS_H2": "What's included",
+  "PERKS": [
+   [
+    "van",
+    "Transport",
+    "Pickup → Diamond Head → harbor → back to Waikiki"
+   ],
+   [
+    "check",
+    "Diamond Head entry",
+    "Non-resident reservation and entry fee"
+   ],
+   [
+    "gear",
+    "Snorkel gear",
+    "Full snorkel set and life jacket"
+   ],
+   [
+    "sup",
+    "Five water activities",
+    "Paddleboard · kayak · sea chair · boat diving and more"
+   ],
+   [
+    "bowl",
+    "Noodles · snacks · drinks",
+    "On deck after snorkeling"
+   ],
+   [
+    "camera",
+    "Photos",
+    "With Diamond Head behind you"
+   ]
+  ],
+  "RULES_H2": "What to bring and good to know",
+  "RULES": [
+   [
+    "Swimsuit",
+    "Wear it under your clothes from the start.",
+    false
+   ],
+   [
+    "Shoes",
+    "Wear sneakers. Sandals and flip-flops are not suitable for the hike.",
+    true
+   ],
+   [
+    "Bring",
+    "Water, hat, sunscreen, towel, a change of clothes",
+    false
+   ],
+   [
+    "Self-guided",
+    "There is no guide on the trail. Please meet the driver at the agreed time.",
+    false
+   ],
+   [
+    "Closed",
+    "The state park is closed on 12/25 and 1/1, so there is no hike on those days.",
+    true
+   ],
+   [
+    "Ask first",
+    "The trail has long stair sections. If you have knee or heart conditions, please contact us before booking.",
+    false
+   ],
+   [
+    "Changes",
+    "To move the snorkeling to another day or switch to sunset snorkeling, send us a message.",
+    false
+   ],
+   [
+    "Not included",
+    "Personal expenses, GoPro rental and underwater filming $40. See the separate notice for the refund policy.",
+    false
+   ]
+  ],
+  "RULES_PHOTO": [
+   "dh_summit.webp",
+   "Guest sitting on the railing at the Diamond Head summit lookout"
+  ],
+  "MORE_H2": "Only at OceanStar",
+  "MORE": [
+   [
+    "turtle.jpg",
+    "100% guaranteed turtle snorkeling",
+    "Our most popular Waikiki turtle snorkeling tour"
+   ],
+   [
+    "private_boat.webp",
+    "Private cruise",
+    "The Waikiki ocean, just for your group"
+   ]
+  ],
+  "DOCK_SUB": "Per person · 05:20-11:30",
+  "END_H2": "Mountain at dawn, sea by 8",
+  "END_SUB": "Pick a Monday, Wednesday or Friday."
  }
 };

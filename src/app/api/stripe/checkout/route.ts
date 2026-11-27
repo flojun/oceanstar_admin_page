@@ -59,6 +59,13 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: `서핑은 오늘부터 ${SURF_BOOKING_DAYS}일 이내 날짜만 예약할 수 있습니다.` }, { status: 400 });
         }
 
+        // 다이아몬드 헤드 콤보는 하이킹 → 1부 스노클링을 같은 날 한다. 화면 값과 상관없이 여기서 정한다.
+        if (tourSetting.tour_id === 'combo_diamond') {
+            body.comboOption = 'diamond';
+            body.comboTimeOption = 'morning1';
+            body.secondaryDate = body.tourDate;
+        }
+
         // Option Label
         let optionLabel = tourSetting.name;
         if (tourSetting.tour_id === 'morning1') optionLabel = '1부';
@@ -115,7 +122,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Invalid price calculation.' }, { status: 400 });
         }
 
-        // 4. 손님이 낼 총액과 수수료. 1·2부·선셋은 표시가에 수수료가 포함돼 있고,
+        // 4. 손님이 낼 총액과 수수료. 1·2부·선셋·다이아몬드 콤보는 표시가에 수수료가 포함돼 있고,
         // 나머지 상품은 수수료를 얹는다. 규칙은 pricing.ts 의 checkoutAmounts 한 곳에 있다.
         const { total: totalRounded, fee } = checkoutAmounts(tourSetting, productPrice, currency);
         // 두 줄의 합이 총액과 정확히 같도록 최소 단위에서 뺀다.

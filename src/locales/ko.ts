@@ -20,7 +20,7 @@ const ko = {
   bento: {
     desc1_title: "Since 2019, 최초",
     desc1_text: "하와이 최초로 설립된 한국인 전용 와이키키 거북이 스노클링",
-    desc2_title: "14,000+ 리뷰",
+    desc2_title: "18,000+ 리뷰",
     desc2_text: "업계 최대의 누적 리뷰가 증명하는 압도적인 신뢰와 만족",
     desc3_title: "100% 거북이 보장",
     desc3_text: "오션스타가 보장하는 와이키키 자연산 바다 거북이와의 만남",
@@ -88,7 +88,7 @@ const ko = {
     addr_badge: "주소",
     google_map: "구글 지도로 바로보기",
     company_name: "오션스타 (Waikiki Turtle Snorkeling)",
-    company_desc: "하와이 한인 최초 거북이 스노클링 원조\n여행 플랫폼 8,000 리뷰 · 구글 5,000 리뷰",
+    company_desc: "하와이 한인 최초 거북이 스노클링 원조\n업계 통합 누적 리뷰 18,000+",
     biz_name: "상호명:",
     biz_no: "사업자등록번호:",
     biz_addr: "사업장 소재지:",

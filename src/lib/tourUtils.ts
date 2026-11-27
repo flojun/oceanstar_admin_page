@@ -266,6 +266,7 @@ const TOUR_NAMES_EN: Record<string, string> = {
     private: '[Private] Waikiki Turtle Snorkeling Trip',
     combo_marine: 'Turtle Snorkeling + Parasailing / Jet Ski',
     combo_surf: 'Turtle Snorkeling + Surf Lesson',
+    combo_diamond: 'Diamond Head Hike + Turtle Snorkeling',
 };
 
 /**

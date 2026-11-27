@@ -26,6 +26,8 @@ const SEO: Record<string, [title: string, description: string]> = {
     private_en: ["Private Boat Charter Waikiki · Turtle Snorkeling | Ocean Star Hawaii", "The whole boat to your group off Waikiki: Turtle Canyon snorkeling, free activities and a Diamond Head coastal cruise. Team rate for 1-10 guests, hotel pickup included."],
     surf_ko: ["하와이 서핑 레슨 + 거북이 스노클링 · 알라모아나 | 오션스타 하와이", "알라모아나 서핑 레슨과 와이키키 거북이 스노클링을 한 번에 예약하세요. 거북이 100% 보장, 한국인 크루, 수영 못해도 참여 가능."],
     surf_en: ["Hawaii Surf Lesson + Turtle Snorkeling, Ala Moana | Ocean Star Hawaii", "Book an Ala Moana surf lesson and Waikiki turtle snorkeling together. Turtle sighting guaranteed, non-swimmers welcome."],
+    diamond_ko: ["다이아몬드 헤드 하이킹 + 거북이 스노클링 콤보 | 오션스타 하와이", "아침엔 다이아몬드 헤드 정상, 오전엔 와이키키 거북이 스노클링. 입장 예약·픽업 포함, 거북이 100% 보장, 월·수·금 운영."],
+    diamond_en: ["Diamond Head Hike + Turtle Snorkeling Combo, Waikiki | Ocean Star Hawaii", "Hike Diamond Head at dawn, then snorkel with turtles off Waikiki. Park reservation and hotel pickup included, turtle sighting guaranteed. Mon, Wed, Fri."],
 };
 
 export function detailMetadata(lang: Lang, tour: string): Metadata {
